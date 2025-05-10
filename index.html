@@ -24,7 +24,8 @@
   </div>
   <script>
     function copyOverlayUrl() {
-      const overlayUrl = window.location.origin + '/overlay.html';
+      // Utiliser le domaine personnalisé de Netlify
+      const overlayUrl = 'https://apo-overlay.netlify.app/overlay.html';
       navigator.clipboard.writeText(overlayUrl);
       const button = document.getElementById('copy-url');
       button.textContent = 'URL Copiée!';

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>APO Overlay Generator</title>
-  <link rel="stylesheet" crossorigin href="/assets/index-DH9TZWbV.css">
+  <link rel="stylesheet" crossorigin href="/assets/main-DH9TZWbV.css">
 </head>
 <body>
   <div id="generator-page">
@@ -24,7 +24,8 @@
   </div>
   <script>
     function copyOverlayUrl() {
-      const overlayUrl = window.location.origin + '/overlay.html';
+      // Utiliser le domaine personnalisé de Netlify
+      const overlayUrl = 'https://apo-overlay.netlify.app/overlay.html';
       navigator.clipboard.writeText(overlayUrl);
       const button = document.getElementById('copy-url');
       button.textContent = 'URL Copiée!';
