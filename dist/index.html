@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>APO Overlay Generator</title>
+  <title>APO Overlay</title>
   <link rel="stylesheet" crossorigin href="/assets/main-DH9TZWbV.css">
 </head>
 <body>
   <div id="generator-page">
-    <h1>APO Overlay Generator</h1>
+    <h1>APO Overlay</h1>
     <div class="preview-container">
       <iframe id="overlay-preview" src="/overlay.html"></iframe>
     </div>
@@ -17,14 +17,12 @@
       <p class="instructions">
         1. Copiez l'URL de l'overlay<br>
         2. Dans OBS, ajoutez une nouvelle source "Navigateur"<br>
-        3. Collez l'URL et définissez la taille sur 800x200<br>
-        4. Activez "Arrière-plan transparent"
+        3. Collez l'URL et définissez la taille sur 800x200
       </p>
     </div>
   </div>
   <script>
     function copyOverlayUrl() {
-      // Utiliser le domaine personnalisé de Netlify
       const overlayUrl = 'https://apo-overlay.netlify.app/overlay.html';
       navigator.clipboard.writeText(overlayUrl);
       const button = document.getElementById('copy-url');
