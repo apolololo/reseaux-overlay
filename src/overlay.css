@@ -64,6 +64,9 @@ body {
   overflow: visible;
   text-overflow: unset;
   flex-shrink: 0;
+  display: inline-block;
+  min-width: 2.5em;
+  max-width: none;
 }
 
 /* Conteneur centré et fond totalement noir profond */
