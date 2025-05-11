@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "apo-overlay-generator": "file:",
     "vite": "^5.0.0"
   }
 }

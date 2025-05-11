@@ -72,9 +72,12 @@
   <script>
     const slides = document.querySelectorAll(".apo-slide");
     let current = 0;
-    
+
     function showSlide(index) {
-      slides.forEach((sl, i) => sl.classList.toggle("active", i === index));
+      // Désactiver tous les slides
+      slides.forEach(slide => slide.classList.remove("active"));
+      // Activer le nouveau slide
+      slides[index].classList.add("active");
     }
 
     function nextSlide() {
@@ -82,7 +85,10 @@
       showSlide(current);
     }
 
-    // Change slide every 6 seconds
+    // S'assurer que le premier slide est visible au démarrage
+    showSlide(0);
+
+    // Changer de slide toutes les 6 secondes
     setInterval(nextSlide, 6000);
   </script>
 </body>
