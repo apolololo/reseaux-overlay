@@ -2,13 +2,19 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
 export default defineConfig({
+  base: './',
   build: {
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
         apo: resolve(__dirname, 'src/overlays/apo/overlay.html'),
+        starting: resolve(__dirname, 'src/overlays/starting/overlay.html')
       },
     },
+    assetsDir: 'assets',
+    outDir: 'dist',
+    emptyOutDir: true,
+    copyPublicDir: true
   },
   server: {
     port: 3000,
