@@ -3,34 +3,54 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>APO Overlay</title>
-  <link rel="stylesheet" href="/src/style.css" />
+  <title>APO Overlays</title>
+  <link rel="stylesheet" href="/src/styles/main.css" />
 </head>
 <body>
-  <div id="generator-page">
-    <h1>APO Overlay</h1>
-    <div class="preview-container">
-      <iframe id="overlay-preview" src="/overlay.html"></iframe>
+  <div id="app">
+    <div class="overlay-list">
+      <h2>Overlays</h2>
+      <ul>
+        <li class="overlay-item active" data-url="/src/overlays/apo/overlay.html" data-size="800x200">
+          APO Overlay
+        </li>
+      </ul>
     </div>
-    <div class="controls">
-      <button id="copy-url" onclick="copyOverlayUrl()">Copier l'URL de l'overlay</button>
-      <p class="instructions">
-        1. Copiez l'URL de l'overlay<br>
-        2. Dans OBS, ajoutez une nouvelle source "Navigateur"<br>
-        3. Collez l'URL et définissez la taille sur 800x200
-      </p>
+    
+    <div class="preview-section">
+      <div class="preview-options">
+        <div class="background-options">
+          <label>Fond de preview :</label>
+          <div class="background-controls">
+            <input type="color" id="bg-color" value="#000000" title="Couleur de fond">
+            <button id="bg-transparent" title="Fond transparent">
+              <svg viewBox="0 0 24 24" width="24" height="24">
+                <path fill="currentColor" d="M12 2L2 12l10 10 10-10L12 2zM4.83 12L12 19.17 19.17 12 12 4.83 4.83 12z"/>
+              </svg>
+            </button>
+            <input type="file" id="bg-image" accept="image/*" hidden>
+            <button id="bg-image-btn" title="Image de fond">
+              <svg viewBox="0 0 24 24" width="24" height="24">
+                <path fill="currentColor" d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="preview-container">
+        <div class="preview-background">
+          <iframe id="overlay-preview" src="/src/overlays/apo/overlay.html"></iframe>
+        </div>
+      </div>
+
+      <div class="copy-info">
+        <button id="copy-url">Copier l'URL pour OBS</button>
+        <span class="size-info">Taille recommandée : 800x200</span>
+      </div>
     </div>
   </div>
-  <script>
-    function copyOverlayUrl() {
-      const overlayUrl = 'https://apo-overlay.netlify.app/overlay.html';
-      navigator.clipboard.writeText(overlayUrl);
-      const button = document.getElementById('copy-url');
-      button.textContent = 'URL Copiée!';
-      setTimeout(() => {
-        button.textContent = 'Copier l\'URL de l\'overlay';
-      }, 2000);
-    }
-  </script>
+
+  <script type="module" src="/src/js/main.js"></script>
 </body>
 </html>

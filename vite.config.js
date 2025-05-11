@@ -1,15 +1,17 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vite';
+import { resolve } from 'path';
 
 export default defineConfig({
-  server: {
-    port: 3000
-  },
   build: {
     rollupOptions: {
       input: {
-        main: './index.html',
-        overlay: './overlay.html'
-      }
-    }
+        main: resolve(__dirname, 'index.html'),
+        apo: resolve(__dirname, 'src/overlays/apo/overlay.html'),
+      },
+    },
+  },
+  server: {
+    port: 3000,
+    open: '/index.html'
   }
-})
+});

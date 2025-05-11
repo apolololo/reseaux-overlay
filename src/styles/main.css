@@ -1,0 +1,211 @@
+/* Style général */
+:root {
+  --primary-color: #ff00c8;
+  --secondary-color: #00f0ff;
+  --bg-dark: #080808;
+  --text-light: #fff;
+  --spacing-unit: 16px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: #0f0f0f;
+  color: #fff;
+}
+
+#app {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  min-height: 100vh;
+}
+
+/* Liste des overlays */
+.overlay-list {
+  background: #1a1a1a;
+  padding: 20px;
+  border-right: 1px solid #333;
+}
+
+.overlay-list h2 {
+  margin: 0 0 20px 0;
+  color: #fff;
+}
+
+.overlay-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.overlay-item {
+  padding: 12px 16px;
+  margin: 4px 0;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.overlay-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.overlay-item.active {
+  background: linear-gradient(45deg, #ff00c8, #00f0ff);
+}
+
+/* Section preview */
+.preview-section {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.preview-options {
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 8px;
+}
+
+.background-options {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16px 24px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.background-options label {
+  color: #aaa;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.background-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.background-controls button {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.background-controls button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.background-controls button.active {
+  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+}
+
+.background-controls button:active {
+  transform: translateY(1px);
+}
+
+#bg-color {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+  padding: 2px;
+  transition: transform 0.3s ease;
+}
+
+#bg-color:hover {
+  transform: scale(1.05);
+}
+
+#bg-color:active {
+  transform: scale(0.95);
+}
+
+.preview-container {
+  width: 100%;
+  max-width: 800px;
+  aspect-ratio: 4/1;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.preview-background {
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  transition: background-color 0.3s ease;
+}
+
+.preview-background iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+}
+
+.copy-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+#copy-url {
+  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+  border: none;
+  color: #fff;
+  padding: 12px 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+#copy-url:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+#copy-url:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.size-info {
+  color: #888;
+  font-size: 13px;
+  font-weight: 500;
+}
