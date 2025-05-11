@@ -21,13 +21,27 @@ document.addEventListener('DOMContentLoaded', () => {
   const bgImageBtn = document.getElementById('bg-image-btn');
   const bgImageInput = document.getElementById('bg-image');
   const copyButton = document.getElementById('copy-url');
+  const sizeInfo = document.querySelector('.size-info');
+  const previewContainerWrapper = document.querySelector('.preview-container');
 
-  // Gestion des overlays
+  // Gestion des overlays avec support des tailles
   document.querySelectorAll('.overlay-item').forEach(item => {
     item.addEventListener('click', () => {
       document.querySelectorAll('.overlay-item').forEach(i => i.classList.remove('active'));
       item.classList.add('active');
       previewFrame.src = item.dataset.url;
+      
+      // Mise à jour de la taille recommandée
+      const size = item.dataset.size;
+      if (size) {
+        sizeInfo.textContent = `Taille recommandée : ${size}`;
+        
+        // Ajuster le ratio de la preview
+        const [width, height] = size.split('x').map(Number);
+        const ratio = width / height;
+        previewContainerWrapper.style.aspectRatio = ratio;
+      }
+      updatePreviewSize();
     });
   });
 
@@ -73,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Gestion améliorée de la copie d'URL avec transitions
+  // Gestion de la copie d'URL avec feedback amélioré
   copyButton.addEventListener('click', async () => {
     const activeOverlay = document.querySelector('.overlay-item.active');
     if (!activeOverlay) return;
@@ -98,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Fonction utilitaire pour gérer l'état actif des boutons de fond
+  // Gestion des états des boutons de fond
   function updateActiveBackgroundButton(type = null) {
     const buttons = [bgTransparent, bgImageBtn];
     buttons.forEach(btn => {
@@ -110,8 +124,56 @@ document.addEventListener('DOMContentLoaded', () => {
     if (type === 'image') bgImageBtn.classList.add('active');
   }
 
-  // État initial
+  // Fonction pour mettre à jour la taille de la preview
+  function updatePreviewSize() {
+    const activeOverlay = document.querySelector('.overlay-item.active');
+    if (!activeOverlay || !activeOverlay.dataset.size) return;
+
+    const [targetWidth, targetHeight] = activeOverlay.dataset.size.split('x').map(Number);
+    const container = document.querySelector('.preview-container');
+    const iframe = document.getElementById('overlay-preview');
+
+    // Déterminer si c'est un overlay plein écran
+    const isFullScreen = targetWidth >= 1920;
+    container.setAttribute('data-full-screen', isFullScreen);
+
+    // Calculer les dimensions du conteneur
+    const containerRect = container.getBoundingClientRect();
+    const targetRatio = targetWidth / targetHeight;
+
+    // Ajuster le conteneur
+    container.style.aspectRatio = targetRatio;
+
+    // Calculer l'échelle optimale
+    const scale = Math.min(
+      containerRect.width / targetWidth,
+      containerRect.height / targetHeight
+    ) * 0.95; // 95% pour laisser une petite marge
+
+    // Appliquer la transformation
+    iframe.style.width = `${targetWidth}px`;
+    iframe.style.height = `${targetHeight}px`;
+    iframe.style.transform = `translate(-50%, -50%) scale(${scale})`;
+  }
+
+  // Mettre à jour la taille lors du chargement de l'iframe
+  document.getElementById('overlay-preview').addEventListener('load', updatePreviewSize);
+
+  // Gérer le redimensionnement de la fenêtre
+  window.addEventListener('resize', updatePreviewSize);
+
+  // Initialisation de l'état
+  const activeOverlay = document.querySelector('.overlay-item.active');
+  if (activeOverlay) {
+    const size = activeOverlay.dataset.size;
+    if (size) {
+      sizeInfo.textContent = `Taille recommandée : ${size}`;
+      const [width, height] = size.split('x').map(Number);
+      previewContainerWrapper.style.aspectRatio = width / height;
+    }
+  }
   bgColor.dispatchEvent(new Event('input'));
+  updatePreviewSize();
 });
 
 // Gestion de la sélection dans la vue dossiers

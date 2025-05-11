@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Starting Soon - APO</title>
+  <link rel="stylesheet" href="overlay.css">
+</head>
+<body>
+  <div class="container">
+    <div class="background">
+      <div class="gradient-overlay"></div>
+      <div class="particles"></div>
+      <div class="floating-shapes"></div>
+    </div>
+
+    <div class="content">
+      <div class="logo-container">
+        <div class="logo">APO</div>
+        <div class="logo-glow"></div>
+      </div>
+
+      <div class="status-container">
+        <div class="status-text">LE LIVE COMMENCE BIENTÔT</div>
+        <div class="status-dots">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+      </div>
+
+      <div class="countdown">
+        <div class="time-container">
+          <div class="time minutes">--</div>
+          <div class="label">MINUTES</div>
+        </div>
+        <div class="separator">:</div>
+        <div class="time-container">
+          <div class="time seconds">--</div>
+          <div class="label">SECONDES</div>
+        </div>
+      </div>
+
+      <div class="social-grid">
+        <div class="social-row">
+          <div class="social-item">
+            <img src="/src/images/instagram.png" alt="Instagram" />
+            <span class="social-tag">@tryh_apo</span>
+          </div>
+          <div class="social-item">
+            <img src="/src/images/twitch.png" alt="Twitch" />
+            <span class="social-tag">@tryh_apo</span>
+          </div>
+          <div class="social-item">
+            <img src="/src/images/youtube.png" alt="YouTube" />
+            <span class="social-tag">@tryhapo</span>
+          </div>
+        </div>
+        <div class="social-row">
+          <div class="social-item">
+            <img src="/src/images/kick.png" alt="Kick" />
+            <span class="social-tag">@tryh-apo</span>
+          </div>
+          <div class="social-item">
+            <img src="/src/images/x.png" alt="X" />
+            <span class="social-tag">@apoftn1</span>
+          </div>
+          <div class="social-item">
+            <img src="/src/images/tiktok.png" alt="TikTok" />
+            <span class="social-tag">@apo_ban</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Constantes pour l'optimisation
+    const MAX_PARTICLES = 30;
+    const MAX_SHAPES = 12;
+    let isAnimating = true;
+
+    // Création optimisée des particules
+    function createParticles() {
+      const container = document.querySelector('.particles');
+      const fragment = document.createDocumentFragment();
+
+      for (let i = 0; i < MAX_PARTICLES; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        
+        // Appliquer les styles une seule fois
+        const delay = Math.random() * 5;
+        const translateX = Math.random() * 100 - 50;
+        const left = Math.random() * 100;
+        
+        particle.style.cssText = `
+          --delay: ${delay}s;
+          --translate-x: ${translateX}px;
+          left: ${left}%;
+          animation: particleFloat 8s ease-in-out infinite;
+          animation-delay: ${delay}s;
+        `;
+        
+        fragment.appendChild(particle);
+      }
+
+      container.appendChild(fragment);
+    }
+
+    // Création optimisée des formes
+    function createFloatingShapes() {
+      const container = document.querySelector('.floating-shapes');
+      const fragment = document.createDocumentFragment();
+      const shapes = ['triangle', 'circle', 'square'];
+
+      for (let i = 0; i < MAX_SHAPES; i++) {
+        const shape = document.createElement('div');
+        const shapeType = shapes[Math.floor(Math.random() * shapes.length)];
+        shape.className = `shape ${shapeType}`;
+        
+        // Appliquer les styles une seule fois
+        const delay = Math.random() * 10;
+        const size = Math.random() * 40 + 20;
+        const rotation = Math.random() * 360;
+        const translateX = Math.random() * 100 - 50;
+        const translateY = Math.random() * 100 - 50;
+        const left = Math.random() * 100;
+        const top = Math.random() * 100;
+
+        shape.style.cssText = `
+          --delay: ${delay}s;
+          --size: ${size}px;
+          --rotation: ${rotation}deg;
+          --translate-x: ${translateX}px;
+          --translate-y: ${translateY}px;
+          left: ${left}%;
+          top: ${top}%;
+          width: ${size}px;
+          height: ${size}px;
+        `;
+
+        fragment.appendChild(shape);
+      }
+
+      container.appendChild(fragment);
+    }
+
+    // Optimisation du compte à rebours
+    function startCountdown(duration = 300) {
+      let timeLeft = duration;
+      const minutesEl = document.querySelector('.minutes');
+      const secondsEl = document.querySelector('.seconds');
+      let animationFrame;
+
+      function updateDisplay() {
+        if (!isAnimating) return;
+        
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        
+        minutesEl.textContent = minutes.toString().padStart(2, '0');
+        secondsEl.textContent = seconds.toString().padStart(2, '0');
+        
+        if (timeLeft > 0) {
+          timeLeft--;
+          setTimeout(updateDisplay, 1000);
+        }
+      }
+
+      updateDisplay();
+    }
+
+    // Animation optimisée des points
+    function animateDots() {
+      const dots = document.querySelectorAll('.dot');
+      dots.forEach((dot, index) => {
+        dot.style.animationDelay = `${index * 0.3}s`;
+      });
+    }
+
+    // Gestionnaire de visibilité pour optimiser les performances
+    document.addEventListener('visibilitychange', () => {
+      isAnimating = !document.hidden;
+    });
+
+    // Initialisation optimisée
+    document.addEventListener('DOMContentLoaded', () => {
+      // Utiliser requestAnimationFrame pour l'initialisation
+      requestAnimationFrame(() => {
+        createParticles();
+        createFloatingShapes();
+        startCountdown();
+        animateDots();
+      });
+    });
+  </script>
+</body>
+</html>
