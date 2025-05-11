@@ -93,34 +93,15 @@ body {
 
 /* Slides */
 .apo-slide-container {
-  width: 100%; height: 100%; position: relative;
-  perspective: 1000px;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
 }
 
-@keyframes slideOut {
-  0% { 
-    transform: translateY(0) rotate(0);
-    opacity: 1;
-  }
-  100% { 
-    transform: translateY(100px) rotate(20deg);
-    opacity: 0;
-  }
-}
-
-@keyframes slideIn {
-  0% { 
-    transform: translateY(-100px) rotate(-10deg);
-    opacity: 0;
-  }
-  50% {
-    transform: translateY(10px) rotate(5deg);
-    opacity: 0.8;
-  }
-  100% { 
-    transform: translateY(0) rotate(0);
-    opacity: 1;
-  }
+/* Empêche toute superposition résiduelle */
+.apo-slide:not(.active):not(.leaving) {
+  display: none !important;
 }
 
 .apo-slide {
@@ -129,22 +110,159 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  opacity: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
   box-sizing: border-box;
-  transition: opacity 0.5s ease-in-out;
-  transform: translateY(20px);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(100%);
+  transition: none;
+  z-index: 1;
   pointer-events: none;
 }
 
 .apo-slide.active {
   opacity: 1;
-  transform: translateY(0);
+  visibility: visible;
+  transform: translateX(0);
+  transition: none;
+  z-index: 3;
   pointer-events: auto;
-  transition: all 0.5s ease-in-out;
+}
+
+/* --- Ajout d'une classe .entering pour permettre l'entrée fluide pendant la sortie de l'autre --- */
+.apo-slide.entering {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+  z-index: 4;
+  pointer-events: auto;
+}
+
+/* --- Correction : la slide sortante ne slide plus sur le côté, elle reste en place et se désintègre --- */
+.apo-slide.leaving {
+  /* On ne translate plus sur X, on garde la slide en place */
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  z-index: 2;
+  pointer-events: none;
+  /* On laisse le temps aux animations de désintégration de jouer */
+  transition: none;
+}
+
+/* --- NOUVELLES ANIMATIONS FLUIDES ET SYNCHRO --- */
+
+/* Lettres : fade + slide vertical doux */
+.apo-user .char {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: none;
+}
+
+.apo-slide.active .apo-user .char,
+.apo-slide.entering .apo-user .char {
+  opacity: 1;
+  transform: translateY(0);
+  animation: charFadeInUp 0.8s cubic-bezier(0.33,1,0.68,1) both;
+  animation-delay: calc(var(--char-index) * 0.04s);
+}
+
+.apo-slide.leaving .apo-user .char {
+  opacity: 0;
+  transform: translateY(-30px);
+  animation: charFadeOutUp 0.7s cubic-bezier(0.33,1,0.68,1) both;
+  animation-delay: calc(var(--char-index) * 0.03s);
+}
+
+@keyframes charFadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes charFadeOutUp {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+}
+
+/* Icônes : fade + slide vertical doux */
+.apo-icons img {
+  width: 36px;
+  height: 36px;
+  filter: brightness(0) invert(1);
+  opacity: 0;
+  transform: translateY(40px);
+  transition: none;
+}
+
+.apo-slide.active .apo-icons img,
+.apo-slide.entering .apo-icons img {
+  opacity: 1;
+  transform: translateY(0);
+  animation: iconFadeInUp 0.9s cubic-bezier(0.33,1,0.68,1) both;
+}
+.apo-slide.active .apo-icons img:nth-child(1),
+.apo-slide.entering .apo-icons img:nth-child(1) { animation-delay: 0.12s; }
+.apo-slide.active .apo-icons img:nth-child(2),
+.apo-slide.entering .apo-icons img:nth-child(2) { animation-delay: 0.22s; }
+.apo-slide.active .apo-icons img:nth-child(3),
+.apo-slide.entering .apo-icons img:nth-child(3) { animation-delay: 0.32s; }
+.apo-slide.active .apo-icons img:nth-child(4),
+.apo-slide.entering .apo-icons img:nth-child(4) { animation-delay: 0.42s; }
+
+.apo-slide.leaving .apo-icons img {
+  opacity: 0;
+  transform: translateY(-40px);
+  animation: iconFadeOutUp 0.7s cubic-bezier(0.33,1,0.68,1) both;
+}
+.apo-slide.leaving .apo-icons img:nth-child(1) { animation-delay: 0.05s; }
+.apo-slide.leaving .apo-icons img:nth-child(2) { animation-delay: 0.13s; }
+.apo-slide.leaving .apo-icons img:nth-child(3) { animation-delay: 0.21s; }
+.apo-slide.leaving .apo-icons img:nth-child(4) { animation-delay: 0.29s; }
+
+@keyframes iconFadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes iconFadeOutUp {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
 }
 
 /* Espacement très large pour slides à icône unique */
@@ -169,51 +287,14 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transform: translateY(20px);
-  opacity: 0;
-  transition: all 0.5s ease-in-out;
 }
 
-.apo-slide.active .apo-user {
-  transform: translateY(0);
-  opacity: 1;
-  transition-delay: 0.2s;
-}
-
-/* Icônes blanches et plus grandes par défaut */
+/* Icônes */
 .apo-icons {
-  display: flex; 
-  gap: 14px; 
+  display: flex;
+  gap: 14px;
   align-items: center;
-}
-
-.apo-icons img {
-  width: 36px;
-  height: 36px;
-  filter: brightness(0) invert(1);
-  opacity: 0;
-  transform: translateY(20px);
-  transition: all 0.5s ease-in-out;
-}
-
-.apo-slide.active .apo-icons img {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.apo-slide.active .apo-icons img:nth-child(1) { transition-delay: 0.1s; }
-.apo-slide.active .apo-icons img:nth-child(2) { transition-delay: 0.2s; }
-.apo-slide.active .apo-icons img:nth-child(3) { transition-delay: 0.3s; }
-.apo-slide.active .apo-icons img:nth-child(4) { transition-delay: 0.4s; }
-
-.apo-slide.active .apo-icons img:nth-child(1) { animation-delay: 0.3s; }
-.apo-slide.active .apo-icons img:nth-child(2) { animation-delay: 0.4s; }
-.apo-slide.active .apo-icons img:nth-child(3) { animation-delay: 0.5s; }
-.apo-slide.active .apo-icons img:nth-child(4) { animation-delay: 0.6s; }
-
-@keyframes iconFloat {
-  0%,100% { transform: translateY(0); }
-  50%     { transform: translateY(-4px); }
+  position: relative;
 }
 
 /* Highlight Discord */

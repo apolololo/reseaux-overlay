@@ -72,21 +72,58 @@
   <script>
     const slides = document.querySelectorAll(".apo-slide");
     let current = 0;
+    let isAnimating = false;
+
+    function splitTextIntoLetters() {
+      slides.forEach(slide => {
+        const userText = slide.querySelector('.apo-user');
+        if (!userText) return;
+        const text = userText.textContent;
+        userText.innerHTML = text.split('').map((char, i) => 
+          `<span class="char" style="--char-index: ${i}">${char}</span>`
+        ).join('');
+      });
+    }
 
     function showSlide(index) {
-      // Désactiver tous les slides
-      slides.forEach(slide => slide.classList.remove("active"));
-      // Activer le nouveau slide
-      slides[index].classList.add("active");
+      if (isAnimating || index === current) return;
+      isAnimating = true;
+      const prev = slides[current];
+      const next = slides[index];
+
+      prev.classList.remove('active');
+      prev.classList.add('leaving');
+      next.classList.add('entering');
+
+      // L'entrée commence tout de suite, la sortie aussi
+      setTimeout(() => {
+        prev.classList.remove('leaving');
+        next.classList.remove('entering');
+        next.classList.add('active');
+        current = index;
+        // Animation des lettres (reset delay)
+        const chars = next.querySelectorAll('.char');
+        chars.forEach((char, i) => {
+          setTimeout(() => {
+            char.style.transitionDelay = '0s';
+          }, i * 50);
+        });
+        setTimeout(() => {
+          isAnimating = false;
+        }, 400); // Fin d'animation d'entrée
+      }, 1100); // Fin d'animation de sortie
     }
 
     function nextSlide() {
-      current = (current + 1) % slides.length;
-      showSlide(current);
+      if (!isAnimating) {
+        const next = (current + 1) % slides.length;
+        showSlide(next);
+      }
     }
 
-    // S'assurer que le premier slide est visible au démarrage
-    showSlide(0);
+    // Initialiser
+    splitTextIntoLetters();
+    slides[0].classList.add('active');
 
     // Changer de slide toutes les 6 secondes
     setInterval(nextSlide, 6000);
