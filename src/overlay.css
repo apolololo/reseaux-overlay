@@ -331,3 +331,20 @@ body {
   width: 24px;
   height: 24px;
 }
+
+/* --- Qualité maximale pour overlay agrandi (OBS, Retina, 4K) --- */
+.apo-container, .creator-box {
+  /* Pour le texte : antialiasing optimal */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.apo-icons img {
+  /* Pour les images : rendu net même agrandi */
+  image-rendering: crisp-edges;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: pixelated; /* fallback */
+  /* Si possible, utiliser des images 2x ou SVG */
+}
+
+/* Pour éviter le flou lors du redimensionnement dans OBS, recommander une source navigateur plus grande (ex: 1920x384) et réduire dans OBS */
