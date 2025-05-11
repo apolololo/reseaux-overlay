@@ -248,3 +248,63 @@ body {
   font-size: 13px;
   font-weight: 500;
 }
+
+/* Timer configuration */
+.timer-options {
+  margin-top: 16px;
+  padding: 16px 24px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.timer-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.timer-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+.timer-input input {
+  width: 50px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  padding: 4px;
+  text-align: center;
+}
+
+.timer-input input::-webkit-inner-spin-button,
+.timer-input input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.timer-input span {
+  color: #fff;
+  font-size: 16px;
+}
+
+#apply-timer {
+  background: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
+  border: none;
+  color: white;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#apply-timer:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+}

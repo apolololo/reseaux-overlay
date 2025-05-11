@@ -5,194 +5,96 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Starting Soon - APO</title>
   <link rel="stylesheet" href="./overlay.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="container">
+    <!-- Éléments de fond optimisés -->
     <div class="background">
-      <div class="gradient-overlay"></div>
-      <div class="particles"></div>
-      <div class="floating-shapes"></div>
+      <div class="gradient-circle circle-1"></div>
+      <div class="gradient-circle circle-2"></div>
+      <div class="gradient-circle circle-3"></div>
+    </div>
+    
+    <!-- Effet de particules léger (CSS uniquement) -->
+    <div class="stars-container">
+      <div class="star-field"></div>
     </div>
 
     <div class="content">
+      <!-- Logo avec animation subtile -->
       <div class="logo-container">
         <div class="logo">APO</div>
-        <div class="logo-glow"></div>
+        <div class="logo-underline"></div>
       </div>
 
-      <div class="status-container">
-        <div class="status-text">LE LIVE COMMENCE BIENTÔT</div>
-        <div class="status-dots">
-          <span class="dot"></span>
-          <span class="dot"></span>
-          <span class="dot"></span>
+      <!-- Timer avec design moderne -->
+      <div class="timer-section">
+        <div class="timer-container">
+          <div class="timer-display">
+            <span class="minutes">--</span>
+            <span class="separator">:</span>
+            <span class="seconds">--</span>
+          </div>
+          <div class="timer-label">Stream commence bientôt</div>
         </div>
-      </div>
-
-      <div class="countdown">
-        <div class="time-container">
-          <div class="time minutes">--</div>
-          <div class="label">MINUTES</div>
-        </div>
-        <div class="separator">:</div>
-        <div class="time-container">
-          <div class="time seconds">--</div>
-          <div class="label">SECONDES</div>
-        </div>
-      </div>
-
-      <div class="social-grid">
-        <div class="social-row">
-          <div class="social-item">
-            <img src="../../images/instagram.png" alt="Instagram" />
-            <span class="social-tag">@tryh_apo</span>
-          </div>
-          <div class="social-item">
-            <img src="../../images/twitch.png" alt="Twitch" />
-            <span class="social-tag">@tryh_apo</span>
-          </div>
-          <div class="social-item">
-            <img src="../../images/youtube.png" alt="YouTube" />
-            <span class="social-tag">@tryhapo</span>
-          </div>
-        </div>
-        <div class="social-row">
-          <div class="social-item">
-            <img src="../../images/kick.png" alt="Kick" />
-            <span class="social-tag">@tryh-apo</span>
-          </div>
-          <div class="social-item">
-            <img src="../../images/x.png" alt="X" />
-            <span class="social-tag">@apoftn1</span>
-          </div>
-          <div class="social-item">
-            <img src="../../images/tiktok.png" alt="TikTok" />
-            <span class="social-tag">@apo_ban</span>
-          </div>
+        
+        <!-- Indicateur de chargement optimisé -->
+        <div class="progress-bar">
+          <div class="progress-fill"></div>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // Constantes pour l'optimisation
-    const MAX_PARTICLES = 30;
-    const MAX_SHAPES = 12;
-    let isAnimating = true;
-
-    // Création optimisée des particules
-    function createParticles() {
-      const container = document.querySelector('.particles');
-      const fragment = document.createDocumentFragment();
-
-      for (let i = 0; i < MAX_PARTICLES; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        
-        // Appliquer les styles une seule fois
-        const delay = Math.random() * 5;
-        const translateX = Math.random() * 100 - 50;
-        const left = Math.random() * 100;
-        
-        particle.style.cssText = `
-          --delay: ${delay}s;
-          --translate-x: ${translateX}px;
-          left: ${left}%;
-          animation: particleFloat 8s ease-in-out infinite;
-          animation-delay: ${delay}s;
-        `;
-        
-        fragment.appendChild(particle);
-      }
-
-      container.appendChild(fragment);
-    }
-
-    // Création optimisée des formes
-    function createFloatingShapes() {
-      const container = document.querySelector('.floating-shapes');
-      const fragment = document.createDocumentFragment();
-      const shapes = ['triangle', 'circle', 'square'];
-
-      for (let i = 0; i < MAX_SHAPES; i++) {
-        const shape = document.createElement('div');
-        const shapeType = shapes[Math.floor(Math.random() * shapes.length)];
-        shape.className = `shape ${shapeType}`;
-        
-        // Appliquer les styles une seule fois
-        const delay = Math.random() * 10;
-        const size = Math.random() * 40 + 20;
-        const rotation = Math.random() * 360;
-        const translateX = Math.random() * 100 - 50;
-        const translateY = Math.random() * 100 - 50;
-        const left = Math.random() * 100;
-        const top = Math.random() * 100;
-
-        shape.style.cssText = `
-          --delay: ${delay}s;
-          --size: ${size}px;
-          --rotation: ${rotation}deg;
-          --translate-x: ${translateX}px;
-          --translate-y: ${translateY}px;
-          left: ${left}%;
-          top: ${top}%;
-          width: ${size}px;
-          height: ${size}px;
-        `;
-
-        fragment.appendChild(shape);
-      }
-
-      container.appendChild(fragment);
-    }
-
-    // Optimisation du compte à rebours
-    function startCountdown(duration = 300) {
-      let timeLeft = duration;
+    // Script optimisé pour éviter les lags
+    document.addEventListener('DOMContentLoaded', () => {
       const minutesEl = document.querySelector('.minutes');
       const secondsEl = document.querySelector('.seconds');
-      let animationFrame;
+      const progressFill = document.querySelector('.progress-fill');
+      
+      // Récupération de la durée depuis l'URL ou valeur par défaut
+      const urlParams = new URLSearchParams(window.location.search);
+      const totalDuration = parseInt(urlParams.get('duration')) || 5 * 60;
+      let timeLeft = totalDuration;
 
-      function updateDisplay() {
-        if (!isAnimating) return;
-        
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-        
-        minutesEl.textContent = minutes.toString().padStart(2, '0');
-        secondsEl.textContent = seconds.toString().padStart(2, '0');
-        
-        if (timeLeft > 0) {
+      // Formatage des nombres à deux chiffres
+      const format = num => num < 10 ? '0' + num : num;
+      
+      // Mise à jour du timer avec requestAnimationFrame pour optimiser les performances
+      let lastUpdateTime = 0;
+      
+      function updateTimer(currentTime) {
+        // Limiter les mises à jour à une fois par seconde
+        if (currentTime - lastUpdateTime >= 1000) {
+          if (timeLeft <= 0) return;
+          
+          const minutes = Math.floor(timeLeft / 60);
+          const seconds = timeLeft % 60;
+          
+          minutesEl.textContent = format(minutes);
+          secondsEl.textContent = format(seconds);
+          
+          // Mise à jour de la barre de progression
+          const progressPercent = ((totalDuration - timeLeft) / totalDuration) * 100;
+          progressFill.style.width = `${progressPercent}%`;
+          
           timeLeft--;
-          setTimeout(updateDisplay, 1000);
+          lastUpdateTime = currentTime;
         }
+        
+        requestAnimationFrame(updateTimer);
       }
-
-      updateDisplay();
-    }
-
-    // Animation optimisée des points
-    function animateDots() {
-      const dots = document.querySelectorAll('.dot');
-      dots.forEach((dot, index) => {
-        dot.style.animationDelay = `${index * 0.3}s`;
-      });
-    }
-
-    // Gestionnaire de visibilité pour optimiser les performances
-    document.addEventListener('visibilitychange', () => {
-      isAnimating = !document.hidden;
-    });
-
-    // Initialisation optimisée
-    document.addEventListener('DOMContentLoaded', () => {
-      // Utiliser requestAnimationFrame pour l'initialisation
-      requestAnimationFrame(() => {
-        createParticles();
-        createFloatingShapes();
-        startCountdown();
-        animateDots();
-      });
+      
+      // Initialisation du timer
+      minutesEl.textContent = format(Math.floor(timeLeft / 60));
+      secondsEl.textContent = format(timeLeft % 60);
+      
+      // Démarrage de l'animation avec requestAnimationFrame
+      requestAnimationFrame(updateTimer);
     });
   </script>
 </body>

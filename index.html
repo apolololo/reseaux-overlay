@@ -37,6 +37,22 @@
             </button>
           </div>
         </div>
+        
+        <div class="timer-options" style="display: none;">
+          <label>Configuration du timer :</label>
+          <div class="timer-controls">
+            <div class="timer-input">
+              <input type="number" id="timer-minutes" min="0" max="60" value="5" title="Minutes">
+              <span>:</span>
+              <input type="number" id="timer-seconds" min="0" max="59" value="0" title="Secondes">
+            </div>
+            <button id="apply-timer" title="Appliquer">
+              <svg viewBox="0 0 24 24" width="24" height="24">
+                <path fill="currentColor" d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
 
       <div class="preview-container">
