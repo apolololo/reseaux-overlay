@@ -28,9 +28,7 @@
       <div class="logo-container">
         <div class="logo">APO</div>
         <div class="logo-underline"></div>
-      </div>
-
-      <!-- Timer avec design moderne -->
+      </div>      <!-- Timer avec design moderne -->
       <div class="timer-section">
         <div class="timer-container">
           <div class="timer-display">
@@ -45,20 +43,25 @@
         <div class="progress-bar">
           <div class="progress-fill"></div>
         </div>
+
+        <!-- Message rassurant -->
+        <div class="arrival-message">
+          J'arrive dans quelques instants...
+        </div>
       </div>
     </div>
   </div>
-
   <script>
-    // Script optimisé pour éviter les lags
     document.addEventListener('DOMContentLoaded', () => {
       const minutesEl = document.querySelector('.minutes');
       const secondsEl = document.querySelector('.seconds');
       const progressFill = document.querySelector('.progress-fill');
+      const timerSection = document.querySelector('.timer-section');
+      const timerDisplay = document.querySelector('.timer-display');
+      const finalMessage = document.querySelector('.final-message');
       
-      // Récupération de la durée depuis l'URL ou valeur par défaut
-      const urlParams = new URLSearchParams(window.location.search);
-      const totalDuration = parseInt(urlParams.get('duration')) || 5 * 60;
+      // Durée fixe de 2 minutes
+      const totalDuration = 2 * 60;
       let timeLeft = totalDuration;
 
       // Formatage des nombres à deux chiffres
@@ -69,8 +72,12 @@
       
       function updateTimer(currentTime) {
         // Limiter les mises à jour à une fois par seconde
-        if (currentTime - lastUpdateTime >= 1000) {
-          if (timeLeft <= 0) return;
+        if (currentTime - lastUpdateTime >= 1000) {          if (timeLeft < 0) {
+            // Afficher le message d'arrivée tout en gardant le timer visible
+            timerSection.classList.add('ended');
+            document.querySelector('.arrival-message').classList.add('show');
+            return;
+          }
           
           const minutes = Math.floor(timeLeft / 60);
           const seconds = timeLeft % 60;
@@ -81,6 +88,13 @@
           // Mise à jour de la barre de progression
           const progressPercent = ((totalDuration - timeLeft) / totalDuration) * 100;
           progressFill.style.width = `${progressPercent}%`;
+          
+          // Effet de clignotement pour les 10 dernières secondes
+          if (timeLeft <= 10) {
+            timerDisplay.classList.add('final-countdown');
+          } else {
+            timerDisplay.classList.remove('final-countdown');
+          }
           
           timeLeft--;
           lastUpdateTime = currentTime;

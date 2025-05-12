@@ -1,5 +1,3 @@
-import { initializeTimerConfig } from './timerConfig.js';
-
 // Gestion de la navigation
 document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -15,9 +13,6 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Initialize timer configuration
-  initializeTimerConfig();
-
   const PRODUCTION_URL = 'https://apo-overlay.netlify.app';
   const previewContainer = document.querySelector('.preview-background');
   const previewFrame = document.getElementById('overlay-preview');
@@ -31,18 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Gestion des overlays avec support des tailles
   document.querySelectorAll('.overlay-item').forEach(item => {
-    item.addEventListener('click', () => {
-      document.querySelectorAll('.overlay-item').forEach(i => i.classList.remove('active'));      item.classList.add('active');
+    item.addEventListener('click', () => {      document.querySelectorAll('.overlay-item').forEach(i => i.classList.remove('active'));      item.classList.add('active');
       
-      // Build URL with timer duration for Starting Soon overlay
-      let url = item.dataset.url;
-      if (url.includes('starting')) {
-        const timerMin = parseInt(document.getElementById('timer-minutes')?.value) || 5;
-        const timerSec = parseInt(document.getElementById('timer-seconds')?.value) || 0;
-        const duration = (timerMin * 60) + timerSec;
-        url = `${url}?duration=${duration}`;
-      }
-      previewFrame.src = url;
+      // Set the URL directly
+      previewFrame.src = item.dataset.url;
       
       // Mise à jour de la taille recommandée
       const size = item.dataset.size;
