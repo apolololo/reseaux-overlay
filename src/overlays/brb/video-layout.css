@@ -56,26 +56,63 @@
   padding: 4vh 2rem;
 }
 
+/* Styles généraux pour le conteneur de logo dans l'overlay vidéo - désactivés pour utiliser .video-logo-container à la place */
+/* 
 .content.with-video .logo-container {
   position: absolute;
-  top: 3vh; /* Monté encore plus haut */
+  top: 3vh;
   left: 50%;
   transform: translateX(-50%);
   z-index: 30;
-  margin-top: -40px; /* Décalage supplémentaire vers le haut */
+  margin-top: -40px;
+}
+*/
+
+/* Style pour le logo centré au-dessus de la zone vidéo */
+.video-logo-container {
+  position: absolute;
+  top: calc(50% - 390px); /* Position au-dessus de la zone vidéo: 50% - 720px/2 - 30px (marge) */
+  right: calc(60px + 640px); /* Même calcul que pour la zone vidéo et le code créateur */
+  transform: translateX(50%); /* Centrer par rapport au point de référence */
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
-/* Style spécifique pour le logo et sa ligne lumineuse */
+/* Styles spécifiques pour le logo et sa ligne dans l'overlay vidéo */
+.video-logo-container .logo {
+  font-size: 7rem; /* Taille d'origine du logo */
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: 6px;
+  text-shadow: 0 0 20px rgba(108, 99, 255, 0.5);
+  animation: logoGlow 3s ease-in-out infinite alternate;
+}
+
+.video-logo-container .logo-underline {
+  width: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, var(--primary), var(--primary-light), var(--primary), transparent);
+  border-radius: 2px;
+  animation: expandLine 2s ease-out forwards;
+  margin-top: 5px;
+}
+
+/* Style spécifique pour le logo et sa ligne lumineuse - désactivés pour utiliser .video-logo-container à la place */
+/*
 .content.with-video .logo {
-  margin-bottom: 10px; /* Espace entre le logo et la ligne */
+  margin-bottom: 10px;
 }
 
 .content.with-video .logo-underline {
-  height: 3px; /* Hauteur de la ligne lumineuse */
-  margin-top: 5px; /* Espace après le logo */
+  height: 3px;
+  margin-top: 5px;
   position: relative;
-  z-index: 31; /* Au-dessus de tout */
+  z-index: 31;
 }
+*/
 
 .content.with-video .main-content {
   display: flex;
