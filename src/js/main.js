@@ -12,10 +12,16 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
   });
 });
 
+import { initPreviewIframe } from './preview.js';
+import { ensureIframeContent } from './iframe-handler.js';
+
 document.addEventListener('DOMContentLoaded', () => {
   const PRODUCTION_URL = 'https://apo-overlay.netlify.app';
   const previewContainer = document.querySelector('.preview-background');
   const previewFrame = document.getElementById('overlay-preview');
+  
+  // Initialize preview iframe handling
+  initPreviewIframe();
   const bgColor = document.getElementById('bg-color');
   const bgTransparent = document.getElementById('bg-transparent');
   const bgImageBtn = document.getElementById('bg-image-btn');
@@ -28,8 +34,16 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.overlay-item').forEach(item => {
     item.addEventListener('click', () => {      document.querySelectorAll('.overlay-item').forEach(i => i.classList.remove('active'));      item.classList.add('active');
       
-      // Set the URL directly
+      // Set the URL and ensure content is visible
       previewFrame.src = item.dataset.url;
+      previewFrame.onload = () => {
+        try {
+          previewFrame.contentWindow.postMessage({ type: 'ensure-content' }, '*');
+          ensureIframeContent();
+        } catch (e) {
+          console.warn('Could not access iframe content:', e);
+        }
+      };
       
       // Mise à jour de la taille recommandée
       const size = item.dataset.size;

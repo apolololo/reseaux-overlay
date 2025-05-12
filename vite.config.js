@@ -13,6 +13,9 @@ export default defineConfig({
         end: resolve(__dirname, 'src/overlays/end/overlay.html'),
         gameStatus: resolve(__dirname, 'src/overlays/game-status/overlay.html')
       },
+      output: {
+        manualChunks: undefined
+      }
     },
     assetsDir: 'assets',
     outDir: 'dist',

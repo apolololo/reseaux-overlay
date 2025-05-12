@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="referrer" content="no-referrer" />
-  <title>APO Overlays</title>  <link rel="stylesheet" href="./src/styles/main.css" />
+  <title>APO Overlays</title>  
+  <link rel="stylesheet" href="./src/styles/main.css" />
+  <link rel="stylesheet" href="./src/styles/preview.css" />
 </head>
 <body>
   <div id="app">    <div class="overlay-list">      <h2>Overlays</h2>      <ul>
@@ -48,7 +50,7 @@
 
       <div class="preview-container">
         <div class="preview-background">
-          <iframe id="overlay-preview" src="src/overlays/apo/overlay.html"></iframe>
+          <iframe id="overlay-preview" src="src/overlays/apo/overlay.html" sandbox="allow-same-origin allow-scripts"></iframe>
         </div>
       </div>
 
