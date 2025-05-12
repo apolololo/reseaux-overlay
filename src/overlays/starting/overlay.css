@@ -54,8 +54,7 @@ body {
 .gradient-circle {
   position: absolute;
   border-radius: 50%;
-  filter: blur(60px);  opacity: 0.1;
-  will-change: transform;
+  filter: blur(60px);  opacity: 0.1;  will-change: transform;
 }
 
 .circle-1 {
@@ -64,7 +63,6 @@ body {
   background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
   top: -20vh;
   left: -20vh;
-  animation: float 15s ease-in-out infinite alternate;
 }
 
 .circle-2 {
@@ -73,7 +71,6 @@ body {
   background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
   bottom: -10vh;
   right: -10vh;
-  animation: float 18s ease-in-out infinite alternate-reverse;
 }
 
 .circle-3 {
@@ -83,7 +80,6 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  animation: pulse 20s ease-in-out infinite;
 }
 
 /* Effet d'étoiles léger (CSS uniquement) */
