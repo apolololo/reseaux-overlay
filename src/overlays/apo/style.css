@@ -1,18 +1,7 @@
 /* Reset & body */
 body {
-  margin:.creator-code .code {
-  font-size: 24px;
-  font-weight: 900;
-  color: #fff;
-  text-shadow: 0 0 12px rgba(255, 0, 200, 0.8);
-  animation: glow 2s ease-in-out infinite;
-  white-space: nowrap;
-  overflow: visible;
-  text-overflow: unset;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-}ng: 0;
+  margin: 0;
+  padding: 0;
   background: transparent;
   font-family: 'Segoe UI', sans-serif;
 }
@@ -67,16 +56,17 @@ body {
 }
 
 .ad-tag {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: bold;
-  color: #FFD700;
-  margin-left: 8px;
+  color: #ff0;
+  margin-left: 4px;
   white-space: nowrap;
   overflow: visible;
   text-overflow: unset;
   flex-shrink: 0;
-  display: inline;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+  display: inline-block;
+  min-width: 2.5em;
+  max-width: none;
 }
 
 /* Conteneur centré et fond totalement noir profond */

@@ -184,8 +184,6 @@ body {
   left: 50%;
   transform-origin: center;
   transform: translate(-50%, -50%);
-  overflow: visible !important;
-  pointer-events: none;
 }
 
 /* Pour les overlays plein écran */
