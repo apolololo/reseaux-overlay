@@ -1,0 +1,154 @@
+/* Styles pour la mise en page avec vidéo */
+.video-zone {
+  position: absolute;
+  top: 50%;
+  right: 60px;
+  transform: translateY(-50%);
+  width: 1280px;
+  height: 720px;
+  margin-top: 30px; /* Décalage vers le bas pour laisser de l'espace au logo */
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+  z-index: 10;
+  /* Effet de contour animé */
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+/* Effet de contour lumineux animé */
+.video-zone::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, 
+    var(--primary) 0%, 
+    var(--primary-light) 25%, 
+    var(--accent) 50%, 
+    var(--primary-light) 75%, 
+    var(--primary) 100%);
+  border-radius: 14px;
+  z-index: -1;
+  animation: borderGlow 4s linear infinite;
+}
+
+@keyframes borderGlow {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 200% 0%;
+  }
+}
+
+/* Ajustements pour le contenu avec vidéo */
+.content.with-video {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  height: 100vh;
+  padding: 4vh 2rem;
+}
+
+.content.with-video .logo-container {
+  position: absolute;
+  top: 3vh; /* Monté encore plus haut */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  margin-top: -40px; /* Décalage supplémentaire vers le haut */
+}
+
+/* Style spécifique pour le logo et sa ligne lumineuse */
+.content.with-video .logo {
+  margin-bottom: 10px; /* Espace entre le logo et la ligne */
+}
+
+.content.with-video .logo-underline {
+  height: 3px; /* Hauteur de la ligne lumineuse */
+  margin-top: 5px; /* Espace après le logo */
+  position: relative;
+  z-index: 31; /* Au-dessus de tout */
+}
+
+.content.with-video .main-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  height: 100%;
+  position: relative;
+}
+
+.content.with-video .message-section {
+  text-align: left; /* Aligné à gauche pour une meilleure lisibilité */
+  margin-right: 1340px;
+  position: absolute;
+  left: 80px;
+  top: 45%; /* Légèrement plus haut */
+  transform: translateY(-50%);
+  width: auto; /* Permet au contenu de définir la largeur naturellement */
+}
+
+.content.with-video .main-message {
+  font-size: 3.2em; /* Réduit la taille du texte principal */
+  margin-bottom: 0.5em;
+  text-shadow: 0 0 20px rgba(108, 99, 255, 0.5);
+  line-height: 1.2; /* Améliore l'espacement des lignes */
+  max-width: 500px; /* Limite la largeur pour éviter la compression */
+}
+
+.content.with-video .sub-message {
+  font-size: 1.8em;
+  opacity: 0.9;
+  max-width: 450px; /* Limite la largeur pour garder la cohérence */
+}
+
+/* Style pour le code créateur sous la zone vidéo */
+.video-creator-code {
+  position: absolute;
+  bottom: 30px;
+  right: calc(60px + 640px); /* Même calcul que pour la zone vidéo: 60px (marge droite) + 1280px/2 (moitié de la largeur) */
+  transform: translateX(50%); /* Centrer par rapport au point de référence */
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.8rem 2rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  white-space: nowrap;
+}
+
+/* Styles pour les éléments à l'intérieur du code créateur */
+.video-creator-code .label {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.video-creator-code .code {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--text);
+  text-shadow: 0 0 20px rgba(108, 99, 255, 0.5);
+  white-space: nowrap;
+}
+
+.video-creator-code .ad-tag {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #FFD700;
+  white-space: nowrap;
+}
+
+

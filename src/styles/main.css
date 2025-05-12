@@ -55,6 +55,66 @@ body {
   background: linear-gradient(45deg, #ff00c8, #00f0ff);
 }
 
+/* Styles pour les dossiers d'overlays */
+.folder-item {
+  margin: 4px 0;
+}
+
+.folder-header {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.folder-header:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.folder-header span {
+  font-weight: 500;
+}
+
+.folder-icon {
+  transition: transform 0.3s ease;
+}
+
+.folder-content {
+  list-style: none;
+  padding-left: 16px;
+  margin: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.folder-item.open .folder-content {
+  max-height: 500px;
+}
+
+.folder-item.open .folder-icon {
+  transform: rotate(180deg);
+}
+
+.folder-content .overlay-item {
+  padding-left: 24px;
+  border-left: 2px solid rgba(255, 255, 255, 0.1);
+  margin-left: 8px;
+}
+
+.folder-content .overlay-item:hover {
+  border-left-color: var(--primary-color);
+}
+
+.folder-content .overlay-item.active {
+  border-left-color: var(--primary-color);
+  background: rgba(255, 255, 255, 0.1);
+}
+
 /* Section preview */
 .preview-section {
   padding: 32px;

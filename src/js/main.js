@@ -26,7 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Gestion des overlays avec support des tailles
   document.querySelectorAll('.overlay-item').forEach(item => {
-    item.addEventListener('click', () => {      document.querySelectorAll('.overlay-item').forEach(i => i.classList.remove('active'));      item.classList.add('active');
+    item.addEventListener('click', () => {      
+      document.querySelectorAll('.overlay-item').forEach(i => i.classList.remove('active'));      
+      item.classList.add('active');
       
       // Set the URL directly
       previewFrame.src = item.dataset.url;
@@ -93,8 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!activeOverlay) return;
 
     const localPath = activeOverlay.dataset.url;
-    // Enlever le ./ du début du chemin s'il existe
-    const cleanPath = localPath.startsWith('./') ? localPath.substring(2) : localPath;
+    // Nettoyer l'URL pour la production
+    const cleanPath = localPath.replace(/^\.?\//, '').replace(/^src\//, '');
     const productionUrl = `${PRODUCTION_URL}/${cleanPath}`;
     
     try {
@@ -177,6 +179,40 @@ document.addEventListener('DOMContentLoaded', () => {
   // Activer le fond transparent par défaut au lieu de la couleur
   bgTransparent.click();
   updatePreviewSize();
+
+  // Gestion des dossiers d'overlays
+  document.querySelectorAll('.folder-header').forEach(header => {
+    header.addEventListener('click', () => {
+      const folderItem = header.closest('.folder-item');
+      folderItem.classList.toggle('open');
+    });
+  });
+
+  // Mise à jour de la gestion des overlays pour prendre en compte les dossiers
+  document.querySelectorAll('.overlay-item').forEach(item => {
+    item.addEventListener('click', (event) => {
+      // Empêcher la propagation vers le dossier parent
+      event.stopPropagation();
+      
+      document.querySelectorAll('.overlay-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+      
+      // Set the URL directly
+      previewFrame.src = item.dataset.url;
+      
+      // Mise à jour de la taille recommandée
+      const size = item.dataset.size;
+      if (size) {
+        sizeInfo.textContent = `Taille recommandée : ${size}`;
+        
+        // Ajuster le ratio de la preview
+        const [width, height] = size.split('x').map(Number);
+        const ratio = width / height;
+        previewContainerWrapper.style.aspectRatio = ratio;
+      }
+      updatePreviewSize();
+    });
+  });
 });
 
 // Mouse movement optimization using requestAnimationFrame
