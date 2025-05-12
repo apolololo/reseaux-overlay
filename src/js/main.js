@@ -185,7 +185,8 @@ document.addEventListener('DOMContentLoaded', () => {
       previewContainerWrapper.style.aspectRatio = width / height;
     }
   }
-  bgColor.dispatchEvent(new Event('input'));
+  // Activer le fond transparent par défaut au lieu de la couleur
+  bgTransparent.click();
   updatePreviewSize();
 });
 
