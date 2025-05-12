@@ -8,7 +8,10 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         apo: resolve(__dirname, 'src/overlays/apo/overlay.html'),
-        starting: resolve(__dirname, 'src/overlays/starting/overlay.html')
+        starting: resolve(__dirname, 'src/overlays/starting/overlay.html'),
+        brb: resolve(__dirname, 'src/overlays/brb/overlay.html'),
+        end: resolve(__dirname, 'src/overlays/end/overlay.html'),
+        gameStatus: resolve(__dirname, 'src/overlays/game-status/overlay.html')
       },
     },
     assetsDir: 'assets',
