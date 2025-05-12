@@ -93,7 +93,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!activeOverlay) return;
 
     const localPath = activeOverlay.dataset.url;
-    const productionUrl = `${PRODUCTION_URL}${localPath}`;
+    // Enlever le ./ du début du chemin s'il existe
+    const cleanPath = localPath.startsWith('./') ? localPath.substring(2) : localPath;
+    const productionUrl = `${PRODUCTION_URL}/${cleanPath}`;
     
     try {
       await navigator.clipboard.writeText(productionUrl);
