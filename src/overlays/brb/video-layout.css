@@ -13,6 +13,35 @@
   z-index: 10;
   border: 2px solid transparent;
   background-clip: padding-box;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.video-zone:hover {
+  background: rgba(0, 0, 0, 0.4);
+  transform: translateY(-50%) scale(1.01);
+}
+
+.video-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.5rem;
+  text-align: center;
+  padding: 2rem;
+}
+
+.video-zone:hover .video-placeholder {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.video-zone iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
 }
 
 /* Effet de contour lumineux animé */

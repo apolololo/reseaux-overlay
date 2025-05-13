@@ -25,9 +25,63 @@
     </div>
 
     <!-- Zone vidéo -->
-    <div class="video-zone">
-      <!-- Cette zone restera vide pour permettre l'ajout de vidéos dans OBS -->
+    <div class="video-zone" id="videoZone" onclick="handleVideoClick()">
+      <div class="video-placeholder">
+        <span>Cliquez ici pour ajouter une vidéo YouTube</span>
+      </div>
     </div>
+
+    <script>
+    // Fonction pour charger la vidéo YouTube
+    function loadYouTubeVideo(videoId) {
+      const videoZone = document.getElementById('videoZone');
+      videoZone.innerHTML = `<iframe
+        width="100%"
+        height="100%"
+        src="https://www.youtube.com/embed/${videoId}"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+      ></iframe>`;
+      // Sauvegarder l'ID de la vidéo dans le stockage local
+      localStorage.setItem('youtubeVideoId', videoId);
+    }
+
+    // Fonction pour extraire l'ID d'une vidéo YouTube à partir de l'URL
+    function extractYouTubeVideoId(url) {
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+    // Fonction pour gérer le clic sur la zone vidéo
+    function handleVideoClick() {
+      const url = prompt('Veuillez entrer l\'URL ou l\'ID de la vidéo YouTube :');
+      if (!url) return;
+      
+      // Vérifier si c'est un ID direct (11 caractères) ou une URL
+      let videoId;
+      if (url.length === 11) {
+        videoId = url;
+      } else {
+        videoId = extractYouTubeVideoId(url);
+      }
+
+      if (videoId) {
+        loadYouTubeVideo(videoId);
+      } else {
+        alert('URL YouTube invalide. Veuillez réessayer.');
+      }
+    }
+
+    // Charger la vidéo sauvegardée au chargement de la page
+    window.addEventListener('load', () => {
+      const savedVideoId = localStorage.getItem('youtubeVideoId');
+      if (savedVideoId) {
+        loadYouTubeVideo(savedVideoId);
+      }
+    });
+    </script>
 
     <div class="content with-video">
       <!-- Logo -->
