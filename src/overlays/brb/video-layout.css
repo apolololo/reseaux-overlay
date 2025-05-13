@@ -10,16 +10,18 @@
   background: rgba(0, 0, 0, 0.2);
   border-radius: 12px;
   overflow: hidden;
-  z-index: 10;
-  border: 2px solid transparent;
+  z-index: 100; /* Augmenté pour être au-dessus des autres éléments */
+  border: 2px solid rgba(255, 255, 255, 0.1);
   background-clip: padding-box;
   cursor: pointer;
   transition: all 0.3s ease;
+  pointer-events: all; /* Assure que les clics sont détectés */
 }
 
 .video-zone:hover {
   background: rgba(0, 0, 0, 0.4);
   transform: translateY(-50%) scale(1.01);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .video-placeholder {
@@ -32,6 +34,7 @@
   font-size: 1.5rem;
   text-align: center;
   padding: 2rem;
+  pointer-events: none; /* Le texte ne doit pas interférer avec les clics */
 }
 
 .video-zone:hover .video-placeholder {
@@ -61,6 +64,7 @@
   border-radius: 14px;
   z-index: -1;
   animation: borderGlow 4s linear infinite;
+  pointer-events: none; /* L'effet ne doit pas interférer avec les clics */
 }
 
 @keyframes borderGlow {
@@ -82,12 +86,13 @@
   align-items: center;
   height: 100vh;
   padding: 4vh 2rem;
+  pointer-events: none; /* Le contenu ne doit pas bloquer les clics sur la vidéo */
 }
 
 /* Style pour le logo centré au-dessus de la zone vidéo */
 .video-logo-container {
   position: absolute;
-  top: calc(44% - 520px); /* Position beaucoup plus haute pour éviter tout chevauchement */
+  top: calc(44% - 520px);
   right: calc(60px + 640px);
   transform: translateX(50%);
   z-index: 30;
@@ -95,6 +100,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+  pointer-events: none;
 }
 
 /* Styles spécifiques pour le logo et sa ligne dans l'overlay vidéo */
@@ -123,16 +129,18 @@
   justify-content: center;
   height: 100%;
   position: relative;
+  pointer-events: none;
 }
 
 .content.with-video .message-section {
   text-align: left;
   margin-right: 1340px;
   position: absolute;
-  left: 10px; /* Déplacé davantage vers la gauche (était 60px) */
-  top: 55%; /* Déplacé davantage vers le bas (était 50%) */
+  left: 10px;
+  top: 55%;
   transform: translateY(-50%);
   width: auto;
+  pointer-events: none;
 }
 
 .content.with-video .main-message {
@@ -141,15 +149,15 @@
   text-shadow: 0 0 20px rgba(108, 99, 255, 0.5);
   line-height: 1.2;
   max-width: 500px;
-  text-align: center; /* Centrage du texte */
+  text-align: center;
 }
 
 .content.with-video .sub-message {
   font-size: 1.8em;
   opacity: 0.9;
   max-width: 450px;
-  text-align: center; /* Centrage du texte */
-  margin-bottom: 1.2rem; /* Espace avant les points */
+  text-align: center;
+  margin-bottom: 1.2rem;
 }
 
 /* Style personnalisé pour l'indicateur de pause dans l'overlay vidéo */
@@ -159,7 +167,8 @@
   margin-top: 0.5rem;
   justify-content: center;
   width: 100%;
-  margin-left: -10px; /* Ajustement vers la gauche */
+  margin-left: -10px;
+  pointer-events: none;
 }
 
 /* Style pour le code créateur sous la zone vidéo */
@@ -177,6 +186,7 @@
   border-radius: 12px;
   backdrop-filter: blur(10px);
   white-space: nowrap;
+  pointer-events: none;
 }
 
 /* Styles pour les éléments à l'intérieur du code créateur */
