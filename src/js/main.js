@@ -34,7 +34,15 @@ document.addEventListener('DOMContentLoaded', () => {
       // Construire l'URL complète pour la preview
       const localPath = item.dataset.url;
       const fullPath = new URL(localPath, window.location.origin).pathname;
-      previewFrame.src = fullPath;
+      
+      // Préserver les paramètres d'URL existants lors du changement d'overlay
+      const currentParams = new URLSearchParams(previewFrame.src.split('?')[1] || '');
+      const newUrl = new URL(fullPath, window.location.origin);
+      currentParams.forEach((value, key) => {
+        newUrl.searchParams.set(key, value);
+      });
+      
+      previewFrame.src = newUrl.toString();
       
       // Mise à jour de la taille recommandée
       const size = item.dataset.size;
@@ -98,12 +106,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!activeOverlay) return;
 
     const localPath = activeOverlay.dataset.url;
-    // Construire l'URL complète pour la production
-    const fullPath = new URL(localPath, window.location.origin).pathname;
-    const productionUrl = `${PRODUCTION_URL}${fullPath}`;
+    // Construire l'URL complète pour la production en incluant les paramètres actuels
+    const previewUrl = new URL(previewFrame.src);
+    const fullPath = new URL(localPath, PRODUCTION_URL);
+    
+    // Copier tous les paramètres de la preview vers l'URL finale
+    previewUrl.searchParams.forEach((value, key) => {
+      fullPath.searchParams.set(key, value);
+    });
     
     try {
-      await navigator.clipboard.writeText(productionUrl);
+      await navigator.clipboard.writeText(fullPath.toString());
       copyButton.style.transition = 'transform 0.2s ease';
       copyButton.style.transform = 'scale(1.05)';
       copyButton.textContent = 'URL Copiée !';
@@ -200,10 +213,15 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.overlay-item').forEach(i => i.classList.remove('active'));
       item.classList.add('active');
       
-      // Construire l'URL complète pour la preview
+      // Construire l'URL complète pour la preview en préservant les paramètres
       const localPath = item.dataset.url;
-      const fullPath = new URL(localPath, window.location.origin).pathname;
-      previewFrame.src = fullPath;
+      const currentParams = new URLSearchParams(previewFrame.src.split('?')[1] || '');
+      const newUrl = new URL(localPath, window.location.origin);
+      currentParams.forEach((value, key) => {
+        newUrl.searchParams.set(key, value);
+      });
+      
+      previewFrame.src = newUrl.toString();
       
       // Mise à jour de la taille recommandée
       const size = item.dataset.size;

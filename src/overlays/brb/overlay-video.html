@@ -67,6 +67,8 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const videoZone = document.getElementById('videoZone');
+      const urlParams = new URLSearchParams(window.location.search);
+      const videoId = urlParams.get('v');
 
       // Fonction pour extraire l'ID d'une vidéo YouTube à partir de l'URL
       function extractYouTubeVideoId(url) {
@@ -75,44 +77,61 @@
         return (match && match[2].length === 11) ? match[2] : null;
       }
 
-      // Fonction pour charger la vidéo YouTube
+      // Fonction pour charger la vidéo YouTube de manière optimisée
       function loadYouTubeVideo(videoId) {
-        videoZone.innerHTML = `<iframe
-          width="100%"
-          height="100%"
-          src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1"
-          frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen
-        ></iframe>`;
-        // Sauvegarder l'ID de la vidéo dans le stockage local
-        localStorage.setItem('youtubeVideoId', videoId);
+        const iframe = document.createElement('iframe');
+        iframe.width = '100%';
+        iframe.height = '100%';
+        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&playsinline=1&enablejsapi=1&origin=${window.location.origin}`;
+        iframe.frameBorder = '0';
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+        iframe.allowFullscreen = true;
+        
+        // Nettoyer la zone vidéo avant d'ajouter l'iframe
+        videoZone.innerHTML = '';
+        videoZone.appendChild(iframe);
+
+        // Mettre à jour l'URL sans recharger la page
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('v', videoId);
+        window.history.replaceState({}, '', newUrl);
       }
 
       // Gestionnaire de clic sur la zone vidéo
       videoZone.addEventListener('click', () => {
-        const url = prompt('Veuillez entrer l\'URL ou l\'ID de la vidéo YouTube :');
+        const url = prompt('Veuillez entrer l\'URL ou l\'ID de la vidéo YouTube :\n(Laissez vide pour retirer la vidéo)');
+        
+        if (url === '') {
+          // Retirer la vidéo
+          videoZone.innerHTML = `<div class="video-placeholder">
+            <span>Cliquez ici pour ajouter une vidéo YouTube</span>
+          </div>`;
+          const newUrl = new URL(window.location.href);
+          newUrl.searchParams.delete('v');
+          window.history.replaceState({}, '', newUrl);
+          return;
+        }
+
         if (!url) return;
         
         // Vérifier si c'est un ID direct (11 caractères) ou une URL
-        let videoId;
+        let newVideoId;
         if (url.length === 11) {
-          videoId = url;
+          newVideoId = url;
         } else {
-          videoId = extractYouTubeVideoId(url);
+          newVideoId = extractYouTubeVideoId(url);
         }
 
-        if (videoId) {
-          loadYouTubeVideo(videoId);
+        if (newVideoId) {
+          loadYouTubeVideo(newVideoId);
         } else {
           alert('URL YouTube invalide. Veuillez réessayer.');
         }
       });
 
-      // Charger la vidéo sauvegardée au chargement de la page
-      const savedVideoId = localStorage.getItem('youtubeVideoId');
-      if (savedVideoId) {
-        loadYouTubeVideo(savedVideoId);
+      // Charger la vidéo depuis l'URL au chargement de la page
+      if (videoId) {
+        loadYouTubeVideo(videoId);
       }
     });
   </script>
