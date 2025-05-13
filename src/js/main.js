@@ -13,7 +13,8 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-  const PRODUCTION_URL = 'https://apo-overlay.netlify.app';
+  // L'URL de production sera automatiquement détectée
+  const PRODUCTION_URL = window.location.origin;
   const previewContainer = document.querySelector('.preview-background');
   const previewFrame = document.getElementById('overlay-preview');
   const bgColor = document.getElementById('bg-color');
@@ -30,8 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.overlay-item').forEach(i => i.classList.remove('active'));      
       item.classList.add('active');
       
-      // Set the URL directly
-      previewFrame.src = item.dataset.url;
+      // Construire l'URL complète pour la preview
+      const localPath = item.dataset.url;
+      const fullPath = new URL(localPath, window.location.origin).pathname;
+      previewFrame.src = fullPath;
       
       // Mise à jour de la taille recommandée
       const size = item.dataset.size;
@@ -95,9 +98,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!activeOverlay) return;
 
     const localPath = activeOverlay.dataset.url;
-    // Nettoyer l'URL pour la production
-    const cleanPath = localPath.replace(/^\.?\//, '').replace(/^src\//, '');
-    const productionUrl = `${PRODUCTION_URL}/${cleanPath}`;
+    // Construire l'URL complète pour la production
+    const fullPath = new URL(localPath, window.location.origin).pathname;
+    const productionUrl = `${PRODUCTION_URL}${fullPath}`;
     
     try {
       await navigator.clipboard.writeText(productionUrl);
@@ -197,8 +200,10 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.overlay-item').forEach(i => i.classList.remove('active'));
       item.classList.add('active');
       
-      // Set the URL directly
-      previewFrame.src = item.dataset.url;
+      // Construire l'URL complète pour la preview
+      const localPath = item.dataset.url;
+      const fullPath = new URL(localPath, window.location.origin).pathname;
+      previewFrame.src = fullPath;
       
       // Mise à jour de la taille recommandée
       const size = item.dataset.size;
@@ -212,76 +217,5 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       updatePreviewSize();
     });
-  });
-});
-
-// Mouse movement optimization using requestAnimationFrame
-let mouseX = 0;
-let mouseY = 0;
-let rafId = null;
-
-function updateMousePosition(e) {
-    mouseX = e.clientX / window.innerWidth;
-    mouseY = e.clientY / window.innerHeight;
-    
-    if (!rafId) {
-        rafId = requestAnimationFrame(updateBackground);
-    }
-}
-
-function updateBackground() {
-    rafId = null;
-    const fluid = document.querySelector('.fluid-background');
-    if (fluid) {
-        fluid.style.setProperty('--mouse-x', mouseX.toString());
-        fluid.style.setProperty('--mouse-y', mouseY.toString());
-    }
-}
-
-// Throttle resize events
-let resizeTimeout;
-function handleResize() {
-    if (resizeTimeout) {
-        clearTimeout(resizeTimeout);
-    }
-    resizeTimeout = setTimeout(() => {
-        // Update any size-dependent calculations here
-        if (rafId) {
-            cancelAnimationFrame(rafId);
-            rafId = requestAnimationFrame(updateBackground);
-        }
-    }, 250);
-}
-
-// Initialize event listeners
-function initializeEventListeners() {
-    document.addEventListener('mousemove', updateMousePosition, { passive: true });
-    window.addEventListener('resize', handleResize, { passive: true });
-}
-
-// Cleanup event listeners
-function cleanup() {
-    document.removeEventListener('mousemove', updateMousePosition);
-    window.removeEventListener('resize', handleResize);
-    if (rafId) {
-        cancelAnimationFrame(rafId);
-    }
-    if (resizeTimeout) {
-        clearTimeout(resizeTimeout);
-    }
-}
-
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', initializeEventListeners);
-// Cleanup when page unloads
-window.addEventListener('unload', cleanup);
-
-// Gestion de la sélection dans la vue dossiers
-document.querySelectorAll('.overlay-item').forEach(item => {
-  item.addEventListener('click', () => {
-    document.querySelectorAll('.overlay-item').forEach(i => i.classList.remove('active'));
-    item.classList.add('active');
-    const previewFrame = document.getElementById('folder-preview-frame');
-    // À implémenter: chargement de l'overlay correspondant
   });
 });

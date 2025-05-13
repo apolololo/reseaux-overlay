@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
 export default defineConfig({
-  base: './',
+  base: '/',
   build: {
     rollupOptions: {
       input: {
@@ -10,6 +10,7 @@ export default defineConfig({
         apo: resolve(__dirname, 'src/overlays/apo/overlay.html'),
         starting: resolve(__dirname, 'src/overlays/starting/overlay.html'),
         brb: resolve(__dirname, 'src/overlays/brb/overlay.html'),
+        brbVideo: resolve(__dirname, 'src/overlays/brb/overlay-video.html'),
         end: resolve(__dirname, 'src/overlays/end/overlay.html'),
         gameStatus: resolve(__dirname, 'src/overlays/game-status/overlay.html')
       },
