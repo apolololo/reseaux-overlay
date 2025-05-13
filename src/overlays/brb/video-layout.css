@@ -2,7 +2,7 @@
 .video-zone {
   position: absolute;
   top: 50%;
-  right: 60px;
+  right: 45px;
   transform: translateY(-50%);
   width: 1280px;
   height: 720px;
@@ -58,7 +58,7 @@
 /* Style pour le logo centré au-dessus de la zone vidéo */
 .video-logo-container {
   position: absolute;
-  top: calc(50% - 520px); /* Position beaucoup plus haute pour éviter tout chevauchement */
+  top: calc(44% - 520px); /* Position beaucoup plus haute pour éviter tout chevauchement */
   right: calc(60px + 640px);
   transform: translateX(50%);
   z-index: 30;
@@ -100,8 +100,8 @@
   text-align: left;
   margin-right: 1340px;
   position: absolute;
-  left: 80px;
-  top: 45%;
+  left: 10px; /* Déplacé davantage vers la gauche (était 60px) */
+  top: 55%; /* Déplacé davantage vers le bas (était 50%) */
   transform: translateY(-50%);
   width: auto;
 }
@@ -112,12 +112,25 @@
   text-shadow: 0 0 20px rgba(108, 99, 255, 0.5);
   line-height: 1.2;
   max-width: 500px;
+  text-align: center; /* Centrage du texte */
 }
 
 .content.with-video .sub-message {
   font-size: 1.8em;
   opacity: 0.9;
   max-width: 450px;
+  text-align: center; /* Centrage du texte */
+  margin-bottom: 1.2rem; /* Espace avant les points */
+}
+
+/* Style personnalisé pour l'indicateur de pause dans l'overlay vidéo */
+.content.with-video .pause-indicator {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+  justify-content: center;
+  width: 100%;
+  margin-left: -10px; /* Ajustement vers la gauche */
 }
 
 /* Style pour le code créateur sous la zone vidéo */
