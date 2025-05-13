@@ -1,0 +1,65 @@
+/* Variables */
+:root {
+  --primary: #6C63FF;
+  --accent: #00F0FF;
+  --bg: rgba(0, 0, 0, 0.85);
+  --text: #F8FAFC;
+}
+
+/* Reset & Base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  background: transparent;
+  color: var(--text);
+  line-height: 1.2;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.content {
+  background: var(--bg);
+  padding: 1.5rem 3rem;
+  border-radius: 16px;
+  box-shadow: 0 0 30px rgba(108, 99, 255, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.map-info {
+  text-align: center;
+}
+
+.map-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 15px rgba(108, 99, 255, 0.5);
+  letter-spacing: 1px;
+}
+
+.map-code {
+  font-size: 4rem;
+  font-weight: 900;
+  background: linear-gradient(45deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+  letter-spacing: 2px;
+}
