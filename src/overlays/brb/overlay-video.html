@@ -26,10 +26,12 @@
 
     <!-- Zone vidéo -->
     <div class="video-zone" id="videoZone">
-      <div class="video-placeholder">
-        <input type="text" id="videoInput" placeholder="Collez l'URL YouTube ici" style="width: 80%; padding: 10px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 4px;">
-        <button id="loadVideo" style="padding: 10px 20px; background: linear-gradient(45deg, #ff00c8, #00f0ff); border: none; color: white; border-radius: 4px; cursor: pointer;">Charger la vidéo</button>
-        <button id="removeVideo" style="padding: 10px 20px; background: rgba(255,0,0,0.5); border: none; color: white; border-radius: 4px; cursor: pointer; margin-left: 10px;">Retirer la vidéo</button>
+      <div class="video-controls">
+        <input type="text" id="videoInput" placeholder="Collez l'URL YouTube ici">
+        <div class="button-group">
+          <button id="loadVideo">Charger la vidéo</button>
+          <button id="removeVideo">Retirer la vidéo</button>
+        </div>
       </div>
     </div>
 
@@ -66,6 +68,72 @@
     </div>
   </div>
 
+  <style>
+    .video-controls {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      z-index: 1000;
+    }
+
+    #videoInput {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background: rgba(255,255,255,0.15);
+      border: 2px solid rgba(255,255,255,0.3);
+      color: white;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    #videoInput:focus {
+      border-color: rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.2);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    #loadVideo, #removeVideo {
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+    }
+
+    #loadVideo {
+      background: linear-gradient(45deg, #ff00c8, #00f0ff);
+      color: white;
+    }
+
+    #removeVideo {
+      background: rgba(255,59,48,0.8);
+      color: white;
+    }
+
+    #loadVideo:hover, #removeVideo:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+    }
+
+    #loadVideo:active, #removeVideo:active {
+      transform: translateY(1px);
+    }
+  </style>
+
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const videoZone = document.getElementById('videoZone');
@@ -75,15 +143,18 @@
       const urlParams = new URLSearchParams(window.location.search);
       const videoId = urlParams.get('v');
 
-      // Fonction pour extraire l'ID d'une vidéo YouTube à partir de l'URL
       function extractYouTubeVideoId(url) {
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
         const match = url.match(regExp);
         return (match && match[2].length === 11) ? match[2] : null;
       }
 
-      // Fonction pour charger la vidéo YouTube
       function loadYouTubeVideo(videoId) {
+        const videoControls = videoZone.querySelector('.video-controls');
+        if (videoControls) {
+          videoControls.style.display = 'none';
+        }
+
         const iframe = document.createElement('iframe');
         iframe.width = '100%';
         iframe.height = '100%';
@@ -92,19 +163,36 @@
         iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
         iframe.allowFullscreen = true;
         
-        // Nettoyer la zone vidéo et ajouter l'iframe
-        videoZone.innerHTML = '';
         videoZone.appendChild(iframe);
 
-        // Mettre à jour l'URL sans recharger la page
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.set('v', videoId);
         window.history.replaceState({}, '', newUrl);
       }
 
-      // Gestionnaire pour le bouton de chargement
-      loadVideoBtn.addEventListener('click', () => {
-        const url = videoInput.value.trim();
+      function showControls() {
+        videoZone.innerHTML = `
+          <div class="video-controls">
+            <input type="text" id="videoInput" placeholder="Collez l'URL YouTube ici">
+            <div class="button-group">
+              <button id="loadVideo">Charger la vidéo</button>
+              <button id="removeVideo">Retirer la vidéo</button>
+            </div>
+          </div>
+        `;
+
+        // Réattacher les gestionnaires d'événements
+        document.getElementById('videoInput').addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            handleLoadVideo();
+          }
+        });
+        document.getElementById('loadVideo').addEventListener('click', handleLoadVideo);
+        document.getElementById('removeVideo').addEventListener('click', handleRemoveVideo);
+      }
+
+      function handleLoadVideo() {
+        const url = document.getElementById('videoInput').value.trim();
         if (!url) return;
         
         const newVideoId = extractYouTubeVideoId(url);
@@ -113,27 +201,23 @@
         } else {
           alert('URL YouTube invalide. Veuillez réessayer.');
         }
-      });
+      }
 
-      // Gestionnaire pour le bouton de suppression
-      removeVideoBtn.addEventListener('click', () => {
-        videoZone.innerHTML = `
-          <div class="video-placeholder">
-            <input type="text" id="videoInput" placeholder="Collez l'URL YouTube ici" style="width: 80%; padding: 10px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 4px;">
-            <button id="loadVideo" style="padding: 10px 20px; background: linear-gradient(45deg, #ff00c8, #00f0ff); border: none; color: white; border-radius: 4px; cursor: pointer;">Charger la vidéo</button>
-            <button id="removeVideo" style="padding: 10px 20px; background: rgba(255,0,0,0.5); border: none; color: white; border-radius: 4px; cursor: pointer; margin-left: 10px;">Retirer la vidéo</button>
-          </div>`;
-        
-        // Réinitialiser les gestionnaires d'événements
-        document.getElementById('videoInput').value = '';
-        document.getElementById('loadVideo').addEventListener('click', loadVideoBtn.onclick);
-        document.getElementById('removeVideo').addEventListener('click', removeVideoBtn.onclick);
-
-        // Mettre à jour l'URL
+      function handleRemoveVideo() {
+        showControls();
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.delete('v');
         window.history.replaceState({}, '', newUrl);
+      }
+
+      // Initialisation des gestionnaires d'événements
+      videoInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          handleLoadVideo();
+        }
       });
+      loadVideoBtn.addEventListener('click', handleLoadVideo);
+      removeVideoBtn.addEventListener('click', handleRemoveVideo);
 
       // Charger la vidéo depuis l'URL au chargement de la page
       if (videoId) {
