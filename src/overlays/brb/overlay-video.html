@@ -26,12 +26,9 @@
 
     <!-- Zone vidéo -->
     <div class="video-zone" id="videoZone">
-      <div class="video-controls">
+      <div class="video-placeholder">
         <input type="text" id="videoInput" placeholder="Collez l'URL YouTube ici">
-        <div class="button-group">
-          <button id="loadVideo">Charger la vidéo</button>
-          <button id="removeVideo">Retirer la vidéo</button>
-        </div>
+        <button id="loadVideo">Charger</button>
       </div>
     </div>
 
@@ -69,68 +66,69 @@
   </div>
 
   <style>
-    .video-controls {
+    .video-placeholder {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 80%;
-      max-width: 600px;
       display: flex;
-      flex-direction: column;
-      gap: 16px;
+      gap: 8px;
       z-index: 1000;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 8px;
+      border-radius: 8px;
+      backdrop-filter: blur(5px);
     }
 
     #videoInput {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
+      width: 300px;
+      padding: 8px 12px;
+      font-size: 14px;
       background: rgba(255,255,255,0.15);
-      border: 2px solid rgba(255,255,255,0.3);
+      border: 1px solid rgba(255,255,255,0.3);
       color: white;
-      border-radius: 8px;
+      border-radius: 4px;
       outline: none;
     }
 
     #videoInput:focus {
       border-color: rgba(255,255,255,0.5);
-      background: rgba(255,255,255,0.2);
-    }
-
-    .button-group {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-    }
-
-    #loadVideo, #removeVideo {
-      padding: 12px 24px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-weight: 600;
     }
 
     #loadVideo {
+      padding: 8px 16px;
+      font-size: 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
       background: linear-gradient(45deg, #ff00c8, #00f0ff);
       color: white;
+      font-weight: 600;
+      transition: all 0.2s ease;
     }
 
-    #removeVideo {
-      background: rgba(255,59,48,0.8);
-      color: white;
-    }
-
-    #loadVideo:hover, #removeVideo:hover {
-      transform: translateY(-2px);
+    #loadVideo:hover {
       filter: brightness(1.1);
     }
 
-    #loadVideo:active, #removeVideo:active {
-      transform: translateY(1px);
+    .remove-video-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 1001;
+    }
+
+    .video-zone:hover .remove-video-btn {
+      opacity: 1;
     }
   </style>
 
@@ -139,7 +137,6 @@
       const videoZone = document.getElementById('videoZone');
       const videoInput = document.getElementById('videoInput');
       const loadVideoBtn = document.getElementById('loadVideo');
-      const removeVideoBtn = document.getElementById('removeVideo');
       const urlParams = new URLSearchParams(window.location.search);
       const videoId = urlParams.get('v');
 
@@ -150,11 +147,17 @@
       }
 
       function loadYouTubeVideo(videoId) {
-        const videoControls = videoZone.querySelector('.video-controls');
-        if (videoControls) {
-          videoControls.style.display = 'none';
-        }
+        // Nettoyer la zone vidéo
+        videoZone.innerHTML = '';
 
+        // Créer le bouton de suppression
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-video-btn';
+        removeBtn.textContent = 'Retirer la vidéo';
+        removeBtn.onclick = handleRemoveVideo;
+        videoZone.appendChild(removeBtn);
+
+        // Créer et ajouter l'iframe
         const iframe = document.createElement('iframe');
         iframe.width = '100%';
         iframe.height = '100%';
@@ -162,22 +165,19 @@
         iframe.frameBorder = '0';
         iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
         iframe.allowFullscreen = true;
-        
         videoZone.appendChild(iframe);
 
+        // Mettre à jour l'URL
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.set('v', videoId);
         window.history.replaceState({}, '', newUrl);
       }
 
-      function showControls() {
+      function showPlaceholder() {
         videoZone.innerHTML = `
-          <div class="video-controls">
+          <div class="video-placeholder">
             <input type="text" id="videoInput" placeholder="Collez l'URL YouTube ici">
-            <div class="button-group">
-              <button id="loadVideo">Charger la vidéo</button>
-              <button id="removeVideo">Retirer la vidéo</button>
-            </div>
+            <button id="loadVideo">Charger</button>
           </div>
         `;
 
@@ -188,11 +188,11 @@
           }
         });
         document.getElementById('loadVideo').addEventListener('click', handleLoadVideo);
-        document.getElementById('removeVideo').addEventListener('click', handleRemoveVideo);
       }
 
       function handleLoadVideo() {
-        const url = document.getElementById('videoInput').value.trim();
+        const input = document.getElementById('videoInput');
+        const url = input.value.trim();
         if (!url) return;
         
         const newVideoId = extractYouTubeVideoId(url);
@@ -204,7 +204,7 @@
       }
 
       function handleRemoveVideo() {
-        showControls();
+        showPlaceholder();
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.delete('v');
         window.history.replaceState({}, '', newUrl);
@@ -217,7 +217,6 @@
         }
       });
       loadVideoBtn.addEventListener('click', handleLoadVideo);
-      removeVideoBtn.addEventListener('click', handleRemoveVideo);
 
       // Charger la vidéo depuis l'URL au chargement de la page
       if (videoId) {
