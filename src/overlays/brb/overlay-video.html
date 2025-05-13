@@ -28,10 +28,7 @@
     <div class="video-zone" id="videoZone">
       <div class="video-controls">
         <input type="text" id="videoInput" placeholder="Collez l'URL YouTube ici">
-        <div class="button-group">
-          <button id="loadVideo">Charger la vidéo</button>
-          <button id="removeVideo">Retirer la vidéo</button>
-        </div>
+        <button id="loadVideo">Charger la vidéo</button>
       </div>
     </div>
 
@@ -66,6 +63,9 @@
       <span class="code">APO21</span>
       <span class="ad-tag">#AD</span>
     </div>
+
+    <!-- Bouton de suppression discret -->
+    <button id="removeVideo" class="remove-video-btn" style="display: none;">×</button>
   </div>
 
   <style>
@@ -98,13 +98,7 @@
       background: rgba(255,255,255,0.2);
     }
 
-    .button-group {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-    }
-
-    #loadVideo, #removeVideo {
+    #loadVideo {
       padding: 12px 24px;
       font-size: 16px;
       border: none;
@@ -112,25 +106,45 @@
       cursor: pointer;
       transition: all 0.3s ease;
       font-weight: 600;
-    }
-
-    #loadVideo {
       background: linear-gradient(45deg, #ff00c8, #00f0ff);
       color: white;
+      margin: 0 auto;
+      display: block;
     }
 
-    #removeVideo {
-      background: rgba(255,59,48,0.8);
-      color: white;
-    }
-
-    #loadVideo:hover, #removeVideo:hover {
+    #loadVideo:hover {
       transform: translateY(-2px);
       filter: brightness(1.1);
     }
 
-    #loadVideo:active, #removeVideo:active {
+    #loadVideo:active {
       transform: translateY(1px);
+    }
+
+    .remove-video-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(255, 59, 48, 0.8);
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 1001;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .remove-video-btn:hover {
+      background: rgba(255, 59, 48, 1);
+      transform: scale(1.1);
     }
   </style>
 
@@ -164,6 +178,7 @@
         iframe.allowFullscreen = true;
         
         videoZone.appendChild(iframe);
+        removeVideoBtn.style.display = 'flex';
 
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.set('v', videoId);
@@ -174,12 +189,10 @@
         videoZone.innerHTML = `
           <div class="video-controls">
             <input type="text" id="videoInput" placeholder="Collez l'URL YouTube ici">
-            <div class="button-group">
-              <button id="loadVideo">Charger la vidéo</button>
-              <button id="removeVideo">Retirer la vidéo</button>
-            </div>
+            <button id="loadVideo">Charger la vidéo</button>
           </div>
         `;
+        removeVideoBtn.style.display = 'none';
 
         // Réattacher les gestionnaires d'événements
         document.getElementById('videoInput').addEventListener('keypress', (e) => {
@@ -188,7 +201,6 @@
           }
         });
         document.getElementById('loadVideo').addEventListener('click', handleLoadVideo);
-        document.getElementById('removeVideo').addEventListener('click', handleRemoveVideo);
       }
 
       function handleLoadVideo() {
