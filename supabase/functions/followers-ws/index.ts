@@ -118,32 +118,80 @@ async function startFollowersCheck(client: Client) {
 
   const checkFollowers = async () => {
     try {
-      const response = await fetch(`https://api.twitch.tv/helix/users/follows?to_id=${client.userId}`, {
+      // Récupérer le nombre total de followers
+      const followersResponse = await fetch(`https://api.twitch.tv/helix/users/follows?to_id=${client.userId}`, {
         headers: {
           'Authorization': `Bearer ${client.token}`,
           'Client-Id': Deno.env.get('VITE_TWITCH_CLIENT_ID') || '',
         },
       });
 
-      if (response.ok) {
-        const data = await response.json();
+      if (!followersResponse.ok) {
+        throw new Error(`Erreur API Twitch: ${followersResponse.status}`);
+      }
+
+      const followersData = await followersResponse.json();
+      
+      // Envoyer la mise à jour au client
+      client.socket.send(JSON.stringify({
+        type: 'followers_update',
+        count: followersData.total || 0,
+        timestamp: Date.now()
+      }));
+
+      // Vérifier s'il y a de nouveaux followers depuis la dernière vérification
+      const recentFollowsResponse = await fetch(
+        `https://api.twitch.tv/helix/users/follows?to_id=${client.userId}&first=1`,
+        {
+          headers: {
+            'Authorization': `Bearer ${client.token}`,
+            'Client-Id': Deno.env.get('VITE_TWITCH_CLIENT_ID') || '',
+          },
+        }
+      );
+
+      if (!recentFollowsResponse.ok) {
+        throw new Error(`Erreur API Twitch: ${recentFollowsResponse.status}`);
+      }
+
+      const recentFollowsData = await recentFollowsResponse.json();
+      
+      // Si on a des followers récents, on les notifie
+      if (recentFollowsData.data && recentFollowsData.data.length > 0) {
         client.socket.send(JSON.stringify({
-          type: 'followers_update',
-          count: data.total
-        }));
-      } else {
-        client.socket.send(JSON.stringify({
-          type: 'error',
-          message: 'Erreur lors de la récupération des followers'
+          type: 'new_follower',
+          follower: {
+            name: recentFollowsData.data[0].from_name,
+            followedAt: recentFollowsData.data[0].followed_at
+          }
         }));
       }
+
     } catch (error) {
       console.error('Erreur lors de la vérification des followers:', error);
+      
+      // Si l'erreur est liée au token expiré
+      if (error.message.includes('401')) {
+        client.socket.send(JSON.stringify({
+          type: 'error',
+          message: 'Token Twitch expiré, reconnexion nécessaire'
+        }));
+        // Fermer la connexion pour forcer une réauthentification
+        client.socket.close(4000, 'Token expiré');
+        return;
+      }
+      
+      client.socket.send(JSON.stringify({
+        type: 'error',
+        message: 'Erreur lors de la récupération des followers'
+      }));
     }
   };
 
-  // Vérifier immédiatement puis toutes les 30 secondes
-  checkFollowers();
+  // Vérifier immédiatement
+  await checkFollowers();
+
+  // Puis vérifier toutes les 30 secondes
   const interval = setInterval(checkFollowers, 30000);
 
   // Nettoyer l'intervalle quand le client se déconnecte

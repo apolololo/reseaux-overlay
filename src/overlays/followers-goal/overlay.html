@@ -15,6 +15,7 @@
       --text-color: #ffffff;
       --progress-bg: rgba(255, 255, 255, 0.1);
       --progress-fill: #6441a5;
+      --highlight-color: #9146ff;
     }
 
     .theme-light {
@@ -22,6 +23,7 @@
       --text-color: #000000;
       --progress-bg: rgba(0, 0, 0, 0.1);
       --progress-fill: #9146ff;
+      --highlight-color: #6441a5;
     }
 
     /* Styles des messages d'erreur */
@@ -59,9 +61,34 @@
       100% { transform: scale(1); }
     }
 
+    @keyframes newFollowerPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes progressFlash {
+      0% { filter: brightness(1); }
+      50% { filter: brightness(1.5); }
+      100% { filter: brightness(1); }
+    }
+
     .anim-slide { animation: slideIn 0.5s ease-out; }
     .anim-fade { animation: fadeIn 0.5s ease-out; }
     .anim-bounce { animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+
+    .new-follower {
+      animation: newFollowerPulse 0.5s ease-in-out;
+    }
+
+    .new-follower .progress-fill {
+      animation: progressFlash 0.5s ease-in-out;
+    }
+
+    .new-follower .current-count {
+      color: var(--highlight-color);
+      transition: color 0.3s ease-out;
+    }
   </style>
 </head>
 <body>
@@ -167,8 +194,27 @@
             }
           }
           if (data.type === 'followers_update') {
-            currentFollowers = data.count;
+            // Mettre à jour le nombre de followers seulement si c'est une nouvelle valeur
+            if (data.count !== currentFollowers) {
+              currentFollowers = data.count;
+              updateDisplay();
+              
+              // Sauvegarder la dernière mise à jour
+              localStorage.setItem('last_followers_count', data.count);
+              localStorage.setItem('last_followers_update', data.timestamp);
+            }
+          }
+          if (data.type === 'new_follower') {
+            // Mettre à jour le compteur et ajouter une animation
+            currentFollowers++;
             updateDisplay();
+            
+            // Ajouter une animation temporaire pour le nouveau follower
+            const container = document.querySelector('.goal-container');
+            container.classList.add('new-follower');
+            setTimeout(() => {
+              container.classList.remove('new-follower');
+            }, 3000);
           }
         } catch (error) {
           console.error('Erreur lors du traitement du message WebSocket:', error);
