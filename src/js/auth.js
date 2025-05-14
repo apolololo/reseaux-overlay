@@ -1,3 +1,5 @@
+import { createClient } from '@supabase/supabase-js';
+
 export async function initTwitchAuth() {
   const clientId = import.meta.env.VITE_TWITCH_CLIENT_ID;
   const redirectUri = import.meta.env.VITE_TWITCH_REDIRECT_URI;
@@ -12,7 +14,9 @@ export async function initTwitchAuth() {
 
   // Ajouter le bouton en haut de la liste des overlays
   const overlayList = document.querySelector('.overlay-list');
-  overlayList.insertBefore(loginButton, overlayList.firstChild);
+  if (overlayList) {
+    overlayList.insertBefore(loginButton, overlayList.firstChild);
+  }
 
   // Gérer la connexion
   loginButton.addEventListener('click', () => {
@@ -23,10 +27,11 @@ export async function initTwitchAuth() {
   });
 
   // Vérifier si on est sur la page de callback
-  if (window.location.pathname === '/auth/callback') {
-    const code = new URLSearchParams(window.location.search).get('code');
-    const error = new URLSearchParams(window.location.search).get('error');
-    const error_description = new URLSearchParams(window.location.search).get('error_description');
+  if (window.location.pathname.includes('/auth/callback')) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const error = urlParams.get('error');
+    const error_description = urlParams.get('error_description');
 
     if (error) {
       console.error('Erreur Twitch:', error, error_description);
@@ -36,19 +41,17 @@ export async function initTwitchAuth() {
 
     if (code) {
       try {
-        const response = await fetch('/api/auth/twitch', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ code }),
-        });
-        
-        if (!response.ok) {
-          throw new Error(`Erreur HTTP: ${response.status}`);
-        }
+        const supabase = createClient(
+          import.meta.env.VITE_SUPABASE_URL,
+          import.meta.env.VITE_SUPABASE_ANON_KEY
+        );
 
-        const data = await response.json();
+        const { data, error } = await supabase.functions.invoke('twitch-auth', {
+          body: { code }
+        });
+
+        if (error) throw error;
+
         if (data.access_token) {
           localStorage.setItem('twitch_token', data.access_token);
           window.location.href = '/';
