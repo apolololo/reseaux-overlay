@@ -41,6 +41,36 @@
       font-weight: 600;
       text-align: center;
       animation: fadeIn 0.3s ease-out;
+      z-index: 1000;
+    }
+
+    /* Styles des messages de statut */
+    .status-message {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      animation: slideUp 0.3s ease-out;
+      z-index: 1000;
+    }
+
+    @keyframes slideUp {
+      from { 
+        transform: translate(-50%, 100%);
+        opacity: 0;
+      }
+      to { 
+        transform: translate(-50%, 0);
+        opacity: 1;
+      }
     }
 
     /* Animations */
@@ -121,6 +151,28 @@
       document.getElementById('progressFill').style.width = `${Math.min(100, progress)}%`;
     }
 
+    // Fonction pour afficher une erreur
+    function showError(message) {
+      const existingError = document.querySelector('.error-message');
+      if (existingError) {
+        existingError.textContent = message;
+      } else {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = message;
+        document.body.appendChild(errorDiv);
+      }
+    }
+
+    // Fonction pour afficher un message de statut
+    function showStatus(message) {
+      const statusDiv = document.createElement('div');
+      statusDiv.className = 'status-message';
+      statusDiv.textContent = message;
+      document.body.appendChild(statusDiv);
+      setTimeout(() => statusDiv.remove(), 3000);
+    }
+
     // Fonction pour appliquer les paramètres
     function applySettings(settings) {
       if (settings.label) goalLabel = settings.label;
@@ -155,16 +207,18 @@
 
     // Fonction pour initialiser la connexion WebSocket
     function initWebSocket() {
-      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsHost = window.location.hostname === 'localhost' ? 'localhost:54321' : window.location.host;
-      const ws = new WebSocket(`${wsProtocol}//${wsHost}/functions/followers-ws`);
+      // Utiliser l'URL de l'API Supabase pour le WebSocket
+      const supabaseUrl = 'wss://uejmtvhqzadtxrqtowtm.supabase.co/functions/v1/followers-ws';
+      console.log('Tentative de connexion WebSocket à:', supabaseUrl);
+      const ws = new WebSocket(supabaseUrl);
       
       let reconnectAttempts = 0;
       const maxReconnectAttempts = 5;
       
       ws.onopen = () => {
         console.log('WebSocket connecté');
-        reconnectAttempts = 0; // Réinitialiser le compteur de tentatives
+        reconnectAttempts = 0;
+        showStatus('Connexion établie');
         
         // Envoyer le token dans un message d'authentification
         if (token) {
@@ -190,6 +244,7 @@
 
           if (data.type === 'auth_success') {
             console.log('Authentification WebSocket réussie');
+            showStatus('Authentification réussie');
             // Cacher le message d'erreur s'il était affiché
             const errorMessage = document.querySelector('.error-message');
             if (errorMessage) {
@@ -206,24 +261,19 @@
 
           if (data.type === 'followers_update') {
             console.log('Mise à jour des followers:', data.count);
-            // Mettre à jour le nombre de followers seulement si c'est une nouvelle valeur
             if (data.count !== currentFollowers) {
               currentFollowers = data.count;
               updateDisplay();
-              
-              // Sauvegarder la dernière mise à jour
-              localStorage.setItem('last_followers_count', data.count);
-              localStorage.setItem('last_followers_update', data.timestamp);
+              showStatus(`Mise à jour : ${data.count} followers`);
             }
           }
 
           if (data.type === 'new_follower') {
             console.log('Nouveau follower:', data.follower);
-            // Mettre à jour le compteur et ajouter une animation
             currentFollowers++;
             updateDisplay();
+            showStatus(`Nouveau follower : ${data.follower.name}`);
             
-            // Ajouter une animation temporaire pour le nouveau follower
             const container = document.querySelector('.goal-container');
             container.classList.add('new-follower');
             setTimeout(() => {
@@ -243,13 +293,12 @@
       ws.onclose = (event) => {
         console.log('Connexion WebSocket fermée, code:', event.code);
         
-        // Tenter de se reconnecter seulement si ce n'est pas une fermeture normale
-        // et qu'on n'a pas dépassé le nombre maximum de tentatives
         if (event.code !== 1000 && reconnectAttempts < maxReconnectAttempts) {
           const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
           reconnectAttempts++;
           
           console.log(`Tentative de reconnexion ${reconnectAttempts}/${maxReconnectAttempts} dans ${delay/1000} secondes...`);
+          showStatus(`Reconnexion dans ${delay/1000} secondes...`);
           
           setTimeout(() => {
             console.log('Tentative de reconnexion...');
