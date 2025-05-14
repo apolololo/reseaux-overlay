@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { initFollowersGoal } from './followers-goal.js';
 
 export async function initTwitchAuth() {
   const clientId = import.meta.env.VITE_TWITCH_CLIENT_ID;
@@ -129,39 +130,13 @@ async function fetchAndDisplayUserInfo(token) {
           </button>
         </div>
 
-        <!-- Options de personnalisation des followers -->
-        <div class="follower-options">
-          <div class="follower-settings">
-            <h3>Personnalisation de l'objectif</h3>
-            <div class="setting-group">
-              <label for="follower-label">Titre :</label>
-              <input type="text" id="follower-label" value="Objectif Followers">
-            </div>
-            <div class="setting-group">
-              <label for="follower-target">Objectif :</label>
-              <input type="number" id="follower-target" min="1" value="500">
-            </div>
-            <button id="update-follower-goal" class="update-btn">Mettre à jour</button>
-          </div>
-        </div>
       `;
 
       userInfoSection.style.display = 'block';
       loginButton.style.display = 'none';
 
-      // Gérer la mise à jour de l'overlay des followers
-      document.getElementById('update-follower-goal').addEventListener('click', () => {
-        const label = document.getElementById('follower-label').value;
-        const target = document.getElementById('follower-target').value;
-        const previewFrame = document.getElementById('overlay-preview');
-        
-        if (previewFrame && previewFrame.src.includes('followers-goal')) {
-          const url = new URL(previewFrame.src);
-          url.searchParams.set('label', label);
-          url.searchParams.set('target', target);
-          previewFrame.src = url.toString();
-        }
-      });
+      // Initialiser le widget Followers Goal
+      initFollowersGoal(token);
 
       // Gérer la déconnexion
       const logoutBtn = userInfoSection.querySelector('.logout-btn');

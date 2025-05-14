@@ -8,6 +8,44 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* Thèmes */
+    .theme-dark {
+      --bg-color: rgba(30, 30, 30, 0.9);
+      --text-color: #ffffff;
+      --progress-bg: rgba(255, 255, 255, 0.1);
+      --progress-fill: #6441a5;
+    }
+
+    .theme-light {
+      --bg-color: rgba(255, 255, 255, 0.9);
+      --text-color: #000000;
+      --progress-bg: rgba(0, 0, 0, 0.1);
+      --progress-fill: #9146ff;
+    }
+
+    /* Animations */
+    @keyframes slideIn {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes bounceIn {
+      0% { transform: scale(0.3); }
+      50% { transform: scale(1.05); }
+      70% { transform: scale(0.9); }
+      100% { transform: scale(1); }
+    }
+
+    .anim-slide { animation: slideIn 0.5s ease-out; }
+    .anim-fade { animation: fadeIn 0.5s ease-out; }
+    .anim-bounce { animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+  </style>
 </head>
 <body>
   <div class="goal-container">
@@ -32,6 +70,23 @@
     const goalTarget = parseInt(params.get('target')) || 500;
     const goalLabel = params.get('label') || 'Objectif Followers';
     let currentFollowers = parseInt(params.get('current')) || 0;
+    const theme = params.get('theme') || 'default';
+    const animation = params.get('animation') || 'slide';
+    const token = params.get('token');
+
+    // Appliquer le thème
+    if (theme !== 'default') {
+      document.body.classList.add(`theme-${theme}`);
+    }
+
+    // Appliquer l'animation
+    document.querySelector('.goal-container').classList.add(`anim-${animation}`);
+
+    if (!token) {
+      console.error('Token d\'authentification manquant');
+      document.body.innerHTML = '<div class="error-message">Erreur : Token d\'authentification manquant</div>';
+      return;
+    }
     
     // Mettre à jour l'affichage avec les paramètres personnalisés
     document.getElementById('goalLabel').textContent = goalLabel;
@@ -50,6 +105,10 @@
     // WebSocket connection
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const ws = new WebSocket(`${wsProtocol}//${window.location.host}/functions/followers-ws`);
+    ws.onopen = () => {
+      // Envoyer le token d'authentification
+      ws.send(JSON.stringify({ type: 'auth', token }));
+    };
     
     ws.onmessage = (event) => {
       try {
