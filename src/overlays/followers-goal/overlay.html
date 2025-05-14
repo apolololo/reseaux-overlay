@@ -1,346 +1,69 @@
+<!-- src/overlays/followers-goal/overlay.html -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Followers Goal - APO</title>
-  <link rel="stylesheet" href="./overlay.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <title>Objectif Followers</title>
   <style>
-    /* Thèmes */
-    .theme-dark {
-      --bg-color: rgba(30, 30, 30, 0.9);
-      --text-color: #ffffff;
-      --progress-bg: rgba(255, 255, 255, 0.1);
-      --progress-fill: #6441a5;
-      --highlight-color: #9146ff;
-    }
-
-    .theme-light {
-      --bg-color: rgba(255, 255, 255, 0.9);
-      --text-color: #000000;
-      --progress-bg: rgba(0, 0, 0, 0.1);
-      --progress-fill: #9146ff;
-      --highlight-color: #6441a5;
-    }
-
-    /* Styles des messages d'erreur */
-    .error-message {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: rgba(255, 0, 0, 0.1);
-      color: #ff3333;
-      padding: 20px;
-      border-radius: 8px;
-      border: 2px solid #ff3333;
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 600;
+    body {
+      font-family: Arial, sans-serif;
+      color: white;
+      background-color: transparent;
       text-align: center;
-      animation: fadeIn 0.3s ease-out;
-      z-index: 1000;
     }
-
-    /* Styles des messages de statut */
-    .status-message {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: rgba(0, 0, 0, 0.8);
-      color: #fff;
-      padding: 10px 20px;
-      border-radius: 20px;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      text-align: center;
-      animation: slideUp 0.3s ease-out;
-      z-index: 1000;
-    }
-
-    @keyframes slideUp {
-      from { 
-        transform: translate(-50%, 100%);
-        opacity: 0;
-      }
-      to { 
-        transform: translate(-50%, 0);
-        opacity: 1;
-      }
-    }
-
-    /* Animations */
-    @keyframes slideIn {
-      from { transform: translateX(-100%); }
-      to { transform: translateX(0); }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @keyframes bounceIn {
-      0% { transform: scale(0.3); }
-      50% { transform: scale(1.05); }
-      70% { transform: scale(0.9); }
-      100% { transform: scale(1); }
-    }
-
-    @keyframes newFollowerPulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-
-    @keyframes progressFlash {
-      0% { filter: brightness(1); }
-      50% { filter: brightness(1.5); }
-      100% { filter: brightness(1); }
-    }
-
-    .anim-slide { animation: slideIn 0.5s ease-out; }
-    .anim-fade { animation: fadeIn 0.5s ease-out; }
-    .anim-bounce { animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
-
-    .new-follower {
-      animation: newFollowerPulse 0.5s ease-in-out;
-    }
-
-    .new-follower .progress-fill {
-      animation: progressFlash 0.5s ease-in-out;
-    }
-
-    .new-follower .current-count {
-      color: var(--highlight-color);
-      transition: color 0.3s ease-out;
+    .error {
+      color: red;
+      font-size: 1.2rem;
+      margin-top: 2rem;
     }
   </style>
 </head>
 <body>
-  <div class="goal-container">
-    <div class="goal-header">
-      <span class="goal-label" id="goalLabel">Objectif Followers</span>
-      <span class="goal-target" id="goalTarget">500</span>
-    </div>
-    <div class="goal-progress">
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill"></div>
-      </div>
-      <div class="progress-text">
-        <span class="current-count" id="currentCount">0</span>
-        <span class="separator">/</span>
-        <span class="target-count" id="targetCount">500</span>
-      </div>
-    </div>
+  <div id="goal">
+    <h2>🎯 Objectif de Followers</h2>
+    <p id="followers-count">Chargement...</p>
   </div>
 
   <script>
-    // Fonction pour mettre à jour l'affichage
-    function updateDisplay() {
-      document.getElementById('goalLabel').textContent = goalLabel;
-      document.getElementById('goalTarget').textContent = goalTarget.toLocaleString();
-      document.getElementById('currentCount').textContent = currentFollowers.toLocaleString();
-      document.getElementById('targetCount').textContent = goalTarget.toLocaleString();
-      
-      const progress = (currentFollowers / goalTarget) * 100;
-      document.getElementById('progressFill').style.width = `${Math.min(100, progress)}%`;
-    }
-
-    // Fonction pour afficher une erreur
-    function showError(message) {
-      const existingError = document.querySelector('.error-message');
-      if (existingError) {
-        existingError.textContent = message;
-      } else {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error-message';
-        errorDiv.textContent = message;
-        document.body.appendChild(errorDiv);
-      }
-    }
-
-    // Fonction pour afficher un message de statut
-    function showStatus(message) {
-      const statusDiv = document.createElement('div');
-      statusDiv.className = 'status-message';
-      statusDiv.textContent = message;
-      document.body.appendChild(statusDiv);
-      setTimeout(() => statusDiv.remove(), 3000);
-    }
-
-    // Fonction pour appliquer les paramètres
-    function applySettings(settings) {
-      if (settings.label) goalLabel = settings.label;
-      if (settings.target) goalTarget = parseInt(settings.target);
-      if (settings.theme) {
-        document.body.className = settings.theme !== 'default' ? `theme-${settings.theme}` : '';
-      }
-      if (settings.animation) {
-        const container = document.querySelector('.goal-container');
-        container.className = 'goal-container';
-        container.classList.add(`anim-${settings.animation}`);
-      }
-      updateDisplay();
-    }
-
-    // Initialisation avec les paramètres de l'URL
     const params = new URLSearchParams(window.location.search);
-    let goalTarget = parseInt(params.get('target')) || 500;
-    let goalLabel = params.get('label') || 'Objectif Followers';
-    let currentFollowers = parseInt(params.get('current')) || 0;
-    const theme = params.get('theme') || 'default';
-    const animation = params.get('animation') || 'slide';
-    const token = params.get('token');
+    const token = params.get("token");
 
-    // Appliquer les paramètres initiaux
-    applySettings({
-      label: goalLabel,
-      target: goalTarget,
-      theme: theme,
-      animation: animation
-    });
-
-    // Fonction pour initialiser la connexion WebSocket
-    function initWebSocket() {
-      // Utiliser l'URL de l'API Supabase pour le WebSocket
-      const supabaseUrl = 'wss://uejmtvhqzadtxrqtowtm.supabase.co/functions/v1/followers-ws';
-      
-      // Vérifier si le token est présent
-      if (!token) {
-        showError('Erreur : Token d\'authentification manquant');
-        console.error('Tentative de connexion sans token');
-        return null;
-      }
-
-      console.log('Tentative de connexion WebSocket à:', supabaseUrl);
-      const ws = new WebSocket(supabaseUrl);
-      
-      let reconnectAttempts = 0;
-      const maxReconnectAttempts = 5;
-      let isAuthenticated = false;
-      
-      ws.onopen = () => {
-        console.log('WebSocket connecté - Envoi du token d\'authentification');
-        reconnectAttempts = 0;
-        showStatus('Connexion établie - Authentification en cours...');
-        
-        // Envoyer le token dans un message d'authentification
-        ws.send(JSON.stringify({
-          type: 'authorization',
-          token: token
-        }));
-      };
-      
-      ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          console.log('Message WebSocket reçu:', data);
-
-          if (data.type === 'error') {
-            console.error('Erreur serveur:', data.message);
-            showError(`Erreur : ${data.message}`);
-            return;
-          }
-
-          if (data.type === 'auth_success') {
-            console.log('Authentification WebSocket réussie');
-            isAuthenticated = true;
-            showStatus('Authentification réussie');
-            // Cacher le message d'erreur s'il était affiché
-            const errorMessage = document.querySelector('.error-message');
-            if (errorMessage) {
-              errorMessage.remove();
-            }
-
-            // Mettre à jour immédiatement le nombre de followers
-            if (typeof data.followers === 'number') {
-              console.log('Nombre initial de followers:', data.followers);
-              currentFollowers = data.followers;
-              updateDisplay();
-            }
-          }
-
-          if (data.type === 'followers_update') {
-            console.log('Mise à jour des followers:', data.count);
-            if (data.count !== currentFollowers) {
-              currentFollowers = data.count;
-              updateDisplay();
-              showStatus(`Mise à jour : ${data.count} followers`);
-            }
-          }
-
-          if (data.type === 'new_follower') {
-            console.log('Nouveau follower:', data.follower);
-            currentFollowers++;
-            updateDisplay();
-            showStatus(`Nouveau follower : ${data.follower.name}`);
-            
-            const container = document.querySelector('.goal-container');
-            container.classList.add('new-follower');
-            setTimeout(() => {
-              container.classList.remove('new-follower');
-            }, 3000);
-          }
-        } catch (error) {
-          console.error('Erreur lors du traitement du message WebSocket:', error);
-        }
-      };
-
-      ws.onerror = (error) => {
-        console.error('Erreur WebSocket détaillée:', error);
-        const errorMessage = isAuthenticated ? 
-          'Erreur de connexion au serveur' : 
-          'Erreur d\'authentification - Vérifiez votre token';
-        showError(errorMessage);
-      };
-
-      ws.onclose = (event) => {
-        console.log('Connexion WebSocket fermée, code:', event.code, 'raison:', event.reason);
-        
-        // Si on n'a jamais réussi à s'authentifier, on arrête les tentatives
-        if (!isAuthenticated && reconnectAttempts > 0) {
-          showError('Échec d\'authentification - Vérifiez votre token');
-          return;
-        }
-        
-        if (event.code !== 1000 && reconnectAttempts < maxReconnectAttempts) {
-          const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
-          reconnectAttempts++;
-          
-          console.log(`Tentative de reconnexion ${reconnectAttempts}/${maxReconnectAttempts} dans ${delay/1000} secondes...`);
-          showStatus(`Reconnexion dans ${delay/1000} secondes...`);
-          
-          setTimeout(() => {
-            console.log('Tentative de reconnexion...');
-            initWebSocket();
-          }, delay);
-        } else if (reconnectAttempts >= maxReconnectAttempts) {
-          showError('Impossible de se connecter au serveur après plusieurs tentatives');
-        }
-      };
-
-      return ws;
+    if (!token) {
+      document.body.innerHTML = `
+        <h2>⚠️ Aucun token Twitch détecté</h2>
+        <p class="error">Connecte-toi d’abord pour afficher cet overlay.</p>
+        <p><a href="/public/login.html">Se connecter avec Twitch</a></p>
+      `;
+      throw new Error("Aucun token Twitch trouvé.");
     }
 
-    // Écouter les messages de mise à jour
-    window.addEventListener('message', (event) => {
-      try {
-        const data = event.data;
-        if (data && data.type === 'update-settings') {
-          applySettings(data.settings);
-        }
-      } catch (error) {
-        console.error('Erreur lors de la mise à jour:', error);
-      }
-    });
+    const socket = new WebSocket("wss://uejmtvhqzadtxrqtowtm.supabase.co/functions/v1/followers-ws");
 
-    // Initialiser la connexion WebSocket
-    initWebSocket();
+    socket.onopen = () => {
+      console.log("🟢 WebSocket connecté");
+      socket.send(JSON.stringify({
+        type: "authorization",
+        token: token
+      }));
+    };
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log("📨 Données reçues :", data);
+
+      // Exemple : met à jour un compteur
+      if (data.type === "followers_count") {
+        document.getElementById("followers-count").textContent = `${data.count} followers`;
+      }
+    };
+
+    socket.onclose = (e) => {
+      console.warn(`❌ WebSocket fermé : ${e.code}`);
+    };
+
+    socket.onerror = (e) => {
+      console.error("Erreur WebSocket :", e);
+    };
   </script>
 </body>
 </html>
