@@ -220,7 +220,7 @@
         errorDiv.className = 'error-message';
         errorDiv.innerHTML = `
           <p>Vous devez vous authentifier avec Twitch pour utiliser cet overlay.</p>
-          <a href="https://apo-overlay.netlify.app/src/auth/twitch-auth.html" target="_blank" style="color: #fff; text-decoration: underline;">
+          <a href="/src/auth/twitch-auth.html" target="_blank" style="color: #fff; text-decoration: underline;">
             Cliquez ici pour vous connecter
           </a>
         `;
@@ -312,7 +312,7 @@
         // Si c'est une erreur d'authentification, proposer de se reconnecter
         if (!isAuthenticated) {
           const authLink = document.createElement('a');
-          authLink.href = 'https://apo-overlay.netlify.app/src/auth/twitch-auth.html';
+          authLink.href = '/src/auth/twitch-auth.html';
           authLink.target = '_blank';
           authLink.style.color = '#fff';
           authLink.style.display = 'block';
@@ -335,7 +335,7 @@
           
           // Ajouter un lien pour se reconnecter
           const authLink = document.createElement('a');
-          authLink.href = 'https://apo-overlay.netlify.app/src/auth/twitch-auth.html';
+          authLink.href = '/src/auth/twitch-auth.html';
           authLink.target = '_blank';
           authLink.style.color = '#fff';
           authLink.style.display = 'block';
