@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authentification Twitch - APO</title>
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: #0e0e10;
+      color: #efeff1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 800px;
+      width: 100%;
+      background-color: #18181b;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+      text-align: center;
+    }
+    
+    h1 {
+      color: #9146ff;
+      margin-bottom: 20px;
+    }
+    
+    p {
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+    
+    .btn-twitch {
+      background-color: #9146ff;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .btn-twitch:hover {
+      background-color: #772ce8;
+    }
+    
+    .token-display {
+      margin-top: 30px;
+      padding: 15px;
+      background-color: #2c2c35;
+      border-radius: 5px;
+      word-break: break-all;
+      display: none;
+    }
+    
+    .copy-btn {
+      background-color: #464649;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      margin-top: 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .copy-btn:hover {
+      background-color: #5a5a5e;
+    }
+    
+    .overlay-preview {
+      margin-top: 30px;
+      width: 100%;
+      max-width: 800px;
+      height: 400px;
+      border: 2px solid #464649;
+      border-radius: 5px;
+      display: none;
+    }
+    
+    .instructions {
+      margin-top: 30px;
+      text-align: left;
+      background-color: #2c2c35;
+      padding: 20px;
+      border-radius: 5px;
+      display: none;
+    }
+    
+    .instructions h3 {
+      color: #9146ff;
+      margin-top: 0;
+    }
+    
+    .instructions ol {
+      padding-left: 20px;
+    }
+    
+    .instructions li {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Authentification Twitch pour les Overlays</h1>
+    <p>Connectez-vous avec votre compte Twitch pour activer les fonctionnalités en temps réel de vos overlays.</p>
+    
+    <button id="login-button" class="btn-twitch">Se connecter avec Twitch</button>
+    
+    <div id="token-section" class="token-display">
+      <h3>Votre token d'accès :</h3>
+      <p id="access-token"></p>
+      <button id="copy-token" class="copy-btn">Copier le token</button>
+    </div>
+    
+    <div id="preview-section" style="display: none;">
+      <h3>Aperçu de l'overlay avec votre token :</h3>
+      <iframe id="overlay-preview" class="overlay-preview"></iframe>
+    </div>
+    
+    <div id="instructions" class="instructions">
+      <h3>Comment utiliser ce token dans OBS :</h3>
+      <ol>
+        <li>Copiez le token d'accès ci-dessus</li>
+        <li>Dans OBS, ajoutez une source "Navigateur"</li>
+        <li>Dans l'URL, utilisez : <code id="obs-url"></code></li>
+        <li>Définissez la largeur et la hauteur selon vos besoins</li>
+        <li>Cliquez sur "OK" pour ajouter l'overlay</li>
+      </ol>
+      <p><strong>Note :</strong> Ce token est valide pendant environ 4 heures. Vous devrez vous reconnecter après cette période.</p>
+    </div>
+  </div>
+
+  <script>
+    // Configuration de l'application Twitch
+    const clientId = 'votre_client_id'; // À remplacer par votre Client ID Twitch
+    const redirectUri = window.location.origin + window.location.pathname;
+    const scope = 'channel:read:subscriptions user:read:follows';
+    
+    // Éléments DOM
+    const loginButton = document.getElementById('login-button');
+    const tokenSection = document.getElementById('token-section');
+    const accessTokenElement = document.getElementById('access-token');
+    const copyTokenButton = document.getElementById('copy-token');
+    const previewSection = document.getElementById('preview-section');
+    const overlayPreview = document.getElementById('overlay-preview');
+    const instructions = document.getElementById('instructions');
+    const obsUrlElement = document.getElementById('obs-url');
+    
+    // Fonction pour initialiser l'authentification
+    function initAuth() {
+      // Vérifier si nous revenons d'une redirection OAuth
+      const hash = window.location.hash.substring(1);
+      if (hash) {
+        const params = new URLSearchParams(hash);
+        const accessToken = params.get('access_token');
+        
+        if (accessToken) {
+          // Afficher le token
+          displayToken(accessToken);
+          return;
+        }
+      }
+      
+      // Sinon, configurer le bouton de connexion
+      loginButton.addEventListener('click', () => {
+        const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=${encodeURIComponent(scope)}`;
+        window.location.href = authUrl;
+      });
+    }
+    
+    // Fonction pour afficher le token et configurer la prévisualisation
+    function displayToken(token) {
+      // Cacher le bouton de connexion et afficher la section token
+      loginButton.style.display = 'none';
+      tokenSection.style.display = 'block';
+      accessTokenElement.textContent = token;
+      
+      // Configurer le bouton de copie
+      copyTokenButton.addEventListener('click', () => {
+        navigator.clipboard.writeText(token)
+          .then(() => {
+            copyTokenButton.textContent = 'Copié !';
+            setTimeout(() => {
+              copyTokenButton.textContent = 'Copier le token';
+            }, 2000);
+          });
+      });
+      
+      // Configurer la prévisualisation
+      const overlayUrl = `${window.location.origin}/src/overlays/followers-goal/overlay.html?token=${token}`;
+      overlayPreview.src = overlayUrl;
+      previewSection.style.display = 'block';
+      
+      // Afficher les instructions pour OBS
+      obsUrlElement.textContent = overlayUrl;
+      instructions.style.display = 'block';
+      
+      // Envoyer le token à la page principale si elle est ouverte
+      try {
+        if (window.opener && !window.opener.closed) {
+          window.opener.postMessage({
+            type: 'twitch_auth',
+            token: token
+          }, window.location.origin);
+        }
+      } catch (error) {
+        console.error('Erreur lors de la communication avec la page principale:', error);
+      }
+      
+      // Stocker le token dans le localStorage
+      localStorage.setItem('twitch_token', token);
+      
+      // Calculer l'expiration (4 heures)
+      const expiry = new Date().getTime() + (4 * 60 * 60 * 1000);
+      localStorage.setItem('twitch_token_expiry', expiry.toString());
+    }
+    
+    // Initialiser l'authentification au chargement
+    window.addEventListener('DOMContentLoaded', initAuth);
+  </script>
+</body>
+</html>
