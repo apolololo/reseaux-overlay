@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Authentification Twitch - APO</title>
+  <title>Authentification Twitch - APO (Local)</title>
   <style>
     body {
       font-family: 'Montserrat', sans-serif;
@@ -110,22 +110,35 @@
     .instructions li {
       margin-bottom: 10px;
     }
+    
+    .local-mode {
+      background-color: #2d8a39;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      font-size: 12px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
+  <div class="local-mode">MODE LOCAL</div>
+  
   <div class="container">
-    <h1>Authentification Twitch pour les Overlays</h1>
-    <p>Connectez-vous avec votre compte Twitch pour activer les fonctionnalités en temps réel de vos overlays.</p>
+    <h1>Authentification Twitch pour les Overlays (Local)</h1>
+    <p>Cette version est pour le développement local uniquement.</p>
     
     <div style="background-color: #2c2c35; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: left;">
       <h3 style="color: #ff8c00; margin-top: 0;">⚠️ Configuration requise</h3>
-      <p>Avant de pouvoir utiliser cette page, vous devez :</p>
+      <p>Pour utiliser cette page en mode local :</p>
       <ol>
-        <li>Créer une application sur <a href="https://dev.twitch.tv/console/apps" target="_blank" style="color: #9146ff;">https://dev.twitch.tv/console/apps</a></li>
-        <li>Définir l'URL de redirection OAuth à : <code>https://apo-overlay.netlify.app/src/auth/twitch-auth.html</code></li>
-        <li>Copier le Client ID généré et le coller dans le code source de cette page (ligne 149)</li>
+        <li>Créez une application sur <a href="https://dev.twitch.tv/console/apps" target="_blank" style="color: #9146ff;">https://dev.twitch.tv/console/apps</a></li>
+        <li>Définissez l'URL de redirection OAuth à : <code>http://localhost:5500/src/auth/twitch-auth-local.html</code></li>
+        <li>Copiez le Client ID généré et collez-le dans le code ci-dessous</li>
       </ol>
-      <p>Sans cette configuration, l'authentification Twitch ne fonctionnera pas.</p>
     </div>
     
     <button id="login-button" class="btn-twitch">Se connecter avec Twitch</button>
@@ -142,23 +155,20 @@
     </div>
     
     <div id="instructions" class="instructions">
-      <h3>Comment utiliser ce token dans OBS :</h3>
+      <h3>Comment utiliser ce token en local :</h3>
       <ol>
         <li>Copiez le token d'accès ci-dessus</li>
-        <li>Dans OBS, ajoutez une source "Navigateur"</li>
-        <li>Dans l'URL, utilisez : <code id="obs-url"></code></li>
-        <li>Définissez la largeur et la hauteur selon vos besoins</li>
-        <li>Cliquez sur "OK" pour ajouter l'overlay</li>
+        <li>Utilisez-le pour tester vos overlays en local</li>
+        <li>Pour OBS, utilisez l'URL : <code id="obs-url"></code></li>
       </ol>
       <p><strong>Note :</strong> Ce token est valide pendant environ 4 heures. Vous devrez vous reconnecter après cette période.</p>
     </div>
   </div>
 
   <script>
-    // Configuration de l'application Twitch
-    // IMPORTANT: Remplacez ce Client ID par celui que vous avez obtenu sur https://dev.twitch.tv/console/apps
+    // Configuration de l'application Twitch pour le développement local
     const clientId = 'VOTRE_CLIENT_ID_ICI'; // Remplacez par votre vrai Client ID Twitch
-    const redirectUri = 'https://apo-overlay.netlify.app/src/auth/twitch-auth.html';
+    const redirectUri = 'http://localhost:5500/src/auth/twitch-auth-local.html';
     const scope = 'channel:read:subscriptions user:read:follows';
     
     // Éléments DOM
