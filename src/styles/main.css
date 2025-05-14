@@ -35,6 +35,62 @@
   filter: brightness(0) invert(1);
 }
 
+/* Section utilisateur Twitch */
+.user-info-section {
+  margin-bottom: 20px;
+  padding: 12px;
+  background: rgba(145, 70, 255, 0.1);
+  border-radius: 6px;
+  border: 1px solid rgba(145, 70, 255, 0.2);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #9146FF;
+}
+
+.user-details {
+  flex-grow: 1;
+  line-height: 1.2;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #fff;
+}
+
+.user-login {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
 /* Reste du CSS existant */
 body {
   margin: 0;

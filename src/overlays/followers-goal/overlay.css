@@ -32,6 +32,7 @@ body {
   width: 400px;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* En-tête de l'objectif */
@@ -98,4 +99,18 @@ body {
 
 .target-count {
   color: var(--accent);
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.goal-container {
+  animation: pulse 2s ease-in-out infinite;
 }

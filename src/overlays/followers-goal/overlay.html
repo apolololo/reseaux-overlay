@@ -12,7 +12,7 @@
 <body>
   <div class="goal-container">
     <div class="goal-header">
-      <span class="goal-label">Objectif Followers</span>
+      <span class="goal-label" id="goalLabel">Objectif Followers</span>
       <span class="goal-target" id="goalTarget">500</span>
     </div>
     <div class="goal-progress">
@@ -30,12 +30,16 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     const goalTarget = parseInt(params.get('target')) || 500;
+    const goalLabel = params.get('label') || 'Objectif Followers';
     let currentFollowers = parseInt(params.get('current')) || 0;
     
+    // Mettre à jour l'affichage avec les paramètres personnalisés
+    document.getElementById('goalLabel').textContent = goalLabel;
+    
     function updateDisplay() {
-      document.getElementById('goalTarget').textContent = goalTarget;
-      document.getElementById('currentCount').textContent = currentFollowers;
-      document.getElementById('targetCount').textContent = goalTarget;
+      document.getElementById('goalTarget').textContent = goalTarget.toLocaleString();
+      document.getElementById('currentCount').textContent = currentFollowers.toLocaleString();
+      document.getElementById('targetCount').textContent = goalTarget.toLocaleString();
       
       const progress = (currentFollowers / goalTarget) * 100;
       document.getElementById('progressFill').style.width = `${Math.min(100, progress)}%`;
