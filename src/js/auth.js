@@ -34,7 +34,7 @@ export async function initTwitchAuth() {
   loginButton.addEventListener('click', () => {
     const scopes = ['channel:read:subscriptions', 'moderator:read:followers', 'user:read:email'];
     const scope = scopes.join(' ');
-    const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
+    const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&force_verify=true`;
     window.location.href = authUrl;
   });
 
@@ -73,11 +73,25 @@ export async function initTwitchAuth() {
         }
       } catch (error) {
         console.error('Erreur d\'authentification:', error);
+        localStorage.removeItem('twitch_token');
         window.location.href = '/?auth_error=' + encodeURIComponent(error.message);
       }
     } else {
       window.location.href = '/?auth_error=Code d\'autorisation manquant';
     }
+  }
+
+  // Gérer les erreurs d'authentification dans l'URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const authError = urlParams.get('auth_error');
+  if (authError) {
+    console.error('Erreur d\'authentification:', authError);
+    localStorage.removeItem('twitch_token');
+    userInfoSection.style.display = 'none';
+    loginButton.style.display = 'flex';
+    alert('Erreur de connexion: ' + authError);
+    // Nettoyer l'URL
+    window.history.replaceState({}, '', window.location.pathname);
   }
 }
 
@@ -114,16 +128,9 @@ async function fetchAndDisplayUserInfo(token) {
             </svg>
           </button>
         </div>
-      `;
 
-      userInfoSection.style.display = 'block';
-      loginButton.style.display = 'none';
-
-      // Ajouter les options de personnalisation pour l'overlay des followers
-      if (document.querySelector('.overlay-item[data-url*="followers-goal"]')) {
-        const followerOptions = document.createElement('div');
-        followerOptions.className = 'follower-options';
-        followerOptions.innerHTML = `
+        <!-- Options de personnalisation des followers -->
+        <div class="follower-options">
           <div class="follower-settings">
             <h3>Personnalisation de l'objectif</h3>
             <div class="setting-group">
@@ -136,23 +143,25 @@ async function fetchAndDisplayUserInfo(token) {
             </div>
             <button id="update-follower-goal" class="update-btn">Mettre à jour</button>
           </div>
-        `;
-        userInfoSection.appendChild(followerOptions);
+        </div>
+      `;
 
-        // Gérer la mise à jour de l'overlay des followers
-        document.getElementById('update-follower-goal').addEventListener('click', () => {
-          const label = document.getElementById('follower-label').value;
-          const target = document.getElementById('follower-target').value;
-          const previewFrame = document.getElementById('overlay-preview');
-          
-          if (previewFrame && previewFrame.src.includes('followers-goal')) {
-            const url = new URL(previewFrame.src);
-            url.searchParams.set('label', label);
-            url.searchParams.set('target', target);
-            previewFrame.src = url.toString();
-          }
-        });
-      }
+      userInfoSection.style.display = 'block';
+      loginButton.style.display = 'none';
+
+      // Gérer la mise à jour de l'overlay des followers
+      document.getElementById('update-follower-goal').addEventListener('click', () => {
+        const label = document.getElementById('follower-label').value;
+        const target = document.getElementById('follower-target').value;
+        const previewFrame = document.getElementById('overlay-preview');
+        
+        if (previewFrame && previewFrame.src.includes('followers-goal')) {
+          const url = new URL(previewFrame.src);
+          url.searchParams.set('label', label);
+          url.searchParams.set('target', target);
+          previewFrame.src = url.toString();
+        }
+      });
 
       // Gérer la déconnexion
       const logoutBtn = userInfoSection.querySelector('.logout-btn');
@@ -164,7 +173,6 @@ async function fetchAndDisplayUserInfo(token) {
     }
   } catch (error) {
     console.error('Erreur lors de la récupération des informations utilisateur:', error);
-    // En cas d'erreur, on supprime le token et on affiche le bouton de connexion
     localStorage.removeItem('twitch_token');
     document.querySelector('.user-info-section').style.display = 'none';
     document.querySelector('.twitch-login-btn').style.display = 'flex';

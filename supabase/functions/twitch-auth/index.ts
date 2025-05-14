@@ -13,8 +13,16 @@ serve(async (req) => {
   try {
     const { code, redirectUri } = await req.json()
     
+    if (!code || !redirectUri) {
+      throw new Error('Code et redirectUri requis')
+    }
+
     const clientId = Deno.env.get('VITE_TWITCH_CLIENT_ID')
     const clientSecret = Deno.env.get('TWITCH_CLIENT_SECRET')
+
+    if (!clientId || !clientSecret) {
+      throw new Error('Configuration Twitch manquante')
+    }
 
     // Échanger le code contre un token
     const tokenResponse = await fetch('https://id.twitch.tv/oauth2/token', {
@@ -47,6 +55,7 @@ serve(async (req) => {
       },
     )
   } catch (error) {
+    console.error('Erreur d\'authentification:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
