@@ -126,9 +126,57 @@
       animation: animation
     });
 
+    // Fonction pour afficher une erreur
+    function showError(message) {
+      document.body.innerHTML = `<div class="error-message">${message}</div>`;
+    }
+
+    // Fonction pour initialiser la connexion WebSocket
+    function initWebSocket() {
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const ws = new WebSocket(`${wsProtocol}//${window.location.host}/functions/followers-ws`);
+      
+      ws.onopen = () => {
+        console.log('WebSocket connecté, envoi du token...');
+        ws.send(JSON.stringify({ type: 'auth', token }));
+      };
+      
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'error') {
+            console.error('Erreur serveur:', data.message);
+            showError(`Erreur : ${data.message}`);
+            return;
+          }
+          if (data.type === 'followers_update') {
+            currentFollowers = data.count;
+            updateDisplay();
+          }
+        } catch (error) {
+          console.error('Erreur lors du traitement du message WebSocket:', error);
+        }
+      };
+
+      ws.onerror = (error) => {
+        console.error('Erreur WebSocket:', error);
+        showError('Erreur de connexion au serveur');
+      };
+
+      ws.onclose = () => {
+        console.log('Connexion WebSocket fermée, tentative de reconnexion...');
+        setTimeout(() => {
+          console.log('Tentative de reconnexion...');
+          initWebSocket();
+        }, 5000);
+      };
+
+      return ws;
+    }
+
     if (!token) {
       console.error('Token d\'authentification manquant');
-      document.body.innerHTML = '<div class="error-message">Erreur : Token d\'authentification manquant</div>';
+      showError('Erreur : Token d\'authentification manquant');
     } else {
       // Écouter les messages de mise à jour
       window.addEventListener('message', (event) => {
@@ -142,52 +190,8 @@
         }
       });
 
-      // WebSocket connection
-      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const ws = new WebSocket(`${wsProtocol}//${window.location.host}/functions/followers-ws`);
-      
-      ws.onopen = () => {
-        ws.send(JSON.stringify({ type: 'auth', token }));
-      };
-      
-      ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data.type === 'error') {
-            console.error('Erreur serveur:', data.message);
-            document.body.innerHTML = `<div class="error-message">Erreur : ${data.message}</div>`;
-            return;
-          }
-          if (data.type === 'followers_update') {
-            currentFollowers = data.count;
-            updateDisplay();
-          }
-        } catch (error) {
-          console.error('Erreur lors du traitement du message WebSocket:', error);
-        }
-      };
-
-      let reconnectAttempts = 0;
-      const maxReconnectAttempts = 5;
-      const reconnectDelay = 5000;
-
-      ws.onerror = (error) => {
-        console.error('Erreur WebSocket:', error);
-        document.body.innerHTML = '<div class="error-message">Erreur de connexion au serveur</div>';
-      };
-
-      ws.onclose = () => {
-        console.log('Connexion WebSocket fermée. Tentative de reconnexion...');
-        if (reconnectAttempts < maxReconnectAttempts) {
-          reconnectAttempts++;
-          setTimeout(() => {
-            console.log(`Tentative de reconnexion ${reconnectAttempts}/${maxReconnectAttempts}...`);
-            window.location.reload();
-          }, reconnectDelay);
-        } else {
-          document.body.innerHTML = '<div class="error-message">Impossible de se connecter au serveur après plusieurs tentatives</div>';
-        }
-      };
+      // Initialiser la connexion WebSocket
+      initWebSocket();
     }
   </script>
 </body>

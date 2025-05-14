@@ -1,5 +1,11 @@
 // Gestion du widget Followers Goal
 export function initFollowersGoal(token) {
+  // Vérifier si le token est présent
+  if (!token) {
+    console.error('Token Twitch manquant');
+    return;
+  }
+
   const container = document.createElement('div');
   container.className = 'follower-options';
   container.innerHTML = `
@@ -54,6 +60,14 @@ export function initFollowersGoal(token) {
     }
   }
 
+  // Initialiser l'aperçu avec le token
+  const previewFrame = document.getElementById('overlay-preview');
+  if (previewFrame && previewFrame.src.includes('followers-goal')) {
+    const url = new URL(previewFrame.src);
+    url.searchParams.set('token', token);
+    previewFrame.src = url.toString();
+  }
+
   function updateOverlay() {
     const label = document.getElementById('follower-label').value;
     const target = document.getElementById('follower-target').value;
@@ -73,7 +87,7 @@ export function initFollowersGoal(token) {
       url.searchParams.set('target', target);
       url.searchParams.set('theme', theme);
       url.searchParams.set('animation', animation);
-      url.searchParams.set('token', token);
+      url.searchParams.set('token', token); // S'assurer que le token est toujours présent
       previewFrame.src = url.toString();
 
       // Envoyer les paramètres à l'iframe via postMessage
@@ -103,7 +117,7 @@ export function initFollowersGoal(token) {
     url.searchParams.set('target', target);
     url.searchParams.set('theme', theme);
     url.searchParams.set('animation', animation);
-    url.searchParams.set('token', token);
+    url.searchParams.set('token', token); // S'assurer que le token est inclus dans l'URL copiée
 
     navigator.clipboard.writeText(url.toString())
       .then(() => alert('URL copiée avec succès !'))
@@ -115,4 +129,7 @@ export function initFollowersGoal(token) {
   inputs.forEach(input => {
     input.addEventListener('change', updateOverlay);
   });
+
+  // Faire la mise à jour initiale
+  updateOverlay();
 }
