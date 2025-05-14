@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 
 export async function initTwitchAuth() {
   const clientId = import.meta.env.VITE_TWITCH_CLIENT_ID;
-  const redirectUri = import.meta.env.VITE_TWITCH_REDIRECT_URI;
+  const redirectUri = window.location.origin + '/auth/callback';
 
   // Créer le bouton de connexion Twitch
   const loginButton = document.createElement('button');
@@ -27,7 +27,7 @@ export async function initTwitchAuth() {
   });
 
   // Vérifier si on est sur la page de callback
-  if (window.location.pathname.includes('/auth/callback')) {
+  if (window.location.pathname === '/auth/callback') {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     const error = urlParams.get('error');
@@ -47,12 +47,12 @@ export async function initTwitchAuth() {
         );
 
         const { data, error } = await supabase.functions.invoke('twitch-auth', {
-          body: { code }
+          body: JSON.stringify({ code, redirectUri })
         });
 
         if (error) throw error;
 
-        if (data.access_token) {
+        if (data && data.access_token) {
           localStorage.setItem('twitch_token', data.access_token);
           window.location.href = '/';
         } else {

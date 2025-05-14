@@ -1,4 +1,4 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,11 +11,10 @@ serve(async (req) => {
   }
 
   try {
-    const { code } = await req.json()
+    const { code, redirectUri } = await req.json()
     
     const clientId = Deno.env.get('VITE_TWITCH_CLIENT_ID')
     const clientSecret = Deno.env.get('TWITCH_CLIENT_SECRET')
-    const redirectUri = Deno.env.get('VITE_TWITCH_REDIRECT_URI')
 
     // Échanger le code contre un token
     const tokenResponse = await fetch('https://id.twitch.tv/oauth2/token', {
@@ -33,6 +32,10 @@ serve(async (req) => {
     })
 
     const tokenData = await tokenResponse.json()
+
+    if (!tokenResponse.ok) {
+      throw new Error(tokenData.message || 'Erreur lors de l\'échange du code')
+    }
 
     return new Response(
       JSON.stringify(tokenData),
