@@ -151,29 +151,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const [targetWidth, targetHeight] = activeOverlay.dataset.size.split('x').map(Number);
     const container = document.querySelector('.preview-container');
+    const previewBackground = document.querySelector('.preview-background');
     const iframe = document.getElementById('overlay-preview');
 
     // Déterminer si c'est un overlay plein écran
     const isFullScreen = targetWidth >= 1920;
     container.setAttribute('data-full-screen', isFullScreen);
 
+    // Définir le ratio exact de l'overlay
+    const targetRatio = targetWidth / targetHeight;
+    
+    // Ajuster le conteneur principal pour qu'il ait exactement le même ratio que l'overlay
+    // Mais seulement si ce n'est pas un petit overlay comme "Réseaux & Code"
+    if (targetWidth > 800) {
+      container.style.aspectRatio = targetRatio;
+    } else {
+      // Pour les petits overlays, on utilise une taille minimale
+      container.style.aspectRatio = "auto";
+      container.style.minWidth = "600px";
+      container.style.minHeight = "200px";
+    }
+
     // Calculer les dimensions du conteneur
     const containerRect = container.getBoundingClientRect();
-    const targetRatio = targetWidth / targetHeight;
-
-    // Ajuster le conteneur
-    container.style.aspectRatio = targetRatio;
-
-    // Calculer l'échelle optimale
+    
+    // Calculer l'échelle optimale pour l'iframe
     const scale = Math.min(
       containerRect.width / targetWidth,
       containerRect.height / targetHeight
     ) * 0.95; // 95% pour laisser une petite marge
 
-    // Appliquer la transformation
+    // Appliquer la transformation à l'iframe
     iframe.style.width = `${targetWidth}px`;
     iframe.style.height = `${targetHeight}px`;
     iframe.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    
+    // IMPORTANT: Ajuster le fond de prévisualisation pour qu'il corresponde exactement à l'overlay
+    // C'est cette partie qui résout le problème du fond trop grand
+    const scaledWidth = targetWidth * scale;
+    const scaledHeight = targetHeight * scale;
+    
+    previewBackground.style.width = `${scaledWidth}px`;
+    previewBackground.style.height = `${scaledHeight}px`;
+    previewBackground.style.top = '50%';
+    previewBackground.style.left = '50%';
+    previewBackground.style.transform = 'translate(-50%, -50%)';
   }
 
   // Mettre à jour la taille lors du chargement de l'iframe
@@ -188,12 +210,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const size = activeOverlay.dataset.size;
     if (size) {
       sizeInfo.textContent = `Taille recommandée : ${size}`;
-      const [width, height] = size.split('x').map(Number);
-      previewContainerWrapper.style.aspectRatio = width / height;
+      
+      // Nous laissons updatePreviewSize() gérer les dimensions
     }
   }
   // Activer le fond transparent par défaut au lieu de la couleur
   bgTransparent.click();
+  // Appliquer la mise à jour de taille
   updatePreviewSize();
 
   // Gestion des dossiers d'overlays

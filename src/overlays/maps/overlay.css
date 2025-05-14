@@ -2,8 +2,8 @@
 :root {
   --primary: #6C63FF;
   --accent: #00F0FF;
-  --bg: rgba(0, 0, 0, 0.85);
-  --text: #F8FAFC;
+  --bg: rgba(0, 0, 0, 0.7);
+  --text: #FFFFFF;
 }
 
 /* Reset & Base */
@@ -21,45 +21,61 @@ body {
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  width: 1920px;
+  height: 1080px;
 }
 
 .container {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
-  align-items: center;
-}
-
-.content {
-  background: var(--bg);
-  padding: 1.5rem 3rem;
-  border-radius: 16px;
-  box-shadow: 0 0 30px rgba(108, 99, 255, 0.3);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  align-items: center; /* Centré verticalement */
 }
 
 .map-info {
+  background: var(--bg);
+  padding: 40px 80px;
+  border-radius: 20px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(5px);
   text-align: center;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+  width: 80%; /* Prend 80% de la largeur disponible */
+  max-width: 1600px; /* Limite maximale pour éviter la déformation */
+}
+
+.map-info::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
 }
 
 .map-title {
-  font-size: 2.5rem;
+  font-size: 4rem; /* Beaucoup plus grand */
   font-weight: 700;
   color: var(--text);
-  margin-bottom: 0.5rem;
-  text-shadow: 0 0 15px rgba(108, 99, 255, 0.5);
-  letter-spacing: 1px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 
 .map-code {
-  font-size: 4rem;
+  font-size: 7rem; /* Beaucoup plus grand */
   font-weight: 900;
   background: linear-gradient(45deg, var(--primary), var(--accent));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
-  letter-spacing: 2px;
+  letter-spacing: 4px;
+  text-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
 }
