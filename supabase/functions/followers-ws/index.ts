@@ -48,46 +48,66 @@ serve(async (req) => {
             return;
           }
 
-          // Vérifier le token
+          // Vérifier le token et obtenir les informations utilisateur
           try {
-            const response = await fetch('https://api.twitch.tv/helix/users', {
+            console.log('Vérification du token Twitch...');
+            const userResponse = await fetch('https://api.twitch.tv/helix/users', {
               headers: {
                 'Authorization': `Bearer ${data.token}`,
                 'Client-Id': Deno.env.get('VITE_TWITCH_CLIENT_ID') || '',
               }
             });
 
-            if (response.ok) {
-              const userData = await response.json();
-              if (!userData.data || !userData.data[0]) {
-                socket.send(JSON.stringify({
-                  type: 'error',
-                  message: 'Données utilisateur Twitch invalides'
-                }));
-                return;
-              }
-
-              client.token = data.token;
-              client.userId = userData.data[0].id;
-              socket.send(JSON.stringify({ 
-                type: 'auth_success',
-                userId: client.userId
-              }));
-
-              // Démarrer la vérification des followers
-              startFollowersCheck(client);
-            } else {
-              const errorData = await response.json();
-              socket.send(JSON.stringify({
-                type: 'error',
-                message: `Token invalide: ${errorData.message || 'Erreur inconnue'}`
-              }));
+            if (!userResponse.ok) {
+              console.error('Erreur lors de la récupération des informations utilisateur:', userResponse.status);
+              throw new Error(`Erreur API Twitch: ${userResponse.status}`);
             }
+
+            const userData = await userResponse.json();
+            console.log('Données utilisateur reçues:', userData);
+
+            if (!userData.data || !userData.data[0]) {
+              throw new Error('Données utilisateur invalides');
+            }
+
+            const user = userData.data[0];
+            console.log('ID utilisateur Twitch:', user.id);
+
+            client.token = data.token;
+            client.userId = user.id;
+
+            // Vérifier immédiatement le nombre de followers
+            const followersResponse = await fetch(`https://api.twitch.tv/helix/users/follows?to_id=${user.id}`, {
+              headers: {
+                'Authorization': `Bearer ${data.token}`,
+                'Client-Id': Deno.env.get('VITE_TWITCH_CLIENT_ID') || '',
+              }
+            });
+
+            if (!followersResponse.ok) {
+              console.error('Erreur lors de la récupération des followers:', followersResponse.status);
+              throw new Error(`Erreur API Twitch Followers: ${followersResponse.status}`);
+            }
+
+            const followersData = await followersResponse.json();
+            console.log('Nombre de followers:', followersData.total);
+
+            // Envoyer les informations de succès avec le nombre de followers
+            socket.send(JSON.stringify({ 
+              type: 'auth_success',
+              userId: user.id,
+              username: user.login,
+              displayName: user.display_name,
+              followers: followersData.total
+            }));
+
+            // Démarrer la vérification continue des followers
+            startFollowersCheck(client);
           } catch (error) {
-            console.error('Erreur d\'authentification:', error);
+            console.error('Erreur complète:', error);
             socket.send(JSON.stringify({
               type: 'error',
-              message: 'Erreur lors de la vérification du token'
+              message: `Erreur d'authentification: ${error.message}`
             }));
           }
         }

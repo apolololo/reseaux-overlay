@@ -180,11 +180,14 @@
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
+          console.log('Message WebSocket reçu:', data);
+
           if (data.type === 'error') {
             console.error('Erreur serveur:', data.message);
             showError(`Erreur : ${data.message}`);
             return;
           }
+
           if (data.type === 'auth_success') {
             console.log('Authentification WebSocket réussie');
             // Cacher le message d'erreur s'il était affiché
@@ -192,8 +195,17 @@
             if (errorMessage) {
               errorMessage.remove();
             }
+
+            // Mettre à jour immédiatement le nombre de followers
+            if (typeof data.followers === 'number') {
+              console.log('Nombre initial de followers:', data.followers);
+              currentFollowers = data.followers;
+              updateDisplay();
+            }
           }
+
           if (data.type === 'followers_update') {
+            console.log('Mise à jour des followers:', data.count);
             // Mettre à jour le nombre de followers seulement si c'est une nouvelle valeur
             if (data.count !== currentFollowers) {
               currentFollowers = data.count;
@@ -204,7 +216,9 @@
               localStorage.setItem('last_followers_update', data.timestamp);
             }
           }
+
           if (data.type === 'new_follower') {
+            console.log('Nouveau follower:', data.follower);
             // Mettre à jour le compteur et ajouter une animation
             currentFollowers++;
             updateDisplay();
