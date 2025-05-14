@@ -91,6 +91,67 @@
   color: #fff;
 }
 
+/* Options de personnalisation des followers */
+.follower-options {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(145, 70, 255, 0.2);
+}
+
+.follower-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.follower-settings h3 {
+  font-size: 14px;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.setting-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.setting-group label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.setting-group input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(145, 70, 255, 0.2);
+  border-radius: 4px;
+  padding: 6px 8px;
+  color: #fff;
+  font-size: 13px;
+}
+
+.setting-group input:focus {
+  outline: none;
+  border-color: #9146FF;
+}
+
+.update-btn {
+  background: #9146FF;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  margin-top: 8px;
+}
+
+.update-btn:hover {
+  background: #7d3cdd;
+}
+
 /* Reste du CSS existant */
 body {
   margin: 0;

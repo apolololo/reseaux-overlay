@@ -90,6 +90,10 @@ async function fetchAndDisplayUserInfo(token) {
       }
     });
 
+    if (!response.ok) {
+      throw new Error('Erreur lors de la récupération des informations utilisateur');
+    }
+
     const data = await response.json();
     const user = data.data[0];
 
@@ -115,6 +119,41 @@ async function fetchAndDisplayUserInfo(token) {
       userInfoSection.style.display = 'block';
       loginButton.style.display = 'none';
 
+      // Ajouter les options de personnalisation pour l'overlay des followers
+      if (document.querySelector('.overlay-item[data-url*="followers-goal"]')) {
+        const followerOptions = document.createElement('div');
+        followerOptions.className = 'follower-options';
+        followerOptions.innerHTML = `
+          <div class="follower-settings">
+            <h3>Personnalisation de l'objectif</h3>
+            <div class="setting-group">
+              <label for="follower-label">Titre :</label>
+              <input type="text" id="follower-label" value="Objectif Followers">
+            </div>
+            <div class="setting-group">
+              <label for="follower-target">Objectif :</label>
+              <input type="number" id="follower-target" min="1" value="500">
+            </div>
+            <button id="update-follower-goal" class="update-btn">Mettre à jour</button>
+          </div>
+        `;
+        userInfoSection.appendChild(followerOptions);
+
+        // Gérer la mise à jour de l'overlay des followers
+        document.getElementById('update-follower-goal').addEventListener('click', () => {
+          const label = document.getElementById('follower-label').value;
+          const target = document.getElementById('follower-target').value;
+          const previewFrame = document.getElementById('overlay-preview');
+          
+          if (previewFrame && previewFrame.src.includes('followers-goal')) {
+            const url = new URL(previewFrame.src);
+            url.searchParams.set('label', label);
+            url.searchParams.set('target', target);
+            previewFrame.src = url.toString();
+          }
+        });
+      }
+
       // Gérer la déconnexion
       const logoutBtn = userInfoSection.querySelector('.logout-btn');
       logoutBtn.addEventListener('click', () => {
@@ -125,5 +164,9 @@ async function fetchAndDisplayUserInfo(token) {
     }
   } catch (error) {
     console.error('Erreur lors de la récupération des informations utilisateur:', error);
+    // En cas d'erreur, on supprime le token et on affiche le bouton de connexion
+    localStorage.removeItem('twitch_token');
+    document.querySelector('.user-info-section').style.display = 'none';
+    document.querySelector('.twitch-login-btn').style.display = 'flex';
   }
 }
