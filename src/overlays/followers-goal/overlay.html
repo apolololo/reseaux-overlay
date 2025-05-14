@@ -83,32 +83,9 @@
   </div>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const goalTarget = parseInt(params.get('target')) || 500;
-    const goalLabel = params.get('label') || 'Objectif Followers';
-    let currentFollowers = parseInt(params.get('current')) || 0;
-    const theme = params.get('theme') || 'default';
-    const animation = params.get('animation') || 'slide';
-    const token = params.get('token');
-
-    // Appliquer le thème
-    if (theme !== 'default') {
-      document.body.classList.add(`theme-${theme}`);
-    }
-
-    // Appliquer l'animation
-    document.querySelector('.goal-container').classList.add(`anim-${animation}`);
-
-    if (!token) {
-      console.error('Token d\'authentification manquant');
-      document.body.innerHTML = '<div class="error-message">Erreur : Token d\'authentification manquant</div>';
-      return;
-    }
-    
-    // Mettre à jour l'affichage avec les paramètres personnalisés
-    document.getElementById('goalLabel').textContent = goalLabel;
-    
+    // Fonction pour mettre à jour l'affichage
     function updateDisplay() {
+      document.getElementById('goalLabel').textContent = goalLabel;
       document.getElementById('goalTarget').textContent = goalTarget.toLocaleString();
       document.getElementById('currentCount').textContent = currentFollowers.toLocaleString();
       document.getElementById('targetCount').textContent = goalTarget.toLocaleString();
@@ -117,80 +94,101 @@
       document.getElementById('progressFill').style.width = `${Math.min(100, progress)}%`;
     }
 
-    updateDisplay();
+    // Fonction pour appliquer les paramètres
+    function applySettings(settings) {
+      if (settings.label) goalLabel = settings.label;
+      if (settings.target) goalTarget = parseInt(settings.target);
+      if (settings.theme) {
+        document.body.className = settings.theme !== 'default' ? `theme-${settings.theme}` : '';
+      }
+      if (settings.animation) {
+        const container = document.querySelector('.goal-container');
+        container.className = 'goal-container';
+        container.classList.add(`anim-${settings.animation}`);
+      }
+      updateDisplay();
+    }
 
-    // Écouter les mises à jour en temps réel
-    window.addEventListener('storage', (event) => {
-      if (event.key === 'follower-goal-update') {
+    // Initialisation avec les paramètres de l'URL
+    const params = new URLSearchParams(window.location.search);
+    let goalTarget = parseInt(params.get('target')) || 500;
+    let goalLabel = params.get('label') || 'Objectif Followers';
+    let currentFollowers = parseInt(params.get('current')) || 0;
+    const theme = params.get('theme') || 'default';
+    const animation = params.get('animation') || 'slide';
+    const token = params.get('token');
+
+    // Appliquer les paramètres initiaux
+    applySettings({
+      label: goalLabel,
+      target: goalTarget,
+      theme: theme,
+      animation: animation
+    });
+
+    if (!token) {
+      console.error('Token d\'authentification manquant');
+      document.body.innerHTML = '<div class="error-message">Erreur : Token d\'authentification manquant</div>';
+    } else {
+      // Écouter les messages de mise à jour
+      window.addEventListener('message', (event) => {
         try {
-          const message = JSON.parse(event.newValue);
-          if (message.type === 'update-settings') {
-            const { label, target, theme, animation } = message.settings;
-            document.getElementById('goalLabel').textContent = label;
-            goalTarget = parseInt(target);
-            
-            // Mettre à jour le thème
-            document.body.className = theme !== 'default' ? `theme-${theme}` : '';
-            
-            // Mettre à jour l'animation
-            const container = document.querySelector('.goal-container');
-            container.className = 'goal-container';
-            container.classList.add(`anim-${animation}`);
-            
-            updateDisplay();
+          const data = event.data;
+          if (data && data.type === 'update-settings') {
+            applySettings(data.settings);
           }
         } catch (error) {
           console.error('Erreur lors de la mise à jour:', error);
         }
-      }
-    });
+      });
 
-    // WebSocket connection
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(`${wsProtocol}//${window.location.host}/functions/followers-ws`);
-    ws.onopen = () => {
-      // Envoyer le token d'authentification
-      ws.send(JSON.stringify({ type: 'auth', token }));
-    };
-    
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'error') {
-          console.error('Erreur serveur:', data.message);
-          document.body.innerHTML = `<div class="error-message">Erreur : ${data.message}</div>`;
-          return;
+      // WebSocket connection
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const ws = new WebSocket(`${wsProtocol}//${window.location.host}/functions/followers-ws`);
+      
+      ws.onopen = () => {
+        ws.send(JSON.stringify({ type: 'auth', token }));
+      };
+      
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'error') {
+            console.error('Erreur serveur:', data.message);
+            document.body.innerHTML = `<div class="error-message">Erreur : ${data.message}</div>`;
+            return;
+          }
+          if (data.type === 'followers_update') {
+            currentFollowers = data.count;
+            updateDisplay();
+          }
+        } catch (error) {
+          console.error('Erreur lors du traitement du message WebSocket:', error);
         }
-        if (data.type === 'followers_update') {
-          currentFollowers = data.count;
-          updateDisplay();
+      };
+
+      let reconnectAttempts = 0;
+      const maxReconnectAttempts = 5;
+      const reconnectDelay = 5000;
+
+      ws.onerror = (error) => {
+        console.error('Erreur WebSocket:', error);
+        document.body.innerHTML = '<div class="error-message">Erreur de connexion au serveur</div>';
+      };
+
+      ws.onclose = () => {
+        console.log('Connexion WebSocket fermée. Tentative de reconnexion...');
+        if (reconnectAttempts < maxReconnectAttempts) {
+          reconnectAttempts++;
+          setTimeout(() => {
+            console.log(`Tentative de reconnexion ${reconnectAttempts}/${maxReconnectAttempts}...`);
+            window.location.reload();
+          }, reconnectDelay);
+        } else {
+          document.body.innerHTML = '<div class="error-message">Impossible de se connecter au serveur après plusieurs tentatives</div>';
         }
-      } catch (error) {
-        console.error('Erreur lors du traitement du message WebSocket:', error);
-      }
-    };
-
-    let reconnectAttempts = 0;
-    const maxReconnectAttempts = 5;
-    const reconnectDelay = 5000;
-
-    ws.onerror = (error) => {
-      console.error('Erreur WebSocket:', error);
-      document.body.innerHTML = '<div class="error-message">Erreur de connexion au serveur</div>';
-    };
-
-    ws.onclose = () => {
-      console.log('Connexion WebSocket fermée. Tentative de reconnexion...');
-      if (reconnectAttempts < maxReconnectAttempts) {
-        reconnectAttempts++;
-        setTimeout(() => {
-          console.log(`Tentative de reconnexion ${reconnectAttempts}/${maxReconnectAttempts}...`);
-          window.location.reload();
-        }, reconnectDelay);
-      } else {
-        document.body.innerHTML = '<div class="error-message">Impossible de se connecter au serveur après plusieurs tentatives</div>';
-      }
-    };
+      };
+    }
   </script>
 </body>
 </html>

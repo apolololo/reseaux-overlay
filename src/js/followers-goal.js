@@ -54,10 +54,6 @@ export function initFollowersGoal(token) {
     }
   }
 
-  // Gérer la mise à jour
-  const updateBtn = document.getElementById('update-follower-goal');
-  const copyBtn = document.getElementById('copy-follower-url');
-
   function updateOverlay() {
     const label = document.getElementById('follower-label').value;
     const target = document.getElementById('follower-target').value;
@@ -65,13 +61,13 @@ export function initFollowersGoal(token) {
     const animation = document.getElementById('follower-animation').value;
 
     // Sauvegarder les paramètres
-    localStorage.setItem('follower-goal-settings', JSON.stringify({
-      label, target, theme, animation
-    }));
+    const settings = { label, target, theme, animation };
+    localStorage.setItem('follower-goal-settings', JSON.stringify(settings));
 
     // Mettre à jour l'aperçu si visible
     const previewFrame = document.getElementById('overlay-preview');
     if (previewFrame && previewFrame.src.includes('followers-goal')) {
+      // Mettre à jour l'URL avec les nouveaux paramètres
       const url = new URL(previewFrame.src);
       url.searchParams.set('label', label);
       url.searchParams.set('target', target);
@@ -79,23 +75,23 @@ export function initFollowersGoal(token) {
       url.searchParams.set('animation', animation);
       url.searchParams.set('token', token);
       previewFrame.src = url.toString();
-    }
 
-    // Envoyer un message à tous les overlays ouverts
-    try {
-      const message = {
-        type: 'update-settings',
-        settings: { label, target, theme, animation }
+      // Envoyer les paramètres à l'iframe via postMessage
+      previewFrame.onload = () => {
+        previewFrame.contentWindow.postMessage({
+          type: 'update-settings',
+          settings: { label, target, theme, animation }
+        }, '*');
       };
-      window.localStorage.setItem('follower-goal-update', JSON.stringify(message));
-      window.dispatchEvent(new Event('storage'));
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour des overlays:', error);
     }
   }
 
+  // Gérer la mise à jour
+  const updateBtn = document.getElementById('update-follower-goal');
   updateBtn.addEventListener('click', updateOverlay);
 
+  // Gérer la copie de l'URL
+  const copyBtn = document.getElementById('copy-follower-url');
   copyBtn.addEventListener('click', () => {
     const label = document.getElementById('follower-label').value;
     const target = document.getElementById('follower-target').value;
