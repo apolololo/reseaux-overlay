@@ -25,21 +25,42 @@ export async function initTwitchAuth() {
   // Vérifier si on est sur la page de callback
   if (window.location.pathname === '/auth/callback') {
     const code = new URLSearchParams(window.location.search).get('code');
+    const error = new URLSearchParams(window.location.search).get('error');
+    const error_description = new URLSearchParams(window.location.search).get('error_description');
+
+    if (error) {
+      console.error('Erreur Twitch:', error, error_description);
+      window.location.href = '/?auth_error=' + encodeURIComponent(error_description);
+      return;
+    }
+
     if (code) {
       try {
         const response = await fetch('/api/auth/twitch', {
           method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify({ code }),
         });
         
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+
         const data = await response.json();
         if (data.access_token) {
           localStorage.setItem('twitch_token', data.access_token);
           window.location.href = '/';
+        } else {
+          throw new Error('Token non reçu');
         }
       } catch (error) {
         console.error('Erreur d\'authentification:', error);
+        window.location.href = '/?auth_error=' + encodeURIComponent(error.message);
       }
+    } else {
+      window.location.href = '/?auth_error=Code d\'autorisation manquant';
     }
   }
 }

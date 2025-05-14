@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentification Twitch</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #18181b;
+            color: #efeff1;
+        }
+
+        .message {
+            text-align: center;
+            padding: 2rem;
+            border-radius: 8px;
+            background-color: #1f1f23;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 80%;
+            margin: 1rem;
+        }
+
+        .error {
+            color: #ff4747;
+        }
+
+        .success {
+            color: #00ff95;
+        }
+
+        .loading {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #2d2d2d;
+            border-top: 5px solid #9147ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px 0;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="message">
+        <div class="loading"></div>
+        <p>Traitement de l'authentification Twitch...</p>
+    </div>
+
+    <script>
+        // Le code d'authentification sera géré par auth.js
+        // Cette page sert uniquement de point d'entrée pour le callback
+    </script>
+</body>
+</html>
