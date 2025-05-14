@@ -36,6 +36,11 @@ serve(async (req) => {
     
     socket.onopen = () => {
       console.log("WebSocket connecté");
+      // Envoyer un message de confirmation de connexion
+      socket.send(JSON.stringify({
+        type: 'connection_status',
+        status: 'connected'
+      }));
     };
 
     socket.onmessage = async (event) => {
