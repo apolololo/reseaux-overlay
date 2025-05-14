@@ -24,6 +24,23 @@
       --progress-fill: #9146ff;
     }
 
+    /* Styles des messages d'erreur */
+    .error-message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(255, 0, 0, 0.1);
+      color: #ff3333;
+      padding: 20px;
+      border-radius: 8px;
+      border: 2px solid #ff3333;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      text-align: center;
+      animation: fadeIn 0.3s ease-out;
+    }
+
     /* Animations */
     @keyframes slideIn {
       from { transform: translateX(-100%); }
@@ -113,24 +130,40 @@
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
+        if (data.type === 'error') {
+          console.error('Erreur serveur:', data.message);
+          document.body.innerHTML = `<div class="error-message">Erreur : ${data.message}</div>`;
+          return;
+        }
         if (data.type === 'followers_update') {
           currentFollowers = data.count;
           updateDisplay();
         }
       } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
+        console.error('Erreur lors du traitement du message WebSocket:', error);
       }
     };
 
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+    const reconnectDelay = 5000;
+
     ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
+      console.error('Erreur WebSocket:', error);
+      document.body.innerHTML = '<div class="error-message">Erreur de connexion au serveur</div>';
     };
 
     ws.onclose = () => {
-      console.log('WebSocket connection closed. Attempting to reconnect...');
-      setTimeout(() => {
-        window.location.reload();
-      }, 5000);
+      console.log('Connexion WebSocket fermée. Tentative de reconnexion...');
+      if (reconnectAttempts < maxReconnectAttempts) {
+        reconnectAttempts++;
+        setTimeout(() => {
+          console.log(`Tentative de reconnexion ${reconnectAttempts}/${maxReconnectAttempts}...`);
+          window.location.reload();
+        }, reconnectDelay);
+      } else {
+        document.body.innerHTML = '<div class="error-message">Impossible de se connecter au serveur après plusieurs tentatives</div>';
+      }
     };
   </script>
 </body>
