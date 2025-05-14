@@ -15,31 +15,27 @@ interface Client {
 const clients = new Map<WebSocket, Client>();
 
 serve(async (req) => {
-  // Gérer les requêtes OPTIONS pour CORS
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
-  try {
-    // Vérifier si c'est une requête de mise à niveau WebSocket
-    if (req.headers.get("upgrade") !== "websocket") {
-      return new Response("Expected WebSocket upgrade", { 
-        status: 426,
-        headers: corsHeaders
-      });
-    }
+  if (req.headers.get("upgrade") !== "websocket") {
+    return new Response("Expected WebSocket upgrade", {
+      status: 426,
+      headers: corsHeaders,
+    });
+  }
 
+  try {
     const { socket, response } = Deno.upgradeWebSocket(req);
-    
-    // Initialiser le client
+
     clients.set(socket, { socket, token: null, userId: null });
-    
+
     socket.onopen = () => {
       console.log("WebSocket connecté");
-      // Envoyer un message de confirmation de connexion
       socket.send(JSON.stringify({
         type: 'connection_status',
-        status: 'connected'
+        status: 'connected',
       }));
     };
 
@@ -59,6 +55,7 @@ serve(async (req) => {
               type: 'error',
               message: 'Token manquant dans la requête d\'autorisation'
             }));
+            socket.close(4001, "Token manquant");
             return;
           }
 
@@ -84,7 +81,6 @@ serve(async (req) => {
             client.token = data.token;
             client.userId = user.id;
 
-            // Vérifier le nombre de followers
             const followersResponse = await fetch(
               `https://api.twitch.tv/helix/users/follows?to_id=${user.id}`,
               {
@@ -101,27 +97,27 @@ serve(async (req) => {
 
             const followersData = await followersResponse.json();
 
-            socket.send(JSON.stringify({ 
+            socket.send(JSON.stringify({
               type: 'auth_success',
               userId: user.id,
               username: user.login,
               displayName: user.display_name,
-              followers: followersData.total
+              followers: followersData.total,
             }));
 
-            // Démarrer la vérification des followers
             startFollowersCheck(client);
 
           } catch (error) {
-            console.error('Erreur:', error);
+            console.error('Erreur d\'authentification:', error);
             socket.send(JSON.stringify({
               type: 'error',
               message: `Erreur d'authentification: ${error.message}`
             }));
+            socket.close(4002, "Erreur d'authentification");
           }
         }
       } catch (error) {
-        console.error('Erreur de traitement:', error);
+        console.error('Erreur de traitement du message:', error);
         socket.send(JSON.stringify({
           type: 'error',
           message: 'Erreur de traitement de la requête'
@@ -129,7 +125,8 @@ serve(async (req) => {
       }
     };
 
-    socket.onclose = () => {
+    socket.onclose = (event) => {
+      console.warn('Fermeture WebSocket:', event.code, event.reason);
       clients.delete(socket);
     };
 
@@ -144,7 +141,7 @@ serve(async (req) => {
     console.error('Erreur serveur:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      { 
+      {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
@@ -172,14 +169,13 @@ async function startFollowersCheck(client: Client) {
       }
 
       const followersData = await followersResponse.json();
-      
+
       client.socket.send(JSON.stringify({
         type: 'followers_update',
         count: followersData.total || 0,
         timestamp: Date.now()
       }));
 
-      // Vérifier les nouveaux followers
       const recentFollowsResponse = await fetch(
         `https://api.twitch.tv/helix/users/follows?to_id=${client.userId}&first=1`,
         {
@@ -195,7 +191,7 @@ async function startFollowersCheck(client: Client) {
       }
 
       const recentFollowsData = await recentFollowsResponse.json();
-      
+
       if (recentFollowsData.data?.[0]) {
         client.socket.send(JSON.stringify({
           type: 'new_follower',
@@ -208,7 +204,7 @@ async function startFollowersCheck(client: Client) {
 
     } catch (error) {
       console.error('Erreur followers:', error);
-      
+
       if (error.message.includes('401')) {
         client.socket.send(JSON.stringify({
           type: 'error',
@@ -217,7 +213,7 @@ async function startFollowersCheck(client: Client) {
         client.socket.close(4000, 'Token expiré');
         return;
       }
-      
+
       client.socket.send(JSON.stringify({
         type: 'error',
         message: 'Erreur lors de la récupération des followers'
@@ -225,12 +221,8 @@ async function startFollowersCheck(client: Client) {
     }
   };
 
-  // Vérification initiale
   await checkFollowers();
 
-  // Vérification périodique
   const interval = setInterval(checkFollowers, 30000);
-
-  // Nettoyage
   client.socket.addEventListener('close', () => clearInterval(interval));
 }
