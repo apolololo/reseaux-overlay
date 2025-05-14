@@ -263,3 +263,34 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
+function updatePreview(item) {
+  const url = item.dataset.url;
+  const size = item.dataset.size;
+  const [width, height] = size.split('x').map(Number);
+  const previewFrame = document.getElementById('overlay-preview');
+  const sizeInfo = document.querySelector('.size-info');
+  const previewContainer = document.querySelector('.preview-container');
+
+  // Ajouter le token Twitch si nécessaire
+  const finalUrl = new URL(url, window.location.origin);
+  if (url.includes('followers-goal')) {
+    const token = localStorage.getItem('twitch_token');
+    if (token) {
+      finalUrl.searchParams.set('token', token);
+    }
+  }
+
+  previewFrame.src = finalUrl.toString();
+  sizeInfo.textContent = `Taille recommandée : ${size}`;
+  
+  // Ajuster la taille du conteneur
+  const isFullScreen = width >= 1920;
+  previewContainer.setAttribute('data-full-screen', isFullScreen);
+
+  // Ajuster l'échelle de l'iframe
+  const scale = isFullScreen ? 0.5 : 1;
+  previewFrame.style.width = `${width}px`;
+  previewFrame.style.height = `${height}px`;
+  previewFrame.style.transform = `translate(-50%, -50%) scale(${scale})`;
+}

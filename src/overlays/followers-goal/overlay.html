@@ -136,9 +136,16 @@
       const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const ws = new WebSocket(`${wsProtocol}//${window.location.host}/functions/followers-ws`);
       
+      // Ajouter les en-têtes d'autorisation
       ws.onopen = () => {
-        console.log('WebSocket connecté, envoi du token...');
-        ws.send(JSON.stringify({ type: 'auth', token }));
+        console.log('WebSocket connecté');
+        // Envoyer le token dans un message d'authentification
+        if (token) {
+          ws.send(JSON.stringify({
+            type: 'authorization',
+            token: token
+          }));
+        }
       };
       
       ws.onmessage = (event) => {
@@ -148,6 +155,9 @@
             console.error('Erreur serveur:', data.message);
             showError(`Erreur : ${data.message}`);
             return;
+          }
+          if (data.type === 'auth_success') {
+            console.log('Authentification WebSocket réussie');
           }
           if (data.type === 'followers_update') {
             currentFollowers = data.count;
@@ -163,12 +173,14 @@
         showError('Erreur de connexion au serveur');
       };
 
-      ws.onclose = () => {
-        console.log('Connexion WebSocket fermée, tentative de reconnexion...');
-        setTimeout(() => {
-          console.log('Tentative de reconnexion...');
-          initWebSocket();
-        }, 5000);
+      ws.onclose = (event) => {
+        console.log('Connexion WebSocket fermée, code:', event.code);
+        if (event.code !== 1000) { // Si ce n'est pas une fermeture normale
+          setTimeout(() => {
+            console.log('Tentative de reconnexion...');
+            initWebSocket();
+          }, 5000);
+        }
       };
 
       return ws;

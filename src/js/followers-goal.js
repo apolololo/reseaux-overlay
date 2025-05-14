@@ -81,22 +81,43 @@ export function initFollowersGoal(token) {
     // Mettre à jour l'aperçu si visible
     const previewFrame = document.getElementById('overlay-preview');
     if (previewFrame && previewFrame.src.includes('followers-goal')) {
-      // Mettre à jour l'URL avec les nouveaux paramètres
-      const url = new URL(previewFrame.src);
-      url.searchParams.set('label', label);
-      url.searchParams.set('target', target);
-      url.searchParams.set('theme', theme);
-      url.searchParams.set('animation', animation);
-      url.searchParams.set('token', token); // S'assurer que le token est toujours présent
-      previewFrame.src = url.toString();
+      // S'assurer que l'iframe est chargée avant d'envoyer le message
+      const updateIframe = () => {
+        // Mettre à jour l'URL avec les nouveaux paramètres
+        const url = new URL(previewFrame.src);
+        url.searchParams.set('label', label);
+        url.searchParams.set('target', target);
+        url.searchParams.set('theme', theme);
+        url.searchParams.set('animation', animation);
+        
+        // Récupérer le token depuis le localStorage
+        const token = localStorage.getItem('twitch_token');
+        if (token) {
+          url.searchParams.set('token', token);
+        }
+        
+        previewFrame.src = url.toString();
 
-      // Envoyer les paramètres à l'iframe via postMessage
-      previewFrame.onload = () => {
-        previewFrame.contentWindow.postMessage({
-          type: 'update-settings',
-          settings: { label, target, theme, animation }
-        }, '*');
+        // Attendre que l'iframe soit chargée avant d'envoyer le message
+        previewFrame.onload = () => {
+          try {
+            previewFrame.contentWindow.postMessage({
+              type: 'update-settings',
+              settings: { label, target, theme, animation }
+            }, '*');
+          } catch (error) {
+            console.error('Erreur lors de la mise à jour des paramètres:', error);
+          }
+        };
       };
+
+      // Si l'iframe est déjà chargée, mettre à jour immédiatement
+      if (previewFrame.contentWindow) {
+        updateIframe();
+      } else {
+        // Sinon, attendre le chargement
+        previewFrame.addEventListener('load', updateIframe, { once: true });
+      }
     }
   }
 
@@ -106,23 +127,31 @@ export function initFollowersGoal(token) {
 
   // Gérer la copie de l'URL
   const copyBtn = document.getElementById('copy-follower-url');
-  copyBtn.addEventListener('click', () => {
-    const label = document.getElementById('follower-label').value;
-    const target = document.getElementById('follower-target').value;
-    const theme = document.getElementById('follower-theme').value;
-    const animation = document.getElementById('follower-animation').value;
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      const label = document.getElementById('follower-label').value;
+      const target = document.getElementById('follower-target').value;
+      const theme = document.getElementById('follower-theme').value;
+      const animation = document.getElementById('follower-animation').value;
+      const token = localStorage.getItem('twitch_token');
 
-    const url = new URL(window.location.origin + '/src/overlays/followers-goal/overlay.html');
-    url.searchParams.set('label', label);
-    url.searchParams.set('target', target);
-    url.searchParams.set('theme', theme);
-    url.searchParams.set('animation', animation);
-    url.searchParams.set('token', token); // S'assurer que le token est inclus dans l'URL copiée
+      if (!token) {
+        alert('Veuillez vous connecter avec Twitch d\'abord');
+        return;
+      }
 
-    navigator.clipboard.writeText(url.toString())
-      .then(() => alert('URL copiée avec succès !'))
-      .catch(() => alert('Erreur lors de la copie de l\'URL'));
-  });
+      const url = new URL(window.location.origin + '/src/overlays/followers-goal/overlay.html');
+      url.searchParams.set('label', label);
+      url.searchParams.set('target', target);
+      url.searchParams.set('theme', theme);
+      url.searchParams.set('animation', animation);
+      url.searchParams.set('token', token);
+
+      navigator.clipboard.writeText(url.toString())
+        .then(() => alert('URL copiée avec succès !'))
+        .catch(() => alert('Erreur lors de la copie de l\'URL'));
+    });
+  }
 
   // Mettre à jour en temps réel lors des changements
   const inputs = document.querySelectorAll('#follower-label, #follower-target, #follower-theme, #follower-animation');
