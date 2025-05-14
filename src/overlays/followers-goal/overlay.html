@@ -209,26 +209,31 @@
     function initWebSocket() {
       // Utiliser l'URL de l'API Supabase pour le WebSocket
       const supabaseUrl = 'wss://uejmtvhqzadtxrqtowtm.supabase.co/functions/v1/followers-ws';
+      
+      // Vérifier si le token est présent
+      if (!token) {
+        showError('Erreur : Token d\'authentification manquant');
+        console.error('Tentative de connexion sans token');
+        return null;
+      }
+
       console.log('Tentative de connexion WebSocket à:', supabaseUrl);
       const ws = new WebSocket(supabaseUrl);
       
       let reconnectAttempts = 0;
       const maxReconnectAttempts = 5;
+      let isAuthenticated = false;
       
       ws.onopen = () => {
-        console.log('WebSocket connecté');
+        console.log('WebSocket connecté - Envoi du token d\'authentification');
         reconnectAttempts = 0;
-        showStatus('Connexion établie');
+        showStatus('Connexion établie - Authentification en cours...');
         
         // Envoyer le token dans un message d'authentification
-        if (token) {
-          ws.send(JSON.stringify({
-            type: 'authorization',
-            token: token
-          }));
-        } else {
-          showError('Erreur : Token d\'authentification manquant');
-        }
+        ws.send(JSON.stringify({
+          type: 'authorization',
+          token: token
+        }));
       };
       
       ws.onmessage = (event) => {
@@ -244,6 +249,7 @@
 
           if (data.type === 'auth_success') {
             console.log('Authentification WebSocket réussie');
+            isAuthenticated = true;
             showStatus('Authentification réussie');
             // Cacher le message d'erreur s'il était affiché
             const errorMessage = document.querySelector('.error-message');
@@ -286,12 +292,21 @@
       };
 
       ws.onerror = (error) => {
-        console.error('Erreur WebSocket:', error);
-        showError('Erreur de connexion au serveur');
+        console.error('Erreur WebSocket détaillée:', error);
+        const errorMessage = isAuthenticated ? 
+          'Erreur de connexion au serveur' : 
+          'Erreur d\'authentification - Vérifiez votre token';
+        showError(errorMessage);
       };
 
       ws.onclose = (event) => {
-        console.log('Connexion WebSocket fermée, code:', event.code);
+        console.log('Connexion WebSocket fermée, code:', event.code, 'raison:', event.reason);
+        
+        // Si on n'a jamais réussi à s'authentifier, on arrête les tentatives
+        if (!isAuthenticated && reconnectAttempts > 0) {
+          showError('Échec d\'authentification - Vérifiez votre token');
+          return;
+        }
         
         if (event.code !== 1000 && reconnectAttempts < maxReconnectAttempts) {
           const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
