@@ -1,10 +1,16 @@
 /* Variables */
 :root {
-  --primary: #6C63FF;
-  --accent: #00F0FF;
-  --bg: rgba(0, 0, 0, 0.7);
+  --primary: #FF3366;
+  --accent: #FFD700;
+  --accent-glow: #FFD70080;
+  --bg: rgba(15, 23, 42, 0.45);
   --text: #FFFFFF;
+  --gradient-start: #FF3366;
+  --gradient-mid: #FF9966;
+  --gradient-end: #FFD700;
 }
+
+
 
 /* Reset & Base */
 * {
@@ -31,24 +37,20 @@ body {
   display: flex;
   justify-content: center;
   align-items: center; /* Centré verticalement */
+  transform: scale(2.0); /* Zoom uniforme de l'overlay */
+  transform-origin: center center; /* Point d'origine du zoom au centre */
 }
 
 .map-info {
-  background: var(--bg);
-  padding: 40px 80px;
-  border-radius: 20px;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(5px);
+  padding: 10px 20px;
   text-align: center;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 10px;
   position: relative;
-  overflow: hidden;
-  width: 80%; /* Prend 80% de la largeur disponible */
-  max-width: 1600px; /* Limite maximale pour éviter la déformation */
+  width: auto;
+  max-width: none;
 }
 
 .map-info::before {
@@ -57,25 +59,93 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  height: 6px;
+  height: 2px;
   background: linear-gradient(90deg, var(--primary), var(--accent));
 }
 
 .map-title {
-  font-size: 4rem; /* Beaucoup plus grand */
+  font-size: 2.5rem;
   font-weight: 700;
   color: var(--text);
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(108, 99, 255, 0.5);
 }
 
 .map-code {
-  font-size: 7rem; /* Beaucoup plus grand */
+  font-size: 4rem;
   font-weight: 900;
   background: linear-gradient(45deg, var(--primary), var(--accent));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  letter-spacing: 4px;
-  text-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+  letter-spacing: 2px;
+  text-shadow: 
+    0 0 15px rgba(0, 0, 0, 0.8),
+    0 0 25px rgba(255, 51, 102, 0.6),
+    0 0 35px rgba(255, 215, 0, 0.4);
+  position: relative;
+  padding: 20px 40px;
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.7));
+}
+
+.map-code {
+  position: relative;
+  font-size: 4rem;
+  font-weight: 900;
+  background: linear-gradient(90deg, 
+    var(--primary) 0%,
+    var(--gradient-mid) 25%,
+    var(--accent) 50%,
+    var(--gradient-mid) 75%,
+    var(--primary) 100%
+  );
+  background-size: 200% 100%;
+  animation: textFill 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  padding: 4px;
+  text-shadow: 0 0 20px var(--accent-glow);
+}
+
+.map-code::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  background: linear-gradient(90deg, 
+    var(--primary) 0%,
+    var(--gradient-mid) 25%,
+    var(--accent) 50%,
+    var(--gradient-mid) 75%,
+    var(--primary) 100%
+  );
+  background-size: 200% 100%;
+  animation: borderGlow 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask: 
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  filter: drop-shadow(0 0 8px var(--accent-glow));
+}
+
+@keyframes borderGlow {
+  0% { background-position: 0% 0%; }
+  25% { background-position: 50% 0%; }
+  50% { background-position: 100% 0%; }
+  75% { background-position: 50% 0%; }
+  100% { background-position: 0% 0%; }
+}
+
+@keyframes textFill {
+  0% { background-position: 0% 0%; }
+  25% { background-position: 50% 0%; }
+  50% { background-position: 100% 0%; }
+  75% { background-position: 50% 0%; }
+  100% { background-position: 0% 0%; }
 }
