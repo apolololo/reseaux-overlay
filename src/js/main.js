@@ -272,14 +272,22 @@ function updatePreview(item) {
   const sizeInfo = document.querySelector('.size-info');
   const previewContainer = document.querySelector('.preview-container');
 
-  // Ajouter le token Twitch si nécessaire
+  // Construire l'URL finale
   const finalUrl = new URL(url, window.location.origin);
-  if (url.includes('followers-goal')) {
-    const token = localStorage.getItem('twitch_token');
-    if (token) {
-      finalUrl.searchParams.set('token', token);
-    }
+  
+  // Ajouter le token Twitch pour tous les overlays qui en ont besoin
+  const token = localStorage.getItem('twitch_token');
+  if (token && (url.includes('followers-goal') || url.includes('chat-overlay'))) {
+    finalUrl.searchParams.set('token', token);
   }
+
+  // Préserver les autres paramètres existants
+  const currentParams = new URLSearchParams(previewFrame.src.split('?')[1] || '');
+  currentParams.forEach((value, key) => {
+    if (key !== 'token') { // Ne pas copier l'ancien token
+      finalUrl.searchParams.set(key, value);
+    }
+  });
 
   previewFrame.src = finalUrl.toString();
   sizeInfo.textContent = `Taille recommandée : ${size}`;

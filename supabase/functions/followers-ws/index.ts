@@ -40,6 +40,14 @@ serve(async (req) => {
         }
 
         if (data.type === 'authorization') {
+          if (!data.token) {
+            socket.send(JSON.stringify({
+              type: 'error',
+              message: 'Token manquant dans la requête d\'autorisation'
+            }));
+            return;
+          }
+
           // Vérifier le token
           try {
             const response = await fetch('https://api.twitch.tv/helix/users', {
@@ -51,27 +59,44 @@ serve(async (req) => {
 
             if (response.ok) {
               const userData = await response.json();
+              if (!userData.data || !userData.data[0]) {
+                socket.send(JSON.stringify({
+                  type: 'error',
+                  message: 'Données utilisateur Twitch invalides'
+                }));
+                return;
+              }
+
               client.token = data.token;
               client.userId = userData.data[0].id;
-              socket.send(JSON.stringify({ type: 'auth_success' }));
+              socket.send(JSON.stringify({ 
+                type: 'auth_success',
+                userId: client.userId
+              }));
 
               // Démarrer la vérification des followers
               startFollowersCheck(client);
             } else {
+              const errorData = await response.json();
               socket.send(JSON.stringify({
                 type: 'error',
-                message: 'Token invalide'
+                message: `Token invalide: ${errorData.message || 'Erreur inconnue'}`
               }));
             }
           } catch (error) {
+            console.error('Erreur d\'authentification:', error);
             socket.send(JSON.stringify({
               type: 'error',
-              message: 'Erreur d\'authentification'
+              message: 'Erreur lors de la vérification du token'
             }));
           }
         }
       } catch (error) {
         console.error('Erreur de traitement du message:', error);
+        socket.send(JSON.stringify({
+          type: 'error',
+          message: 'Erreur de traitement de la requête'
+        }));
       }
     };
 
