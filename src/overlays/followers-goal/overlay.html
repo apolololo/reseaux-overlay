@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Followers Goal - APO</title>
+  <link rel="stylesheet" href="./overlay.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="goal-container">
+    <div class="goal-header">
+      <span class="goal-label">Objectif Followers</span>
+      <span class="goal-target" id="goalTarget">500</span>
+    </div>
+    <div class="goal-progress">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-text">
+        <span class="current-count" id="currentCount">0</span>
+        <span class="separator">/</span>
+        <span class="target-count" id="targetCount">500</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Récupérer les paramètres de l'URL
+    const params = new URLSearchParams(window.location.search);
+    const goalTarget = params.get('target') || 500;
+    const currentFollowers = params.get('current') || 0;
+    
+    // Mettre à jour les éléments
+    document.getElementById('goalTarget').textContent = goalTarget;
+    document.getElementById('currentCount').textContent = currentFollowers;
+    document.getElementById('targetCount').textContent = goalTarget;
+    
+    // Calculer et mettre à jour la progression
+    const progress = (currentFollowers / goalTarget) * 100;
+    document.getElementById('progressFill').style.width = `${Math.min(100, progress)}%`;
+
+    // Connexion WebSocket pour les mises à jour en direct
+    const ws = new WebSocket(`wss://${window.location.host}/api/followers-ws`);
+    
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === 'followers_update') {
+        document.getElementById('currentCount').textContent = data.count;
+        const newProgress = (data.count / goalTarget) * 100;
+        document.getElementById('progressFill').style.width = `${Math.min(100, newProgress)}%`;
+      }
+    };
+  </script>
+</body>
+</html>

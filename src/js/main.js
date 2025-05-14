@@ -25,6 +25,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const sizeInfo = document.querySelector('.size-info');
   const previewContainerWrapper = document.querySelector('.preview-container');
 
+  // Initialiser l'authentification Twitch
+  import('./auth.js').then(module => {
+    module.initTwitchAuth();
+  });
+
   // Gestion des overlays avec support des tailles
   document.querySelectorAll('.overlay-item').forEach(item => {
     item.addEventListener('click', () => {      
@@ -210,8 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const size = activeOverlay.dataset.size;
     if (size) {
       sizeInfo.textContent = `Taille recommandée : ${size}`;
-      
-      // Nous laissons updatePreviewSize() gérer les dimensions
     }
   }
   // Activer le fond transparent par défaut au lieu de la couleur

@@ -7,6 +7,35 @@
   --spacing-unit: 16px;
 }
 
+/* Bouton de connexion Twitch */
+.twitch-login-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #9146FF;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 20px;
+  width: calc(100% - 8px);
+  transition: background-color 0.2s ease;
+}
+
+.twitch-login-btn:hover {
+  background: #7d3cdd;
+}
+
+.twitch-login-btn img {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) invert(1);
+}
+
+/* Reste du CSS existant */
 body {
   margin: 0;
   padding: 0;
@@ -230,7 +259,6 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  /* Ces dimensions seront ajustées par JavaScript pour correspondre exactement à l'overlay */
 }
 
 .preview-background iframe {
