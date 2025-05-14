@@ -39,6 +39,9 @@
         <li class="overlay-item" data-url="src/overlays/game-status/overlay.html" data-size="1920x1080">
           Status de Jeu
         </li>
+        <li class="overlay-item" data-url="src/overlays/followers-goal/overlay.html" data-size="800x200">
+          Followers Goal
+        </li>
         <li class="folder-item">
           <div class="folder-header">
             <span>Maps</span>
@@ -51,47 +54,6 @@
               Box Fights & Zone Wars
             </li>
           </ul>
-        </li>
-        <li class="overlay-item" data-overlay="followers-goal">
-          <h3>Objectif Followers</h3>
-          <div class="preview-container">
-            <div class="preview-background">
-              <iframe id="overlay-preview" src="/src/overlays/followers-goal/overlay.html"></iframe>
-            </div>
-            <div class="overlay-controls">
-              <div class="follower-settings">
-                <h4>Personnalisation</h4>
-                <div class="setting-group">
-                  <label for="follower-label">Titre :</label>
-                  <input type="text" id="follower-label" value="Objectif Followers">
-                </div>
-                <div class="setting-group">
-                  <label for="follower-target">Objectif :</label>
-                  <input type="number" id="follower-target" min="1" value="500">
-                </div>
-                <div class="setting-group">
-                  <label for="follower-theme">Thème :</label>
-                  <select id="follower-theme">
-                    <option value="default">Par défaut</option>
-                    <option value="dark">Sombre</option>
-                    <option value="light">Clair</option>
-                  </select>
-                </div>
-                <div class="setting-group">
-                  <label for="follower-animation">Animation :</label>
-                  <select id="follower-animation">
-                    <option value="slide">Slide</option>
-                    <option value="fade">Fade</option>
-                    <option value="bounce">Bounce</option>
-                  </select>
-                </div>
-                <div class="setting-actions">
-                  <button id="update-follower-goal" class="update-btn">Mettre à jour</button>
-                  <button id="copy-follower-url" class="copy-btn">Copier l'URL pour OBS</button>
-                </div>
-              </div>
-            </div>
-          </div>
         </li>
       </ul>
     </div>

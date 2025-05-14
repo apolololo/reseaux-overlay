@@ -119,6 +119,32 @@
 
     updateDisplay();
 
+    // Écouter les mises à jour en temps réel
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'follower-goal-update') {
+        try {
+          const message = JSON.parse(event.newValue);
+          if (message.type === 'update-settings') {
+            const { label, target, theme, animation } = message.settings;
+            document.getElementById('goalLabel').textContent = label;
+            goalTarget = parseInt(target);
+            
+            // Mettre à jour le thème
+            document.body.className = theme !== 'default' ? `theme-${theme}` : '';
+            
+            // Mettre à jour l'animation
+            const container = document.querySelector('.goal-container');
+            container.className = 'goal-container';
+            container.classList.add(`anim-${animation}`);
+            
+            updateDisplay();
+          }
+        } catch (error) {
+          console.error('Erreur lors de la mise à jour:', error);
+        }
+      }
+    });
+
     // WebSocket connection
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const ws = new WebSocket(`${wsProtocol}//${window.location.host}/functions/followers-ws`);
