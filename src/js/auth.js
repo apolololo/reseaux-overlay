@@ -69,7 +69,7 @@ function updateAuthUI() {
   } else {
     authBanner.classList.remove('authenticated');
     authButton.textContent = 'Se connecter';
-    authButton.href = './src/auth/twitch-auth.html';
+    authButton.href = 'https://apo-overlay.netlify.app/src/auth/twitch-auth.html';
   }
 }
 
