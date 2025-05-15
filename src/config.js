@@ -1,6 +1,9 @@
+const PROD_URL = 'https://apo-overlay.netlify.app';
+
 export const config = {
-  apiUrl: import.meta.env.VITE_API_URL || 'http://localhost:3000',
-  appUrl: import.meta.env.VITE_APP_URL || 'http://localhost:3000',
-  twitchClientId: import.meta.env.VITE_TWITCH_CLIENT_ID,
-  twitchRedirectUri: import.meta.env.VITE_TWITCH_REDIRECT_URI
+  apiUrl: PROD_URL,
+  appUrl: PROD_URL,
+  twitchClientId: '6qdvxjxzwxjvxlm5ydkw9f6jg3xdw1',
+  twitchRedirectUri: `${PROD_URL}/auth/callback`,
+  twitchScopes: ['user:read:email', 'channel:read:subscriptions']
 }; 

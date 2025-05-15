@@ -1,31 +1,34 @@
 import React from 'react';
+import { config } from '../config';
 
 const Login = () => {
+  const loginUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${config.twitchClientId}&redirect_uri=${encodeURIComponent(config.twitchRedirectUri)}&response_type=code&scope=${config.twitchScopes.join('+')}`;
+
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gray-900 relative overflow-hidden">
       {/* Fond animé */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 bg-pattern opacity-20 animate-pulse"></div>
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 to-gray-900"></div>
+        <div className="absolute inset-0 bg-pattern opacity-10"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-gray-900"></div>
       </div>
 
       {/* Contenu principal */}
-      <div className="relative z-10 text-center px-4">
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-8 tracking-tight">
+      <div className="relative z-10 text-center max-w-md w-full mx-4">
+        <h1 className="text-3xl font-bold text-white mb-6">
           Générateur d'Overlay
         </h1>
         
-        <div className="max-w-md mx-auto bg-gray-800/50 p-8 rounded-xl backdrop-blur-sm shadow-2xl">
-          <p className="text-gray-300 mb-6">
-            Connectez-vous avec Twitch pour accéder à vos overlays personnalisés
+        <div className="bg-gray-800/50 p-6 rounded-lg backdrop-blur-sm shadow-xl">
+          <p className="text-gray-300 text-sm mb-6">
+            Connectez-vous avec Twitch pour accéder à vos overlays
           </p>
           
           <a
-            href="/auth/twitch"
-            className="group inline-flex items-center px-8 py-4 bg-[#9146FF] text-white rounded-lg hover:bg-[#7c2cff] transition-all duration-200 text-lg font-medium shadow-lg hover:shadow-purple-500/20"
+            href={loginUrl}
+            className="inline-flex items-center px-4 py-2 bg-[#9146FF] text-white text-sm rounded hover:bg-[#7c2cff] transition-all duration-200 font-medium"
           >
             <svg 
-              className="w-6 h-6 mr-3 transition-transform group-hover:-translate-y-px" 
+              className="w-5 h-5 mr-2" 
               viewBox="0 0 24 24" 
               fill="currentColor"
             >
@@ -39,7 +42,7 @@ const Login = () => {
       {/* Message d'erreur */}
       <div 
         id="error-message" 
-        className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-200 translate-y-full"
+        className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg hidden"
       >
         Une erreur est survenue lors de la connexion
       </div>
