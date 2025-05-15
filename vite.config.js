@@ -13,8 +13,7 @@ export default defineConfig({
         brbVideo: resolve(__dirname, 'src/overlays/brb/overlay-video.html'),
         end: resolve(__dirname, 'src/overlays/end/overlay.html'),
         gameStatus: resolve(__dirname, 'src/overlays/game-status/overlay.html'),
-        mapInfo: resolve(__dirname, 'src/overlays/maps/overlay.html'),
-        followersGoal: resolve(__dirname, 'src/overlays/followers-goal/overlay.html')
+        mapInfo: resolve(__dirname, 'src/overlays/maps/overlay.html')
       },
     },
     assetsDir: 'assets',
