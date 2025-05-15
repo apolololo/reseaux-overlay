@@ -25,12 +25,51 @@ export async function initTwitchAuth() {
   if (token) {
     loginButton.style.display = 'none';
     connectionStatus.style.display = 'block';
-    connectionStatus.innerHTML = `
-      <div class="status-connected">
-        <span>✓ Connecté à Twitch</span>
-        <button class="logout-btn">Déconnexion</button>
-      </div>
-    `;
+    
+    try {
+      const response = await fetch('https://api.twitch.tv/helix/users', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Client-Id': clientId
+        }
+      });
+      
+      const data = await response.json();
+      const user = data.data[0];
+      
+      // Récupérer le nombre de followers
+      const followersResponse = await fetch(`https://api.twitch.tv/helix/users/follows?to_id=${user.id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Client-Id': clientId
+        }
+      });
+      
+      const followersData = await followersResponse.json();
+      
+      connectionStatus.innerHTML = `
+        <div class="status-connected">
+          <div class="user-info">
+            <img src="${user.profile_image_url}" alt="${user.display_name}" class="profile-image">
+            <div class="user-details">
+              <span class="username">${user.display_name}</span>
+              <span class="followers">${followersData.total} followers</span>
+            </div>
+          </div>
+          <button class="logout-btn">Déconnexion</button>
+        </div>
+      `;
+
+      localStorage.setItem('twitch_user_id', user.id);
+    } catch (error) {
+      console.error('Erreur:', error);
+      connectionStatus.innerHTML = `
+        <div class="status-connected">
+          <span>✓ Connecté à Twitch</span>
+          <button class="logout-btn">Déconnexion</button>
+        </div>
+      `;
+    }
     
     // Gérer la déconnexion
     connectionStatus.querySelector('.logout-btn').addEventListener('click', () => {
@@ -60,20 +99,6 @@ export async function initTwitchAuth() {
         const data = await response.json();
         if (data.access_token) {
           localStorage.setItem('twitch_token', data.access_token);
-          
-          // Récupérer l'ID de l'utilisateur
-          const userResponse = await fetch('https://api.twitch.tv/helix/users', {
-            headers: {
-              'Authorization': `Bearer ${data.access_token}`,
-              'Client-Id': clientId
-            }
-          });
-          
-          const userData = await userResponse.json();
-          if (userData.data && userData.data[0]) {
-            localStorage.setItem('twitch_user_id', userData.data[0].id);
-          }
-          
           window.location.href = '/';
         }
       } catch (error) {

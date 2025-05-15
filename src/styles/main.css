@@ -38,32 +38,57 @@
 /* Status de connexion */
 .connection-status {
   margin-bottom: 20px;
-  padding: 10px;
+  padding: 12px;
   border-radius: 6px;
   background: rgba(145, 70, 255, 0.1);
 }
 
 .status-connected {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.status-connected span {
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #9146FF;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.username {
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.followers {
   color: #9146FF;
-  font-weight: 500;
+  font-size: 12px;
 }
 
 .logout-btn {
   background: none;
   border: 1px solid #9146FF;
   color: #9146FF;
-  padding: 4px 8px;
+  padding: 8px;
   border-radius: 4px;
   cursor: pointer;
   font-size: 12px;
   transition: all 0.2s ease;
+  width: 100%;
 }
 
 .logout-btn:hover {
