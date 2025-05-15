@@ -1,3 +1,4 @@
+
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
@@ -7,6 +8,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
+        auth: resolve(__dirname, 'src/auth.html'),
+        authCallback: resolve(__dirname, 'src/auth/callback.html'),
         apo: resolve(__dirname, 'src/overlays/apo/overlay.html'),
         starting: resolve(__dirname, 'src/overlays/starting/overlay.html'),
         brb: resolve(__dirname, 'src/overlays/brb/overlay.html'),
@@ -22,7 +25,7 @@ export default defineConfig({
     copyPublicDir: true
   },
   server: {
-    port: 3000,
+    port: 8080,
     open: '/index.html'
   }
 });

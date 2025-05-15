@@ -6,10 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:dev": "vite build --mode development",
     "preview": "vite preview"
   },
   "dependencies": {
     "apo-overlay-generator": "file:",
-    "vite": "^5.0.0"
+    "vite": "^5.0.0",
+    "@supabase/supabase-js": "^2.38.4"
   }
 }

@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Authentification en cours - APO Overlays</title>
+  <link rel="stylesheet" href="../overlay.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="login-container">
+    <!-- Éléments de fond -->
+    <div class="auth-background">
+      <div class="auth-gradient-circle auth-circle-1"></div>
+      <div class="auth-gradient-circle auth-circle-2"></div>
+      <div class="auth-gradient-circle auth-circle-3"></div>
+    </div>
+    
+    <div class="login-box">
+      <h1 class="login-title">Authentification</h1>
+      <p id="status-message" class="login-subtitle">Traitement de votre connexion...</p>
+      
+      <div class="loading-container active">
+        <div class="loading-spinner"></div>
+        <div id="loading-text" class="loading-text">Vérification...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const statusMessage = document.getElementById('status-message');
+      const loadingText = document.getElementById('loading-text');
+      
+      // Fonction pour obtenir les paramètres de l'URL
+      const getUrlParams = () => {
+        const params = new URLSearchParams(window.location.search);
+        return {
+          code: params.get('code'),
+          state: params.get('state'),
+          error: params.get('error'),
+          error_description: params.get('error_description')
+        };
+      };
+      
+      // Fonction pour échanger le code contre un token
+      const exchangeCodeForToken = async (code) => {
+        try {
+          loadingText.textContent = "Échange du code contre un token...";
+          
+          // Appel à notre fonction Supabase Edge qui gère l'échange de code
+          const response = await fetch('/.netlify/functions/twitch-auth', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ code })
+          });
+          
+          if (!response.ok) {
+            throw new Error('Erreur lors de l\'échange du code');
+          }
+          
+          const data = await response.json();
+          
+          // Stocker le token et l'expiration en local storage
+          localStorage.setItem('twitch_token', data.access_token);
+          const expiresAt = new Date().getTime() + (data.expires_in * 1000);
+          localStorage.setItem('twitch_expires_at', expiresAt.toString());
+          
+          // Stocker également les infos utilisateur si retournées
+          if (data.user) {
+            localStorage.setItem('twitch_user', JSON.stringify(data.user));
+          }
+          
+          loadingText.textContent = "Connexion réussie !";
+          statusMessage.textContent = "Vous êtes connecté ! Redirection...";
+          
+          // Rediriger vers la page principale
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 1500);
+          
+        } catch (error) {
+          console.error('Erreur d\'authentification:', error);
+          loadingText.textContent = "Erreur d'authentification";
+          statusMessage.textContent = "Une erreur s'est produite lors de l'authentification.";
+        }
+      };
+      
+      // Traiter les paramètres d'URL
+      const params = getUrlParams();
+      
+      // Vérifier si l'état correspond
+      const storedState = localStorage.getItem('twitch_auth_state');
+      
+      if (params.error) {
+        // Gérer les erreurs retournées par Twitch
+        statusMessage.textContent = "Erreur d'authentification";
+        loadingText.textContent = params.error_description || params.error;
+      } else if (!params.state || params.state !== storedState) {
+        // Vérification de l'état échouée (possible attaque CSRF)
+        statusMessage.textContent = "Erreur de sécurité";
+        loadingText.textContent = "Vérification d'état échouée";
+      } else if (params.code) {
+        // Échanger le code contre un token
+        await exchangeCodeForToken(params.code);
+      } else {
+        // Aucun code ou erreur dans l'URL
+        statusMessage.textContent = "Erreur d'authentification";
+        loadingText.textContent = "Aucun code d'autorisation reçu";
+      }
+      
+      // Nettoyer l'état stocké
+      localStorage.removeItem('twitch_auth_state');
+    });
+  </script>
+</body>
+</html>

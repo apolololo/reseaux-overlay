@@ -1,3 +1,4 @@
+
 // Gestion de la navigation
 document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -13,6 +14,23 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Vérification de l'authentification
+  const checkAuth = () => {
+    const token = localStorage.getItem('twitch_token');
+    const expiresAt = localStorage.getItem('twitch_expires_at');
+    
+    // Vérifier si le token existe et n'est pas expiré
+    if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
+      // Rediriger vers la page d'authentification
+      window.location.href = './src/auth.html';
+      return false;
+    }
+    return true;
+  };
+  
+  // Vérifier l'authentification au chargement
+  if (!checkAuth()) return;
+
   // L'URL de production sera automatiquement détectée
   const PRODUCTION_URL = window.location.origin;
   const previewContainer = document.querySelector('.preview-background');
@@ -210,7 +228,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const size = activeOverlay.dataset.size;
     if (size) {
       sizeInfo.textContent = `Taille recommandée : ${size}`;
-      
       // Nous laissons updatePreviewSize() gérer les dimensions
     }
   }

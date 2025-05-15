@@ -1,0 +1,150 @@
+
+/* Variables globales */
+:root {
+  --primary: #6C63FF;
+  --primary-light: #8F8AFF;
+  --primary-dark: #4B45B3;
+  --bg: #070B14;
+  --bg-light: #0D1525;
+  --text: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --accent: #38BDF8;
+  --accent-dark: #0284C7;
+}
+
+/* Styles de base pour la page de login */
+.login-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Montserrat', sans-serif;
+}
+
+.login-box {
+  background: rgba(30, 41, 59, 0.6);
+  padding: 2.5rem;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 500px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.login-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+
+.login-subtitle {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  color: var(--text-secondary);
+}
+
+.login-button {
+  background-color: #9146FF; /* Couleur de Twitch */
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  font-size: 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.login-button:hover {
+  background-color: #7929cc;
+  transform: translateY(-2px);
+}
+
+.login-button img {
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+}
+
+/* Éléments de fond */
+.auth-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.auth-gradient-circle {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.1;
+}
+
+.auth-circle-1 {
+  width: 80vh;
+  height: 80vh;
+  background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+  top: -20vh;
+  left: -20vh;
+}
+
+.auth-circle-2 {
+  width: 60vh;
+  height: 60vh;
+  background: radial-gradient(circle, #9146FF 0%, transparent 70%);
+  bottom: -10vh;
+  right: -10vh;
+}
+
+.auth-circle-3 {
+  width: 40vh;
+  height: 40vh;
+  background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Animation de chargement */
+.loading-container {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 2rem;
+}
+
+.loading-container.active {
+  display: flex;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-left-color: #9146FF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  margin-top: 1rem;
+  color: var(--text-secondary);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
