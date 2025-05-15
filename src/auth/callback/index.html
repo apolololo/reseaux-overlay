@@ -27,14 +27,6 @@
             margin: 1rem;
         }
 
-        .error {
-            color: #ff4747;
-        }
-
-        .success {
-            color: #00ff95;
-        }
-
         .loading {
             width: 50px;
             height: 50px;
@@ -57,28 +49,43 @@
         <p>Traitement de l'authentification Twitch...</p>
     </div>
 
-    <script type="module">
-        import { initTwitchAuth } from '/src/js/auth.js';
-
-        // Initialiser l'authentification Twitch
+    <script>
         window.addEventListener('DOMContentLoaded', () => {
-            initTwitchAuth();
+            const hash = window.location.hash.substring(1);
+            const params = new URLSearchParams(hash);
+            const accessToken = params.get('access_token');
+            
+            if (accessToken) {
+                // Stocker le token
+                localStorage.setItem('twitch_token', accessToken);
+                
+                // Calculer l'expiration (4 heures)
+                const expiry = new Date().getTime() + (4 * 60 * 60 * 1000);
+                localStorage.setItem('twitch_token_expiry', expiry.toString());
+                
+                // Envoyer le token à la page principale
+                window.opener.postMessage({
+                    type: 'twitch_auth',
+                    token: accessToken
+                }, window.location.origin);
+                
+                // Fermer cette fenêtre
+                window.close();
+            } else {
+                document.querySelector('.message').innerHTML = `
+                    <p style="color: #ff4747;">Erreur d'authentification</p>
+                    <button onclick="window.close()" style="
+                        background: #9147ff;
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        margin-top: 10px;
+                    ">Fermer</button>
+                `;
+            }
         });
-
-        // Afficher les messages d'erreur si présents
-        const urlParams = new URLSearchParams(window.location.search);
-        const error = urlParams.get('error');
-        const errorDescription = urlParams.get('error_description');
-
-        if (error) {
-            const messageDiv = document.querySelector('.message');
-            messageDiv.innerHTML = `
-                <div class="error">
-                    <p>Erreur d'authentification :</p>
-                    <p>${errorDescription || error}</p>
-                </div>
-            `;
-        }
     </script>
 </body>
 </html>

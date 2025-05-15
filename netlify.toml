@@ -1,9 +1,10 @@
 [build]
-  publish = "/"
+  publish = "dist"
+  command = "npm run build"
 
 [[redirects]]
-  from = "/auth/callback"
-  to = "/index.html"
+  from = "/src/auth/callback/*"
+  to = "/src/auth/callback/index.html"
   status = 200
 
 [[redirects]]
