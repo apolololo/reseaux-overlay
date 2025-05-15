@@ -1,6 +1,6 @@
 export async function initTwitchAuth() {
   const clientId = import.meta.env.VITE_TWITCH_CLIENT_ID;
-  const redirectUri = import.meta.env.VITE_TWITCH_REDIRECT_URI;
+  const redirectUri = 'https://apo-overlay.netlify.app/auth/callback';
 
   // Créer le bouton de connexion Twitch
   const loginButton = document.createElement('button');
