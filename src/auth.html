@@ -77,8 +77,8 @@
           // ID client Twitch (using environment variable when available)
           const clientId = "k40r5alkvhaz3aq0sk3mcoufwfvg8y";
           
-          // URL de redirection (doit correspondre à celle configurée dans l'application Twitch)
-          const redirectUri = window.location.origin + '/auth/callback.html';
+          // URL de redirection vers Netlify
+          const redirectUri = 'https://apo-overlay.netlify.app/auth/callback';
           
           // Générer un état aléatoire pour la sécurité
           const state = Math.random().toString(36).substring(2, 15);
