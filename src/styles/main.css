@@ -35,6 +35,42 @@
   filter: brightness(0) invert(1);
 }
 
+/* Status de connexion */
+.connection-status {
+  margin-bottom: 20px;
+  padding: 10px;
+  border-radius: 6px;
+  background: rgba(145, 70, 255, 0.1);
+}
+
+.status-connected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.status-connected span {
+  color: #9146FF;
+  font-weight: 500;
+}
+
+.logout-btn {
+  background: none;
+  border: 1px solid #9146FF;
+  color: #9146FF;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  background: #9146FF;
+  color: white;
+}
+
 /* Reste du CSS existant */
 body {
   margin: 0;

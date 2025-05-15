@@ -45,8 +45,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const newUrl = new URL(fullPath, window.location.origin);
       
       // Ajouter le token Twitch si disponible et si c'est l'overlay followers-goal
-      if (localPath.includes('followers-goal') && localStorage.getItem('twitch_token')) {
-        newUrl.searchParams.set('token', localStorage.getItem('twitch_token'));
+      if (localPath.includes('followers-goal')) {
+        const token = localStorage.getItem('twitch_token');
+        const userId = localStorage.getItem('twitch_user_id');
+        if (token && userId) {
+          newUrl.searchParams.set('token', token);
+          newUrl.searchParams.set('user_id', userId);
+        }
       }
       
       currentParams.forEach((value, key) => {
@@ -121,15 +126,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const previewUrl = new URL(previewFrame.src);
     const fullPath = new URL(localPath, PRODUCTION_URL);
     
+    // Ajouter le token Twitch si disponible et si c'est l'overlay followers-goal
+    if (localPath.includes('followers-goal')) {
+      const token = localStorage.getItem('twitch_token');
+      const userId = localStorage.getItem('twitch_user_id');
+      if (token && userId) {
+        fullPath.searchParams.set('token', token);
+        fullPath.searchParams.set('user_id', userId);
+      }
+    }
+    
     // Copier tous les paramètres de la preview vers l'URL finale
     previewUrl.searchParams.forEach((value, key) => {
       fullPath.searchParams.set(key, value);
     });
-    
-    // Ajouter le token Twitch si disponible et si c'est l'overlay followers-goal
-    if (localPath.includes('followers-goal') && localStorage.getItem('twitch_token')) {
-      fullPath.searchParams.set('token', localStorage.getItem('twitch_token'));
-    }
     
     try {
       await navigator.clipboard.writeText(fullPath.toString());
@@ -256,8 +266,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const newUrl = new URL(localPath, window.location.origin);
       
       // Ajouter le token Twitch si disponible et si c'est l'overlay followers-goal
-      if (localPath.includes('followers-goal') && localStorage.getItem('twitch_token')) {
-        newUrl.searchParams.set('token', localStorage.getItem('twitch_token'));
+      if (localPath.includes('followers-goal')) {
+        const token = localStorage.getItem('twitch_token');
+        const userId = localStorage.getItem('twitch_user_id');
+        if (token && userId) {
+          newUrl.searchParams.set('token', token);
+          newUrl.searchParams.set('user_id', userId);
+        }
       }
       
       currentParams.forEach((value, key) => {
