@@ -27,6 +27,13 @@
         <div class="loading-spinner"></div>
         <div id="loading-text" class="loading-text">Vérification...</div>
       </div>
+
+      <div id="error-container" style="display: none; margin-top: 20px; color: #ff5252; background: rgba(255, 82, 82, 0.1); padding: 12px; border-radius: 8px; text-align: left;">
+        <div id="error-message">Une erreur s'est produite</div>
+        <button id="retry-button" style="margin-top: 12px; background: #9146FF; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+          Réessayer
+        </button>
+      </div>
     </div>
   </div>
 
@@ -34,6 +41,9 @@
     document.addEventListener('DOMContentLoaded', async () => {
       const statusMessage = document.getElementById('status-message');
       const loadingText = document.getElementById('loading-text');
+      const errorContainer = document.getElementById('error-container');
+      const errorMessage = document.getElementById('error-message');
+      const retryButton = document.getElementById('retry-button');
       
       // Fonction pour obtenir les paramètres de l'URL
       const getUrlParams = () => {
@@ -45,6 +55,11 @@
           error_description: params.get('error_description')
         };
       };
+
+      // Gérer le bouton de nouvelle tentative
+      retryButton.addEventListener('click', () => {
+        window.location.href = '/src/auth.html';
+      });
       
       // Fonction pour échanger le code contre un token
       const exchangeCodeForToken = async (code) => {
@@ -70,6 +85,10 @@
           const data = await response.json();
           console.log("Données reçues:", data);
           
+          if (data.error) {
+            throw new Error(data.error);
+          }
+          
           // Stocker le token et l'expiration en local storage
           localStorage.setItem('twitch_token', data.access_token);
           const expiresAt = new Date().getTime() + (data.expires_in * 1000);
@@ -78,6 +97,19 @@
           // Stocker également les infos utilisateur si retournées
           if (data.user) {
             localStorage.setItem('twitch_user', JSON.stringify(data.user));
+            console.log("Informations utilisateur stockées:", data.user);
+          }
+          
+          // Stocker les informations des abonnés si disponibles
+          if (data.subscriberCount !== undefined) {
+            localStorage.setItem('twitch_subscriber_count', data.subscriberCount.toString());
+            console.log("Nombre d'abonnés stocké:", data.subscriberCount);
+          }
+          
+          // Stocker les points d'abonnement si disponibles
+          if (data.subscriberPoints !== undefined) {
+            localStorage.setItem('twitch_subscriber_points', data.subscriberPoints.toString());
+            console.log("Points d'abonnement stockés:", data.subscriberPoints);
           }
           
           loadingText.textContent = "Connexion réussie !";
@@ -91,7 +123,9 @@
         } catch (error) {
           console.error('Erreur d\'authentification:', error);
           loadingText.textContent = "Erreur d'authentification";
-          statusMessage.textContent = "Une erreur s'est produite lors de l'authentification. Détails : " + error.message;
+          statusMessage.textContent = "Une erreur s'est produite";
+          errorContainer.style.display = 'block';
+          errorMessage.textContent = error.message || "Détails non disponibles";
         }
       };
       
@@ -106,11 +140,15 @@
         // Gérer les erreurs retournées par Twitch
         statusMessage.textContent = "Erreur d'authentification";
         loadingText.textContent = params.error_description || params.error;
+        errorContainer.style.display = 'block';
+        errorMessage.textContent = params.error_description || params.error;
         console.error("Erreur Twitch:", params.error, params.error_description);
       } else if (!params.state || params.state !== storedState) {
         // Vérification de l'état échouée (possible attaque CSRF)
         statusMessage.textContent = "Erreur de sécurité";
         loadingText.textContent = "Vérification d'état échouée";
+        errorContainer.style.display = 'block';
+        errorMessage.textContent = "Erreur de sécurité (état invalide)";
         console.error("État invalide:", params.state, "attendu:", storedState);
       } else if (params.code) {
         // Échanger le code contre un token
@@ -120,6 +158,8 @@
         // Aucun code ou erreur dans l'URL
         statusMessage.textContent = "Erreur d'authentification";
         loadingText.textContent = "Aucun code d'autorisation reçu";
+        errorContainer.style.display = 'block';
+        errorMessage.textContent = "Aucun code d'autorisation n'a été reçu";
         console.error("Aucun code reçu dans l'URL");
       }
       
