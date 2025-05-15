@@ -1,4 +1,3 @@
-
 // Gestion de la navigation
 document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -70,7 +69,23 @@ document.addEventListener('DOMContentLoaded', () => {
         // Ajuster le ratio de la preview
         const [width, height] = size.split('x').map(Number);
         const ratio = width / height;
-        previewContainerWrapper.style.aspectRatio = ratio;
+        
+        // Calculer la taille maximale disponible
+        const containerHeight = previewContainerWrapper.clientHeight - 80; // Marge pour le padding
+        const containerWidth = previewContainerWrapper.clientWidth - 80;
+        
+        // Calculer la scale pour s'adapter à l'espace disponible
+        let scale;
+        if (width > height) {
+          scale = Math.min(containerWidth / width, containerHeight / height);
+        } else {
+          scale = Math.min(containerHeight / height, containerWidth / width);
+        }
+        
+        // Appliquer la transformation
+        previewFrame.style.width = `${width}px`;
+        previewFrame.style.height = `${height}px`;
+        previewFrame.style.transform = `translate(-50%, -50%) scale(${scale})`;
       }
       updatePreviewSize();
     });
@@ -172,50 +187,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const previewBackground = document.querySelector('.preview-background');
     const iframe = document.getElementById('overlay-preview');
 
-    // Définir les dimensions exactes de l'iframe
-    iframe.style.width = `${targetWidth}px`;
-    iframe.style.height = `${targetHeight}px`;
-    iframe.setAttribute('data-size', `${targetWidth}/${targetHeight}`);
+    // Calculer la taille maximale disponible
+    const containerHeight = container.clientHeight - 80; // Marge pour le padding
+    const containerWidth = container.clientWidth - 80;
 
-    // Calculer les dimensions du conteneur
-    const containerRect = container.getBoundingClientRect();
-    const containerWidth = containerRect.width;
-    const containerHeight = containerRect.height;
-
-    // Calculer l'échelle pour ajuster l'iframe aux dimensions du conteneur
-    const scaleX = containerWidth / targetWidth;
-    const scaleY = containerHeight / targetHeight;
-    const scale = Math.min(scaleX, scaleY) * 0.95; // 95% pour une petite marge
-
-    // Appliquer la transformation
-    iframe.style.transform = `scale(${scale})`;
-    iframe.style.transformOrigin = 'center';
-
-    // Ajuster le conteneur de fond pour correspondre aux dimensions de l'iframe
-    previewBackground.style.width = `${targetWidth * scale}px`;
-    previewBackground.style.height = `${targetHeight * scale}px`;
-
-    // Mettre à jour l'affichage des dimensions
-    const sizeInfo = document.querySelector('.size-info');
-    if (sizeInfo) {
-      sizeInfo.textContent = `Dimensions : ${targetWidth}x${targetHeight} pixels`;
+    // Calculer la scale pour s'adapter à l'espace disponible
+    let scale;
+    if (targetWidth > targetHeight) {
+      scale = Math.min(containerWidth / targetWidth, containerHeight / targetHeight);
+    } else {
+      scale = Math.min(containerHeight / targetHeight, containerWidth / targetWidth);
     }
 
-    // Appliquer la transformation à l'iframe
+    // Appliquer la transformation
     iframe.style.width = `${targetWidth}px`;
     iframe.style.height = `${targetHeight}px`;
     iframe.style.transform = `translate(-50%, -50%) scale(${scale})`;
-    
-    // IMPORTANT: Ajuster le fond de prévisualisation pour qu'il corresponde exactement à l'overlay
-    // C'est cette partie qui résout le problème du fond trop grand
+
+    // Ajuster le conteneur de fond
     const scaledWidth = targetWidth * scale;
     const scaledHeight = targetHeight * scale;
     
     previewBackground.style.width = `${scaledWidth}px`;
     previewBackground.style.height = `${scaledHeight}px`;
-    previewBackground.style.top = '50%';
-    previewBackground.style.left = '50%';
-    previewBackground.style.transform = 'translate(-50%, -50%)';
   }
 
   // Mettre à jour la taille lors du chargement de l'iframe
@@ -230,11 +224,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const size = activeOverlay.dataset.size;
     if (size) {
       sizeInfo.textContent = `Taille recommandée : ${size}`;
-      // Nous laissons updatePreviewSize() gérer les dimensions
     }
   }
-  // Activer le fond transparent par défaut au lieu de la couleur
+  
+  // Activer le fond transparent par défaut
   bgTransparent.click();
+  
   // Appliquer la mise à jour de taille
   updatePreviewSize();
 
@@ -246,36 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Mise à jour de la gestion des overlays pour prendre en compte les dossiers
-  document.querySelectorAll('.overlay-item').forEach(item => {
-    item.addEventListener('click', (event) => {
-      // Empêcher la propagation vers le dossier parent
-      event.stopPropagation();
-      
-      document.querySelectorAll('.overlay-item').forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-      
-      // Construire l'URL complète pour la preview en préservant les paramètres
-      const localPath = item.dataset.url;
-      const currentParams = new URLSearchParams(previewFrame.src.split('?')[1] || '');
-      const newUrl = new URL(localPath, window.location.origin);
-      currentParams.forEach((value, key) => {
-        newUrl.searchParams.set(key, value);
-      });
-      
-      previewFrame.src = newUrl.toString();
-      
-      // Mise à jour de la taille recommandée
-      const size = item.dataset.size;
-      if (size) {
-        sizeInfo.textContent = `Taille recommandée : ${size}`;
-        
-        // Ajuster le ratio de la preview
-        const [width, height] = size.split('x').map(Number);
-        const ratio = width / height;
-        previewContainerWrapper.style.aspectRatio = ratio;
-      }
-      updatePreviewSize();
-    });
-  });
+  // Afficher l'interface une fois tout initialisé
+  document.getElementById('app').style.display = 'flex';
+  document.querySelector('.loading-screen').style.display = 'none';
 });
