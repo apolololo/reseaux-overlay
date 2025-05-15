@@ -2,96 +2,19 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>APO Overlays</title>
-  <link rel="stylesheet" href="./src/styles/main.css" />
+  <title>Générateur d'Overlay</title>
+  <meta name="description" content="Créez et gérez vos overlays Twitch facilement" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
 </head>
 <body>
-  <div id="app">
-    <div class="overlay-list">
-      <h2>Overlays</h2>
-      <ul>
-        <li class="overlay-item active" data-url="src/overlays/apo/overlay.html" data-size="800x200">
-          Réseaux & Code
-        </li>
-        <li class="overlay-item" data-url="src/overlays/starting/overlay.html" data-size="1920x1080">
-          Starting Soon
-        </li>
-        <li class="folder-item">
-          <div class="folder-header">
-            <span>Pause</span>
-            <svg class="folder-icon" viewBox="0 0 24 24" width="24" height="24">
-              <path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-            </svg>
-          </div>
-          <ul class="folder-content">
-            <li class="overlay-item" data-url="src/overlays/brb/overlay.html" data-size="1920x1080">
-              Pause Standard
-            </li>
-            <li class="overlay-item" data-url="src/overlays/brb/overlay-video.html" data-size="1920x1080">
-              Pause avec Zone Vidéo
-            </li>
-          </ul>
-        </li>
-        <li class="overlay-item" data-url="src/overlays/end/overlay.html" data-size="1920x1080">
-          Fin du Stream
-        </li>
-        <li class="overlay-item" data-url="src/overlays/game-status/overlay.html" data-size="1920x1080">
-          Status de Jeu
-        </li>
-        <li class="folder-item">
-          <div class="folder-header">
-            <span>Maps</span>
-            <svg class="folder-icon" viewBox="0 0 24 24" width="24" height="24">
-              <path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-            </svg>
-          </div>
-          <ul class="folder-content">
-            <li class="overlay-item" data-url="src/overlays/maps/overlay.html" data-size="1920x1080">
-              Box Fights & Zone Wars
-            </li>
-          </ul>
-        </li>
-        <li class="overlay-item" data-url="src/overlays/followers-goal/overlay.html" data-size="1920x1080">
-          Followers Goal
-        </li>
-      </ul>
-    </div>
-    
-    <div class="preview-section">
-      <div class="preview-options">
-        <div class="background-options">
-          <label>Fond de preview :</label>
-          <div class="background-controls">
-            <input type="color" id="bg-color" value="#000000" title="Couleur de fond">
-            <button id="bg-transparent" title="Fond transparent">
-              <svg viewBox="0 0 24 24" width="24" height="24">
-                <path fill="currentColor" d="M12 2L2 12l10 10 10-10L12 2zM4.83 12L12 19.17 19.17 12 12 4.83 4.83 12z"/>
-              </svg>
-            </button>
-            <input type="file" id="bg-image" accept="image/*" hidden>
-            <button id="bg-image-btn" title="Image de fond">
-              <svg viewBox="0 0 24 24" width="24" height="24">
-                <path fill="currentColor" d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="preview-container">
-        <div class="preview-background">
-          <iframe id="overlay-preview" src="/src/overlays/apo/overlay.html"></iframe>
-        </div>
-      </div>
-
-      <div class="copy-info">
-        <button id="copy-url">Copier l'URL pour OBS</button>
-        <span class="size-info">Taille recommandée : 800x200</span>
-      </div>
-    </div>
-  </div>
-
-  <script type="module" src="./src/js/main.js"></script>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>

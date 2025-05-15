@@ -1,8 +1,15 @@
+import jwt from 'jsonwebtoken';
+
 export const requireAuth = async (req, res, next) => {
   const session = await getSession(req);
   
   if (!session) {
-    return res.redirect('/auth/twitch');
+    // Si la requête est une API, renvoyer une erreur 401
+    if (req.path.startsWith('/api/')) {
+      return res.status(401).json({ error: 'Non authentifié' });
+    }
+    // Sinon, rediriger vers la page de login
+    return res.redirect('/login');
   }
   
   req.user = session.user;
@@ -14,19 +21,25 @@ export const getSession = async (req) => {
   if (!token) return null;
 
   try {
-    const session = await verifyToken(token);
-    return session;
+    const decoded = await verifyToken(token);
+    return {
+      user: {
+        id: decoded.id,
+        login: decoded.login,
+        display_name: decoded.display_name,
+        access_token: decoded.access_token
+      }
+    };
   } catch (error) {
+    console.error('Erreur de vérification du token:', error);
     return null;
   }
 };
 
 const verifyToken = async (token) => {
   try {
-    // Vérifier le token JWT
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    return decoded;
+    return jwt.verify(token, process.env.JWT_SECRET);
   } catch (error) {
-    throw new Error('Invalid token');
+    throw new Error('Token invalide');
   }
 }; 
