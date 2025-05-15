@@ -65,7 +65,7 @@
         try {
           loadingText.textContent = "Échange du code contre un token...";
           console.log("Échange du code contre un token...", code);
-          console.log("URL de redirection utilisée:", 'https://apo-overlay.netlify.app/auth/callback');
+          console.log("URL de redirection utilisée:", 'https://apo-overlay.netlify.app/auth/callback.html');
           console.log("Client ID utilisé (dans auth.html):", "z8q1w4g12yrql6cyb5zzwmhe1pnxyn");
           
           // Appel à notre fonction Supabase Edge qui gère l'échange de code
@@ -77,7 +77,7 @@
             body: JSON.stringify({ 
               code,
               origin: window.location.origin,
-              redirect_uri: 'https://apo-overlay.netlify.app/auth/callback'
+              redirect_uri: 'https://apo-overlay.netlify.app/auth/callback.html'
             })
           });
           
@@ -143,8 +143,12 @@
           if (error.message && error.message.includes('invalid client')) {
             errorMessage.innerHTML = "Erreur d'authentification Twitch: Client ID ou Secret invalide.<br><br>" +
               "Vérifiez que les identifiants client sont correctement configurés dans la console développeur Twitch " +
-              "et que l'URL de redirection <strong>https://apo-overlay.netlify.app/auth/callback</strong> " +
+              "et que l'URL de redirection <strong>https://apo-overlay.netlify.app/auth/callback.html</strong> " +
               "est bien enregistrée dans les paramètres de l'application Twitch.";
+          } else if (error.message && error.message.includes('redirect_uri does not match')) {
+            errorMessage.innerHTML = "Erreur d'authentification Twitch: L'URL de redirection ne correspond pas.<br><br>" +
+              "Vérifiez que l'URL de redirection <strong>https://apo-overlay.netlify.app/auth/callback.html</strong> " +
+              "est exactement celle qui est enregistrée dans les paramètres de l'application Twitch.";
           }
         }
       };
