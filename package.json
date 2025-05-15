@@ -8,6 +8,7 @@
     "dev:server": "nodemon src/server.js",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "build": "vite build",
+    "postbuild": "cp dist/index.html dist/404.html",
     "preview": "vite preview",
     "start": "node src/server.js"
   },
