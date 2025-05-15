@@ -7,8 +7,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        auth: resolve(__dirname, 'src/auth.html'),
-        callback: resolve(__dirname, 'auth/callback.html'),
         apo: resolve(__dirname, 'src/overlays/apo/overlay.html'),
         starting: resolve(__dirname, 'src/overlays/starting/overlay.html'),
         brb: resolve(__dirname, 'src/overlays/brb/overlay.html'),
@@ -24,7 +22,7 @@ export default defineConfig({
     copyPublicDir: true
   },
   server: {
-    port: 8080,
+    port: 3000,
     open: '/index.html'
   }
 });
