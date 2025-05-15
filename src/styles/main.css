@@ -2,10 +2,10 @@
 /* Ajout des styles pour le bouton de déconnexion */
 .header-container {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 1rem;
   margin-bottom: 1.5rem;
-  padding: 0.5rem;
+  padding: 1rem;
   background-color: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
 }
@@ -42,23 +42,26 @@
 /* Styles pour les informations utilisateur */
 .user-info-container {
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
 }
 
 .twitch-info {
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
 .user-profile {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
   background-color: rgba(145, 70, 255, 0.1);
   border-radius: 8px;
   transition: var(--transition);
+  width: 100%;
 }
 
 .user-profile img {

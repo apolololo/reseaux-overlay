@@ -172,32 +172,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const previewBackground = document.querySelector('.preview-background');
     const iframe = document.getElementById('overlay-preview');
 
-    // Déterminer si c'est un overlay plein écran
-    const isFullScreen = targetWidth >= 1920;
-    container.setAttribute('data-full-screen', isFullScreen);
-
-    // Définir le ratio exact de l'overlay
-    const targetRatio = targetWidth / targetHeight;
-    
-    // Ajuster le conteneur principal pour qu'il ait exactement le même ratio que l'overlay
-    // Mais seulement si ce n'est pas un petit overlay comme "Réseaux & Code"
-    if (targetWidth > 800) {
-      container.style.aspectRatio = targetRatio;
-    } else {
-      // Pour les petits overlays, on utilise une taille minimale
-      container.style.aspectRatio = "auto";
-      container.style.minWidth = "600px";
-      container.style.minHeight = "200px";
-    }
+    // Définir les dimensions exactes de l'iframe
+    iframe.style.width = `${targetWidth}px`;
+    iframe.style.height = `${targetHeight}px`;
+    iframe.setAttribute('data-size', `${targetWidth}/${targetHeight}`);
 
     // Calculer les dimensions du conteneur
     const containerRect = container.getBoundingClientRect();
-    
-    // Calculer l'échelle optimale pour l'iframe
-    const scale = Math.min(
-      containerRect.width / targetWidth,
-      containerRect.height / targetHeight
-    ) * 0.95; // 95% pour laisser une petite marge
+    const containerWidth = containerRect.width;
+    const containerHeight = containerRect.height;
+
+    // Calculer l'échelle pour ajuster l'iframe aux dimensions du conteneur
+    const scaleX = containerWidth / targetWidth;
+    const scaleY = containerHeight / targetHeight;
+    const scale = Math.min(scaleX, scaleY) * 0.95; // 95% pour une petite marge
+
+    // Appliquer la transformation
+    iframe.style.transform = `scale(${scale})`;
+    iframe.style.transformOrigin = 'center';
+
+    // Ajuster le conteneur de fond pour correspondre aux dimensions de l'iframe
+    previewBackground.style.width = `${targetWidth * scale}px`;
+    previewBackground.style.height = `${targetHeight * scale}px`;
+
+    // Mettre à jour l'affichage des dimensions
+    const sizeInfo = document.querySelector('.size-info');
+    if (sizeInfo) {
+      sizeInfo.textContent = `Dimensions : ${targetWidth}x${targetHeight} pixels`;
+    }
 
     // Appliquer la transformation à l'iframe
     iframe.style.width = `${targetWidth}px`;
