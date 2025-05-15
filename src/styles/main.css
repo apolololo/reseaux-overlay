@@ -32,3 +32,38 @@
 .logout-button svg {
   opacity: 0.8;
 }
+
+/* Styles pour les informations utilisateur */
+.user-info-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.twitch-info {
+  display: flex;
+  align-items: center;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  background-color: rgba(145, 70, 255, 0.1);
+  border-radius: 4px;
+}
+
+.user-profile img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.username {
+  color: #f1f1f1;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+

@@ -50,9 +50,10 @@
       const exchangeCodeForToken = async (code) => {
         try {
           loadingText.textContent = "Échange du code contre un token...";
+          console.log("Échange du code contre un token...", code);
           
           // Appel à notre fonction Supabase Edge qui gère l'échange de code
-          const response = await fetch('/.netlify/functions/twitch-auth', {
+          const response = await fetch('https://uejmtvhqzadtxrqtowtm.supabase.co/functions/v1/twitch-auth', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -61,10 +62,13 @@
           });
           
           if (!response.ok) {
-            throw new Error('Erreur lors de l\'échange du code');
+            const errorText = await response.text();
+            console.error("Erreur de la fonction Supabase:", errorText);
+            throw new Error('Erreur lors de l\'échange du code: ' + response.status + ' ' + errorText);
           }
           
           const data = await response.json();
+          console.log("Données reçues:", data);
           
           // Stocker le token et l'expiration en local storage
           localStorage.setItem('twitch_token', data.access_token);
@@ -87,12 +91,13 @@
         } catch (error) {
           console.error('Erreur d\'authentification:', error);
           loadingText.textContent = "Erreur d'authentification";
-          statusMessage.textContent = "Une erreur s'est produite lors de l'authentification.";
+          statusMessage.textContent = "Une erreur s'est produite lors de l'authentification. Détails : " + error.message;
         }
       };
       
       // Traiter les paramètres d'URL
       const params = getUrlParams();
+      console.log("Paramètres reçus:", params);
       
       // Vérifier si l'état correspond
       const storedState = localStorage.getItem('twitch_auth_state');
@@ -101,17 +106,21 @@
         // Gérer les erreurs retournées par Twitch
         statusMessage.textContent = "Erreur d'authentification";
         loadingText.textContent = params.error_description || params.error;
+        console.error("Erreur Twitch:", params.error, params.error_description);
       } else if (!params.state || params.state !== storedState) {
         // Vérification de l'état échouée (possible attaque CSRF)
         statusMessage.textContent = "Erreur de sécurité";
         loadingText.textContent = "Vérification d'état échouée";
+        console.error("État invalide:", params.state, "attendu:", storedState);
       } else if (params.code) {
         // Échanger le code contre un token
+        console.log("Code d'autorisation reçu, échange en cours...");
         await exchangeCodeForToken(params.code);
       } else {
         // Aucun code ou erreur dans l'URL
         statusMessage.textContent = "Erreur d'authentification";
         loadingText.textContent = "Aucun code d'autorisation reçu";
+        console.error("Aucun code reçu dans l'URL");
       }
       
       // Nettoyer l'état stocké

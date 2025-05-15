@@ -13,12 +13,17 @@
     <div class="overlay-list">
       <div class="header-container">
         <h2>Overlays</h2>
-        <button id="logout-button" class="logout-button">
-          <svg viewBox="0 0 24 24" width="18" height="18">
-            <path fill="currentColor" d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-          </svg>
-          <span>Déconnexion</span>
-        </button>
+        <div class="user-info-container">
+          <div id="twitch-info" class="twitch-info">
+            <!-- Les informations utilisateur seront insérées ici -->
+          </div>
+          <button id="logout-button" class="logout-button">
+            <svg viewBox="0 0 24 24" width="18" height="18">
+              <path fill="currentColor" d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+            </svg>
+            <span>Déconnexion</span>
+          </button>
+        </div>
       </div>
       <ul>
         <li class="overlay-item active" data-url="src/overlays/apo/overlay.html" data-size="800x200">
@@ -106,12 +111,35 @@
       const checkAuth = () => {
         const token = localStorage.getItem('twitch_token');
         const expiresAt = localStorage.getItem('twitch_expires_at');
+        const userData = localStorage.getItem('twitch_user');
         
         // Vérifier si le token existe et n'est pas expiré
         if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
+          console.log("Non authentifié, redirection vers la page de connexion");
           // Rediriger vers la page d'authentification
           window.location.href = './src/auth.html';
+          return false;
         }
+        
+        // Afficher les informations utilisateur
+        if (userData) {
+          try {
+            const user = JSON.parse(userData);
+            const twitchInfo = document.getElementById('twitch-info');
+            if (twitchInfo && user) {
+              twitchInfo.innerHTML = `
+                <div class="user-profile">
+                  ${user.profile_image_url ? `<img src="${user.profile_image_url}" alt="${user.display_name}">` : ''}
+                  <span class="username">${user.display_name || 'Utilisateur Twitch'}</span>
+                </div>
+              `;
+            }
+          } catch (e) {
+            console.error("Erreur lors de l'affichage des infos utilisateur", e);
+          }
+        }
+        
+        return true;
       };
       
       // Vérifier l'authentification au chargement

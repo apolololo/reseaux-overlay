@@ -47,7 +47,7 @@
         
         if (token && expiresAt && new Date().getTime() < parseInt(expiresAt)) {
           // Token valide, rediriger vers la page principale
-          window.location.href = './index.html';
+          window.location.href = '/index.html';
         }
       };
       
@@ -55,26 +55,35 @@
       checkAuthentication();
       
       // Gérer le clic sur le bouton de connexion
-      loginButton.addEventListener('click', async () => {
-        // Afficher le chargement
-        loading.classList.add('active');
-        
-        // ID client Twitch (défini dans l'environnement)
-        const clientId = import.meta.env.VITE_TWITCH_CLIENT_ID;
-        
-        // URL de redirection (doit correspondre à celle configurée dans l'application Twitch)
-        const redirectUri = 'https://apo-overlay.netlify.app/auth/callback';
-        
-        // Générer un état aléatoire pour la sécurité
-        const state = Math.random().toString(36).substring(2, 15);
-        localStorage.setItem('twitch_auth_state', state);
-        
-        // Construire l'URL d'authentification Twitch
-        const scope = 'user:read:email'; // Permissions demandées
-        const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}`;
-        
-        // Rediriger vers l'authentification Twitch
-        window.location.href = authUrl;
+      loginButton.addEventListener('click', () => {
+        try {
+          // Afficher le chargement
+          loading.classList.add('active');
+          
+          // ID client Twitch (hardcoded for testing - should use environment variable)
+          // En production, utilisez toujours import.meta.env.VITE_TWITCH_CLIENT_ID
+          const clientId = "q22qg1vb8mctmr45e2g6liopppfmyh";
+          
+          // URL de redirection (doit correspondre à celle configurée dans l'application Twitch)
+          const redirectUri = 'https://apo-overlay.netlify.app/auth/callback';
+          
+          // Générer un état aléatoire pour la sécurité
+          const state = Math.random().toString(36).substring(2, 15);
+          localStorage.setItem('twitch_auth_state', state);
+          
+          // Construire l'URL d'authentification Twitch
+          const scope = 'user:read:email channel:read:subscriptions'; // Permission pour lire les abonnements
+          const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}`;
+          
+          console.log("Redirecting to:", authUrl);
+          
+          // Rediriger vers l'authentification Twitch
+          window.location.href = authUrl;
+        } catch (error) {
+          console.error("Erreur lors de la redirection:", error);
+          loading.classList.remove('active');
+          alert("Une erreur s'est produite lors de la tentative de connexion. Veuillez réessayer.");
+        }
       });
     });
   </script>
