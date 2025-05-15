@@ -1,9 +1,9 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const TWITCH_CLIENT_ID = Deno.env.get("VITE_TWITCH_CLIENT_ID") || "k40r5alkvhaz3aq0sk3mcoufwfvg8y";
-const TWITCH_CLIENT_SECRET = Deno.env.get("TWITCH_CLIENT_SECRET") || "0xmcch55lsr4ftorzx5a4qzt19pjrd";
-const REDIRECT_URI = Deno.env.get("REDIRECT_URI") || "https://apo-overlay.netlify.app/auth/callback.html";
+const TWITCH_CLIENT_ID = Deno.env.get("VITE_TWITCH_CLIENT_ID") || "z8q1w4g12yrql6cyb5zzwmhe1pnxyn";
+const TWITCH_CLIENT_SECRET = Deno.env.get("TWITCH_CLIENT_SECRET") || "etddbi8l496w5x6px5ip7bohrwuwy6";
+const REDIRECT_URI = Deno.env.get("REDIRECT_URI") || "https://apo-overlay.netlify.app/auth/callback";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -164,7 +164,7 @@ serve(async (req) => {
     const { code } = data;
     
     // Récupérer l'URL de redirection depuis le corps de la requête ou utiliser celle par défaut
-    const redirectUri = data.redirect_uri || REDIRECT_URI || 'https://apo-overlay.netlify.app/auth/callback.html';
+    const redirectUri = data.redirect_uri || REDIRECT_URI || 'https://apo-overlay.netlify.app/auth/callback';
 
     if (!code) {
       return new Response(

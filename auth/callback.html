@@ -65,6 +65,8 @@
         try {
           loadingText.textContent = "Échange du code contre un token...";
           console.log("Échange du code contre un token...", code);
+          console.log("URL de redirection utilisée:", 'https://apo-overlay.netlify.app/auth/callback');
+          console.log("Client ID utilisé (dans auth.html):", "z8q1w4g12yrql6cyb5zzwmhe1pnxyn");
           
           // Appel à notre fonction Supabase Edge qui gère l'échange de code
           const response = await fetch('https://uejmtvhqzadtxrqtowtm.supabase.co/functions/v1/twitch-auth', {
@@ -75,13 +77,20 @@
             body: JSON.stringify({ 
               code,
               origin: window.location.origin,
-              redirect_uri: 'https://apo-overlay.netlify.app/auth/callback.html'
+              redirect_uri: 'https://apo-overlay.netlify.app/auth/callback'
             })
           });
           
           if (!response.ok) {
-            const errorText = await response.text();
-            console.error("Erreur de la fonction Supabase:", errorText);
+            let errorText;
+            try {
+              const errorJson = await response.json();
+              errorText = JSON.stringify(errorJson);
+              console.error("Erreur de la fonction Supabase (JSON):", errorJson);
+            } catch (e) {
+              errorText = await response.text();
+              console.error("Erreur de la fonction Supabase (texte):", errorText);
+            }
             throw new Error('Erreur lors de l\'échange du code: ' + response.status + ' ' + errorText);
           }
           
@@ -120,7 +129,7 @@
           
           // Rediriger vers la page principale
           setTimeout(() => {
-            window.location.href = '/';
+            window.location.href = '/index.html';
           }, 1500);
           
         } catch (error) {
@@ -129,6 +138,14 @@
           statusMessage.textContent = "Une erreur s'est produite";
           errorContainer.style.display = 'block';
           errorMessage.textContent = error.message || "Détails non disponibles";
+          
+          // Ajouter des détails supplémentaires pour le débogage
+          if (error.message && error.message.includes('invalid client')) {
+            errorMessage.innerHTML = "Erreur d'authentification Twitch: Client ID ou Secret invalide.<br><br>" +
+              "Vérifiez que les identifiants client sont correctement configurés dans la console développeur Twitch " +
+              "et que l'URL de redirection <strong>https://apo-overlay.netlify.app/auth/callback</strong> " +
+              "est bien enregistrée dans les paramètres de l'application Twitch.";
+          }
         }
       };
       
