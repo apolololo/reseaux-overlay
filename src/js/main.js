@@ -25,6 +25,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const sizeInfo = document.querySelector('.size-info');
   const previewContainerWrapper = document.querySelector('.preview-container');
 
+  // Initialiser l'authentification Twitch
+  import('./auth.js').then(module => {
+    module.initTwitchAuth();
+  });
+
   // Gestion des overlays avec support des tailles
   document.querySelectorAll('.overlay-item').forEach(item => {
     item.addEventListener('click', () => {      
@@ -38,6 +43,17 @@ document.addEventListener('DOMContentLoaded', () => {
       // Préserver les paramètres d'URL existants lors du changement d'overlay
       const currentParams = new URLSearchParams(previewFrame.src.split('?')[1] || '');
       const newUrl = new URL(fullPath, window.location.origin);
+      
+      // Ajouter le token Twitch si disponible et si c'est l'overlay followers-goal
+      if (localPath.includes('followers-goal')) {
+        const token = localStorage.getItem('twitch_token');
+        const userId = localStorage.getItem('twitch_user_id');
+        if (token && userId) {
+          newUrl.searchParams.set('token', token);
+          newUrl.searchParams.set('user_id', userId);
+        }
+      }
+      
       currentParams.forEach((value, key) => {
         newUrl.searchParams.set(key, value);
       });
@@ -109,6 +125,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Construire l'URL complète pour la production en incluant les paramètres actuels
     const previewUrl = new URL(previewFrame.src);
     const fullPath = new URL(localPath, PRODUCTION_URL);
+    
+    // Ajouter le token Twitch si disponible et si c'est l'overlay followers-goal
+    if (localPath.includes('followers-goal')) {
+      const token = localStorage.getItem('twitch_token');
+      const userId = localStorage.getItem('twitch_user_id');
+      if (token && userId) {
+        fullPath.searchParams.set('token', token);
+        fullPath.searchParams.set('user_id', userId);
+      }
+    }
     
     // Copier tous les paramètres de la preview vers l'URL finale
     previewUrl.searchParams.forEach((value, key) => {
@@ -210,8 +236,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const size = activeOverlay.dataset.size;
     if (size) {
       sizeInfo.textContent = `Taille recommandée : ${size}`;
-      
-      // Nous laissons updatePreviewSize() gérer les dimensions
     }
   }
   // Activer le fond transparent par défaut au lieu de la couleur
@@ -240,6 +264,17 @@ document.addEventListener('DOMContentLoaded', () => {
       const localPath = item.dataset.url;
       const currentParams = new URLSearchParams(previewFrame.src.split('?')[1] || '');
       const newUrl = new URL(localPath, window.location.origin);
+      
+      // Ajouter le token Twitch si disponible et si c'est l'overlay followers-goal
+      if (localPath.includes('followers-goal')) {
+        const token = localStorage.getItem('twitch_token');
+        const userId = localStorage.getItem('twitch_user_id');
+        if (token && userId) {
+          newUrl.searchParams.set('token', token);
+          newUrl.searchParams.set('user_id', userId);
+        }
+      }
+      
       currentParams.forEach((value, key) => {
         newUrl.searchParams.set(key, value);
       });

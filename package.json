@@ -10,6 +10,16 @@
   },
   "dependencies": {
     "apo-overlay-generator": "file:",
-    "vite": "^5.0.0"
+    "vite": "^5.0.0",
+    "@supabase/supabase-js": "^2.39.0",
+    "express": "^4.18.2",
+    "dotenv": "^16.3.1",
+    "uuid": "^9.0.1",
+    "twitch-auth": "^4.6.7"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.3.0",
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.27"
   }
 }

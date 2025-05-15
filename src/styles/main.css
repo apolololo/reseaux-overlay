@@ -7,6 +7,96 @@
   --spacing-unit: 16px;
 }
 
+/* Bouton de connexion Twitch */
+.twitch-login-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #9146FF;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 20px;
+  width: calc(100% - 8px);
+  transition: background-color 0.2s ease;
+}
+
+.twitch-login-btn:hover {
+  background: #7d3cdd;
+}
+
+.twitch-login-btn img {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) invert(1);
+}
+
+/* Status de connexion */
+.connection-status {
+  margin-bottom: 20px;
+  padding: 12px;
+  border-radius: 6px;
+  background: rgba(145, 70, 255, 0.1);
+}
+
+.status-connected {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #9146FF;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.username {
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.followers {
+  color: #9146FF;
+  font-size: 12px;
+}
+
+.logout-btn {
+  background: none;
+  border: 1px solid #9146FF;
+  color: #9146FF;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.logout-btn:hover {
+  background: #9146FF;
+  color: white;
+}
+
+/* Reste du CSS existant */
 body {
   margin: 0;
   padding: 0;
@@ -230,7 +320,6 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  /* Ces dimensions seront ajustées par JavaScript pour correspondre exactement à l'overlay */
 }
 
 .preview-background iframe {
