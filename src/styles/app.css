@@ -27,13 +27,16 @@ body {
   background-color: var(--bg-dark);
   color: var(--text-light);
   min-height: 100vh;
+  display: flex;
+  align-items: stretch;
 }
 
 #app {
   display: flex;
+  width: 100%;
   height: 100vh;
-  gap: 1rem;
-  padding: 1rem;
+  gap: 2rem;
+  padding: 2rem;
 }
 
 /* Liste des overlays */
@@ -41,12 +44,11 @@ body {
   width: 320px;
   background-color: var(--bg-light);
   padding: 1.5rem;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
-  overflow-y: auto;
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-  transition: var(--transition);
-  margin: 0 auto;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 4rem);
 }
 
 .overlay-list h2 {
@@ -59,12 +61,29 @@ body {
 
 .overlay-list ul {
   list-style: none;
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.overlay-list ul::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overlay-list ul::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.overlay-list ul::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
 }
 
 .overlay-item {
   padding: 1rem 1.25rem;
   margin-bottom: 0.75rem;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
   transition: var(--transition);
   color: var(--text-secondary);
@@ -72,32 +91,34 @@ body {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .overlay-item:hover {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(255, 255, 255, 0.1);
   transform: translateX(6px);
 }
 
 .overlay-item.active {
   background-color: var(--primary);
   color: white;
-  box-shadow: 0 4px 12px rgba(108, 99, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(108, 99, 255, 0.3);
 }
 
 /* Dossiers */
 .folder-item {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .folder-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1rem;
+  padding: 1rem 1.25rem;
   cursor: pointer;
-  border-radius: 8px;
-  transition: background-color 0.2s;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  transition: var(--transition);
 }
 
 .folder-header:hover {
@@ -105,7 +126,7 @@ body {
 }
 
 .folder-icon {
-  transition: transform 0.2s;
+  transition: transform 0.3s ease;
 }
 
 .folder-item.open .folder-icon {
@@ -113,7 +134,7 @@ body {
 }
 
 .folder-content {
-  margin-left: 1rem;
+  margin: 0.75rem 0 0.75rem 1rem;
   display: none;
 }
 
@@ -124,36 +145,43 @@ body {
 /* Section de prévisualisation */
 .preview-section {
   flex: 1;
-  padding: 1.5rem;
   display: flex;
   flex-direction: column;
   background-color: var(--bg-light);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
 }
 
 .preview-options {
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+  padding: 1.5rem;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .background-options {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.5rem;
+}
+
+.background-options label {
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 .background-controls {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
-.background-controls button {
-  padding: 0.75rem;
+.background-controls button,
+.background-controls input[type="color"] {
+  width: 40px;
+  height: 40px;
+  padding: 0.5rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   background-color: rgba(255, 255, 255, 0.1);
   color: var(--text);
   cursor: pointer;
@@ -163,54 +191,69 @@ body {
   justify-content: center;
 }
 
-.background-controls button:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+.background-controls input[type="color"] {
+  padding: 2px;
+}
+
+.background-controls input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.background-controls input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 6px;
+}
+
+.background-controls button:hover,
+.background-controls input[type="color"]:hover {
+  background-color: rgba(255, 255, 255, 0.15);
   transform: translateY(-2px);
 }
 
 .background-controls button.active {
   background-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(108, 99, 255, 0.2);
 }
 
 /* Conteneur de prévisualisation */
 .preview-container {
   flex: 1;
-  background-color: var(--bg-light);
-  border-radius: 12px;
-  overflow: hidden;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 2rem;
+  background: var(--bg-dark);
 }
 
 .preview-background {
-  width: 100%;
-  height: 100%;
   position: relative;
   background-color: black;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 #overlay-preview {
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
   border: none;
   background: transparent;
-  aspect-ratio: attr(data-size);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 /* Informations de copie */
 .copy-info {
-  margin-top: 1rem;
+  padding: 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 #copy-url {
@@ -218,13 +261,13 @@ body {
   background-color: var(--primary);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
   font-weight: 600;
   transition: var(--transition);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
 #copy-url:hover {
@@ -240,4 +283,8 @@ body {
 .size-info {
   color: var(--text-secondary);
   font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
 }

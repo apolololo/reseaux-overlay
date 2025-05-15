@@ -1,78 +1,82 @@
-/* Ajout des styles pour le bouton de déconnexion */
+/* Header et informations utilisateur */
 .header-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1.5rem;
   margin-bottom: 1.5rem;
-  padding: 1rem;
-  background-color: rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
 }
 
-.logout-button {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1.25rem;
-  background-color: rgba(255, 255, 255, 0.15);
-  border: none;
-  border-radius: 8px;
-  color: #f1f1f1;
-  cursor: pointer;
-  transition: var(--transition);
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.logout-button:hover {
-  background-color: rgba(255, 255, 255, 0.25);
-  transform: translateY(-3px);
-  box-shadow: var(--shadow);
-}
-
-.logout-button:active {
-  transform: scale(0.97);
-}
-
-.logout-button svg {
-  opacity: 0.8;
-}
-
-/* Styles pour les informations utilisateur */
 .user-info-container {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  width: 100%;
+  gap: 1rem;
 }
 
 .twitch-info {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
 }
 
 .user-profile {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
   padding: 0.75rem 1rem;
-  background-color: rgba(145, 70, 255, 0.1);
-  border-radius: 8px;
+  background: rgba(145, 70, 255, 0.1);
+  border-radius: 10px;
   transition: var(--transition);
-  width: 100%;
+  flex: 1;
+}
+
+.user-profile:hover {
+  background: rgba(145, 70, 255, 0.15);
+  transform: translateY(-2px);
 }
 
 .user-profile img {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .username {
-  color: #f1f1f1;
-  font-size: 0.9rem;
-  font-weight: 500;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 600;
 }
 
+/* Bouton de déconnexion */
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  background-color: rgba(239, 68, 68, 0.15);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-top: 1rem;
+}
+
+.logout-button:hover {
+  background-color: rgba(239, 68, 68, 0.25);
+  transform: translateY(-2px);
+}
+
+.logout-button:active {
+  transform: scale(0.98);
+}
+
+.logout-button svg {
+  width: 18px;
+  height: 18px;
+  opacity: 0.9;
+}
