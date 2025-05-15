@@ -33,8 +33,15 @@ async function exchangeCodeForToken(code: string, redirectUri: string) {
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    console.error("Twitch token exchange failed:", errorText);
+    let errorText;
+    try {
+      const errorJson = await response.json();
+      errorText = JSON.stringify(errorJson);
+      console.error("Twitch token exchange failed:", errorJson);
+    } catch (e) {
+      errorText = await response.text();
+      console.error("Twitch token exchange failed (raw):", errorText);
+    }
     throw new Error(`Échec de l'échange du code: ${response.status} ${errorText}`);
   }
 
@@ -156,10 +163,8 @@ serve(async (req) => {
     const data = await req.json();
     const { code } = data;
     
-    // Récupérer l'URL de redirection depuis la requête ou utiliser celle par défaut
-    const requestURL = new URL(req.url);
-    const origin = requestURL.searchParams.get('origin') || 'https://apo-overlay.netlify.app';
-    const redirectUri = `${origin}/auth/callback.html`;
+    // Récupérer l'URL de redirection depuis le corps de la requête ou utiliser celle par défaut
+    const redirectUri = data.redirect_uri || REDIRECT_URI || 'https://apo-overlay.netlify.app/auth/callback.html';
 
     if (!code) {
       return new Response(
@@ -176,6 +181,8 @@ serve(async (req) => {
 
     console.log("Code reçu, échange en cours...");
     console.log("Utilisation de l'URL de redirection:", redirectUri);
+    console.log("Client ID utilisé:", TWITCH_CLIENT_ID);
+    console.log("Client Secret utilisé (masqué):", TWITCH_CLIENT_SECRET ? "***" : "non défini");
     
     // Échanger le code contre un token d'accès
     const tokenData = await exchangeCodeForToken(code, redirectUri);

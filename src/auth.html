@@ -85,7 +85,7 @@
           
           // Construire l'URL d'authentification Twitch
           const scope = 'user:read:email channel:read:subscriptions moderator:read:followers';
-          const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}`;
+          const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}&force_verify=true`;
           
           console.log("URL de redirection:", redirectUri);
           console.log("URL d'authentification:", authUrl);
