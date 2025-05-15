@@ -77,8 +77,8 @@
           // ID client Twitch (using environment variable when available)
           const clientId = "k40r5alkvhaz3aq0sk3mcoufwfvg8y";
           
-          // URL de redirection vers Netlify
-          const redirectUri = 'https://apo-overlay.netlify.app/auth/callback';
+          // URL de redirection (utiliser l'URL actuelle pour le développement local)
+          const redirectUri = window.location.protocol + '//' + window.location.host + '/src/auth/callback.html';
           
           // Générer un état aléatoire pour la sécurité
           const state = Math.random().toString(36).substring(2, 15);
@@ -88,7 +88,8 @@
           const scope = 'user:read:email channel:read:subscriptions moderator:read:followers';
           const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}`;
           
-          console.log("Redirecting to:", authUrl);
+          console.log("URL de redirection:", redirectUri);
+          console.log("URL d'authentification:", authUrl);
           
           // Rediriger vers l'authentification Twitch
           window.location.href = authUrl;
