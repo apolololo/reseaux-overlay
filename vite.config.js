@@ -1,25 +1,28 @@
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 
 export default defineConfig({
-  plugins: [react()],
   base: '/',
-  server: {
-    port: 3000,
-    proxy: {
-      '/api': 'http://localhost:3000',
-      '/auth': 'http://localhost:3000'
-    }
-  },
   build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
-    emptyOutDir: true,
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'index.html')
-      }
-    }
+        main: resolve(__dirname, 'index.html'),
+        apo: resolve(__dirname, 'src/overlays/apo/overlay.html'),
+        starting: resolve(__dirname, 'src/overlays/starting/overlay.html'),
+        brb: resolve(__dirname, 'src/overlays/brb/overlay.html'),
+        brbVideo: resolve(__dirname, 'src/overlays/brb/overlay-video.html'),
+        end: resolve(__dirname, 'src/overlays/end/overlay.html'),
+        gameStatus: resolve(__dirname, 'src/overlays/game-status/overlay.html'),
+        mapInfo: resolve(__dirname, 'src/overlays/maps/overlay.html')
+      },
+    },
+    assetsDir: 'assets',
+    outDir: 'dist',
+    emptyOutDir: true,
+    copyPublicDir: true
+  },
+  server: {
+    port: 3000,
+    open: '/index.html'
   }
 });
