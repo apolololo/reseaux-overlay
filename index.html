@@ -5,65 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>APO Overlays</title>
   <link rel="stylesheet" href="./src/styles/main.css" />
-  <style>
-    .auth-banner {
-      background-color: #9146ff;
-      color: white;
-      padding: 10px 15px;
-      text-align: center;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-family: 'Montserrat', sans-serif;
-    }
-    
-    .auth-banner.authenticated {
-      background-color: #43a047;
-    }
-    
-    .auth-banner p {
-      margin: 0;
-    }
-    
-    .auth-banner a, .auth-banner button {
-      background-color: white;
-      color: #9146ff;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-      text-decoration: none;
-      font-size: 14px;
-    }
-    
-    .auth-banner.authenticated button {
-      color: #43a047;
-    }
-    
-    .auth-banner a:hover, .auth-banner button:hover {
-      background-color: #f0f0f0;
-    }
-    
-    .token-info {
-      display: none;
-      margin-left: 15px;
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.8);
-    }
-    
-    .auth-banner.authenticated .token-info {
-      display: inline;
-    }
-  </style>
 </head>
 <body>
-  <div class="auth-banner" id="auth-banner">
-    <p>Connectez-vous avec Twitch pour activer les fonctionnalités en temps réel</p>
-    <a href="./src/auth/twitch-auth.html" id="auth-button">Se connecter</a>
-    <span class="token-info" id="token-expiry"></span>
-  </div>
-  
   <div id="app">
     <div class="overlay-list">
       <h2>Overlays</h2>
@@ -96,9 +39,6 @@
         <li class="overlay-item" data-url="src/overlays/game-status/overlay.html" data-size="1920x1080">
           Status de Jeu
         </li>
-        <li class="overlay-item" data-url="src/overlays/followers-goal/overlay.html" data-size="800x200">
-          Followers Goal
-        </li>
         <li class="folder-item">
           <div class="folder-header">
             <span>Maps</span>
@@ -111,6 +51,9 @@
               Box Fights & Zone Wars
             </li>
           </ul>
+        </li>
+        <li class="overlay-item" data-url="src/overlays/followers-goal/overlay.html" data-size="1920x1080">
+          Followers Goal
         </li>
       </ul>
     </div>
@@ -150,103 +93,5 @@
   </div>
 
   <script type="module" src="./src/js/main.js"></script>
-  <script>
-    // Gestion de l'authentification Twitch
-    document.addEventListener('DOMContentLoaded', () => {
-      const authBanner = document.getElementById('auth-banner');
-      const authButton = document.getElementById('auth-button');
-      const tokenExpiry = document.getElementById('token-expiry');
-      
-      // Vérifier si un token est stocké
-      const checkAuth = () => {
-        const token = localStorage.getItem('twitch_token');
-        const expiryTime = localStorage.getItem('twitch_token_expiry');
-        
-        if (token && expiryTime) {
-          const now = new Date().getTime();
-          const expiry = parseInt(expiryTime);
-          
-          if (now < expiry) {
-            // Token valide
-            authBanner.classList.add('authenticated');
-            authButton.textContent = 'Déconnexion';
-            
-            // Calculer le temps restant
-            const timeLeft = Math.floor((expiry - now) / 1000 / 60); // minutes
-            tokenExpiry.textContent = `Token valide pour encore ${timeLeft} minutes`;
-            
-            return true;
-          } else {
-            // Token expiré
-            localStorage.removeItem('twitch_token');
-            localStorage.removeItem('twitch_token_expiry');
-          }
-        }
-        
-        // Pas de token ou token expiré
-        authBanner.classList.remove('authenticated');
-        authButton.textContent = 'Se connecter';
-        authButton.href = './src/auth/twitch-auth.html';
-        return false;
-      };
-      
-      // Vérifier l'authentification au chargement
-      const isAuthenticated = checkAuth();
-      
-      // Gérer le clic sur le bouton d'authentification
-      authButton.addEventListener('click', (e) => {
-        if (authBanner.classList.contains('authenticated')) {
-          e.preventDefault();
-          // Déconnexion
-          localStorage.removeItem('twitch_token');
-          localStorage.removeItem('twitch_token_expiry');
-          checkAuth();
-        }
-      });
-      
-      // Intercepter les messages de la page d'authentification
-      window.addEventListener('message', (event) => {
-        if (event.data && event.data.type === 'twitch_auth') {
-          localStorage.setItem('twitch_token', event.data.token);
-          
-          // Calculer l'expiration (4 heures)
-          const expiry = new Date().getTime() + (4 * 60 * 60 * 1000);
-          localStorage.setItem('twitch_token_expiry', expiry.toString());
-          
-          checkAuth();
-        }
-      });
-      
-      // Vérifier périodiquement l'état du token
-      setInterval(checkAuth, 60000); // Vérifier chaque minute
-      
-      // Modifier le comportement du bouton de copie d'URL
-      const copyUrlButton = document.getElementById('copy-url');
-      const originalCopyFunction = copyUrlButton.onclick;
-      
-      copyUrlButton.onclick = function() {
-        const token = localStorage.getItem('twitch_token');
-        const iframe = document.getElementById('overlay-preview');
-        let url = iframe.src;
-        
-        // Ajouter le token à l'URL si disponible
-        if (token && url.includes('followers-goal')) {
-          url = url.includes('?') ? 
-            `${url}&token=${token}` : 
-            `${url}?token=${token}`;
-        }
-        
-        // Copier l'URL dans le presse-papier
-        navigator.clipboard.writeText(url)
-          .then(() => {
-            const originalText = copyUrlButton.textContent;
-            copyUrlButton.textContent = 'URL copiée !';
-            setTimeout(() => {
-              copyUrlButton.textContent = originalText;
-            }, 2000);
-          });
-      };
-    });
-  </script>
 </body>
 </html>
