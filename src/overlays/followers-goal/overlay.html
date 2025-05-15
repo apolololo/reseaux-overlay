@@ -32,6 +32,13 @@
     const params = new URLSearchParams(window.location.search);
     const goalTarget = params.get('target') || 500;
     const currentFollowers = params.get('current') || 0;
+    const token = params.get('token');
+    
+    if (!token) {
+      console.error('Token manquant');
+      document.body.innerHTML = '<div style="color: red;">Erreur: Token manquant</div>';
+      return;
+    }
     
     // Mettre à jour les éléments
     document.getElementById('goalTarget').textContent = goalTarget;
@@ -42,17 +49,32 @@
     const progress = (currentFollowers / goalTarget) * 100;
     document.getElementById('progressFill').style.width = `${Math.min(100, progress)}%`;
 
-    // Connexion WebSocket pour les mises à jour en direct
-    const ws = new WebSocket(`wss://${window.location.host}/api/followers-ws`);
-    
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'followers_update') {
-        document.getElementById('currentCount').textContent = data.count;
-        const newProgress = (data.count / goalTarget) * 100;
+    // Fonction pour récupérer le nombre de followers
+    async function fetchFollowers() {
+      try {
+        const response = await fetch('https://api.twitch.tv/helix/users/follows?to_id=' + token, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Client-Id': import.meta.env.VITE_TWITCH_CLIENT_ID
+          }
+        });
+        
+        if (!response.ok) throw new Error('Erreur API');
+        
+        const data = await response.json();
+        const count = data.total;
+        
+        document.getElementById('currentCount').textContent = count;
+        const newProgress = (count / goalTarget) * 100;
         document.getElementById('progressFill').style.width = `${Math.min(100, newProgress)}%`;
+      } catch (error) {
+        console.error('Erreur:', error);
       }
-    };
+    }
+
+    // Mettre à jour toutes les 30 secondes
+    setInterval(fetchFollowers, 30000);
+    fetchFollowers(); // Premier appel
   </script>
 </body>
 </html>

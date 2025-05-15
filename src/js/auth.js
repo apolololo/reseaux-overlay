@@ -16,7 +16,7 @@ export async function initTwitchAuth() {
 
   // Gérer la connexion
   loginButton.addEventListener('click', () => {
-    const scope = 'user:read:email channel:read:subscriptions channel:read:followers';
+    const scope = 'user:read:follows channel:read:subscriptions';
     const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
     window.location.href = authUrl;
   });

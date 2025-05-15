@@ -43,6 +43,12 @@ document.addEventListener('DOMContentLoaded', () => {
       // Préserver les paramètres d'URL existants lors du changement d'overlay
       const currentParams = new URLSearchParams(previewFrame.src.split('?')[1] || '');
       const newUrl = new URL(fullPath, window.location.origin);
+      
+      // Ajouter le token Twitch si disponible et si c'est l'overlay followers-goal
+      if (localPath.includes('followers-goal') && localStorage.getItem('twitch_token')) {
+        newUrl.searchParams.set('token', localStorage.getItem('twitch_token'));
+      }
+      
       currentParams.forEach((value, key) => {
         newUrl.searchParams.set(key, value);
       });
@@ -119,6 +125,11 @@ document.addEventListener('DOMContentLoaded', () => {
     previewUrl.searchParams.forEach((value, key) => {
       fullPath.searchParams.set(key, value);
     });
+    
+    // Ajouter le token Twitch si disponible et si c'est l'overlay followers-goal
+    if (localPath.includes('followers-goal') && localStorage.getItem('twitch_token')) {
+      fullPath.searchParams.set('token', localStorage.getItem('twitch_token'));
+    }
     
     try {
       await navigator.clipboard.writeText(fullPath.toString());
@@ -243,6 +254,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const localPath = item.dataset.url;
       const currentParams = new URLSearchParams(previewFrame.src.split('?')[1] || '');
       const newUrl = new URL(localPath, window.location.origin);
+      
+      // Ajouter le token Twitch si disponible et si c'est l'overlay followers-goal
+      if (localPath.includes('followers-goal') && localStorage.getItem('twitch_token')) {
+        newUrl.searchParams.set('token', localStorage.getItem('twitch_token'));
+      }
+      
       currentParams.forEach((value, key) => {
         newUrl.searchParams.set(key, value);
       });
