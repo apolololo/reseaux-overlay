@@ -1,4 +1,3 @@
-
 /* Ajout des styles pour le bouton de déconnexion */
 .header-container {
   display: flex;
@@ -6,7 +5,7 @@
   gap: 1rem;
   margin-bottom: 1.5rem;
   padding: 1rem;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, 0.08);
   border-radius: 8px;
 }
 
@@ -15,7 +14,7 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1.25rem;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.15);
   border: none;
   border-radius: 8px;
   color: #f1f1f1;
@@ -26,8 +25,8 @@
 }
 
 .logout-button:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
+  background-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-3px);
   box-shadow: var(--shadow);
 }
 

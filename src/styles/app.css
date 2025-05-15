@@ -5,8 +5,10 @@
   --primary-dark: #4B45B3;
   --bg: #070B14;
   --bg-light: #0D1525;
+  --bg-dark: #05080F;
   --text: #F8FAFC;
   --text-secondary: #CBD5E1;
+  --text-light: #F8FAFC;
   --accent: #38BDF8;
   --accent-dark: #0284C7;
   --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -22,8 +24,8 @@
 
 body {
   font-family: 'Montserrat', sans-serif;
-  background-color: var(--bg);
-  color: var(--text);
+  background-color: var(--bg-dark);
+  color: var(--text-light);
   min-height: 100vh;
 }
 
@@ -44,6 +46,7 @@ body {
   border-radius: 12px;
   box-shadow: var(--shadow);
   transition: var(--transition);
+  margin: 0 auto;
 }
 
 .overlay-list h2 {
@@ -72,8 +75,8 @@ body {
 }
 
 .overlay-item:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  transform: translateX(4px);
+  background-color: rgba(255, 255, 255, 0.15);
+  transform: translateX(6px);
 }
 
 .overlay-item.active {
