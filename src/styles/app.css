@@ -1,0 +1,201 @@
+/* Variables globales */
+:root {
+  --primary: #6C63FF;
+  --primary-light: #8F8AFF;
+  --primary-dark: #4B45B3;
+  --bg: #070B14;
+  --bg-light: #0D1525;
+  --text: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --accent: #38BDF8;
+  --accent-dark: #0284C7;
+}
+
+/* Styles de base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+#app {
+  display: flex;
+  height: 100vh;
+}
+
+/* Liste des overlays */
+.overlay-list {
+  width: 300px;
+  background-color: var(--bg-light);
+  padding: 1.5rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  overflow-y: auto;
+}
+
+.overlay-list h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--text);
+}
+
+.overlay-list ul {
+  list-style: none;
+}
+
+.overlay-item {
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  color: var(--text-secondary);
+}
+
+.overlay-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.overlay-item.active {
+  background-color: var(--primary);
+  color: white;
+}
+
+/* Dossiers */
+.folder-item {
+  margin-bottom: 0.5rem;
+}
+
+.folder-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.folder-header:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.folder-icon {
+  transition: transform 0.2s;
+}
+
+.folder-item.open .folder-icon {
+  transform: rotate(180deg);
+}
+
+.folder-content {
+  margin-left: 1rem;
+  display: none;
+}
+
+.folder-item.open .folder-content {
+  display: block;
+}
+
+/* Section de prévisualisation */
+.preview-section {
+  flex: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-options {
+  margin-bottom: 1rem;
+}
+
+.background-options {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.background-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.background-controls button {
+  padding: 0.5rem;
+  border: none;
+  border-radius: 4px;
+  background-color: var(--bg-light);
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.background-controls button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.background-controls button.active {
+  background-color: var(--primary);
+}
+
+/* Conteneur de prévisualisation */
+.preview-container {
+  flex: 1;
+  background-color: var(--bg-light);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.preview-background {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background-color: black;
+  transition: background-color 0.3s;
+}
+
+#overlay-preview {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+}
+
+/* Informations de copie */
+.copy-info {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#copy-url {
+  padding: 0.75rem 1.5rem;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+#copy-url:hover {
+  background-color: var(--primary-light);
+}
+
+#copy-url:active {
+  transform: scale(0.98);
+}
+
+.size-info {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
