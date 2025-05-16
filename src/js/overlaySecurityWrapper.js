@@ -26,15 +26,40 @@ export function initializeSecureOverlay(overlayPath, containerId, initializer) {
       console.log('Hostname:', window.location.hostname);
     }
     
-    // NOUVEAU: Détection automatique de l'environnement
+    // CORRECTION MAJEURE: Détection d'environnement plus fiable
     const isProduction = !window.location.hostname.includes('localhost') && 
                          !window.location.hostname.includes('127.0.0.1');
     
-    // Normaliser le chemin en fonction de l'environnement
+    // NOUVELLE LOGIQUE: Normaliser le chemin en fonction de l'environnement
     let normalizedPath = overlayPath;
+    
+    // S'assurer que le chemin commence par un slash
+    if (!normalizedPath.startsWith('/')) {
+      normalizedPath = '/' + normalizedPath;
+    }
+    
     if (isProduction) {
-      // En production, les chemins peuvent être différents
-      normalizedPath = overlayPath.replace(/^\/src\//, '/');
+      // En production, adapter les chemins pour qu'ils fonctionnent avec la structure déployée
+      // Deux stratégies principales:
+      
+      // 1. Supprimer le préfixe src/ qui peut ne pas exister en production
+      normalizedPath = normalizedPath.replace(/^\/src\//, '/');
+      
+      // 2. Utiliser le chemin relatif à partir de overlays/
+      if (normalizedPath.includes('/overlays/')) {
+        const overlaysPath = normalizedPath.split('/overlays/')[1];
+        if (overlaysPath) {
+          // Tester aussi avec le chemin direct à partir de /overlays/
+          const altPath = '/overlays/' + overlaysPath;
+          if (DEBUG) console.log('Chemin alternatif créé:', altPath);
+          
+          // Essayer le chemin alternatif si le principal échoue
+          if (!checkOverlayAccess(normalizedPath)) {
+            normalizedPath = altPath;
+            if (DEBUG) console.log('Utilisation du chemin alternatif');
+          }
+        }
+      }
     }
     
     if (DEBUG) {
@@ -42,15 +67,17 @@ export function initializeSecureOverlay(overlayPath, containerId, initializer) {
       console.log('Chemin normalisé:', normalizedPath);
     }
     
-    // Vérifier l'accès avec le chemin normalisé
-    const hasAccess = checkOverlayAccess(normalizedPath);
+    // NOUVEAU: Mode test pour faciliter le développement
+    const isTestMode = params.get('test') === '1';
+    const hasAccess = isTestMode || checkOverlayAccess(normalizedPath);
     
     if (DEBUG) {
+      console.log('Mode test activé:', isTestMode);
       console.log('Accès autorisé:', hasAccess);
     }
     
     if (!hasAccess) {
-      showAccessDenied(`#${containerId}`, "Accès refusé", "Veuillez utiliser un lien d'overlay généré depuis l'application APO Overlays.");
+      showAccessDenied(`#${containerId}`, "Accès refusé", "Veuillez utiliser un lien d'overlay généré depuis l'application APO Overlays ou activer le mode test.");
     } else {
       // Exécuter le code d'initialisation uniquement si l'accès est autorisé
       try {
@@ -66,6 +93,7 @@ export function initializeSecureOverlay(overlayPath, containerId, initializer) {
             ${DEBUG ? `<pre style="text-align:left;background:#333;padding:10px;max-width:90%;overflow:auto;">${error.toString()}\n\n${error.stack}</pre>` : ''}
             <div style="margin-top: 10px">
               <button onclick="window.location.reload()">Recharger</button>
+              <button onclick="window.location.href=window.location.href+'&test=1'">Mode test</button>
               ${!DEBUG ? `<button onclick="window.location.href=window.location.href+'&debug=1'">Activer le mode débogage</button>` : ''}
             </div>
           </div>

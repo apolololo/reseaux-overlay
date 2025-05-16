@@ -40,6 +40,7 @@ export function validateOverlayToken(token, path) {
     // Extraire le chemin du token
     let overlayPath = decodedData.substring(separatorIndex + 1);
     
+    // AMÉLIORATION: Normalisation rigoureuse des chemins
     // Normaliser les chemins pour la comparaison
     if (!overlayPath.startsWith('/')) {
       overlayPath = '/' + overlayPath;
@@ -49,89 +50,89 @@ export function validateOverlayToken(token, path) {
       path = '/' + path;
     }
     
-    // NOUVEAU: Détection de l'environnement de production
+    // Détection de l'environnement de production
     const isProduction = !window.location.hostname.includes('localhost') && 
                          !window.location.hostname.includes('127.0.0.1');
                          
     // Normalisation des chemins en fonction de l'environnement
     if (isProduction) {
-      // En production, les chemins peuvent être différents (sans le préfixe src/)
+      // Supprimer le préfixe 'src/' pour tous les chemins en production
       overlayPath = overlayPath.replace(/^\/src\//, '/');
       path = path.replace(/^\/src\//, '/');
     }
     
+    // Nettoyer les chemins pour une meilleure correspondance
+    const cleanPath = (p) => p.replace(/\.html$/, '').replace(/\/$/, '');
+    const normalizedTokenPath = cleanPath(overlayPath);
+    const normalizedRequestPath = cleanPath(path);
+    
     if (DEBUG) {
-      console.log('Chemin dans token (normalisé):', overlayPath);
-      console.log('Chemin demandé (normalisé):', path);
+      console.log('----- Vérification d\'accès détaillée -----');
+      console.log('Chemin original dans token:', overlayPath);
+      console.log('Chemin original demandé:', path);
+      console.log('Chemin token normalisé:', normalizedTokenPath);
+      console.log('Chemin demandé normalisé:', normalizedRequestPath);
       console.log('Environnement de production:', isProduction);
     }
     
-    // NOUVEAU: Nettoyer les chemins pour une meilleure correspondance
-    // Supprimer les extensions de fichier (.html)
-    const cleanPath = (p) => p.replace(/\.html$/, '');
-    const cleanedTokenPath = cleanPath(overlayPath);
-    const cleanedRequestPath = cleanPath(path);
+    // CORRECTION: Vérifications améliorées pour correspondance de chemin
     
-    if (DEBUG) {
-      console.log('Chemin token nettoyé:', cleanedTokenPath);
-      console.log('Chemin demandé nettoyé:', cleanedRequestPath);
-    }
-    
-    // Vérification plus permissive:
-    // 1. Le chemin dans le token correspond au chemin demandé
-    if (overlayPath === path || cleanedTokenPath === cleanedRequestPath) {
-      if (DEBUG) console.log('Chemins exacts correspondants');
+    // 1. Correspondance exacte des chemins normalisés
+    if (normalizedTokenPath === normalizedRequestPath) {
+      if (DEBUG) console.log('✅ Correspondance exacte des chemins normalisés');
       return true;
     }
     
-    // 2. Les chemins se contiennent mutuellement
-    if (path.includes(overlayPath) || overlayPath.includes(path) ||
-        cleanedRequestPath.includes(cleanedTokenPath) || cleanedTokenPath.includes(cleanedRequestPath)) {
-      if (DEBUG) console.log('Chemins partiellement correspondants');
-      return true;
-    }
-    
-    // 3. Extraire le dossier d'overlay du chemin (ex: /overlays/apo/)
-    const getOverlayFolder = (p) => {
-      const overlayMatch = p.match(/\/overlays\/([^\/]+)\//);
-      return overlayMatch ? overlayMatch[0] : null;
-    };
-    
-    const overlayFolder = getOverlayFolder(overlayPath);
-    const requestFolder = getOverlayFolder(path);
-    
-    if (overlayFolder && requestFolder && overlayFolder === requestFolder) {
-      if (DEBUG) console.log('Même dossier d\'overlay:', overlayFolder);
-      return true;
-    }
-    
-    // 4. NOUVEAU: Vérification simplifiée par nom d'overlay
-    const getOverlayName = (p) => {
+    // 2. Extraire le nom de l'overlay et le type
+    const getOverlayInfo = (p) => {
       const parts = p.split('/');
-      // Trouver le segment qui contient "overlay" ou qui suit "overlays"
-      for (let i = 0; i < parts.length; i++) {
-        if (parts[i] === 'overlays' && i + 1 < parts.length) {
-          return parts[i + 1];
-        }
-      }
-      return null;
+      // Trouver "overlays" dans le chemin
+      const overlaysIndex = parts.indexOf('overlays');
+      if (overlaysIndex === -1) return null;
+      
+      return {
+        type: parts[overlaysIndex + 1] || null,
+        filename: parts[parts.length - 1] || null
+      };
     };
     
-    const overlayName = getOverlayName(overlayPath);
-    const requestName = getOverlayName(path);
+    const tokenInfo = getOverlayInfo(normalizedTokenPath);
+    const requestInfo = getOverlayInfo(normalizedRequestPath);
     
-    if (overlayName && requestName && overlayName === requestName) {
-      if (DEBUG) console.log('Même nom d\'overlay:', overlayName);
+    if (tokenInfo && requestInfo) {
+      if (DEBUG) {
+        console.log('Info token:', tokenInfo);
+        console.log('Info requête:', requestInfo);
+      }
+      
+      // 3. Même type d'overlay
+      if (tokenInfo.type && requestInfo.type && tokenInfo.type === requestInfo.type) {
+        if (DEBUG) console.log('✅ Même type d\'overlay');
+        return true;
+      }
+    }
+    
+    // 4. NOUVEAU: Correspondance de sous-chaîne plus intelligente
+    if (normalizedRequestPath.includes(normalizedTokenPath) || normalizedTokenPath.includes(normalizedRequestPath)) {
+      if (DEBUG) console.log('✅ L\'un des chemins contient l\'autre');
       return true;
     }
     
-    // 5. NOUVEAU: Autoriser tous les overlays en mode développement avec debug activé
-    if (DEBUG && !isProduction) {
-      console.log('Mode développement avec debug: accès autorisé');
+    // 5. NOUVEAU: Vérifier si les deux chemins pointent vers le même fichier
+    const tokenFile = normalizedTokenPath.split('/').pop();
+    const requestFile = normalizedRequestPath.split('/').pop();
+    if (tokenFile && requestFile && tokenFile === requestFile) {
+      if (DEBUG) console.log('✅ Même nom de fichier');
       return true;
     }
     
-    if (DEBUG) console.log('Accès refusé: les chemins ne correspondent pas');
+    // 6. Autoriser l'accès en mode test (pour simplifier le développement)
+    if (params.get('test') === '1') {
+      console.log('✅ Mode test activé, accès autorisé');
+      return true;
+    }
+    
+    if (DEBUG) console.log('❌ Accès refusé: aucun critère de correspondance trouvé');
     return false;
   } catch (error) {
     console.error("Erreur de validation du token:", error);
@@ -156,25 +157,48 @@ export function checkOverlayAccess(path) {
     console.log('URL complète:', window.location.href);
   }
   
-  // Mode développement local - autoriser l'accès sans token pour le débogage local
-  if ((DEBUG || params.get('force') === '1') && 
-      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-    console.log('Mode développement local ou forcé, accès autorisé');
+  // NOUVEAU: Autorisation facile pour le développement local
+  const isDevelopment = window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1';
+                       
+  // 1. Mode développement local - autoriser l'accès sans token pour le débogage local
+  if ((DEBUG || params.get('force') === '1') && isDevelopment) {
+    console.log('Mode développement local avec debug, accès autorisé');
     return true;
   }
   
-  // NOUVEAU: Mode de test facile - ajouter ?test=1 pour autoriser tout accès (uniquement pour le développement)
-  if (params.get('test') === '1' && (
-      window.location.hostname === 'localhost' || 
-      window.location.hostname === '127.0.0.1' || 
-      window.location.hostname.includes('github.io') || 
-      window.location.hostname.includes('netlify.app') ||
-      window.location.hostname.includes('vercel.app'))) {
-    console.log('Mode test activé, accès autorisé');
+  // 2. Mode test - pour faciliter le test des overlays
+  if (params.get('test') === '1') {
+    // En développement, toujours autoriser
+    if (isDevelopment) {
+      console.log('Mode test en développement, accès autorisé');
+      return true;
+    }
+    
+    // En production, autoriser uniquement sur certains domaines
+    const allowedTestDomains = [
+      'github.io',
+      'netlify.app',
+      'vercel.app'
+    ];
+    
+    const domainAllowed = allowedTestDomains.some(domain => 
+      window.location.hostname.includes(domain)
+    );
+    
+    if (domainAllowed) {
+      console.log('Mode test sur domaine de déploiement, accès autorisé');
+      return true;
+    }
+  }
+  
+  // 3. Autorisation forcée pour tous les domaines
+  if (params.get('force') === '1' && params.get('admin') === 'true') {
+    console.log('Mode force + admin, accès autorisé');
     return true;
   }
   
-  // Vérifier si le token est valide pour ce chemin
+  // 4. Validation standard par token
   return validateOverlayToken(accessToken, path);
 }
 
@@ -210,14 +234,17 @@ export function showAccessDenied(container, title = "Accès refusé", message = 
         URL complète: ${window.location.href}<br>
       </div>
       <div style="margin-top: 10px">
-        <button onclick="window.location.search += '&test=1'">Activer le mode test</button>
+        <button onclick="window.location.search += '&test=1'">Mode test</button>
+        <button onclick="window.location.reload()">Réessayer</button>
       </div>
     `;
   } else {
-    // Même pour le mode non-debug, ajouter un bouton pour activer le débogage
+    // Même pour le mode non-debug, ajouter des boutons utiles
     debugInfo = `
       <div style="margin-top: 20px">
-        <button onclick="window.location.href=window.location.href+'&debug=1'">Activer le mode débogage</button>
+        <button onclick="window.location.href=window.location.href+'&debug=1'">Activer le débogage</button>
+        <button onclick="window.location.href=window.location.href+'&test=1'">Mode test</button>
+        <button onclick="window.location.reload()">Réessayer</button>
       </div>
     `;
   }

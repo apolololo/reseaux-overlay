@@ -71,7 +71,6 @@
         return;
       }
       
-      // Le jeton est simple: userID-overlayPath
       try {
         // Format du token: userID-overlayPath (encodé en base64)
         const decodedData = atob(token);
@@ -94,97 +93,112 @@
         
         if (DEBUG) console.log('User ID:', userId, 'Chemin d\'overlay:', overlayPath);
         
-        // NOUVEAU: Détection automatique du format de déploiement
-        // Pour les environnements de production (Netlify, Vercel, etc.)
+        // CORRECTION CRITIQUE: Détecter l'environnement de production
         const isProduction = !window.location.hostname.includes('localhost') && 
-                            !window.location.hostname.includes('127.0.0.1');
-                            
-        if (DEBUG) console.log('Environnement de production détecté:', isProduction);
+                             !window.location.hostname.includes('127.0.0.1');
         
-        // Correction des chemins pour les environnements de production
+        // Tableau des chemins à essayer, en commençant par les plus probables
+        let pathsToTry = [];
+        
         if (isProduction) {
-          // Dans un déploiement, le répertoire 'src' est souvent aplati à la racine
-          // Enlever le préfixe "src" pour les chemins en production
-          overlayPath = overlayPath.replace(/^\/src\//, '/');
-          if (DEBUG) console.log('Chemin corrigé pour la production:', overlayPath);
-        }
-        
-        // Construire l'URL de l'overlay
-        const overlayUrl = new URL(overlayPath, window.location.origin);
-        
-        if (DEBUG) console.log('URL construite:', overlayUrl.toString());
-        
-        // Transférer tous les paramètres de l'URL actuelle vers l'URL de l'overlay
-        params.forEach((value, key) => {
-          if (key !== 'token') { // Ne pas transférer le token original
-            overlayUrl.searchParams.set(key, value);
-          }
-        });
-        
-        // Ajouter un paramètre sécurisé pour autoriser l'accès
-        overlayUrl.searchParams.set('access_token', token);
-        
-        // Si on est en debug, ajouter aussi le paramètre de debug à l'overlay cible
-        if (DEBUG) {
-          overlayUrl.searchParams.set('debug', '1');
-          console.log('URL finale avec debug:', overlayUrl.toString());
-        }
-        
-        // Créer un iframe pour charger l'overlay avec gestion d'erreur améliorée
-        const iframe = document.createElement('iframe');
-        iframe.src = overlayUrl.toString();
-        iframe.style.border = 'none';
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.position = 'absolute';
-        iframe.style.top = '0';
-        iframe.style.left = '0';
-        
-        // Gestion des erreurs améliorée
-        iframe.onerror = (error) => {
-          console.error("Erreur de chargement de l'iframe:", error);
-          showError("Erreur de chargement", "Impossible de charger l'overlay spécifié.", {error, url: overlayUrl.toString()}, DEBUG);
-        };
-        
-        // NOUVEAU: Ne pas vérifier l'URL en amont car cela peut causer des problèmes CORS
-        // Au lieu de cela, charger directement l'iframe et utiliser onload/onerror
-        document.getElementById('overlay-container').appendChild(iframe);
-        
-        // Suivre les erreurs d'iframe
-        iframe.onload = () => {
-          if (DEBUG) console.log('Iframe chargé avec succès');
-          // Vérifier si le contenu de l'iframe a été chargé correctement
-          try {
-            // Tenter d'accéder au contenu pour vérifier si c'est chargé
-            const iframeContent = iframe.contentDocument || iframe.contentWindow.document;
-            if (DEBUG) console.log('Contenu iframe accessible');
-          } catch (e) {
-            if (DEBUG) console.error('Erreur lors de l\'accès au contenu de l\'iframe:', e);
-            // En cas d'erreur CORS, nous ne pouvons pas vérifier le contenu
-            // mais l'iframe est probablement chargé correctement
-          }
-        };
-        
-        // NOUVEAU: Timer de secours pour détecter les problèmes de chargement
-        setTimeout(() => {
-          const alternativePaths = [
-            // Essayer sans le préfixe "src"
-            overlayPath.replace(/^\/src\//, '/'),
-            // Essayer avec un préfixe src
-            overlayPath.startsWith('/src/') ? overlayPath : '/src' + overlayPath,
-            // Essayer des chemins plus directs
-            `/overlays${overlayPath.split('/overlays').pop()}`,
-            // Essayer avec .html explicite
-            `${overlayPath}.html`,
-            // Essayer des chemins très basiques
-            `/overlays/${overlayPath.split('/').pop()}`,
-            `/overlays/${overlayPath.split('/').pop()}.html`
+          // Production: essayer d'abord sans le préfixe 'src'
+          pathsToTry = [
+            overlayPath.replace(/^\/src\//, '/'),             // Sans le préfixe src
+            `/overlays/${overlayPath.split('/').pop()}`,      // Chemin direct au fichier
+            `/overlays/${overlayPath.split('/').pop()}.html`, // Avec extension .html explicite
+            overlayPath,                                      // Chemin original
+            `/src${overlayPath}`                              // Avec préfixe src explicite
           ];
-          
-          if (DEBUG) {
-            console.log('Chemins alternatifs préparés en cas d\'échec:', alternativePaths);
+        } else {
+          // Développement: commencer par le chemin original
+          pathsToTry = [
+            overlayPath,                                      // Chemin original
+            overlayPath.replace(/^\/src\//, '/'),             // Sans le préfixe src
+            `/overlays/${overlayPath.split('/').pop()}`,      // Chemin direct au fichier
+            `/src${overlayPath}`                              // Avec préfixe src explicite
+          ];
+        }
+        
+        if (DEBUG) console.log('Chemins à essayer:', pathsToTry);
+        
+        // Essayer chaque chemin dans la liste
+        tryNextPath(0);
+        
+        function tryNextPath(index) {
+          if (index >= pathsToTry.length) {
+            showError("Overlay non trouvé", `Impossible de trouver l'overlay à aucun des chemins essayés. Vérifiez la configuration des chemins.`, {
+              overlayPath,
+              triedPaths: pathsToTry
+            }, DEBUG);
+            return;
           }
-        }, 5000);
+          
+          const currentPath = pathsToTry[index];
+          if (DEBUG) console.log(`Essai du chemin ${index + 1}/${pathsToTry.length}: ${currentPath}`);
+          
+          // Construire l'URL de l'overlay
+          const overlayUrl = new URL(currentPath, window.location.origin);
+          
+          // Ajouter le paramètre d'accès
+          overlayUrl.searchParams.set('access_token', token);
+          
+          // Transférer les autres paramètres
+          params.forEach((value, key) => {
+            if (key !== 'token' && key !== 'access_token') {
+              overlayUrl.searchParams.set(key, value);
+            }
+          });
+          
+          // Si on est en debug, ajouter aussi le paramètre
+          if (DEBUG) {
+            overlayUrl.searchParams.set('debug', '1');
+            console.log(`URL complète à essayer: ${overlayUrl.toString()}`);
+          }
+          
+          // Tester si l'URL existe avant de créer l'iframe
+          fetch(overlayUrl.toString(), { method: 'HEAD' })
+            .then(response => {
+              if (response.ok) {
+                if (DEBUG) console.log(`Chemin trouvé: ${currentPath}`);
+                createIframe(overlayUrl.toString());
+              } else {
+                if (DEBUG) console.log(`Chemin non trouvé: ${currentPath}, statut: ${response.status}`);
+                tryNextPath(index + 1);
+              }
+            })
+            .catch(error => {
+              if (DEBUG) console.error(`Erreur lors de la vérification du chemin ${currentPath}:`, error);
+              tryNextPath(index + 1);
+            });
+        }
+        
+        function createIframe(src) {
+          const iframe = document.createElement('iframe');
+          iframe.src = src;
+          iframe.style.border = 'none';
+          iframe.style.width = '100%';
+          iframe.style.height = '100%';
+          iframe.style.position = 'absolute';
+          iframe.style.top = '0';
+          iframe.style.left = '0';
+          
+          iframe.onerror = () => {
+            console.error("Erreur de chargement de l'iframe:", src);
+            document.getElementById('overlay-container').innerHTML = `
+              <div class="error-container">
+                <div class="error-icon">⚠️</div>
+                <div class="error-message">Erreur de chargement</div>
+                <div class="error-details">L'overlay a été trouvé mais n'a pas pu être chargé correctement.</div>
+                ${DEBUG ? `<div class="debug-info">URL: ${src}</div>` : ''}
+                <button onclick="location.reload()">Réessayer</button>
+              </div>
+            `;
+          };
+          
+          document.getElementById('overlay-container').innerHTML = '';
+          document.getElementById('overlay-container').appendChild(iframe);
+        }
+        
       } catch (error) {
         console.error("Erreur lors du décodage du token:", error);
         showError("Token d'overlay invalide", "Ce lien d'overlay n'est pas valide ou a expiré.", {error, token}, DEBUG);
@@ -215,6 +229,8 @@
           ${debugHtml}
           <div style="margin-top: 20px">
             <button onclick="window.location.href=window.location.href+'&debug=1'">Activer le mode débogage</button>
+            <button onclick="window.location.reload()">Réessayer</button>
+            <button onclick="window.location.href=window.location.href+'&test=1'">Mode test</button>
           </div>
         </div>
       `;
