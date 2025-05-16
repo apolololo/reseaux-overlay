@@ -227,8 +227,8 @@ body {
   justify-content: center;
   padding: 2rem;
   background: var(--bg-dark);
-  min-height: 0; /* Important pour le scroll */
-  overflow: auto; /* Permet le scroll si nécessaire */
+  min-height: 0;
+  overflow: hidden;
 }
 
 .preview-background {
@@ -240,8 +240,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  max-height: calc(100vh - 16rem); /* Hauteur maximale ajustée */
-  margin: 0 auto; /* Centrer horizontalement */
 }
 
 #overlay-preview {
@@ -251,8 +249,6 @@ body {
   top: 50%;
   left: 50%;
   transform-origin: center center;
-  max-width: 100%;
-  max-height: 100%;
 }
 
 /* Informations de copie */

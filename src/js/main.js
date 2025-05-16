@@ -169,39 +169,48 @@ document.addEventListener('DOMContentLoaded', () => {
     if (type === 'image') bgImageBtn.classList.add('active');
   }
 
-  // Fonction pour mettre à jour la taille de la preview et centrer correctement
+  // Fonction pour mettre à jour la taille de la preview
   function updatePreviewSize() {
     const activeOverlay = document.querySelector('.overlay-item.active');
     if (!activeOverlay || !activeOverlay.dataset.size) return;
 
     const [targetWidth, targetHeight] = activeOverlay.dataset.size.split('x').map(Number);
     const container = document.querySelector('.preview-container');
-    const previewBackground = document.querySelector('.preview-background');
-    const iframe = document.getElementById('overlay-preview');
-
-    // Calculer la taille maximale disponible
-    const containerHeight = container.clientHeight - 80; // Marge pour le padding
-    const containerWidth = container.clientWidth - 80;
-
-    // Calculer la scale pour s'adapter à l'espace disponible
-    let scale;
-    if (targetWidth > targetHeight) {
-      scale = Math.min(containerWidth / targetWidth, containerHeight / targetHeight);
-    } else {
-      scale = Math.min(containerHeight / targetHeight, containerWidth / targetWidth);
-    }
-
-    // Appliquer la transformation
-    iframe.style.width = `${targetWidth}px`;
-    iframe.style.height = `${targetHeight}px`;
-    iframe.style.transform = `translate(-50%, -50%) scale(${scale})`;
-
-    // Ajuster le conteneur de fond
-    const scaledWidth = targetWidth * scale;
-    const scaledHeight = targetHeight * scale;
     
-    previewBackground.style.width = `${scaledWidth}px`;
-    previewBackground.style.height = `${scaledHeight}px`;
+    // Calculer la taille maximale disponible en respectant les marges
+    const containerWidth = container.clientWidth - 40; // Marge horizontale
+    const containerHeight = container.clientHeight - 40; // Marge verticale
+
+    // Calculer le ratio original
+    const ratio = targetWidth / targetHeight;
+    
+    // Calculer la taille maximale possible en préservant le ratio
+    let width, height;
+    
+    if (containerWidth / ratio <= containerHeight) {
+      // Limité par la largeur
+      width = containerWidth;
+      height = width / ratio;
+    } else {
+      // Limité par la hauteur
+      height = containerHeight;
+      width = height * ratio;
+    }
+    
+    // Appliquer la taille à l'iframe directement sans scaling
+    previewFrame.style.width = `${targetWidth}px`;
+    previewFrame.style.height = `${targetHeight}px`;
+    
+    // Calculer le scale en fonction de la taille voulue versus la taille disponible
+    const scale = Math.min(width / targetWidth, height / targetHeight);
+    
+    // Appliquer la transformation pour centrer et scaler
+    previewFrame.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    
+    // Ajuster la taille du conteneur de background
+    const previewBackground = document.querySelector('.preview-background');
+    previewBackground.style.width = `${width}px`;
+    previewBackground.style.height = `${height}px`;
   }
 
   // Mettre à jour la taille lors du chargement de l'iframe
