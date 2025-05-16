@@ -53,36 +53,55 @@
         return;
       }
       
-      // Récupérer les tokens stockés
-      const overlayTokens = JSON.parse(localStorage.getItem('overlay_tokens') || '{}');
-      const overlayInfo = overlayTokens[token];
-      
-      if (!overlayInfo || !overlayInfo.path) {
-        showError("Token d'overlay invalide", "Ce lien d'overlay n'est pas valide ou a expiré.");
-        return;
-      }
-      
-      // Construire l'URL de l'overlay avec les paramètres originaux
-      const overlayUrl = new URL(overlayInfo.path, window.location.origin);
-      
-      // Transférer tous les paramètres de l'URL actuelle vers l'URL de l'overlay
-      params.forEach((value, key) => {
-        if (key !== 'token') { // Ne pas transférer le token
-          overlayUrl.searchParams.set(key, value);
+      // Le jeton est simple: userID-overlayPath
+      // Pas besoin de vérifier dans le localStorage
+      try {
+        // Format du token: userID-overlayPath (encodé en base64)
+        const decodedData = atob(token);
+        const separatorIndex = decodedData.indexOf('-');
+        
+        if (separatorIndex === -1) {
+          throw new Error("Format de token invalide");
         }
-      });
-      
-      // Créer un iframe pour charger l'overlay
-      const iframe = document.createElement('iframe');
-      iframe.src = overlayUrl.toString();
-      iframe.style.border = 'none';
-      iframe.style.width = '100%';
-      iframe.style.height = '100%';
-      iframe.style.position = 'absolute';
-      iframe.style.top = '0';
-      iframe.style.left = '0';
-      
-      document.getElementById('overlay-container').appendChild(iframe);
+        
+        const userId = decodedData.substring(0, separatorIndex);
+        let overlayPath = decodedData.substring(separatorIndex + 1);
+        
+        // S'assurer que le chemin commence par / si ce n'est pas déjà le cas
+        if (!overlayPath.startsWith('/')) {
+          overlayPath = '/' + overlayPath;
+        }
+        
+        // S'assurer que le chemin est valide (sécurité basique)
+        if (!overlayPath.includes('/overlays/')) {
+          throw new Error("Chemin d'overlay non valide");
+        }
+        
+        // Construire l'URL de l'overlay
+        const overlayUrl = new URL(overlayPath, window.location.origin);
+        
+        // Transférer tous les paramètres de l'URL actuelle vers l'URL de l'overlay
+        params.forEach((value, key) => {
+          if (key !== 'token') { // Ne pas transférer le token
+            overlayUrl.searchParams.set(key, value);
+          }
+        });
+        
+        // Créer un iframe pour charger l'overlay
+        const iframe = document.createElement('iframe');
+        iframe.src = overlayUrl.toString();
+        iframe.style.border = 'none';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.position = 'absolute';
+        iframe.style.top = '0';
+        iframe.style.left = '0';
+        
+        document.getElementById('overlay-container').appendChild(iframe);
+      } catch (error) {
+        console.error("Erreur lors du décodage du token:", error);
+        showError("Token d'overlay invalide", "Ce lien d'overlay n'est pas valide ou a expiré.");
+      }
     });
     
     function showError(title, message) {

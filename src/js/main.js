@@ -1,4 +1,3 @@
-
 // Gestion de la navigation
 document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -43,33 +42,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const sizeInfo = document.querySelector('.size-info');
   const previewContainerWrapper = document.querySelector('.preview-container');
 
-  // Génération et gestion des jetons d'overlay
+  // Génération d'un jeton simple pour les overlays (compatible partout)
   function generateOverlayToken(overlayPath) {
     // Récupérer l'ID utilisateur Twitch
     const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
     const userId = userData?.id || 'anonymous';
     
-    // Générer une chaîne aléatoire de 32 caractères
-    const randomPart = Array.from(crypto.getRandomValues(new Uint8Array(16)))
-      .map(b => b.toString(16).padStart(2, '0')).join('');
+    // Créer un jeton simple qui contient l'ID utilisateur et le chemin de l'overlay
+    const tokenData = userId + '-' + overlayPath;
     
-    // Combiner avec l'ID utilisateur et le chemin de l'overlay pour créer un jeton unique
-    const token = `${userId}-${randomPart}`;
-    
-    // Stocker la correspondance entre le jeton et le chemin de l'overlay
-    const overlayTokens = JSON.parse(localStorage.getItem('overlay_tokens') || '{}');
-    overlayTokens[token] = {
-      path: overlayPath,
-      createdAt: new Date().getTime()
-    };
-    localStorage.setItem('overlay_tokens', JSON.stringify(overlayTokens));
+    // Encoder en base64 pour plus de lisibilité
+    const token = btoa(tokenData);
     
     return token;
-  }
-
-  function getOverlayPathFromToken(token) {
-    const overlayTokens = JSON.parse(localStorage.getItem('overlay_tokens') || '{}');
-    return overlayTokens[token]?.path || null;
   }
 
   // Gestion des overlays avec support des tailles et jetons
@@ -80,11 +65,10 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Construire l'URL complète pour la preview
       const localPath = item.dataset.url;
-      const fullPath = new URL(localPath, window.location.origin).pathname;
       
       // Préserver les paramètres d'URL existants lors du changement d'overlay
       const currentParams = new URLSearchParams(previewFrame.src.split('?')[1] || '');
-      const newUrl = new URL(fullPath, window.location.origin);
+      const newUrl = new URL(localPath, window.location.origin);
       currentParams.forEach((value, key) => {
         if (key !== 'token') { // Ne pas copier l'ancien token
           newUrl.searchParams.set(key, value);
@@ -153,11 +137,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const localPath = activeOverlay.dataset.url;
     
-    // Générer un nouveau jeton pour cet overlay
+    // Générer un nouveau jeton pour cet overlay (format simple)
     const token = generateOverlayToken(localPath);
     
     // Construire l'URL avec le jeton
-    const overlayUrl = new URL('/overlay', PRODUCTION_URL);
+    const overlayUrl = new URL('/overlay.html', PRODUCTION_URL);
     overlayUrl.searchParams.set('token', token);
     
     // Copier tous les paramètres pertinents de la preview
