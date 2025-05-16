@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overlay Personnalisé</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        .overlay-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Zone d'édition pour le Studio */
+        .editable-zone {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Styles par défaut pour les éléments */
+        .overlay-element {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay-container">
+        <div class="editable-zone" id="editableZone">
+            <!-- Les éléments de l'overlay seront ajoutés ici dynamiquement -->
+        </div>
+    </div>
+
+    <script>
+        // Charger les paramètres de l'overlay
+        function loadOverlaySettings() {
+            const params = new URLSearchParams(window.location.search);
+            const overlayId = params.get('id');
+            
+            // TODO: Charger les paramètres spécifiques de l'overlay
+            // Cette fonction sera complétée lors de l'implémentation du système de sauvegarde
+        }
+
+        // Initialiser l'overlay
+        window.addEventListener('load', loadOverlaySettings);
+    </script>
+</body>
+</html>
