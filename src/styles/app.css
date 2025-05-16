@@ -1,11 +1,12 @@
+
 /* Variables globales */
 :root {
   --primary: #6C63FF;
   --primary-light: #8F8AFF;
   --primary-dark: #4B45B3;
-  --bg: #070B14;
-  --bg-light: #0D1525;
-  --bg-dark: #05080F;
+  --bg: #0A0C14;
+  --bg-light: #111827;
+  --bg-dark: #050710;
   --text: #F8FAFC;
   --text-secondary: #CBD5E1;
   --text-light: #F8FAFC;
@@ -45,10 +46,11 @@ body {
   background-color: var(--bg-light);
   padding: 1.5rem;
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
   height: calc(100vh - 4rem);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .overlay-list h2 {
@@ -149,8 +151,9 @@ body {
   flex-direction: column;
   background-color: var(--bg-light);
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .preview-options {
@@ -238,6 +241,7 @@ body {
   align-items: center;
   justify-content: center;
   max-height: calc(100vh - 16rem); /* Hauteur maximale ajustée */
+  margin: 0 auto; /* Centrer horizontalement */
 }
 
 #overlay-preview {

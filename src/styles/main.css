@@ -1,9 +1,11 @@
+
 /* Header et informations utilisateur */
 .header-container {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(30, 41, 59, 0.4);
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .user-info-container {
@@ -24,14 +26,14 @@
   align-items: center;
   gap: 1rem;
   padding: 0.75rem 1rem;
-  background: rgba(145, 70, 255, 0.1);
+  background: rgba(145, 70, 255, 0.15);
   border-radius: 10px;
   transition: var(--transition);
   flex: 1;
 }
 
 .user-profile:hover {
-  background: rgba(145, 70, 255, 0.15);
+  background: rgba(145, 70, 255, 0.2);
   transform: translateY(-2px);
 }
 

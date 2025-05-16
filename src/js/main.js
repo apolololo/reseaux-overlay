@@ -1,3 +1,4 @@
+
 // Gestion de la navigation
 document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -66,28 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (size) {
         sizeInfo.textContent = `Taille recommandée : ${size}`;
         
-        // Ajuster le ratio de la preview
-        const [width, height] = size.split('x').map(Number);
-        const ratio = width / height;
-        
-        // Calculer la taille maximale disponible
-        const containerHeight = previewContainerWrapper.clientHeight - 80; // Marge pour le padding
-        const containerWidth = previewContainerWrapper.clientWidth - 80;
-        
-        // Calculer la scale pour s'adapter à l'espace disponible
-        let scale;
-        if (width > height) {
-          scale = Math.min(containerWidth / width, containerHeight / height);
-        } else {
-          scale = Math.min(containerHeight / height, containerWidth / width);
-        }
-        
-        // Appliquer la transformation
-        previewFrame.style.width = `${width}px`;
-        previewFrame.style.height = `${height}px`;
-        previewFrame.style.transform = `translate(-50%, -50%) scale(${scale})`;
+        // Ajuster le ratio de la preview et effectuer le centrage
+        updatePreviewSize();
       }
-      updatePreviewSize();
     });
   });
 
@@ -152,12 +134,22 @@ document.addEventListener('DOMContentLoaded', () => {
       await navigator.clipboard.writeText(fullPath.toString());
       copyButton.style.transition = 'transform 0.2s ease';
       copyButton.style.transform = 'scale(1.05)';
-      copyButton.textContent = 'URL Copiée !';
+      copyButton.innerHTML = `
+        <svg viewBox="0 0 24 24" width="18" height="18">
+          <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+        </svg>
+        URL Copiée !
+      `;
       
       setTimeout(() => {
         copyButton.style.transform = 'scale(1)';
         setTimeout(() => {
-          copyButton.textContent = 'Copier l\'URL pour OBS';
+          copyButton.innerHTML = `
+            <svg viewBox="0 0 24 24" width="18" height="18">
+              <path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+            </svg>
+            Copier l'URL pour OBS
+          `;
         }, 200);
       }, 1000);
     } catch (err) {
@@ -177,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (type === 'image') bgImageBtn.classList.add('active');
   }
 
-  // Fonction pour mettre à jour la taille de la preview
+  // Fonction pour mettre à jour la taille de la preview et centrer correctement
   function updatePreviewSize() {
     const activeOverlay = document.querySelector('.overlay-item.active');
     if (!activeOverlay || !activeOverlay.dataset.size) return;
@@ -213,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Mettre à jour la taille lors du chargement de l'iframe
-  document.getElementById('overlay-preview').addEventListener('load', updatePreviewSize);
+  previewFrame.addEventListener('load', updatePreviewSize);
 
   // Gérer le redimensionnement de la fenêtre
   window.addEventListener('resize', updatePreviewSize);
