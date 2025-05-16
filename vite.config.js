@@ -1,4 +1,3 @@
-
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
@@ -10,8 +9,7 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         auth: resolve(__dirname, 'src/auth.html'),
         callback: resolve(__dirname, 'auth/callback.html'),
-        overlay: resolve(__dirname, 'overlay.html'), // Main overlay access point
-        // Individual overlays are now secured through middleware
+        overlay: resolve(__dirname, 'overlay.html'),
       },
     },
     assetsDir: 'assets',
@@ -21,6 +19,13 @@ export default defineConfig({
   },
   server: {
     port: 8080,
-    open: '/index.html'
+    open: '/index.html',
+    proxy: {
+      '/src/overlays': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false
+      }
+    }
   }
 });

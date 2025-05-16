@@ -1,4 +1,3 @@
-
 // Importation du middleware de sécurité
 import { isAuthenticated, redirectToAuth } from './securityMiddleware.js';
 
@@ -48,6 +47,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const token = btoa(tokenData);
     
     return token;
+  }
+
+  function generateOverlayUrl(overlayPath) {
+    const userId = localStorage.getItem('twitch_user_id');
+    if (!userId) {
+      console.error('User ID not found');
+      return null;
+    }
+
+    // Créer un token avec l'ID utilisateur et un timestamp
+    const token = btoa(`${userId}-${Date.now()}`);
+    
+    // Construire l'URL de l'overlay
+    const url = new URL('/overlay.html', window.location.origin);
+    url.searchParams.set('token', token);
+    url.searchParams.set('path', overlayPath);
+    
+    return url.toString();
   }
 
   // Gestion des overlays avec support des tailles et jetons
