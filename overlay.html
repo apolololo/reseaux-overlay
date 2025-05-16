@@ -56,19 +56,25 @@
       // Le jeton est simple: userID-overlayPath
       // Pas besoin de vérifier dans le localStorage
       try {
-        // Validation du token avec le nouveau système de sécurité
-        const validation = window.securityUtils.validateOverlayToken(token);
+        // Format du token: userID-overlayPath (encodé en base64)
+        const decodedData = atob(token);
+        const separatorIndex = decodedData.indexOf('-');
         
-        if (!validation.isValid) {
-          throw new Error(validation.error || 'Token invalide ou expiré');
+        if (separatorIndex === -1) {
+          throw new Error("Format de token invalide");
         }
         
-        const userId = validation.userId;
-        let overlayPath = validation.overlayPath;
+        const userId = decodedData.substring(0, separatorIndex);
+        let overlayPath = decodedData.substring(separatorIndex + 1);
         
         // S'assurer que le chemin commence par / si ce n'est pas déjà le cas
         if (!overlayPath.startsWith('/')) {
           overlayPath = '/' + overlayPath;
+        }
+        
+        // S'assurer que le chemin est valide (sécurité basique)
+        if (!overlayPath.includes('/overlays/')) {
+          throw new Error("Chemin d'overlay non valide");
         }
         
         // Construire l'URL de l'overlay
