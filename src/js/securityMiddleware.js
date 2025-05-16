@@ -45,8 +45,8 @@ export function validateOverlayToken(token, path) {
     }
     
     // Nettoyer les chemins pour la comparaison
-    overlayPath = overlayPath.replace(/\/+\/g, '/').replace(/^\/src\/overlays\//, '');
-    path = path.replace(/\/+\/g, '/').replace(/^\/src\/overlays\//, '');
+    overlayPath = overlayPath.replace(/\/+/g, '/').replace(/^\/src\/overlays\//, '');
+    path = path.replace(/\/+/g, '/').replace(/^\/src\/overlays\//, '');
     
     // Vérifier que le chemin demandé correspond au chemin dans le token
     return overlayPath === path || 
