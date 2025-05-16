@@ -1,3 +1,4 @@
+
 // Importation du middleware de sécurité
 import { isAuthenticated, redirectToAuth } from './securityMiddleware.js';
 
@@ -49,55 +50,41 @@ document.addEventListener('DOMContentLoaded', () => {
     return token;
   }
 
-  function generateOverlayUrl(overlayPath) {
-    const userId = localStorage.getItem('twitch_user_id');
-    if (!userId) {
-      console.error('User ID not found');
-      return null;
-    }
-
-    // Créer un token avec l'ID utilisateur et un timestamp
-    const token = btoa(`${userId}-${Date.now()}`);
-    
-    // Nettoyer le chemin de l'overlay
-    let cleanPath = overlayPath;
-    if (cleanPath.startsWith('/src/')) {
-      cleanPath = cleanPath.substring(5);
-    }
-    
-    // Construire l'URL de l'overlay
-    const url = new URL('/overlay.html', window.location.origin);
-    url.searchParams.set('token', token);
-    url.searchParams.set('path', cleanPath);
-    
-    return url.toString();
-  }
-
   // Gestion des overlays avec support des tailles et jetons
   document.querySelectorAll('.overlay-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const overlayPath = item.dataset.url;
-      const overlayUrl = generateOverlayUrl(overlayPath);
+    item.addEventListener('click', () => {      
+      document.querySelectorAll('.overlay-item').forEach(i => i.classList.remove('active'));      
+      item.classList.add('active');
       
-      if (overlayUrl) {
-        // Mettre à jour l'iframe de prévisualisation
-        const previewFrame = document.getElementById('overlay-preview');
-        if (previewFrame) {
-          previewFrame.src = overlayUrl;
+      // Construire l'URL complète pour la preview
+      const localPath = item.dataset.url;
+      
+      // Générer un token pour cet overlay
+      const token = generateOverlayToken(localPath);
+      
+      // Préserver les paramètres d'URL existants lors du changement d'overlay
+      const currentParams = new URLSearchParams(previewFrame.src.split('?')[1] || '');
+      const newUrl = new URL(localPath, window.location.origin);
+      
+      // Ajouter le token d'accès à l'URL de prévisualisation
+      newUrl.searchParams.set('access_token', token);
+      
+      // Transférer les autres paramètres
+      currentParams.forEach((value, key) => {
+        if (key !== 'token' && key !== 'access_token') { 
+          newUrl.searchParams.set(key, value);
         }
+      });
+      
+      previewFrame.src = newUrl.toString();
+      
+      // Mise à jour de la taille recommandée
+      const size = item.dataset.size;
+      if (size) {
+        sizeInfo.textContent = `Taille recommandée : ${size}`;
         
-        // Mettre à jour le bouton de copie
-        const copyButton = document.getElementById('copy-url');
-        if (copyButton) {
-          copyButton.onclick = () => {
-            navigator.clipboard.writeText(overlayUrl).then(() => {
-              copyButton.textContent = 'URL copiée !';
-              setTimeout(() => {
-                copyButton.textContent = 'Copier l\'URL pour OBS';
-              }, 2000);
-            });
-          };
-        }
+        // Ajuster le ratio de la preview et effectuer le centrage
+        updatePreviewSize();
       }
     });
   });
