@@ -42,19 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const sizeInfo = document.querySelector('.size-info');
   const previewContainerWrapper = document.querySelector('.preview-container');
 
-  // Génération d'un jeton simple pour les overlays (compatible partout)
+  // Utilisation du nouveau système de sécurité pour la génération des tokens
   function generateOverlayToken(overlayPath) {
-    // Récupérer l'ID utilisateur Twitch
-    const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
-    const userId = userData?.id || 'anonymous';
-    
-    // Créer un jeton simple qui contient l'ID utilisateur et le chemin de l'overlay
-    const tokenData = userId + '-' + overlayPath;
-    
-    // Encoder en base64 pour plus de lisibilité
-    const token = btoa(tokenData);
-    
-    return token;
+    return window.securityUtils.generateSecureOverlayToken(overlayPath);
   }
 
   // Gestion des overlays avec support des tailles et jetons
