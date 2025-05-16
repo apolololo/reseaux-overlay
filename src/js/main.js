@@ -43,7 +43,36 @@ document.addEventListener('DOMContentLoaded', () => {
   const sizeInfo = document.querySelector('.size-info');
   const previewContainerWrapper = document.querySelector('.preview-container');
 
-  // Gestion des overlays avec support des tailles
+  // Génération et gestion des jetons d'overlay
+  function generateOverlayToken(overlayPath) {
+    // Récupérer l'ID utilisateur Twitch
+    const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
+    const userId = userData?.id || 'anonymous';
+    
+    // Générer une chaîne aléatoire de 32 caractères
+    const randomPart = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+      .map(b => b.toString(16).padStart(2, '0')).join('');
+    
+    // Combiner avec l'ID utilisateur et le chemin de l'overlay pour créer un jeton unique
+    const token = `${userId}-${randomPart}`;
+    
+    // Stocker la correspondance entre le jeton et le chemin de l'overlay
+    const overlayTokens = JSON.parse(localStorage.getItem('overlay_tokens') || '{}');
+    overlayTokens[token] = {
+      path: overlayPath,
+      createdAt: new Date().getTime()
+    };
+    localStorage.setItem('overlay_tokens', JSON.stringify(overlayTokens));
+    
+    return token;
+  }
+
+  function getOverlayPathFromToken(token) {
+    const overlayTokens = JSON.parse(localStorage.getItem('overlay_tokens') || '{}');
+    return overlayTokens[token]?.path || null;
+  }
+
+  // Gestion des overlays avec support des tailles et jetons
   document.querySelectorAll('.overlay-item').forEach(item => {
     item.addEventListener('click', () => {      
       document.querySelectorAll('.overlay-item').forEach(i => i.classList.remove('active'));      
@@ -57,7 +86,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const currentParams = new URLSearchParams(previewFrame.src.split('?')[1] || '');
       const newUrl = new URL(fullPath, window.location.origin);
       currentParams.forEach((value, key) => {
-        newUrl.searchParams.set(key, value);
+        if (key !== 'token') { // Ne pas copier l'ancien token
+          newUrl.searchParams.set(key, value);
+        }
       });
       
       previewFrame.src = newUrl.toString();
@@ -115,23 +146,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Gestion de la copie d'URL avec feedback amélioré
+  // Gestion de la copie d'URL avec jetons et feedback amélioré
   copyButton.addEventListener('click', async () => {
     const activeOverlay = document.querySelector('.overlay-item.active');
     if (!activeOverlay) return;
 
     const localPath = activeOverlay.dataset.url;
-    // Construire l'URL complète pour la production en incluant les paramètres actuels
-    const previewUrl = new URL(previewFrame.src);
-    const fullPath = new URL(localPath, PRODUCTION_URL);
     
-    // Copier tous les paramètres de la preview vers l'URL finale
+    // Générer un nouveau jeton pour cet overlay
+    const token = generateOverlayToken(localPath);
+    
+    // Construire l'URL avec le jeton
+    const overlayUrl = new URL('/overlay', PRODUCTION_URL);
+    overlayUrl.searchParams.set('token', token);
+    
+    // Copier tous les paramètres pertinents de la preview
+    const previewUrl = new URL(previewFrame.src);
     previewUrl.searchParams.forEach((value, key) => {
-      fullPath.searchParams.set(key, value);
+      if (key !== 'token') { // Ne pas copier l'ancien token s'il existe
+        overlayUrl.searchParams.set(key, value);
+      }
     });
     
     try {
-      await navigator.clipboard.writeText(fullPath.toString());
+      await navigator.clipboard.writeText(overlayUrl.toString());
       copyButton.style.transition = 'transform 0.2s ease';
       copyButton.style.transform = 'scale(1.05)';
       copyButton.innerHTML = `

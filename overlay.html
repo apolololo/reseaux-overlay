@@ -1,132 +1,99 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Overlay Réseaux - APO</title>
-  <link rel="stylesheet" href="/src/overlay.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APO Overlay</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    .error-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: 'Montserrat', Arial, sans-serif;
+      color: #fff;
+      background: #1a1a1a;
+      text-align: center;
+      padding: 20px;
+    }
+    .error-icon {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    .error-message {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .error-details {
+      font-size: 16px;
+      opacity: 0.7;
+      max-width: 600px;
+    }
+  </style>
 </head>
 <body>
-  <!-- Petit overlay permanent pour le code créateur -->
-  <div class="creator-box">
-    <span class="creator-label">CODE CRÉATEUR</span>
-    <span class="creator-code">APO21 <span class="ad-tag">#AD</span></span>
-  </div>
-
-  <!-- Overlay principal des réseaux -->
-  <div class="apo-container">
-    <div class="apo-slide-container">
-      <!-- Slide 1 : icônes réduites -->
-      <div class="apo-slide active small-icons-slide">
-        <span class="apo-user">@tryh_apo</span>
-        <div class="apo-icons">
-          <img src="/images/instagram.png" alt="Instagram" />
-          <img src="/images/twitch.png" alt="Twitch" />
-          <img src="/images/trovo.png" alt="Trovo" />
-          <img src="/images/dlive.png" alt="DLive" />
-        </div>
-      </div>
-
-      <!-- Slide 2 : X -->
-      <div class="apo-slide single-icon-slide">
-        <span class="apo-user">@apoftn1</span>
-        <div class="apo-icons">
-          <img src="/images/x.png" alt="Twitter/X" />
-        </div>
-      </div>
-
-      <!-- Slide 3 : TikTok -->
-      <div class="apo-slide single-icon-slide">
-        <span class="apo-user">@apo_ban</span>
-        <div class="apo-icons">
-          <img src="/images/tiktok.png" alt="TikTok" />
-        </div>
-      </div>
-
-      <!-- Slide 4 : YouTube -->
-      <div class="apo-slide single-icon-slide">
-        <span class="apo-user">@tryhapo</span>
-        <div class="apo-icons">
-          <img src="/images/youtube.png" alt="YouTube" />
-        </div>
-      </div>
-
-      <!-- Slide 5 : Kick -->
-      <div class="apo-slide single-icon-slide">
-        <span class="apo-user">@tryh-apo</span>
-        <div class="apo-icons">
-          <img src="/images/kick.png" alt="Kick" />
-        </div>
-      </div>
-
-      <!-- Slide 6 : Discord -->
-      <div class="apo-slide single-icon-slide discord-slide">
-        <span class="apo-user">Serveur&nbsp;<span class="highlight">!discord</span></span>
-        <div class="apo-icons">
-          <img src="/images/discord.png" alt="Discord" />
-        </div>
-      </div>
-    </div>
-  </div>
-
+  <div id="overlay-container"></div>
+  
   <script>
-    const slides = document.querySelectorAll(".apo-slide");
-    let current = 0;
-    let isAnimating = false;
-
-    function splitTextIntoLetters() {
-      slides.forEach(slide => {
-        const userText = slide.querySelector('.apo-user');
-        if (!userText) return;
-        const text = userText.textContent;
-        userText.innerHTML = text.split('').map((char, i) => 
-          `<span class="char" style="--char-index: ${i}">${char}</span>`
-        ).join('');
-      });
-    }
-
-    function showSlide(index) {
-      if (isAnimating || index === current) return;
-      isAnimating = true;
-      const prev = slides[current];
-      const next = slides[index];
-
-      prev.classList.remove('active');
-      prev.classList.add('leaving');
-      next.classList.add('entering');
-
-      // L'entrée commence tout de suite, la sortie aussi
-      setTimeout(() => {
-        prev.classList.remove('leaving');
-        next.classList.remove('entering');
-        next.classList.add('active');
-        current = index;
-        // Animation des lettres (reset delay)
-        const chars = next.querySelectorAll('.char');
-        chars.forEach((char, i) => {
-          setTimeout(() => {
-            char.style.transitionDelay = '0s';
-          }, i * 50);
-        });
-        setTimeout(() => {
-          isAnimating = false;
-        }, 400); // Fin d'animation d'entrée
-      }, 1100); // Fin d'animation de sortie
-    }
-
-    function nextSlide() {
-      if (!isAnimating) {
-        const next = (current + 1) % slides.length;
-        showSlide(next);
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+      
+      if (!token) {
+        showError("Token d'overlay manquant", "Veuillez utiliser un lien valide généré depuis l'application APO Overlays.");
+        return;
       }
+      
+      // Récupérer les tokens stockés
+      const overlayTokens = JSON.parse(localStorage.getItem('overlay_tokens') || '{}');
+      const overlayInfo = overlayTokens[token];
+      
+      if (!overlayInfo || !overlayInfo.path) {
+        showError("Token d'overlay invalide", "Ce lien d'overlay n'est pas valide ou a expiré.");
+        return;
+      }
+      
+      // Construire l'URL de l'overlay avec les paramètres originaux
+      const overlayUrl = new URL(overlayInfo.path, window.location.origin);
+      
+      // Transférer tous les paramètres de l'URL actuelle vers l'URL de l'overlay
+      params.forEach((value, key) => {
+        if (key !== 'token') { // Ne pas transférer le token
+          overlayUrl.searchParams.set(key, value);
+        }
+      });
+      
+      // Créer un iframe pour charger l'overlay
+      const iframe = document.createElement('iframe');
+      iframe.src = overlayUrl.toString();
+      iframe.style.border = 'none';
+      iframe.style.width = '100%';
+      iframe.style.height = '100%';
+      iframe.style.position = 'absolute';
+      iframe.style.top = '0';
+      iframe.style.left = '0';
+      
+      document.getElementById('overlay-container').appendChild(iframe);
+    });
+    
+    function showError(title, message) {
+      document.body.innerHTML = `
+        <div class="error-container">
+          <div class="error-icon">⚠️</div>
+          <div class="error-message">${title}</div>
+          <div class="error-details">${message}</div>
+        </div>
+      `;
     }
-
-    // Initialiser
-    splitTextIntoLetters();
-    slides[0].classList.add('active');
-
-    // Changer de slide toutes les 6 secondes
-    setInterval(nextSlide, 6000);
   </script>
 </body>
 </html>
