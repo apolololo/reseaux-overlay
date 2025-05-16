@@ -1,8 +1,10 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import basicSsl from '@vitejs/plugin-basic-ssl';
 
 export default defineConfig({
   base: '/',
+  plugins: [basicSsl()],
   build: {
     rollupOptions: {
       input: {
@@ -15,7 +17,15 @@ export default defineConfig({
     assetsDir: 'assets',
     outDir: 'dist',
     emptyOutDir: true,
-    copyPublicDir: true
+    copyPublicDir: true,
+    sourcemap: true,
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
+    }
   },
   server: {
     port: 8080,
