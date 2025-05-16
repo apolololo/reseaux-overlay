@@ -46,7 +46,6 @@
       border-radius: 4px;
       max-width: 90%;
       overflow-wrap: break-word;
-      display: none;
     }
   </style>
 </head>
@@ -66,7 +65,7 @@
       }
       
       if (!token) {
-        showError("Token d'overlay manquant", "Veuillez utiliser un lien valide généré depuis l'application APO Overlays.", {token});
+        showError("Token d'overlay manquant", "Veuillez utiliser un lien valide généré depuis l'application APO Overlays.", {token}, DEBUG);
         return;
       }
       
@@ -93,13 +92,32 @@
         
         if (DEBUG) console.log('User ID:', userId, 'Chemin d\'overlay:', overlayPath);
         
-        // Vérification de sécurité basique pour le chemin
-        // Cette vérification est moins stricte pour résoudre le problème de 404
+        // Vérification et correction du chemin d'overlay
+        // Cette section est critique pour éviter les erreurs 404
         if (!overlayPath.includes('/overlays/')) {
           if (overlayPath.includes('overlay')) {
-            // Tentative de correction si le chemin contient "overlay" mais pas "/overlays/"
-            overlayPath = overlayPath.replace(/\/src\/overlay/, '/src/overlays');
-            if (DEBUG) console.log('Correction de chemin tentée:', overlayPath);
+            // Tentatives de correction de chemin
+            let correctedPath = overlayPath;
+            
+            // Correction 1: src/overlay -> src/overlays
+            correctedPath = correctedPath.replace(/\/src\/overlay/, '/src/overlays');
+            
+            // Correction 2: ajout du dossier overlays s'il manque
+            if (!correctedPath.includes('/overlays/')) {
+              const parts = correctedPath.split('/');
+              const lastPart = parts[parts.length - 1];
+              if (lastPart && lastPart.includes('overlay')) {
+                // Trouver l'index du dernier dossier avant "overlay"
+                let folderIndex = parts.length - 2;
+                if (folderIndex >= 0) {
+                  // Reconstruire le chemin avec /overlays/
+                  correctedPath = parts.slice(0, folderIndex).join('/') + '/overlays/' + parts.slice(folderIndex).join('/');
+                }
+              }
+            }
+            
+            if (DEBUG) console.log('Correction de chemin tentée:', correctedPath);
+            overlayPath = correctedPath;
           } else {
             throw new Error("Chemin d'overlay non valide");
           }
@@ -122,7 +140,7 @@
         
         if (DEBUG) console.log('URL finale:', overlayUrl.toString());
         
-        // Créer un iframe pour charger l'overlay
+        // Créer un iframe pour charger l'overlay avec gestion d'erreur améliorée
         const iframe = document.createElement('iframe');
         iframe.src = overlayUrl.toString();
         iframe.style.border = 'none';
@@ -132,32 +150,102 @@
         iframe.style.top = '0';
         iframe.style.left = '0';
         
-        // Ajouter une gestion d'erreur pour l'iframe
+        // Gestion des erreurs
         iframe.onerror = (error) => {
           console.error("Erreur de chargement de l'iframe:", error);
-          showError("Erreur de chargement", "Impossible de charger l'overlay spécifié.", {error, url: overlayUrl.toString()});
+          showError("Erreur de chargement", "Impossible de charger l'overlay spécifié.", {error, url: overlayUrl.toString()}, DEBUG);
         };
+        
+        // Vérifier si l'URL est accessible
+        fetch(overlayUrl.toString(), { method: 'HEAD' })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`L'URL retourne une erreur ${response.status}`);
+            }
+            return response;
+          })
+          .then(() => {
+            if (DEBUG) console.log('URL accessible, chargement de l\'iframe');
+            document.getElementById('overlay-container').appendChild(iframe);
+          })
+          .catch(error => {
+            console.error("Erreur d'accès à l'URL:", error);
+            
+            // Tentatives alternatives avec d'autres chemins
+            const alternativePaths = [
+              overlayPath.replace('/src/overlays/', '/overlays/'),
+              overlayPath.replace('/overlays/', '/src/overlays/'),
+              '/src' + overlayPath,
+              overlayPath + '/index.html',
+              overlayPath + '.html'
+            ];
+            
+            if (DEBUG) console.log('Tentatives alternatives:', alternativePaths);
+            
+            // Essayer des chemins alternatifs
+            tryAlternativePaths(alternativePaths, 0);
+          });
+          
+        // Fonction pour essayer des chemins alternatifs
+        function tryAlternativePaths(paths, index) {
+          if (index >= paths.length) {
+            showError("Ressource introuvable", `L'overlay demandé n'a pas été trouvé: ${overlayPath}`, 
+              {paths, originalPath: overlayPath}, DEBUG);
+            return;
+          }
+          
+          const altPath = paths[index];
+          const altUrl = new URL(altPath, window.location.origin);
+          
+          // Ajouter les mêmes paramètres
+          params.forEach((value, key) => {
+            if (key !== 'token') altUrl.searchParams.set(key, value);
+          });
+          altUrl.searchParams.set('access_token', token);
+          
+          if (DEBUG) console.log(`Essai de chemin alternatif (${index+1}/${paths.length}):`, altUrl.toString());
+          
+          fetch(altUrl.toString(), { method: 'HEAD' })
+            .then(response => {
+              if (!response.ok) throw new Error();
+              
+              if (DEBUG) console.log('Chemin alternatif trouvé!', altUrl.toString());
+              
+              // Créer un nouvel iframe avec le chemin alternatif
+              const newIframe = document.createElement('iframe');
+              newIframe.src = altUrl.toString();
+              newIframe.style.border = 'none';
+              newIframe.style.width = '100%';
+              newIframe.style.height = '100%';
+              newIframe.style.position = 'absolute';
+              newIframe.style.top = '0';
+              newIframe.style.left = '0';
+              
+              document.getElementById('overlay-container').appendChild(newIframe);
+            })
+            .catch(() => {
+              // Essayer le chemin suivant
+              tryAlternativePaths(paths, index + 1);
+            });
+        }
         
         iframe.onload = () => {
           if (DEBUG) console.log('Iframe chargé avec succès');
         };
         
-        document.getElementById('overlay-container').appendChild(iframe);
       } catch (error) {
         console.error("Erreur lors du décodage du token:", error);
-        showError("Token d'overlay invalide", "Ce lien d'overlay n'est pas valide ou a expiré.", {error, token});
+        showError("Token d'overlay invalide", "Ce lien d'overlay n'est pas valide ou a expiré.", {error, token}, DEBUG);
       }
     });
     
-    function showError(title, message, debugData = null) {
-      const params = new URLSearchParams(window.location.search);
-      const DEBUG = params.get('debug') === '1';
-      
+    function showError(title, message, debugData = null, showDebug = false) {
       let debugHtml = '';
-      if (DEBUG && debugData) {
+      if (showDebug && debugData) {
         debugHtml = `
-          <div class="debug-info" style="display: block;">
+          <div class="debug-info">
             <strong>Informations de débogage:</strong><br>
+            URL actuelle: ${window.location.href}<br>
             ${Object.entries(debugData).map(([key, value]) => 
               `<strong>${key}:</strong> ${JSON.stringify(value)}`
             ).join('<br>')}
