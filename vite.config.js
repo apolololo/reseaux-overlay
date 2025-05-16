@@ -21,11 +21,17 @@ export default defineConfig({
     port: 8080,
     open: '/index.html',
     proxy: {
-      '/src/overlays': {
+      '/src': {
         target: 'http://localhost:8080',
         changeOrigin: true,
-        secure: false
+        secure: false,
+        rewrite: (path) => path.replace(/^\/src/, '')
       }
+    }
+  },
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src')
     }
   }
 });

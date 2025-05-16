@@ -64,9 +64,18 @@
         if (currentTime - tokenTime > 24 * 60 * 60 * 1000) {
           throw new Error("Token expiré");
         }
+
+        // Nettoyer et normaliser le chemin de l'overlay
+        let cleanPath = overlayPath;
+        if (cleanPath.startsWith('/src/')) {
+          cleanPath = cleanPath.substring(5); // Enlever '/src/'
+        }
+        if (!cleanPath.startsWith('/')) {
+          cleanPath = '/' + cleanPath;
+        }
         
         // Construire l'URL de l'overlay
-        const overlayUrl = new URL(overlayPath, window.location.origin);
+        const overlayUrl = new URL(cleanPath, window.location.origin);
         
         // Transférer les paramètres nécessaires
         params.forEach((value, key) => {
@@ -88,6 +97,14 @@
         // Gérer les erreurs de chargement de l'iframe
         iframe.onerror = () => {
           showError("Erreur de chargement", "Impossible de charger l'overlay. Veuillez vérifier le lien.");
+        };
+
+        // Ajouter un gestionnaire d'événements pour le chargement
+        iframe.onload = () => {
+          if (iframe.contentDocument.body.innerHTML.includes('404') || 
+              iframe.contentDocument.body.innerHTML.includes('Page not found')) {
+            showError("Erreur de chargement", "L'overlay n'a pas été trouvé. Veuillez vérifier le chemin.");
+          }
         };
         
         document.getElementById('overlay-container').appendChild(iframe);
