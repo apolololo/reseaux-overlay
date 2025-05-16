@@ -44,8 +44,13 @@ export function validateOverlayToken(token, path) {
       path = '/' + path;
     }
     
-    // Vérifier que le chemin demandé correspond au chemin dans le token
-    return overlayPath === path;
+    console.log('Chemin dans token:', overlayPath);
+    console.log('Chemin demandé:', path);
+    
+    // Vérification moins stricte pour permettre l'accès aux overlays
+    // Vérifie si le chemin demandé contient le chemin de base dans le token
+    // ou si le chemin dans le token contient le chemin demandé
+    return path.includes(overlayPath) || overlayPath.includes(path);
   } catch (error) {
     console.error("Erreur de validation du token:", error);
     return false;

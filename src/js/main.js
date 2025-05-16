@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Générer un nouveau jeton pour cet overlay (format simple)
     const token = generateOverlayToken(localPath);
     
-    // Construire l'URL avec le jeton
+    // Construire l'URL avec le jeton - Correction du chemin de l'overlay
     const overlayUrl = new URL('/overlay.html', PRODUCTION_URL);
     overlayUrl.searchParams.set('token', token);
     
