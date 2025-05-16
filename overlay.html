@@ -54,7 +54,6 @@
       }
       
       // Le jeton est simple: userID-overlayPath
-      // Pas besoin de vérifier dans le localStorage
       try {
         // Format du token: userID-overlayPath (encodé en base64)
         const decodedData = atob(token);
@@ -86,6 +85,9 @@
             overlayUrl.searchParams.set(key, value);
           }
         });
+        
+        // Ajouter un paramètre sécurisé pour autoriser l'accès
+        overlayUrl.searchParams.set('access_token', token);
         
         // Créer un iframe pour charger l'overlay
         const iframe = document.createElement('iframe');
