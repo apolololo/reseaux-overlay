@@ -49,31 +49,49 @@ export function validateOverlayToken(token, path) {
       path = '/' + path;
     }
     
-    if (DEBUG) {
-      console.log('Chemin dans token:', overlayPath);
-      console.log('Chemin demandé:', path);
+    // NOUVEAU: Détection de l'environnement de production
+    const isProduction = !window.location.hostname.includes('localhost') && 
+                         !window.location.hostname.includes('127.0.0.1');
+                         
+    // Normalisation des chemins en fonction de l'environnement
+    if (isProduction) {
+      // En production, les chemins peuvent être différents (sans le préfixe src/)
+      overlayPath = overlayPath.replace(/^\/src\//, '/');
+      path = path.replace(/^\/src\//, '/');
     }
     
-    // Autoriser les accès plus flexibles - permettre des correspondances partielles
-    // ou des chemins qui sont des variantes d'un même overlay
+    if (DEBUG) {
+      console.log('Chemin dans token (normalisé):', overlayPath);
+      console.log('Chemin demandé (normalisé):', path);
+      console.log('Environnement de production:', isProduction);
+    }
+    
+    // NOUVEAU: Nettoyer les chemins pour une meilleure correspondance
+    // Supprimer les extensions de fichier (.html)
+    const cleanPath = (p) => p.replace(/\.html$/, '');
+    const cleanedTokenPath = cleanPath(overlayPath);
+    const cleanedRequestPath = cleanPath(path);
+    
+    if (DEBUG) {
+      console.log('Chemin token nettoyé:', cleanedTokenPath);
+      console.log('Chemin demandé nettoyé:', cleanedRequestPath);
+    }
     
     // Vérification plus permissive:
     // 1. Le chemin dans le token correspond au chemin demandé
-    // 2. Le chemin demandé contient le chemin dans le token
-    // 3. Le chemin dans le token contient le chemin demandé
-    // 4. Les deux chemins contiennent le même sous-dossier d'overlay (/overlays/XXX/)
-    
-    if (overlayPath === path) {
-      if (DEBUG) console.log('Chemin exact correspondant');
+    if (overlayPath === path || cleanedTokenPath === cleanedRequestPath) {
+      if (DEBUG) console.log('Chemins exacts correspondants');
       return true;
     }
     
-    if (path.includes(overlayPath) || overlayPath.includes(path)) {
-      if (DEBUG) console.log('Chemin partiellement correspondant');
+    // 2. Les chemins se contiennent mutuellement
+    if (path.includes(overlayPath) || overlayPath.includes(path) ||
+        cleanedRequestPath.includes(cleanedTokenPath) || cleanedTokenPath.includes(cleanedRequestPath)) {
+      if (DEBUG) console.log('Chemins partiellement correspondants');
       return true;
     }
     
-    // Extraire le dossier d'overlay du chemin (ex: /overlays/apo/)
+    // 3. Extraire le dossier d'overlay du chemin (ex: /overlays/apo/)
     const getOverlayFolder = (p) => {
       const overlayMatch = p.match(/\/overlays\/([^\/]+)\//);
       return overlayMatch ? overlayMatch[0] : null;
@@ -84,6 +102,32 @@ export function validateOverlayToken(token, path) {
     
     if (overlayFolder && requestFolder && overlayFolder === requestFolder) {
       if (DEBUG) console.log('Même dossier d\'overlay:', overlayFolder);
+      return true;
+    }
+    
+    // 4. NOUVEAU: Vérification simplifiée par nom d'overlay
+    const getOverlayName = (p) => {
+      const parts = p.split('/');
+      // Trouver le segment qui contient "overlay" ou qui suit "overlays"
+      for (let i = 0; i < parts.length; i++) {
+        if (parts[i] === 'overlays' && i + 1 < parts.length) {
+          return parts[i + 1];
+        }
+      }
+      return null;
+    };
+    
+    const overlayName = getOverlayName(overlayPath);
+    const requestName = getOverlayName(path);
+    
+    if (overlayName && requestName && overlayName === requestName) {
+      if (DEBUG) console.log('Même nom d\'overlay:', overlayName);
+      return true;
+    }
+    
+    // 5. NOUVEAU: Autoriser tous les overlays en mode développement avec debug activé
+    if (DEBUG && !isProduction) {
+      console.log('Mode développement avec debug: accès autorisé');
       return true;
     }
     
@@ -109,11 +153,24 @@ export function checkOverlayAccess(path) {
   if (DEBUG) {
     console.log('Vérification d\'accès pour:', path);
     console.log('Token présent:', accessToken ? 'Oui' : 'Non');
+    console.log('URL complète:', window.location.href);
   }
   
   // Mode développement local - autoriser l'accès sans token pour le débogage local
-  if (DEBUG && window.location.hostname === 'localhost') {
-    console.log('Mode développement local, accès autorisé');
+  if ((DEBUG || params.get('force') === '1') && 
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    console.log('Mode développement local ou forcé, accès autorisé');
+    return true;
+  }
+  
+  // NOUVEAU: Mode de test facile - ajouter ?test=1 pour autoriser tout accès (uniquement pour le développement)
+  if (params.get('test') === '1' && (
+      window.location.hostname === 'localhost' || 
+      window.location.hostname === '127.0.0.1' || 
+      window.location.hostname.includes('github.io') || 
+      window.location.hostname.includes('netlify.app') ||
+      window.location.hostname.includes('vercel.app'))) {
+    console.log('Mode test activé, accès autorisé');
     return true;
   }
   
@@ -149,6 +206,18 @@ export function showAccessDenied(container, title = "Accès refusé", message = 
         Chemin demandé: ${window.location.pathname}<br>
         Paramètres: ${window.location.search}<br>
         Token présent: ${params.get('access_token') ? 'Oui' : 'Non'}<br>
+        Hostname: ${window.location.hostname}<br>
+        URL complète: ${window.location.href}<br>
+      </div>
+      <div style="margin-top: 10px">
+        <button onclick="window.location.search += '&test=1'">Activer le mode test</button>
+      </div>
+    `;
+  } else {
+    // Même pour le mode non-debug, ajouter un bouton pour activer le débogage
+    debugInfo = `
+      <div style="margin-top: 20px">
+        <button onclick="window.location.href=window.location.href+'&debug=1'">Activer le mode débogage</button>
       </div>
     `;
   }

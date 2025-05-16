@@ -22,10 +22,28 @@ export function initializeSecureOverlay(overlayPath, containerId, initializer) {
       console.log('Mode débogage activé dans overlay');
       console.log('Chemin demandé:', overlayPath);
       console.log('Paramètres URL:', Object.fromEntries(params.entries()));
+      console.log('URL complète:', window.location.href);
+      console.log('Hostname:', window.location.hostname);
     }
     
-    // Vérifier l'accès
-    const hasAccess = checkOverlayAccess(overlayPath);
+    // NOUVEAU: Détection automatique de l'environnement
+    const isProduction = !window.location.hostname.includes('localhost') && 
+                         !window.location.hostname.includes('127.0.0.1');
+    
+    // Normaliser le chemin en fonction de l'environnement
+    let normalizedPath = overlayPath;
+    if (isProduction) {
+      // En production, les chemins peuvent être différents
+      normalizedPath = overlayPath.replace(/^\/src\//, '/');
+    }
+    
+    if (DEBUG) {
+      console.log('Environnement de production:', isProduction);
+      console.log('Chemin normalisé:', normalizedPath);
+    }
+    
+    // Vérifier l'accès avec le chemin normalisé
+    const hasAccess = checkOverlayAccess(normalizedPath);
     
     if (DEBUG) {
       console.log('Accès autorisé:', hasAccess);
@@ -46,6 +64,10 @@ export function initializeSecureOverlay(overlayPath, containerId, initializer) {
             <div class="error-message">Erreur d'initialisation</div>
             <div class="error-details">Une erreur est survenue lors de l'initialisation de cet overlay.</div>
             ${DEBUG ? `<pre style="text-align:left;background:#333;padding:10px;max-width:90%;overflow:auto;">${error.toString()}\n\n${error.stack}</pre>` : ''}
+            <div style="margin-top: 10px">
+              <button onclick="window.location.reload()">Recharger</button>
+              ${!DEBUG ? `<button onclick="window.location.href=window.location.href+'&debug=1'">Activer le mode débogage</button>` : ''}
+            </div>
           </div>
         `;
       }
