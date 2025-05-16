@@ -1,7 +1,3 @@
-
-// Importation du middleware de sécurité
-import { isAuthenticated, redirectToAuth } from './securityMiddleware.js';
-
 // Gestion de la navigation
 document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -18,10 +14,21 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 
 document.addEventListener('DOMContentLoaded', () => {
   // Vérification de l'authentification
-  if (!isAuthenticated()) {
-    redirectToAuth();
-    return;
-  }
+  const checkAuth = () => {
+    const token = localStorage.getItem('twitch_token');
+    const expiresAt = localStorage.getItem('twitch_expires_at');
+    
+    // Vérifier si le token existe et n'est pas expiré
+    if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
+      // Rediriger vers la page d'authentification
+      window.location.href = './src/auth.html';
+      return false;
+    }
+    return true;
+  };
+  
+  // Vérifier l'authentification au chargement
+  if (!checkAuth()) return;
 
   // L'URL de production sera automatiquement détectée
   const PRODUCTION_URL = window.location.origin;
@@ -59,19 +66,11 @@ document.addEventListener('DOMContentLoaded', () => {
       // Construire l'URL complète pour la preview
       const localPath = item.dataset.url;
       
-      // Générer un token pour cet overlay
-      const token = generateOverlayToken(localPath);
-      
       // Préserver les paramètres d'URL existants lors du changement d'overlay
       const currentParams = new URLSearchParams(previewFrame.src.split('?')[1] || '');
       const newUrl = new URL(localPath, window.location.origin);
-      
-      // Ajouter le token d'accès à l'URL de prévisualisation
-      newUrl.searchParams.set('access_token', token);
-      
-      // Transférer les autres paramètres
       currentParams.forEach((value, key) => {
-        if (key !== 'token' && key !== 'access_token') { 
+        if (key !== 'token') { // Ne pas copier l'ancien token
           newUrl.searchParams.set(key, value);
         }
       });
@@ -141,14 +140,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Générer un nouveau jeton pour cet overlay (format simple)
     const token = generateOverlayToken(localPath);
     
-    // Construire l'URL avec le jeton - Correction du chemin de l'overlay
+    // Construire l'URL avec le jeton
     const overlayUrl = new URL('/overlay.html', PRODUCTION_URL);
     overlayUrl.searchParams.set('token', token);
     
     // Copier tous les paramètres pertinents de la preview
     const previewUrl = new URL(previewFrame.src);
     previewUrl.searchParams.forEach((value, key) => {
-      if (key !== 'token' && key !== 'access_token') { // Ne pas copier l'ancien token s'il existe
+      if (key !== 'token') { // Ne pas copier l'ancien token s'il existe
         overlayUrl.searchParams.set(key, value);
       }
     });
@@ -249,9 +248,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (size) {
       sizeInfo.textContent = `Taille recommandée : ${size}`;
     }
-    
-    // Déclencher un clic sur l'overlay actif pour charger la prévisualisation avec le token
-    activeOverlay.click();
   }
   
   // Activer le fond transparent par défaut
