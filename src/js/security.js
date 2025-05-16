@@ -2,9 +2,9 @@
 
 // Configuration de sécurité
 const SECURITY_CONFIG = {
-  TOKEN_EXPIRATION: 24 * 60 * 60 * 1000, // 24 heures en millisecondes
   ALLOWED_PATHS: ['/src/auth.html', '/auth/callback.html', '/src/overlay.css', '/src/images/'], // Chemins publics autorisés
-  TOKEN_VERSION: '2', // Version du token pour invalider les anciens tokens
+  TOKEN_VERSION: '3', // Version du token pour invalider les anciens tokens
+  OVERLAY_PATH_PREFIX: '/src/overlays/' // Préfixe obligatoire pour les chemins d'overlay
 };
 
 // Vérification de l'authentification
@@ -27,8 +27,8 @@ function generateSecureOverlayToken(overlayPath) {
   const userId = userData?.id || 'anonymous';
   const timestamp = new Date().getTime();
   
-  // Structure du token: version-userId-timestamp-overlayPath
-  const tokenData = `${SECURITY_CONFIG.TOKEN_VERSION}-${userId}-${timestamp}-${overlayPath}`;
+  // Structure du token: version-userId-overlayPath
+  const tokenData = `${SECURITY_CONFIG.TOKEN_VERSION}-${userId}-${overlayPath}`;
   return btoa(tokenData);
 }
 
@@ -36,22 +36,15 @@ function generateSecureOverlayToken(overlayPath) {
 function validateOverlayToken(token) {
   try {
     const decodedData = atob(token);
-    const [version, userId, timestamp, overlayPath] = decodedData.split('-');
+    const [version, userId, overlayPath] = decodedData.split('-');
     
     // Vérifier la version du token
     if (version !== SECURITY_CONFIG.TOKEN_VERSION) {
-      throw new Error('Version de token invalide ou expirée');
-    }
-    
-    // Vérifier l'expiration
-    const tokenTime = parseInt(timestamp);
-    const currentTime = new Date().getTime();
-    if (currentTime - tokenTime > SECURITY_CONFIG.TOKEN_EXPIRATION) {
-      throw new Error('Token expiré');
+      throw new Error('Version de token invalide');
     }
     
     // Vérifier le chemin de l'overlay
-    if (!overlayPath.startsWith('/src/overlays/')) {
+    if (!overlayPath.startsWith(SECURITY_CONFIG.OVERLAY_PATH_PREFIX)) {
       throw new Error('Chemin d\overlay non autorisé');
     }
     
