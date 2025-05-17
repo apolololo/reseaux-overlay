@@ -27,7 +27,6 @@ export default defineConfig({
   },
   server: {
     port: 8080,
-    open: '/index.html',
-    middlewareMode: 'html',
+    open: '/index.html'
   }
 });
