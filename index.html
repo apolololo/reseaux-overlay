@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -20,6 +19,7 @@
       height: 100%;
       background: var(--bg-dark);
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       z-index: 9999;
@@ -31,6 +31,12 @@
       border-left-color: var(--primary);
       border-radius: 50%;
       animation: spin 1s linear infinite;
+      margin-bottom: 10px;
+    }
+    .loading-text {
+      color: var(--text-light);
+      font-size: 16px;
+      font-weight: 500;
     }
     @keyframes spin {
       to { transform: rotate(360deg); }
@@ -68,6 +74,7 @@
 <body>
   <div class="loading-screen">
     <div class="loading-spinner"></div>
+    <div class="loading-text">Chargement...</div>
   </div>
 
   <div id="app">
@@ -157,7 +164,7 @@
             <input type="file" id="bg-image" accept="image/*" hidden>
             <button id="bg-image-btn" title="Image de fond">
               <svg viewBox="0 0 24 24" width="24" height="24">
-                <path fill="currentColor" d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                <path fill="currentColor" d="M21 19V5c0-1.1-.9-2-2-2h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
               </svg>
             </button>
           </div>
@@ -185,22 +192,27 @@
   <script type="module" src="./src/js/main.js"></script>
   <script type="module">
     document.addEventListener('DOMContentLoaded', () => {
+      console.log("Document chargé, vérification de l'authentification");
       const app = document.getElementById('app');
       const loadingScreen = document.querySelector('.loading-screen');
+      const loadingText = document.querySelector('.loading-text');
 
       const checkAuth = () => {
+        console.log("Vérification de l'authentification");
         const token = localStorage.getItem('twitch_token');
         const expiresAt = localStorage.getItem('twitch_expires_at');
         const userData = localStorage.getItem('twitch_user');
         
         if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
+          console.log("Redirection vers la page d'authentification");
           window.location.href = './src/auth.html';
           return false;
         }
         
+        console.log("Authentification valide, affichage de l'interface");
         // Afficher l'interface une fois l'authentification vérifiée
-        loadingScreen.style.display = 'none';
-        app.style.display = 'flex';
+        if (loadingScreen) loadingScreen.style.display = 'none';
+        if (app) app.style.display = 'flex';
         
         // Afficher les informations utilisateur
         if (userData) {
@@ -223,13 +235,27 @@
         return true;
       };
       
+      // Mettre à jour le texte de chargement pour montrer la progression
+      if (loadingText) {
+        loadingText.textContent = "Vérification de l'authentification...";
+      }
+      
       // Vérifier l'authentification au chargement
-      checkAuth();
+      setTimeout(() => {
+        if (!checkAuth()) {
+          console.log("Échec de l'authentification");
+          return;
+        }
+        
+        // En cas de succès, continuer l'initialisation
+        console.log("Interface affichée avec succès");
+      }, 300);
       
       // Gérer le bouton Studio
       const studioButton = document.getElementById('studio-button');
       if (studioButton) {
         studioButton.addEventListener('click', () => {
+          console.log("Navigation vers le Studio");
           window.location.href = './src/studio.html';
         });
       }
@@ -238,6 +264,7 @@
       const libraryButton = document.getElementById('library-button');
       if (libraryButton) {
         libraryButton.addEventListener('click', () => {
+          console.log("Navigation vers la Bibliothèque");
           window.location.href = './src/studio.html#library';
         });
       }
@@ -246,6 +273,7 @@
       const logoutButton = document.getElementById('logout-button');
       if (logoutButton) {
         logoutButton.addEventListener('click', () => {
+          console.log("Déconnexion de l'utilisateur");
           localStorage.removeItem('twitch_token');
           localStorage.removeItem('twitch_expires_at');
           localStorage.removeItem('twitch_user');
@@ -254,6 +282,15 @@
           window.location.href = './src/auth.html';
         });
       }
+      
+      // Afficher l'interface après un délai maximum
+      setTimeout(() => {
+        if (loadingScreen && loadingScreen.style.display !== 'none') {
+          console.log("Affichage forcé de l'interface après délai maximum");
+          loadingScreen.style.display = 'none';
+          if (app) app.style.display = 'flex';
+        }
+      }, 5000);
     });
   </script>
 </body>

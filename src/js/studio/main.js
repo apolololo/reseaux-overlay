@@ -1,4 +1,3 @@
-
 /**
  * Script principal du Studio
  * Gère la navigation entre les différentes vues et les fonctionnalités communes
@@ -250,21 +249,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
   
-  // Initialiser l'application après l'authentification
+  // Fonction d'initialisation de l'application
   const initApp = () => {
     console.log("Initialisation de l'application studio");
+    
+    // Cacher l'écran de chargement
+    const loadingScreen = document.querySelector('.loading-screen');
+    if (loadingScreen) loadingScreen.style.display = 'none';
+    
+    // Afficher l'application
+    const app = document.getElementById('app');
+    if (app) app.style.display = 'flex';
+    
     // Vérifier le hash pour la vue initiale
     checkInitialView();
     
-    // Cacher l'écran de chargement si nécessaire
-    document.querySelector('.loading-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'flex';
+    console.log("Application studio initialisée avec succès");
   };
   
-  // S'assurer que l'initialisation est faite après l'authentification
-  document.addEventListener('authComplete', initApp);
+  // Écouter l'événement authComplete
+  document.addEventListener('authComplete', () => {
+    console.log("Événement authComplete reçu, initialisation de l'application");
+    initApp();
+  });
   
-  // S'assurer que l'application est initialisée même si l'événement authComplete n'est pas déclenché
+  // Mécanisme de sécurité pour garantir l'initialisation
+  // même si l'événement authComplete n'est pas déclenché
   setTimeout(() => {
     const loadingScreen = document.querySelector('.loading-screen');
     if (loadingScreen && loadingScreen.style.display !== 'none') {
