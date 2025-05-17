@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Création d'éléments sur le canvas
     const createCanvasElement = (type, x, y) => {
         const element = document.createElement('div');
-        element.className = `canvas-element ${type}-element`;
+        element.className = `editor-element ${type}-element`;
         element.style.left = `${x}px`;
         element.style.top = `${y}px`;
 
