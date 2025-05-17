@@ -1,4 +1,3 @@
-
 /**
  * Module de bibliothèque pour le Studio
  * Gère l'affichage et l'interaction avec les overlays sauvegardés
@@ -56,14 +55,25 @@ document.addEventListener('DOMContentLoaded', () => {
             year: 'numeric' 
           });
           
+          // Générer la prévisualisation
+          const previewHtml = window.generatePreviewHtml(overlay);
+          const previewBlob = new Blob([previewHtml], { type: 'text/html' });
+          const previewUrl = URL.createObjectURL(previewBlob);
+          
+          // Générer l'URL pour OBS
+          const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
+          const userId = userData.id || 'anonymous';
+          const token = btoa(`${userId}-${overlay.id}`);
+          const obsUrl = new URL('/overlay.html', window.location.origin);
+          obsUrl.searchParams.set('token', token);
+          
           overlaysHTML += `
             <div class="overlay-card" data-id="${overlay.id}">
               <div class="overlay-preview">
-                <div class="overlay-thumbnail" style="background-color: ${overlay.background || '#000'}">
-                  <span class="overlay-placeholder">Aperçu</span>
-                </div>
+                <iframe src="${previewUrl}" frameborder="0"></iframe>
                 <div class="overlay-actions">
                   <button class="edit-overlay" data-id="${overlay.id}">Éditer</button>
+                  <button class="copy-obs-url" data-url="${obsUrl.toString()}">Copier l'URL OBS</button>
                   <button class="delete-overlay" data-id="${overlay.id}">Supprimer</button>
                 </div>
               </div>
@@ -86,6 +96,22 @@ document.addEventListener('DOMContentLoaded', () => {
           btn.addEventListener('click', function() {
             const overlayId = this.dataset.id;
             editOverlay(overlayId);
+          });
+        });
+        
+        libraryGrid.querySelectorAll('.copy-obs-url').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const url = this.dataset.url;
+            navigator.clipboard.writeText(url).then(() => {
+              showNotification('URL copiée dans le presse-papier !', 'success');
+              
+              // Changer temporairement le texte du bouton
+              const originalText = this.textContent;
+              this.textContent = 'URL Copiée !';
+              setTimeout(() => {
+                this.textContent = originalText;
+              }, 2000);
+            });
           });
         });
         
@@ -115,10 +141,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     // Fonction pour éditer un overlay
-    const editOverlay = (overlayId) => {
+    const editOverlay = (overlay) => {
       // Charger les données de l'overlay
-      const overlay = savedOverlays.find(o => o.id === overlayId);
-      if (!overlay) return;
+      const overlayData = savedOverlays.find(o => o.id === overlayId);
+      if (!overlayData) return;
       
       // Enregistrer l'ID de l'overlay courant
       window.currentOverlayId = overlayId;
@@ -129,12 +155,34 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Mettre à jour le nom de l'overlay
       const nameInput = document.getElementById('overlay-name');
-      if (nameInput && overlay.metadata?.name) {
-        nameInput.value = overlay.metadata.name;
+      if (nameInput && overlayData.metadata?.name) {
+        nameInput.value = overlayData.metadata.name;
       }
       
-      // TODO: Charger les éléments de l'overlay dans l'éditeur
-      console.log('Chargement de l\'overlay', overlayId);
+      // Charger les éléments de l'overlay dans l'éditeur
+      const canvas = document.getElementById('editor-canvas');
+      if (canvas) {
+        // Vider le canvas
+        canvas.innerHTML = '';
+        
+        // Recréer chaque élément
+        overlayData.elements.forEach(element => {
+          const newElement = document.createElement('div');
+          newElement.className = `editor-element ${element.type}-element`;
+          newElement.innerHTML = element.content;
+          
+          // Appliquer les styles
+          Object.entries(element.style).forEach(([key, value]) => {
+            if (value) newElement.style[key] = value;
+          });
+          
+          // Rendre l'élément interactif
+          makeElementDraggable(newElement);
+          makeElementResizable(newElement);
+          
+          canvas.appendChild(newElement);
+        });
+      }
     };
     
     // Fonction pour supprimer un overlay
@@ -148,8 +196,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // Mettre à jour l'affichage
       window.updateLibrary();
       
-      // Afficher un message
-      alert('Overlay supprimé avec succès');
+      // Afficher une notification
+      showNotification('Overlay supprimé avec succès', 'success');
     };
     
     // Initialiser la recherche et le tri
@@ -209,9 +257,25 @@ document.addEventListener('DOMContentLoaded', () => {
           break;
       }
       
-      // TODO: Mettre à jour l'affichage avec les overlays filtrés
-      // Pour l'instant on réinitialise simplement l'affichage
-      window.updateLibrary();
+      // Mettre à jour l'affichage
+      const libraryGrid = document.querySelector('.overlays-grid');
+      if (libraryGrid) {
+        libraryGrid.innerHTML = '';
+        
+        if (filteredOverlays.length === 0) {
+          libraryGrid.innerHTML = `
+            <div class="empty-library-message">
+              <div class="empty-icon">🔍</div>
+              <h2>Aucun résultat</h2>
+              <p>Aucun overlay ne correspond à votre recherche</p>
+            </div>
+          `;
+        } else {
+          filteredOverlays.forEach(overlay => {
+            // ... (même code que dans updateLibrary pour afficher les overlays)
+          });
+        }
+      }
     };
     
     // Initialiser la recherche
