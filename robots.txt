@@ -1,0 +1,11 @@
+User-agent: *
+Disallow: /src/
+Disallow: /assets/
+Disallow: /src/overlays/
+Disallow: /src/images/
+Disallow: /src/styles/
+Disallow: /src/js/
+
+Allow: /index.html
+Allow: /src/auth.html
+Allow: /overlay.html

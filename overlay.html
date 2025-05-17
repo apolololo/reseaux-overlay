@@ -96,6 +96,17 @@
           throw new Error("Chemin d'overlay non autorisé");
         }
         
+        // Vérifier si le token a expiré
+        if (decodedData.includes('&expires=')) {
+          const expiresMatch = decodedData.match(/&expires=(\d+)/);
+          if (expiresMatch) {
+            const expiresAt = parseInt(expiresMatch[1]);
+            if (Date.now() > expiresAt) {
+              throw new Error("Token expiré");
+            }
+          }
+        }
+        
         // Construire l'URL de l'overlay
         const overlayUrl = new URL(overlayPath, window.location.origin);
         

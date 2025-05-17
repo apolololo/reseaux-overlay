@@ -38,11 +38,18 @@ export const generateOverlayToken = (overlayPath) => {
   const userData = getUserInfo();
   const userId = userData?.id || 'anonymous';
   
-  // Créer un jeton qui contient l'ID utilisateur et le chemin de l'overlay
-  const tokenData = userId + '-' + overlayPath;
+  // Ajouter une date d'expiration (7 jours)
+  const expiresAt = Date.now() + (7 * 24 * 60 * 60 * 1000);
+  
+  // Créer un jeton qui contient l'ID utilisateur, le chemin de l'overlay et la date d'expiration
+  const tokenData = userId + '-' + overlayPath + '&expires=' + expiresAt;
+  
+  // Ajouter un sel aléatoire pour rendre chaque token unique
+  const randomSalt = Math.random().toString(36).substring(2, 15);
+  const finalTokenData = tokenData + '&salt=' + randomSalt;
   
   // Encoder en base64
-  const token = btoa(tokenData);
+  const token = btoa(finalTokenData);
   
   return token;
 };

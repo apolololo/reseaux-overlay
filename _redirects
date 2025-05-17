@@ -1,0 +1,16 @@
+# Redirection des anciennes URLs vers la page d'authentification
+/src/overlays/apo/overlay.html /src/auth.html 301!
+/src/overlays/starting/overlay.html /src/auth.html 301!
+/src/overlays/brb/overlay.html /src/auth.html 301!
+/src/overlays/brb/overlay-video.html /src/auth.html 301!
+/src/overlays/end/overlay.html /src/auth.html 301!
+/src/overlays/game-status/overlay.html /src/auth.html 301!
+/src/overlays/maps/overlay.html /src/auth.html 301!
+
+# Protection des ressources statiques
+/src/images/* /src/auth.html 301
+/src/styles/* /src/auth.html 301
+/src/js/* /src/auth.html 301
+
+# Fallback pour toutes les autres routes
+/* /index.html 200
