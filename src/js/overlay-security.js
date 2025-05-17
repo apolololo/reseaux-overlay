@@ -11,19 +11,28 @@
   // Vérifier si on a un paramètre de token valide
   const hasValidToken = () => {
     const params = new URLSearchParams(window.location.search);
-    return params.has('token');
+    if (!params.has('token')) return false;
+    
+    // Vérifier que le token est bien formé (base64 valide)
+    try {
+      const token = params.get('token');
+      const decoded = atob(token);
+      return decoded.includes('-'); // Format attendu: userID-overlayPath
+    } catch (e) {
+      console.error("Token invalide", e);
+      return false;
+    }
   };
   
-  // Obtenir le chemin actuel de l'overlay
-  const getCurrentPath = () => {
-    return window.location.pathname;
-  };
-  
-  // Si on n'est pas dans un iframe et qu'on n'a pas de token, rediriger vers la version sécurisée
+  // Si on n'est pas dans un iframe et qu'on n'a pas de token valide
   if (!isInIframe && !hasValidToken()) {
     console.log('Accès direct à l\'overlay détecté. Redirection vers la version sécurisée...');
     
-    // Rediriger vers la page principale
+    // Bloquer l'affichage du contenu
+    document.body.innerHTML = '';
+    document.body.style.display = 'none';
+    
+    // Rediriger immédiatement vers la page principale
     window.location.href = '/index.html';
   }
 })();

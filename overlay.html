@@ -55,7 +55,13 @@
       
       try {
         // Format du token: userID-overlayPath (encodé en base64)
-        const decodedData = atob(token);
+        let decodedData;
+        try {
+          decodedData = atob(token);
+        } catch (e) {
+          throw new Error("Format de token invalide");
+        }
+        
         const separatorIndex = decodedData.indexOf('-');
         
         if (separatorIndex === -1) {
