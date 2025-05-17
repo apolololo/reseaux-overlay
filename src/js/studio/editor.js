@@ -281,21 +281,6 @@ document.addEventListener('DOMContentLoaded', () => {
         element.style.color = '#ffffff';
         element.style.borderRadius = '4px';
         break;
-      case 'creator-code':
-        element.innerHTML = `
-          <div class="creator-code-element">
-            <span>CODE : APO21</span>
-            <span class="tag" style="background-color: red; padding: 2px 5px; margin-left: 5px; border-radius: 3px;">#AD</span>
-          </div>
-        `;
-        element.style.fontFamily = 'Arial, sans-serif';
-        element.style.fontWeight = 'bold';
-        element.style.padding = '8px';
-        element.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-        element.style.color = '#ffffff';
-        element.style.display = 'inline-block';
-        element.style.borderRadius = '4px';
-        break;
     }
 
     // Rendre l'élément déplaçable
