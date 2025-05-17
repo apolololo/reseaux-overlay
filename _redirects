@@ -16,5 +16,10 @@
 # Ensure Studio page is accessible
 /src/studio.html /src/studio.html 200
 
+# Ensure studio resources are accessible
+/src/js/studio/* /src/js/studio/:splat 200
+/src/styles/studio.css /src/styles/studio.css 200
+/src/images/* /src/images/:splat 200
+
 # Fallback pour toutes les autres routes
 /* /index.html 200

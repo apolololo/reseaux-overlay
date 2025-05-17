@@ -1,3 +1,4 @@
+
 /**
  * Vérification de l'authentification pour le Studio
  * Ce script s'assure que l'utilisateur est connecté avant d'accéder au Studio
@@ -38,7 +39,13 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   
   // Vérifier l'authentification au chargement
-  if (!checkAuth()) return;
+  if (checkAuth()) {
+    // Afficher l'application une fois l'authentification vérifiée
+    setTimeout(() => {
+      document.querySelector('.loading-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'flex';
+    }, 1000);
+  }
   
   // Gérer la déconnexion
   const logoutBtn = document.querySelector('.logout-btn');
@@ -52,10 +59,4 @@ document.addEventListener('DOMContentLoaded', () => {
       window.location.href = './auth.html';
     });
   }
-  
-  // Afficher l'application une fois l'authentification vérifiée
-  setTimeout(() => {
-    document.querySelector('.loading-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'flex';
-  }, 1000);
 });
