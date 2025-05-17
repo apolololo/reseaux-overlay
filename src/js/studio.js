@@ -59,9 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Afficher l'interface du studio et cacher l'écran de chargement
-        console.log("Affichage de l'interface du studio");
-        loadingScreen.style.display = 'none';
-        app.style.display = 'block';
+
         
         // Vérifier le hash pour déterminer la vue initiale
         const hash = window.location.hash.substring(1);
@@ -84,13 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
         displayUserInfo('.username');
         initStudio();
         
-        // S'assurer que l'interface est bien affichée même si un problème survient
-        setTimeout(() => {
-            if (loadingScreen && loadingScreen.style.display !== 'none') {
-                console.log("Fallback: affichage forcé de l'interface après délai");
-                loadingScreen.style.display = 'none';
-                app.style.display = 'block';
-            }
-        }, 1500);
+
     }
 });
