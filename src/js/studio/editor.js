@@ -430,6 +430,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const radiusValue = imageRadius.nextElementSibling;
         if (radiusValue) radiusValue.textContent = `${radius}px`;
       }
+
+      // Largeur
+      const imageWidth = document.getElementById('image-width');
+      if (imageWidth) {
+        imageWidth.value = Math.round(element.offsetWidth);
+      }
+
+      // Hauteur
+      const imageHeight = document.getElementById('image-height');
+      if (imageHeight) {
+        imageHeight.value = Math.round(element.offsetHeight);
+      }
     }
 
     // Mettre à jour les propriétés communes
@@ -600,10 +612,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (file) {
               const reader = new FileReader();
               reader.onload = (e) => {
-                element.innerHTML = '';
-                element.style.backgroundImage = `url(${e.target.result})`;
-                element.style.backgroundSize = 'cover';
-                element.style.backgroundPosition = 'center';
+                const img = new Image();
+                img.onload = function() {
+                  element.innerHTML = '';
+                  element.style.backgroundImage = `url(${e.target.result})`;
+                  element.style.backgroundSize = 'cover';
+                  element.style.backgroundPosition = 'center';
+                  element.style.width = `${this.width}px`;
+                  element.style.height = `${this.height}px`;
+
+                  // Mettre à jour les champs de largeur et de hauteur
+                  const imageWidth = document.getElementById('image-width');
+                  if (imageWidth) imageWidth.value = this.width;
+                  const imageHeight = document.getElementById('image-height');
+                  if (imageHeight) imageHeight.value = this.height;
+                };
+                img.src = e.target.result;
               };
               reader.readAsDataURL(file);
             }
@@ -629,6 +653,22 @@ document.addEventListener('DOMContentLoaded', () => {
           element.style.borderRadius = `${imageRadius.value}px`;
           const radiusValue = imageRadius.nextElementSibling;
           if (radiusValue) radiusValue.textContent = `${imageRadius.value}px`;
+        };
+      }
+
+      // Largeur
+      const imageWidth = document.getElementById('image-width');
+      if (imageWidth) {
+        imageWidth.onchange = () => {
+          element.style.width = `${imageWidth.value}px`;
+        };
+      }
+
+      // Hauteur
+      const imageHeight = document.getElementById('image-height');
+      if (imageHeight) {
+        imageHeight.onchange = () => {
+          element.style.height = `${imageHeight.value}px`;
         };
       }
     }
