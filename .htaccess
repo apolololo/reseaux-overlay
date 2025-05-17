@@ -1,0 +1,29 @@
+# Protection contre l'accès direct aux fichiers
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  
+  # Rediriger les accès directs aux overlays vers la page d'authentification
+  RewriteCond %{HTTP_REFERER} !^https://(www\.)?apo-overlay\.netlify\.app/ [NC]
+  RewriteRule ^src/overlays/.+\.html$ /src/auth.html [R=301,L]
+  
+  # Protéger les ressources statiques
+  RewriteCond %{HTTP_REFERER} !^https://(www\.)?apo-overlay\.netlify\.app/ [NC]
+  RewriteRule ^src/(images|styles|js)/.+$ /src/auth.html [R=301,L]
+  
+  # Rediriger toutes les autres routes vers index.html
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.*)$ /index.html [L]
+</IfModule>
+
+# En-têtes de sécurité
+<IfModule mod_headers.c>
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set X-XSS-Protection "1; mode=block"
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; frame-ancestors 'self'"
+</IfModule>
+
+# Désactiver l'affichage du contenu des répertoires
+Options -Indexes

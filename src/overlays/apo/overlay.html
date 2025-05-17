@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APO Overlay</title>
+  <link rel="stylesheet" href="./overlay.css">
+  <script type="module" src="../../js/overlay-security.js"></script>
+</head>
+<body>
+  <!-- Creator Box -->
+  <div class="creator-box">
+    <span class="creator-label">CODE CRÉATEUR</span>
+    <span class="creator-code">APO21</span>
+    <span class="ad-tag">#AD</span>
+  </div>
+
+  <!-- Apo Container -->
+  <div class="apo-container">
+      <div class="apo-slide-container">
+        <!-- Slide 1 : icônes réduites -->
+        <div class="apo-slide active small-icons-slide">
+          <span class="apo-user">@tryh_apo</span>
+          <div class="apo-icons">
+            <img src="../../images/instagram.png" alt="Instagram" />
+            <img src="../../images/twitch.png" alt="Twitch" />
+            <img src="../../images/trovo.png" alt="Trovo" />
+            <img src="../../images/dlive.png" alt="DLive" />
+          </div>
+        </div>
+
+        <!-- Slide 2 : X -->
+        <div class="apo-slide single-icon-slide">
+          <span class="apo-user">@apoftn1</span>
+          <div class="apo-icons">
+            <img src="../../images/x.png" alt="Twitter/X" />
+          </div>
+        </div>
+
+        <!-- Slide 3 : TikTok -->
+        <div class="apo-slide single-icon-slide">
+          <span class="apo-user">@apo_ban</span>          <div class="apo-icons">
+            <img src="../../images/tiktok.png" alt="TikTok" />
+          </div>
+        </div>
+
+        <!-- Slide 4 : YouTube -->
+        <div class="apo-slide single-icon-slide">
+          <span class="apo-user">@tryhapo</span>
+          <div class="apo-icons">
+            <img src="../../images/youtube.png" alt="YouTube" />
+          </div>
+        </div>
+
+        <!-- Slide 5 : Kick -->
+        <div class="apo-slide single-icon-slide">
+          <span class="apo-user">@tryh-apo</span>
+          <div class="apo-icons">
+            <img src="/src/images/kick.png" alt="Kick" />
+          </div>
+        </div>
+
+        <!-- Slide 6 : Discord -->
+        <div class="apo-slide single-icon-slide discord-slide">
+          <span class="apo-user">Serveur&nbsp;<span class="highlight">!discord</span></span>
+          <div class="apo-icons">
+            <img src="/src/images/discord.png" alt="Discord" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll(".apo-slide");
+    let current = 0;
+    let isAnimating = false;
+
+    function splitTextIntoLetters() {
+      slides.forEach(slide => {
+        const userText = slide.querySelector('.apo-user');
+        if (!userText) return;
+        const text = userText.textContent;
+        userText.innerHTML = text.split('').map((char, i) => 
+          `<span class="char" style="--char-index: ${i}">${char}</span>`
+        ).join('');
+      });
+    }
+
+    function showSlide(index) {
+      if (isAnimating || index === current) return;
+      isAnimating = true;
+      const prev = slides[current];
+      const next = slides[index];
+
+      prev.classList.remove('active');
+      prev.classList.add('leaving');
+      next.classList.add('entering');
+
+      // L'entrée commence tout de suite, la sortie aussi
+      setTimeout(() => {
+        prev.classList.remove('leaving');
+        next.classList.remove('entering');
+        next.classList.add('active');
+        current = index;
+        // Animation des lettres (reset delay)
+        const chars = next.querySelectorAll('.char');
+        chars.forEach((char, i) => {
+          setTimeout(() => {
+            char.style.transitionDelay = '0s';
+          }, i * 50);
+        });
+        setTimeout(() => {
+          isAnimating = false;
+        }, 400); // Fin d'animation d'entrée
+      }, 1100); // Fin d'animation de sortie
+    }
+
+    function nextSlide() {
+      if (!isAnimating) {
+        const next = (current + 1) % slides.length;
+        showSlide(next);
+      }
+    }
+
+    // Initialiser
+    splitTextIntoLetters();
+    slides[0].classList.add('active');
+
+    // Changer de slide toutes les 6 secondes
+    setInterval(nextSlide, 6000);
+  </script>
+</body>
+</html>
