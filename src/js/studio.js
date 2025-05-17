@@ -1,37 +1,13 @@
 
+// Importation des fonctions d'authentification partagées
+import { checkAuthAndRedirect, displayUserInfo } from './auth.js';
+
 // Gestion de l'authentification et du chargement initial
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Studio.js chargé");
     const app = document.getElementById('app');
     const loadingScreen = document.querySelector('.loading-screen');
     const username = document.querySelector('.username');
-
-    // Vérification de l'authentification
-    const checkAuth = () => {
-        console.log("Vérification de l'authentification");
-        const token = localStorage.getItem('twitch_token');
-        const expiresAt = localStorage.getItem('twitch_expires_at');
-        const userData = localStorage.getItem('twitch_user');
-
-        if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
-            console.log("Token invalide ou expiré, redirection vers auth.html");
-            window.location.href = './auth.html';
-            return false;
-        }
-
-        // Afficher les informations utilisateur
-        if (userData) {
-            try {
-                const user = JSON.parse(userData);
-                username.textContent = user.display_name || 'Utilisateur Twitch';
-                console.log("Nom d'utilisateur affiché:", user.display_name);
-            } catch (e) {
-                console.error("Erreur lors de l'affichage des infos utilisateur", e);
-            }
-        }
-
-        return true;
-    };
 
     // Initialisation du studio
     const initStudio = () => {
@@ -101,8 +77,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Démarrer l'application avec un timeout de sécurité
-    if (checkAuth()) {
+    // Utiliser la fonction partagée pour vérifier l'authentification et rediriger si nécessaire
+    if (checkAuthAndRedirect('./auth.html')) {
         console.log("Authentification réussie, initialisation du studio");
+        // Afficher les informations utilisateur en utilisant la fonction partagée
+        displayUserInfo('.username');
         initStudio();
         
         // S'assurer que l'interface est bien affichée même si un problème survient
