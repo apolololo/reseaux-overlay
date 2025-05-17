@@ -636,7 +636,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (bringForward) {
       bringForward.onclick = () => {
         const zIndex = parseInt(element.style.zIndex || 0);
-        element.style.zIndex = zIndex + 1;
+        const maxZIndex = Math.max(...Array.from(document.querySelectorAll('.editor-element')).map(el => parseInt(el.style.zIndex || 0)));
+        element.style.zIndex = maxZIndex + 1;
+        showNotification('Élément déplacé vers l\'avant', 'success');
       };
     }
     
@@ -644,7 +646,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (sendBackward) {
       sendBackward.onclick = () => {
         const zIndex = parseInt(element.style.zIndex || 0);
-        element.style.zIndex = Math.max(0, zIndex - 1);
+        const minZIndex = Math.min(...Array.from(document.querySelectorAll('.editor-element')).map(el => parseInt(el.style.zIndex || 0)));
+        element.style.zIndex = Math.max(0, minZIndex - 1);
+        showNotification('Élément déplacé vers l\'arrière', 'success');
       };
     }
     
