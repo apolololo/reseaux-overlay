@@ -332,6 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Rendre un élément déplaçable
   function makeElementDraggable(element) {
     let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    let isDragging = false;
 
     element.addEventListener('mousedown', dragMouseDown);
 
@@ -339,8 +340,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.target !== element && e.target.contentEditable === 'true') {
         return; // Permet l'édition du contenu sans déplacer
       }
+      if (isDragging) return; // Empêche les événements multiples
+      
       e.preventDefault();
       e.stopPropagation(); // Empêche la propagation au canvas
+      isDragging = true;
       pos3 = e.clientX;
       pos4 = e.clientY;
       document.addEventListener('mousemove', elementDrag);
@@ -367,6 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function closeDragElement() {
+      isDragging = false;
       document.removeEventListener('mousemove', elementDrag);
       document.removeEventListener('mouseup', closeDragElement);
     }
@@ -398,6 +403,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function doResize(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Calcul des nouvelles dimensions en maintenant le ratio
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      let newWidth, newHeight;
+
+      // Maintenir le ratio d'aspect pour un redimensionnement proportionnel
+      if (e.shiftKey) {
+        if (Math.abs(dx) > Math.abs(dy)) {
+          newWidth = startWidth + dx;
+          newHeight = newWidth / aspectRatio;
+        } else {
+          newHeight = startHeight + dy;
+          newWidth = newHeight * aspectRatio;
+        }
+      } else {
+        newWidth = startWidth + dx;
+        newHeight = startHeight + dy;
+      }
+
+      // Appliquer les nouvelles dimensions avec une taille minimale
+      if (newWidth >= 50 && newHeight >= 50) {
+        element.style.width = `${newWidth}px`;
+        element.style.height = `${newHeight}px`;
+      }
       const width = startWidth + (e.clientX - startX);
       const height = startHeight + (e.clientY - startY);
 
