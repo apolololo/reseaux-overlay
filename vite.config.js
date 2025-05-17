@@ -1,4 +1,5 @@
 
+
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
@@ -9,6 +10,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         auth: resolve(__dirname, 'src/auth.html'),
+        studio: resolve(__dirname, 'src/studio.html'),
         callback: resolve(__dirname, 'auth/callback.html'),
         overlay: resolve(__dirname, 'overlay.html'), // Added this entry
         apo: resolve(__dirname, 'src/overlays/apo/overlay.html'),
@@ -30,3 +32,4 @@ export default defineConfig({
     open: '/index.html'
   }
 });
+

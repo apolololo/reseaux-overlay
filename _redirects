@@ -1,3 +1,4 @@
+
 # Redirection des anciennes URLs vers la page d'authentification
 /src/overlays/apo/overlay.html /src/auth.html 301!
 /src/overlays/starting/overlay.html /src/auth.html 301!
@@ -11,6 +12,9 @@
 /src/images/* /src/auth.html 301
 /src/styles/* /src/auth.html 301
 /src/js/* /src/auth.html 301
+
+# Ensure Studio page is accessible
+/src/studio.html /src/studio.html 200
 
 # Fallback pour toutes les autres routes
 /* /index.html 200
