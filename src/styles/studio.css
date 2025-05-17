@@ -78,6 +78,8 @@ input:focus, select:focus, textarea:focus {
   justify-content: center;
   align-items: center;
   z-index: 9999;
+  transition: opacity var(--transition-normal);
+  opacity: 1;
 }
 
 .loading-logo {
@@ -114,6 +116,12 @@ input:focus, select:focus, textarea:focus {
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+#app.visible {
+  opacity: 1;
 }
 
 /* En-tête */

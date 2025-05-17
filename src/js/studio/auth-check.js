@@ -1,4 +1,3 @@
-
 /**
  * Vérification de l'authentification pour le Studio
  * Ce script s'assure que l'utilisateur est connecté avant d'accéder au Studio
@@ -48,32 +47,51 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Fonction pour montrer l'application
   const showApp = () => {
-    if (loadingScreen) loadingScreen.style.display = 'none';
-    if (app) app.style.display = 'flex';
-    console.log("auth-check.js: Interface de l'application affichée");
+    console.log("auth-check.js: Tentative d'affichage de l'application");
     
-    // Déclencher l'initialisation des vues
-    const event = new CustomEvent('authComplete');
-    document.dispatchEvent(event);
+    // Vérifier si les éléments existent avant de les manipuler
+    if (!loadingScreen || !app) {
+      console.error("auth-check.js: Éléments de l'interface non trouvés");
+      return;
+    }
+
+    // Masquer l'écran de chargement avec une transition
+    loadingScreen.style.opacity = '0';
+    setTimeout(() => {
+      loadingScreen.style.display = 'none';
+      app.style.display = 'flex';
+      app.style.opacity = '1';
+      console.log("auth-check.js: Interface de l'application affichée avec succès");
+      
+      // Déclencher l'événement d'authentification complète
+      const event = new CustomEvent('authComplete');
+      document.dispatchEvent(event);
+    }, 300);
   };
   
   // Vérifier l'authentification au chargement
-  if (checkAuth()) {
-    console.log("auth-check.js: Authentification réussie");
-    // Montrer l'application après un court délai pour s'assurer que tout est chargé
-    setTimeout(showApp, 100);
-  } else {
-    console.log("auth-check.js: Échec de l'authentification");
-  }
+  const initializeApp = () => {
+    console.log("auth-check.js: Initialisation de l'application");
+    
+    if (checkAuth()) {
+      console.log("auth-check.js: Authentification réussie");
+      showApp();
+    } else {
+      console.log("auth-check.js: Échec de l'authentification");
+      window.location.href = './auth.html';
+    }
+  };
+
+  // Démarrer l'initialisation après un court délai
+  setTimeout(initializeApp, 100);
   
   // Mécanisme de sécurité: afficher l'application après un délai maximum
-  // même si les événements ne se sont pas déclenchés correctement
   setTimeout(() => {
     if (loadingScreen && loadingScreen.style.display !== 'none') {
       console.log("auth-check.js: Fallback - Affichage forcé de l'application après délai maximum");
       showApp();
     }
-  }, 3000);
+  }, 2000);
   
   // Gérer la déconnexion
   const logoutBtn = document.querySelector('.logout-btn');

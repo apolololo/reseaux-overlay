@@ -255,11 +255,21 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Cacher l'écran de chargement
     const loadingScreen = document.querySelector('.loading-screen');
-    if (loadingScreen) loadingScreen.style.display = 'none';
+    if (loadingScreen) {
+      loadingScreen.style.opacity = '0';
+      setTimeout(() => {
+        loadingScreen.style.display = 'none';
+      }, 300);
+    }
     
     // Afficher l'application
     const app = document.getElementById('app');
-    if (app) app.style.display = 'flex';
+    if (app) {
+      app.style.display = 'flex';
+      setTimeout(() => {
+        app.classList.add('visible');
+      }, 50);
+    }
     
     // Vérifier le hash pour la vue initiale
     checkInitialView();
@@ -274,14 +284,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   // Mécanisme de sécurité pour garantir l'initialisation
-  // même si l'événement authComplete n'est pas déclenché
   setTimeout(() => {
     const loadingScreen = document.querySelector('.loading-screen');
     if (loadingScreen && loadingScreen.style.display !== 'none') {
       console.log("Fallback: initialisation de l'application après délai");
       initApp();
     }
-  }, 2000);
+  }, 1500);
   
   // Écouter les changements de hash
   window.addEventListener('hashchange', checkInitialView);
