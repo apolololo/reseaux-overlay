@@ -271,20 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
         element.style.backgroundColor = '#ffffff';
         element.style.border = '2px solid #000000';
         break;
-      case 'social':
-        element.innerHTML = `
-          <div class="social-element">
-            <img src="../images/twitch.png" alt="Twitch" style="width: 24px; height: 24px; margin-right: 8px;">
-            <span>@votre_pseudo</span>
-          </div>
-        `;
-        element.style.display = 'flex';
-        element.style.alignItems = 'center';
-        element.style.padding = '8px';
-        element.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-        element.style.color = '#ffffff';
-        element.style.borderRadius = '4px';
-        break;
+
       case 'timer':
         element.innerHTML = '00:00';
         element.style.fontFamily = 'monospace';
