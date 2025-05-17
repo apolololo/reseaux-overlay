@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -5,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>APO Overlay</title>
   <link rel="stylesheet" href="./overlay.css">
+  <script src="../../js/overlay-security.js"></script>
 </head>
 <body>
   <!-- Creator Box -->
@@ -71,63 +73,70 @@
   </div>
 
   <script>
-    const slides = document.querySelectorAll(".apo-slide");
-    let current = 0;
-    let isAnimating = false;
+    // Vérifier si nous avons un jeton valide avant d'exécuter le script
+    const params = new URLSearchParams(window.location.search);
+    const hasValidToken = params.has('token');
+    
+    // Si on est dans un iframe ou si on a un token valide, exécuter le script normal
+    if (window !== window.top || hasValidToken) {
+      const slides = document.querySelectorAll(".apo-slide");
+      let current = 0;
+      let isAnimating = false;
 
-    function splitTextIntoLetters() {
-      slides.forEach(slide => {
-        const userText = slide.querySelector('.apo-user');
-        if (!userText) return;
-        const text = userText.textContent;
-        userText.innerHTML = text.split('').map((char, i) => 
-          `<span class="char" style="--char-index: ${i}">${char}</span>`
-        ).join('');
-      });
-    }
-
-    function showSlide(index) {
-      if (isAnimating || index === current) return;
-      isAnimating = true;
-      const prev = slides[current];
-      const next = slides[index];
-
-      prev.classList.remove('active');
-      prev.classList.add('leaving');
-      next.classList.add('entering');
-
-      // L'entrée commence tout de suite, la sortie aussi
-      setTimeout(() => {
-        prev.classList.remove('leaving');
-        next.classList.remove('entering');
-        next.classList.add('active');
-        current = index;
-        // Animation des lettres (reset delay)
-        const chars = next.querySelectorAll('.char');
-        chars.forEach((char, i) => {
-          setTimeout(() => {
-            char.style.transitionDelay = '0s';
-          }, i * 50);
+      function splitTextIntoLetters() {
+        slides.forEach(slide => {
+          const userText = slide.querySelector('.apo-user');
+          if (!userText) return;
+          const text = userText.textContent;
+          userText.innerHTML = text.split('').map((char, i) => 
+            `<span class="char" style="--char-index: ${i}">${char}</span>`
+          ).join('');
         });
-        setTimeout(() => {
-          isAnimating = false;
-        }, 400); // Fin d'animation d'entrée
-      }, 1100); // Fin d'animation de sortie
-    }
-
-    function nextSlide() {
-      if (!isAnimating) {
-        const next = (current + 1) % slides.length;
-        showSlide(next);
       }
+
+      function showSlide(index) {
+        if (isAnimating || index === current) return;
+        isAnimating = true;
+        const prev = slides[current];
+        const next = slides[index];
+
+        prev.classList.remove('active');
+        prev.classList.add('leaving');
+        next.classList.add('entering');
+
+        // L'entrée commence tout de suite, la sortie aussi
+        setTimeout(() => {
+          prev.classList.remove('leaving');
+          next.classList.remove('entering');
+          next.classList.add('active');
+          current = index;
+          // Animation des lettres (reset delay)
+          const chars = next.querySelectorAll('.char');
+          chars.forEach((char, i) => {
+            setTimeout(() => {
+              char.style.transitionDelay = '0s';
+            }, i * 50);
+          });
+          setTimeout(() => {
+            isAnimating = false;
+          }, 400); // Fin d'animation d'entrée
+        }, 1100); // Fin d'animation de sortie
+      }
+
+      function nextSlide() {
+        if (!isAnimating) {
+          const next = (current + 1) % slides.length;
+          showSlide(next);
+        }
+      }
+
+      // Initialiser
+      splitTextIntoLetters();
+      slides[0].classList.add('active');
+
+      // Changer de slide toutes les 6 secondes
+      setInterval(nextSlide, 6000);
     }
-
-    // Initialiser
-    splitTextIntoLetters();
-    slides[0].classList.add('active');
-
-    // Changer de slide toutes les 6 secondes
-    setInterval(nextSlide, 6000);
   </script>
 </body>
 </html>

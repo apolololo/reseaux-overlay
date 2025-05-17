@@ -1,3 +1,6 @@
+// Import du système d'authentification centralisé
+import { requireAuth, generateOverlayToken } from './auth.js';
+
 // Gestion de la navigation
 document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -13,22 +16,8 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Vérification de l'authentification
-  const checkAuth = () => {
-    const token = localStorage.getItem('twitch_token');
-    const expiresAt = localStorage.getItem('twitch_expires_at');
-    
-    // Vérifier si le token existe et n'est pas expiré
-    if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
-      // Rediriger vers la page d'authentification
-      window.location.href = './src/auth.html';
-      return false;
-    }
-    return true;
-  };
-  
-  // Vérifier l'authentification au chargement
-  if (!checkAuth()) return;
+  // Vérifier l'authentification au démarrage
+  if (!requireAuth()) return;
 
   // L'URL de production sera automatiquement détectée
   const PRODUCTION_URL = window.location.origin;
@@ -41,21 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const copyButton = document.getElementById('copy-url');
   const sizeInfo = document.querySelector('.size-info');
   const previewContainerWrapper = document.querySelector('.preview-container');
-
-  // Génération d'un jeton simple pour les overlays (compatible partout)
-  function generateOverlayToken(overlayPath) {
-    // Récupérer l'ID utilisateur Twitch
-    const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
-    const userId = userData?.id || 'anonymous';
-    
-    // Créer un jeton simple qui contient l'ID utilisateur et le chemin de l'overlay
-    const tokenData = userId + '-' + overlayPath;
-    
-    // Encoder en base64 pour plus de lisibilité
-    const token = btoa(tokenData);
-    
-    return token;
-  }
 
   // Gestion des overlays avec support des tailles et jetons
   document.querySelectorAll('.overlay-item').forEach(item => {
@@ -74,6 +48,10 @@ document.addEventListener('DOMContentLoaded', () => {
           newUrl.searchParams.set(key, value);
         }
       });
+      
+      // Générer un nouveau jeton pour la prévisualisation
+      const token = generateOverlayToken(localPath);
+      newUrl.searchParams.set('token', token);
       
       previewFrame.src = newUrl.toString();
       
