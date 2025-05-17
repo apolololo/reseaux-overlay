@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Vérifier si le token existe et n'est pas expiré
     if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
+      console.log("Authentification échouée ou expirée, redirection vers la page d'auth");
       // Rediriger vers la page d'authentification
       window.location.href = './auth.html?redirect=studio';
       return false;
@@ -21,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
       if (!userData.id) {
+        console.log("Données utilisateur invalides");
         throw new Error('Données utilisateur invalides');
       }
       
@@ -40,11 +42,16 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Vérifier l'authentification au chargement
   if (checkAuth()) {
-    // Afficher l'application une fois l'authentification vérifiée
-    setTimeout(() => {
-      document.querySelector('.loading-screen').style.display = 'none';
-      document.getElementById('app').style.display = 'flex';
-    }, 1000);
+    console.log("Authentification réussie, affichage de l'application");
+    // Afficher l'application immédiatement après vérification
+    document.querySelector('.loading-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    
+    // Déclencher l'initialisation des vues
+    const event = new CustomEvent('authComplete');
+    document.dispatchEvent(event);
+  } else {
+    console.log("Échec de l'authentification");
   }
   
   // Gérer la déconnexion

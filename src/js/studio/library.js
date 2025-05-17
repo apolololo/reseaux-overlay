@@ -5,7 +5,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('Bibliothèque chargée');
+  console.log('Module bibliothèque chargé');
   
   // Overlays sauvegardés (simulation de base de données)
   let savedOverlays = JSON.parse(localStorage.getItem('saved_overlays') || '[]');
@@ -23,10 +23,14 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Référence au conteneur de la grille
       const libraryGrid = document.querySelector('.overlays-grid');
-      if (!libraryGrid) return;
+      if (!libraryGrid) {
+        console.error("Conteneur de la grille non trouvé");
+        return;
+      }
       
       // Si aucun overlay sauvegardé, afficher un message
       if (savedOverlays.length === 0) {
+        console.log("Aucun overlay trouvé, affichage du message vide");
         libraryGrid.innerHTML = `
           <div class="empty-library-message">
             <div class="empty-icon">📁</div>
@@ -40,12 +44,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const switchToEditorBtn = libraryGrid.querySelector('.switch-to-editor');
         if (switchToEditorBtn) {
           switchToEditorBtn.addEventListener('click', () => {
+            console.log("Passage à l'éditeur depuis la bibliothèque vide");
             const event = new CustomEvent('viewChanged', { detail: { view: 'editor' } });
             document.dispatchEvent(event);
           });
         }
       } else {
         // Afficher les overlays sauvegardés
+        console.log(`Affichage de ${savedOverlays.length} overlays dans la bibliothèque`);
         let overlaysHTML = '';
         
         savedOverlays.forEach(overlay => {
@@ -89,11 +95,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         libraryGrid.innerHTML = overlaysHTML;
+        console.log("Contenu HTML de la bibliothèque généré");
         
         // Ajouter les événements aux boutons
         libraryGrid.querySelectorAll('.edit-overlay').forEach(btn => {
           btn.addEventListener('click', function() {
             const overlayId = this.dataset.id;
+            console.log(`Demande d'édition de l'overlay: ${overlayId}`);
             editOverlay(overlayId);
           });
         });
@@ -101,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
         libraryGrid.querySelectorAll('.copy-overlay-url').forEach(btn => {
           btn.addEventListener('click', function() {
             const overlayId = this.dataset.id;
+            console.log(`Copie de l'URL de l'overlay: ${overlayId}`);
             copyOverlayUrl(overlayId);
           });
         });
@@ -108,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
         libraryGrid.querySelectorAll('.delete-overlay').forEach(btn => {
           btn.addEventListener('click', function() {
             const overlayId = this.dataset.id;
+            console.log(`Demande de suppression de l'overlay: ${overlayId}`);
             if (confirm('Voulez-vous vraiment supprimer cet overlay ?')) {
               deleteOverlay(overlayId);
             }
@@ -134,7 +144,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const editOverlay = (overlayId) => {
       // Charger les données de l'overlay
       const overlay = savedOverlays.find(o => o.id === overlayId);
-      if (!overlay) return;
+      if (!overlay) {
+        console.error(`Overlay avec l'ID ${overlayId} non trouvé`);
+        return;
+      }
+      
+      console.log(`Chargement de l'overlay pour édition: ${overlayId}`);
       
       // Enregistrer l'ID de l'overlay courant
       window.currentOverlayId = overlayId;
@@ -151,6 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Charger les éléments de l'overlay dans l'éditeur
       if (window.loadOverlay) {
+        console.log("Appel de la fonction loadOverlay");
         window.loadOverlay(overlayId);
       } else {
         console.error("La fonction loadOverlay n'est pas disponible");
@@ -161,7 +177,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyOverlayUrl = (overlayId) => {
       // Récupérer l'overlay
       const overlay = savedOverlays.find(o => o.id === overlayId);
-      if (!overlay) return;
+      if (!overlay) {
+        console.error(`Overlay avec l'ID ${overlayId} non trouvé pour la copie d'URL`);
+        return;
+      }
       
       // Générer l'URL pour OBS
       const baseUrl = window.location.origin;
@@ -171,6 +190,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // Créer un token encodé pour l'URL
       const token = btoa(`${userId}-${overlayId}`);
       const url = `${baseUrl}/overlay.html?token=${token}`;
+      
+      console.log(`URL générée pour OBS: ${url}`);
       
       // Copier l'URL dans le presse-papier
       const tempInput = document.createElement('input');
@@ -186,6 +207,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Fonction pour supprimer un overlay
     const deleteOverlay = (overlayId) => {
+      console.log(`Suppression de l'overlay: ${overlayId}`);
+      
       // Supprimer l'overlay de la liste
       savedOverlays = savedOverlays.filter(o => o.id !== overlayId);
       
@@ -206,12 +229,14 @@ document.addEventListener('DOMContentLoaded', () => {
       
       if (searchInput) {
         searchInput.addEventListener('input', () => {
+          console.log(`Recherche: ${searchInput.value}`);
           filterOverlays(searchInput.value, sortSelect ? sortSelect.value : 'recent');
         });
       }
       
       if (sortSelect) {
         sortSelect.addEventListener('change', () => {
+          console.log(`Tri: ${sortSelect.value}`);
           filterOverlays(searchInput ? searchInput.value : '', sortSelect.value);
         });
       }
@@ -257,13 +282,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       // Sauvegarder les overlays filtrés temporairement
+      const tempOverlays = savedOverlays;
       savedOverlays = filteredOverlays;
       
       // Mettre à jour l'affichage
       window.updateLibrary();
       
       // Restaurer tous les overlays
-      savedOverlays = JSON.parse(localStorage.getItem('saved_overlays') || '[]');
+      savedOverlays = tempOverlays;
     };
     
     // Afficher une notification
@@ -300,12 +326,20 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Mettre à jour l'affichage
     window.updateLibrary();
+    console.log("Bibliothèque initialisée et mise à jour");
   };
   
   // Attendre que la vue de la bibliothèque soit visible
   document.addEventListener('viewChanged', (event) => {
     if (event.detail.view === 'library') {
+      console.log("Vue bibliothèque activée, initialisation");
       initLibrary();
     }
   });
+  
+  // Initialiser la bibliothèque si nous sommes directement sur la vue bibliothèque (via hash)
+  if (window.location.hash === '#library') {
+    console.log("Bibliothèque demandée via hash, initialisation immédiate");
+    setTimeout(initLibrary, 500); // Petit délai pour s'assurer que le DOM est prêt
+  }
 });

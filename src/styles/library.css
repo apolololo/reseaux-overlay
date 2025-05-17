@@ -14,6 +14,7 @@
   overflow: hidden;
   background-color: #fff;
   transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .overlay-card:hover {
@@ -172,4 +173,74 @@
   .search-filter-bar {
     flex-direction: column;
   }
+}
+
+/* Notification pour les actions de la bibliothèque */
+.studio-notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  background-color: #333;
+  color: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.studio-notification.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.studio-notification.success {
+  background-color: #4caf50;
+}
+
+.studio-notification.error {
+  background-color: #f44336;
+}
+
+.studio-notification.info {
+  background-color: #2196f3;
+}
+
+/* Style pour placeholder des overlays sans vignette */
+.overlay-placeholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background-color: #222;
+  color: #666;
+  font-size: 16px;
+  font-style: italic;
+}
+
+/* Amélioration du chargement */
+.loading-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  color: #666;
+}
+
+.loading-indicator:after {
+  content: "";
+  width: 20px;
+  height: 20px;
+  border: 2px solid #ddd;
+  border-top-color: #333;
+  border-radius: 50%;
+  margin-left: 10px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }

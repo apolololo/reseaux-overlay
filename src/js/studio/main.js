@@ -1,9 +1,12 @@
+
 /**
  * Script principal du Studio
  * Gère la navigation entre les différentes vues et les fonctionnalités communes
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('Studio main.js chargé');
+  
   // Gestion de la navigation
   const navButtons = document.querySelectorAll('.nav-btn');
   const views = {
@@ -238,6 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Vérifier le hash pour déterminer la vue initiale
   const checkInitialView = () => {
     const hash = window.location.hash.substring(1);
+    console.log("Hash actuel :", hash);
     if (hash && views[hash]) {
       switchView(hash);
     } else {
@@ -246,8 +250,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
   
-  // Initialisation : vérifier le hash pour déterminer la vue initiale
-  checkInitialView();
+  // Initialiser l'application après l'authentification
+  const initApp = () => {
+    console.log("Initialisation de l'application studio");
+    // Vérifier le hash pour la vue initiale
+    checkInitialView();
+    
+    // Cacher l'écran de chargement si nécessaire
+    document.querySelector('.loading-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+  };
+  
+  // S'assurer que l'initialisation est faite après l'authentification
+  document.addEventListener('authComplete', initApp);
+  
+  // S'assurer que l'application est initialisée même si l'événement authComplete n'est pas déclenché
+  setTimeout(() => {
+    const loadingScreen = document.querySelector('.loading-screen');
+    if (loadingScreen && loadingScreen.style.display !== 'none') {
+      console.log("Fallback: initialisation de l'application après délai");
+      initApp();
+    }
+  }, 2000);
   
   // Écouter les changements de hash
   window.addEventListener('hashchange', checkInitialView);
