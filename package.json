@@ -12,6 +12,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.38.4",
     "apo-overlay-generator": "file:",
+    "html2canvas": "^1.4.1",
     "vite": "^5.0.0"
   }
 }

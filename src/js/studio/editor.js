@@ -61,7 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
             borderRadius: element.style.borderRadius,
             boxShadow: element.style.boxShadow,
             opacity: element.style.opacity,
-            transform: element.style.transform
+            transform: element.style.transform,
+            zIndex: element.style.zIndex || '0'
           }
         });
       });
@@ -84,9 +85,13 @@ document.addEventListener('DOMContentLoaded', () => {
         height = canvasHeight ? parseInt(canvasHeight.value) : 1080;
       }
       
+      // Récupérer la couleur de fond du canvas
+      const canvasBackground = document.getElementById('canvas-background');
+      const backgroundColor = canvasBackground ? canvasBackground.value : '#000000';
+      
       return {
         elements: elements,
-        background: '#000000', // Pour l'instant, fond noir fixe
+        background: backgroundColor,
         size: { width, height }
       };
     };
@@ -155,6 +160,24 @@ document.addEventListener('DOMContentLoaded', () => {
     window.saveOverlay = async (data) => {
       console.log('Sauvegarde de l\'overlay', data);
       
+      // Générer une capture d'écran du canvas
+      try {
+        const canvas = document.getElementById('editor-canvas');
+        if (canvas) {
+          // Créer une capture d'écran du canvas
+          const screenshot = await html2canvas(canvas, {
+            backgroundColor: '#000000',
+            scale: 0.3, // Échelle réduite pour la vignette
+            logging: false
+          });
+          
+          // Convertir le canvas en base64
+          data.thumbnail = screenshot.toDataURL('image/jpeg', 0.7);
+        }
+      } catch (e) {
+        console.error('Impossible de créer la vignette:', e);
+      }
+      
       // Récupérer les overlays déjà sauvegardés
       const savedOverlays = JSON.parse(localStorage.getItem('saved_overlays') || '[]');
       
@@ -180,7 +203,111 @@ document.addEventListener('DOMContentLoaded', () => {
       
       return { id: data.id };
     };
+    
+    // Fonction pour charger un overlay existant
+    window.loadOverlay = (overlayId) => {
+      // Récupérer les overlays sauvegardés
+      const savedOverlays = JSON.parse(localStorage.getItem('saved_overlays') || '[]');
+      const overlay = savedOverlays.find(o => o.id === overlayId);
+      
+      if (!overlay) return false;
+      
+      // Nettoyer le canvas
+      const canvas = document.getElementById('editor-canvas');
+      if (!canvas) return false;
+      
+      // Supprimer tous les éléments existants
+      while (canvas.firstChild) {
+        canvas.removeChild(canvas.firstChild);
+      }
+      
+      // Restaurer la taille du canvas
+      if (overlay.size) {
+        canvas.style.width = `${overlay.size.width}px`;
+        canvas.style.height = `${overlay.size.height}px`;
+        
+        // Mettre à jour les inputs correspondants
+        const canvasPreset = document.getElementById('canvas-preset');
+        if (canvasPreset) {
+          const presetValue = `${overlay.size.width}x${overlay.size.height}`;
+          const presetExists = Array.from(canvasPreset.options).some(option => option.value === presetValue);
+          
+          if (presetExists) {
+            canvasPreset.value = presetValue;
+          } else {
+            canvasPreset.value = 'custom';
+            
+            const canvasWidth = document.getElementById('canvas-width');
+            const canvasHeight = document.getElementById('canvas-height');
+            const customSizeDiv = document.querySelector('.custom-size');
+            
+            if (customSizeDiv) customSizeDiv.style.display = 'flex';
+            if (canvasWidth) canvasWidth.value = overlay.size.width;
+            if (canvasHeight) canvasHeight.value = overlay.size.height;
+          }
+        }
+      }
+      
+      // Restaurer la couleur de fond
+      const canvasBackground = document.getElementById('canvas-background');
+      if (canvasBackground && overlay.background) {
+        canvasBackground.value = overlay.background;
+        canvas.style.backgroundColor = overlay.background;
+      }
+      
+      // Restaurer le nom de l'overlay
+      const nameInput = document.getElementById('overlay-name');
+      if (nameInput && overlay.metadata && overlay.metadata.name) {
+        nameInput.value = overlay.metadata.name;
+      }
+      
+      // Restaurer les éléments
+      if (overlay.elements && Array.isArray(overlay.elements)) {
+        overlay.elements.forEach(element => {
+          // Créer l'élément sur le canvas
+          createElementFromData(element, canvas);
+        });
+      }
+      
+      // Enregistrer l'ID de l'overlay courant
+      window.currentOverlayId = overlayId;
+      
+      return true;
+    };
   };
+  
+  // Créer un élément à partir des données sauvegardées
+  function createElementFromData(data, canvas) {
+    if (!data || !data.type || !canvas) return null;
+    
+    const element = document.createElement('div');
+    element.className = `editor-element ${data.type}-element`;
+    element.dataset.type = data.type;
+    element.innerHTML = data.content || '';
+    
+    // Appliquer les styles
+    if (data.style) {
+      Object.entries(data.style).forEach(([key, value]) => {
+        if (value) element.style[key] = value;
+      });
+    }
+    
+    // S'assurer que l'élément est positionné correctement
+    element.style.position = 'absolute';
+    
+    // Rendre l'élément déplaçable
+    makeElementDraggable(element);
+    
+    // Ajouter les gestionnaires spécifiques selon le type
+    if (data.type === 'text') {
+      element.contentEditable = true;
+    }
+    
+    // Ajouter l'élément au canvas
+    canvas.appendChild(element);
+    
+    return element;
+  }
   
   // Configuration du drag & drop
   function setupDragAndDrop(canvas) {
@@ -232,6 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
     element.style.left = `${x}px`;
     element.style.top = `${y}px`;
     element.style.cursor = 'move';
+    element.style.zIndex = '1'; // Valeur par défaut
 
     switch (type) {
       case 'text':
@@ -242,6 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
         element.style.fontSize = '24px';
         element.style.minWidth = '200px';
         element.style.minHeight = '30px';
+        element.style.padding = '10px';
         break;
       case 'image':
         element.innerHTML = '<div class="placeholder">Cliquez pour ajouter une image</div>';
@@ -252,49 +381,77 @@ document.addEventListener('DOMContentLoaded', () => {
         element.style.justifyContent = 'center';
         element.style.alignItems = 'center';
         element.style.color = '#ffffff';
+        
+        // Ajouter un gestionnaire d'événement pour sélectionner une image
+        element.addEventListener('click', function(e) {
+          if (e.target !== this && !e.target.classList.contains('placeholder')) return;
+          
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.accept = 'image/*';
+          
+          fileInput.onchange = function() {
+            if (this.files && this.files[0]) {
+              const file = this.files[0];
+              const reader = new FileReader();
+              
+              reader.onload = function(e) {
+                // Créer une image pour obtenir les dimensions réelles
+                const img = new Image();
+                img.onload = function() {
+                  // Ajuster la taille de l'élément aux dimensions réelles de l'image
+                  element.style.width = `${img.width}px`;
+                  element.style.height = `${img.height}px`;
+                  
+                  // Mettre à jour les champs de propriétés si l'élément est sélectionné
+                  if (element.classList.contains('selected')) {
+                    const widthInput = document.getElementById('element-width');
+                    const heightInput = document.getElementById('element-height');
+                    if (widthInput) widthInput.value = img.width;
+                    if (heightInput) heightInput.value = img.height;
+                  }
+                };
+                
+                img.src = e.target.result;
+                
+                // Mettre à jour l'élément avec l'image
+                element.innerHTML = '';
+                element.style.backgroundImage = `url(${e.target.result})`;
+                element.style.backgroundSize = 'contain';
+                element.style.backgroundPosition = 'center';
+                element.style.backgroundRepeat = 'no-repeat';
+              };
+              
+              reader.readAsDataURL(file);
+            }
+          };
+          
+          fileInput.click();
+        });
+        
+        // Ajout des poignées de redimensionnement
+        addResizeHandles(element);
         break;
       case 'shape':
+        // Nouveau format pour les formes avec plus d'options
         element.style.width = '100px';
         element.style.height = '100px';
         element.style.backgroundColor = '#ffffff';
         element.style.border = '2px solid #000000';
-        break;
-      case 'social':
-        element.innerHTML = `
-          <div class="social-element">
-            <img src="../images/twitch.png" alt="Twitch" style="width: 24px; height: 24px; margin-right: 8px;">
-            <span>@votre_pseudo</span>
-          </div>
-        `;
-        element.style.display = 'flex';
-        element.style.alignItems = 'center';
-        element.style.padding = '8px';
-        element.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-        element.style.color = '#ffffff';
-        element.style.borderRadius = '4px';
+        element.style.borderRadius = '0'; // Rectangle par défaut
+        
+        // Ajout des poignées de redimensionnement
+        addResizeHandles(element);
         break;
       case 'timer':
-        element.innerHTML = '00:00';
+        element.innerHTML = '00:10:00';
+        element.dataset.format = 'hh:mm:ss';
+        element.dataset.duration = '600'; // 10 minutes par défaut
         element.style.fontFamily = 'monospace';
         element.style.fontSize = '24px';
         element.style.padding = '8px';
         element.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
         element.style.color = '#ffffff';
-        element.style.borderRadius = '4px';
-        break;
-      case 'creator-code':
-        element.innerHTML = `
-          <div class="creator-code-element">
-            <span>CODE : APO21</span>
-            <span class="tag" style="background-color: red; padding: 2px 5px; margin-left: 5px; border-radius: 3px;">#AD</span>
-          </div>
-        `;
-        element.style.fontFamily = 'Arial, sans-serif';
-        element.style.fontWeight = 'bold';
-        element.style.padding = '8px';
-        element.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-        element.style.color = '#ffffff';
-        element.style.display = 'inline-block';
         element.style.borderRadius = '4px';
         break;
     }
@@ -312,6 +469,153 @@ document.addEventListener('DOMContentLoaded', () => {
     return element;
   }
 
+  // Ajouter les poignées de redimensionnement à un élément
+  function addResizeHandles(element) {
+    const positions = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
+    const handles = {};
+    
+    positions.forEach(pos => {
+      const handle = document.createElement('div');
+      handle.className = `resize-handle ${pos}`;
+      handle.style.position = 'absolute';
+      handle.style.width = '10px';
+      handle.style.height = '10px';
+      handle.style.backgroundColor = '#0066ff';
+      handle.style.zIndex = '1000';
+      handle.style.borderRadius = '50%';
+      
+      switch(pos) {
+        case 'nw': 
+          handle.style.top = '-5px'; 
+          handle.style.left = '-5px'; 
+          handle.style.cursor = 'nwse-resize';
+          break;
+        case 'n': 
+          handle.style.top = '-5px'; 
+          handle.style.left = 'calc(50% - 5px)'; 
+          handle.style.cursor = 'ns-resize';
+          break;
+        case 'ne': 
+          handle.style.top = '-5px'; 
+          handle.style.right = '-5px'; 
+          handle.style.cursor = 'nesw-resize';
+          break;
+        case 'e': 
+          handle.style.top = 'calc(50% - 5px)'; 
+          handle.style.right = '-5px'; 
+          handle.style.cursor = 'ew-resize';
+          break;
+        case 'se': 
+          handle.style.bottom = '-5px'; 
+          handle.style.right = '-5px'; 
+          handle.style.cursor = 'nwse-resize';
+          break;
+        case 's': 
+          handle.style.bottom = '-5px'; 
+          handle.style.left = 'calc(50% - 5px)'; 
+          handle.style.cursor = 'ns-resize';
+          break;
+        case 'sw': 
+          handle.style.bottom = '-5px'; 
+          handle.style.left = '-5px'; 
+          handle.style.cursor = 'nesw-resize';
+          break;
+        case 'w': 
+          handle.style.top = 'calc(50% - 5px)'; 
+          handle.style.left = '-5px'; 
+          handle.style.cursor = 'ew-resize';
+          break;
+      }
+      
+      handles[pos] = handle;
+      element.appendChild(handle);
+      
+      handle.addEventListener('mousedown', startResize);
+    });
+    
+    // Stocker les poignées sur l'élément pour un accès facile
+    element.resizeHandles = handles;
+    
+    function startResize(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      
+      const handle = e.target;
+      const direction = handle.className.split(' ')[1];
+      
+      const startX = e.clientX;
+      const startY = e.clientY;
+      
+      const startWidth = parseInt(element.style.width);
+      const startHeight = parseInt(element.style.height);
+      const startLeft = parseInt(element.style.left);
+      const startTop = parseInt(element.style.top);
+      
+      document.addEventListener('mousemove', resize);
+      document.addEventListener('mouseup', stopResize);
+      
+      function resize(e) {
+        e.preventDefault();
+        
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+        
+        let newWidth = startWidth;
+        let newHeight = startHeight;
+        let newLeft = startLeft;
+        let newTop = startTop;
+        
+        if (direction.includes('e')) {
+          newWidth = startWidth + deltaX;
+        }
+        if (direction.includes('w')) {
+          newWidth = startWidth - deltaX;
+          newLeft = startLeft + deltaX;
+        }
+        if (direction.includes('s')) {
+          newHeight = startHeight + deltaY;
+        }
+        if (direction.includes('n')) {
+          newHeight = startHeight - deltaY;
+          newTop = startTop + deltaY;
+        }
+        
+        // Appliquer les nouvelles dimensions et position
+        if (newWidth > 20) {
+          element.style.width = `${newWidth}px`;
+          if (direction.includes('w')) {
+            element.style.left = `${newLeft}px`;
+          }
+        }
+        
+        if (newHeight > 20) {
+          element.style.height = `${newHeight}px`;
+          if (direction.includes('n')) {
+            element.style.top = `${newTop}px`;
+          }
+        }
+        
+        // Mettre à jour les champs de propriétés si l'élément est sélectionné
+        if (element.classList.contains('selected')) {
+          const widthInput = document.getElementById('element-width');
+          const heightInput = document.getElementById('element-height');
+          const leftInput = document.getElementById('position-x');
+          const topInput = document.getElementById('position-y');
+          
+          if (widthInput) widthInput.value = Math.round(newWidth);
+          if (heightInput) heightInput.value = Math.round(newHeight);
+          if (leftInput) leftInput.value = Math.round(newLeft);
+          if (topInput) topInput.value = Math.round(newTop);
+        }
+      }
+      
+      function stopResize() {
+        document.removeEventListener('mousemove', resize);
+        document.removeEventListener('mouseup', stopResize);
+      }
+    }
+  }
+
   // Rendre un élément déplaçable
   function makeElementDraggable(element) {
     let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
@@ -319,6 +623,11 @@ document.addEventListener('DOMContentLoaded', () => {
     element.addEventListener('mousedown', dragMouseDown);
 
     function dragMouseDown(e) {
+      // Ne pas déclencher le déplacement si on clique sur une poignée de redimensionnement
+      if (e.target.classList.contains('resize-handle')) {
+        return;
+      }
+      
       if (e.target !== element && e.target.contentEditable === 'true') {
         return; // Permet l'édition du contenu sans déplacer
       }
@@ -367,8 +676,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Ajouter une bordure visible pour indiquer la sélection
     elements.forEach(el => {
       el.style.outline = 'none';
+      // Masquer les poignées de redimensionnement
+      if (el.resizeHandles) {
+        Object.values(el.resizeHandles).forEach(handle => {
+          handle.style.display = 'none';
+        });
+      }
     });
+    
     element.style.outline = '2px solid #0066ff';
+    
+    // Afficher les poignées de redimensionnement
+    if (element.resizeHandles) {
+      Object.values(element.resizeHandles).forEach(handle => {
+        handle.style.display = 'block';
+      });
+    }
     
     // Afficher les propriétés correspondantes
     showElementProperties(element);
@@ -404,9 +727,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (sizeValue) sizeValue.textContent = `${size || 16}px`;
       }
       
-      // Couleur
+      // Couleur du texte
       const textColor = document.getElementById('text-color');
       if (textColor) textColor.value = element.style.color || '#ffffff';
+      
+      // Couleur de fond
+      const bgColor = document.getElementById('text-bg-color');
+      if (bgColor) bgColor.value = element.style.backgroundColor || 'transparent';
     } else if (element.classList.contains('image-element')) {
       const imageProperties = document.querySelector('.image-properties');
       if (imageProperties) imageProperties.style.display = 'block';
@@ -427,6 +754,83 @@ document.addEventListener('DOMContentLoaded', () => {
         imageRadius.value = radius;
         const radiusValue = imageRadius.nextElementSibling;
         if (radiusValue) radiusValue.textContent = `${radius}px`;
+      }
+    } else if (element.classList.contains('shape-element')) {
+      const shapeProperties = document.querySelector('.shape-properties');
+      if (shapeProperties) shapeProperties.style.display = 'block';
+      
+      // Couleur de fond
+      const shapeBgColor = document.getElementById('shape-bg-color');
+      if (shapeBgColor) shapeBgColor.value = element.style.backgroundColor || '#ffffff';
+      
+      // Couleur de bordure
+      const shapeBorderColor = document.getElementById('shape-border-color');
+      if (shapeBorderColor) {
+        const borderColor = element.style.borderColor || '#000000';
+        shapeBorderColor.value = borderColor;
+      }
+      
+      // Épaisseur de bordure
+      const shapeBorderWidth = document.getElementById('shape-border-width');
+      if (shapeBorderWidth) {
+        const width = parseInt(element.style.borderWidth) || 2;
+        shapeBorderWidth.value = width;
+        const widthValue = shapeBorderWidth.nextElementSibling;
+        if (widthValue) widthValue.textContent = `${width}px`;
+      }
+      
+      // Arrondi
+      const shapeRadius = document.getElementById('shape-radius');
+      if (shapeRadius) {
+        const radius = parseInt(element.style.borderRadius) || 0;
+        shapeRadius.value = radius;
+        const radiusValue = shapeRadius.nextElementSibling;
+        if (radiusValue) radiusValue.textContent = `${radius}px`;
+      }
+      
+      // Type de forme
+      const shapeType = document.getElementById('shape-type');
+      if (shapeType) {
+        // Déterminer le type de forme à partir du borderRadius
+        const radius = parseInt(element.style.borderRadius) || 0;
+        const width = parseInt(element.style.width);
+        const height = parseInt(element.style.height);
+        
+        if (radius >= 50) {
+          shapeType.value = 'circle';
+        } else if (radius > 0) {
+          shapeType.value = 'rounded';
+        } else {
+          shapeType.value = 'rectangle';
+        }
+      }
+    } else if (element.classList.contains('timer-element')) {
+      const timerProperties = document.querySelector('.timer-properties');
+      if (timerProperties) timerProperties.style.display = 'block';
+      
+      // Format
+      const timerFormat = document.getElementById('timer-format');
+      if (timerFormat) timerFormat.value = element.dataset.format || 'hh:mm:ss';
+      
+      // Durée
+      const timerDuration = document.getElementById('timer-duration');
+      if (timerDuration) timerDuration.value = element.dataset.duration || '600';
+      
+      // Couleur du texte
+      const timerColor = document.getElementById('timer-color');
+      if (timerColor) timerColor.value = element.style.color || '#ffffff';
+      
+      // Couleur de fond
+      const timerBgColor = document.getElementById('timer-bg-color');
+      if (timerBgColor) timerBgColor.value = element.style.backgroundColor || 'rgba(0, 0, 0, 0.7)';
+      
+      // Taille de police
+      const timerFontSize = document.getElementById('timer-font-size');
+      if (timerFontSize) {
+        const size = parseInt(element.style.fontSize);
+        timerFontSize.value = size || 24;
+        const sizeValue = timerFontSize.nextElementSibling;
+        if (sizeValue) sizeValue.textContent = `${size || 24}px`;
       }
     }
 
@@ -518,7 +922,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     }
     
-    // Mise en forme du texte
+    // Propriétés spécifiques au texte
     if (element.classList.contains('text-element')) {
       // Contenu du texte
       const textContent = document.getElementById('text-content');
@@ -546,11 +950,19 @@ document.addEventListener('DOMContentLoaded', () => {
         };
       }
       
-      // Couleur
+      // Couleur du texte
       const textColor = document.getElementById('text-color');
       if (textColor) {
         textColor.oninput = () => {
           element.style.color = textColor.value;
+        };
+      }
+      
+      // Couleur de fond
+      const bgColor = document.getElementById('text-bg-color');
+      if (bgColor) {
+        bgColor.oninput = () => {
+          element.style.backgroundColor = bgColor.value;
         };
       }
       
@@ -583,7 +995,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     
-    // Propriétés d'image
+    // Propriétés spécifiques à l'image
     if (element.classList.contains('image-element')) {
       // Changer l'image
       const changeImage = document.getElementById('change-image');
@@ -598,10 +1010,27 @@ document.addEventListener('DOMContentLoaded', () => {
             if (file) {
               const reader = new FileReader();
               reader.onload = (e) => {
+                // Créer une image pour obtenir les dimensions réelles
+                const img = new Image();
+                img.onload = function() {
+                  // Ajuster la taille de l'élément aux dimensions réelles de l'image
+                  element.style.width = `${img.width}px`;
+                  element.style.height = `${img.height}px`;
+                  
+                  // Mettre à jour les champs de propriétés
+                  const widthInput = document.getElementById('element-width');
+                  const heightInput = document.getElementById('element-height');
+                  if (widthInput) widthInput.value = img.width;
+                  if (heightInput) heightInput.value = img.height;
+                };
+                
+                img.src = e.target.result;
+                
                 element.innerHTML = '';
                 element.style.backgroundImage = `url(${e.target.result})`;
-                element.style.backgroundSize = 'cover';
+                element.style.backgroundSize = 'contain';
                 element.style.backgroundPosition = 'center';
+                element.style.backgroundRepeat = 'no-repeat';
               };
               reader.readAsDataURL(file);
             }
@@ -631,20 +1060,170 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     
+    // Propriétés spécifiques aux formes
+    if (element.classList.contains('shape-element')) {
+      // Couleur de fond
+      const shapeBgColor = document.getElementById('shape-bg-color');
+      if (shapeBgColor) {
+        shapeBgColor.oninput = () => {
+          element.style.backgroundColor = shapeBgColor.value;
+        };
+      }
+      
+      // Couleur de bordure
+      const shapeBorderColor = document.getElementById('shape-border-color');
+      if (shapeBorderColor) {
+        shapeBorderColor.oninput = () => {
+          element.style.borderColor = shapeBorderColor.value;
+        };
+      }
+      
+      // Épaisseur de bordure
+      const shapeBorderWidth = document.getElementById('shape-border-width');
+      if (shapeBorderWidth) {
+        shapeBorderWidth.oninput = () => {
+          element.style.borderWidth = `${shapeBorderWidth.value}px`;
+          element.style.borderStyle = 'solid';
+          const widthValue = shapeBorderWidth.nextElementSibling;
+          if (widthValue) widthValue.textContent = `${shapeBorderWidth.value}px`;
+        };
+      }
+      
+      // Arrondi
+      const shapeRadius = document.getElementById('shape-radius');
+      if (shapeRadius) {
+        shapeRadius.oninput = () => {
+          element.style.borderRadius = `${shapeRadius.value}px`;
+          const radiusValue = shapeRadius.nextElementSibling;
+          if (radiusValue) radiusValue.textContent = `${shapeRadius.value}px`;
+        };
+      }
+      
+      // Type de forme
+      const shapeType = document.getElementById('shape-type');
+      if (shapeType) {
+        shapeType.onchange = () => {
+          switch(shapeType.value) {
+            case 'circle':
+              // Rendre la forme circulaire
+              element.style.borderRadius = '50%';
+              if (shapeRadius) {
+                shapeRadius.value = 50;
+                const radiusValue = shapeRadius.nextElementSibling;
+                if (radiusValue) radiusValue.textContent = '50px';
+              }
+              break;
+            case 'rounded':
+              // Rectangle aux coins arrondis
+              element.style.borderRadius = '10px';
+              if (shapeRadius) {
+                shapeRadius.value = 10;
+                const radiusValue = shapeRadius.nextElementSibling;
+                if (radiusValue) radiusValue.textContent = '10px';
+              }
+              break;
+            case 'rectangle':
+              // Rectangle standard
+              element.style.borderRadius = '0';
+              if (shapeRadius) {
+                shapeRadius.value = 0;
+                const radiusValue = shapeRadius.nextElementSibling;
+                if (radiusValue) radiusValue.textContent = '0px';
+              }
+              break;
+          }
+        };
+      }
+    }
+    
+    // Propriétés spécifiques au minuteur
+    if (element.classList.contains('timer-element')) {
+      // Format
+      const timerFormat = document.getElementById('timer-format');
+      if (timerFormat) {
+        timerFormat.onchange = () => {
+          element.dataset.format = timerFormat.value;
+          
+          // Mettre à jour l'affichage du timer selon le format
+          const duration = parseInt(element.dataset.duration) || 600;
+          element.innerText = formatTime(duration, timerFormat.value);
+        };
+      }
+      
+      // Durée
+      const timerDuration = document.getElementById('timer-duration');
+      if (timerDuration) {
+        timerDuration.onchange = () => {
+          const duration = parseInt(timerDuration.value) || 600;
+          element.dataset.duration = duration;
+          
+          // Mettre à jour l'affichage du timer selon le format
+          const format = element.dataset.format || 'hh:mm:ss';
+          element.innerText = formatTime(duration, format);
+        };
+      }
+      
+      // Couleur du texte
+      const timerColor = document.getElementById('timer-color');
+      if (timerColor) {
+        timerColor.oninput = () => {
+          element.style.color = timerColor.value;
+        };
+      }
+      
+      // Couleur de fond
+      const timerBgColor = document.getElementById('timer-bg-color');
+      if (timerBgColor) {
+        timerBgColor.oninput = () => {
+          element.style.backgroundColor = timerBgColor.value;
+        };
+      }
+      
+      // Taille de police
+      const timerFontSize = document.getElementById('timer-font-size');
+      if (timerFontSize) {
+        timerFontSize.oninput = () => {
+          element.style.fontSize = `${timerFontSize.value}px`;
+          const sizeValue = timerFontSize.nextElementSibling;
+          if (sizeValue) sizeValue.textContent = `${timerFontSize.value}px`;
+        };
+      }
+    }
+    
+    // Formater le temps selon le format souhaité
+    function formatTime(seconds, format) {
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      const s = seconds % 60;
+      
+      switch(format) {
+        case 'hh:mm:ss':
+          return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        case 'mm:ss':
+          return `${(h * 60 + m).toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        case 'ss':
+          return `${(h * 3600 + m * 60 + s).toString().padStart(2, '0')}`;
+        default:
+          return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+      }
+    }
+    
     // Boutons d'avant-plan/arrière-plan
     const bringForward = document.getElementById('bring-forward');
     if (bringForward) {
       bringForward.onclick = () => {
-        const zIndex = parseInt(element.style.zIndex || 0);
-        element.style.zIndex = zIndex + 1;
+        const zIndex = parseInt(element.style.zIndex || 1);
+        element.style.zIndex = (zIndex + 1).toString();
       };
     }
     
     const sendBackward = document.getElementById('send-backward');
     if (sendBackward) {
       sendBackward.onclick = () => {
-        const zIndex = parseInt(element.style.zIndex || 0);
-        element.style.zIndex = Math.max(0, zIndex - 1);
+        const zIndex = parseInt(element.style.zIndex || 1);
+        if (zIndex > 1) {
+          element.style.zIndex = (zIndex - 1).toString();
+        }
       };
     }
     
@@ -670,6 +1249,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const customSizeDiv = document.querySelector('.custom-size');
     const canvasWidth = document.getElementById('canvas-width');
     const canvasHeight = document.getElementById('canvas-height');
+    const canvasBackground = document.getElementById('canvas-background');
     const canvas = document.getElementById('editor-canvas');
     
     if (canvasPreset && customSizeDiv && canvas) {
@@ -693,6 +1273,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         canvasHeight.addEventListener('change', () => {
           canvas.style.height = `${canvasHeight.value}px`;
+        });
+      }
+      
+      // Gestion du fond du canvas
+      if (canvasBackground) {
+        canvasBackground.addEventListener('input', () => {
+          canvas.style.backgroundColor = canvasBackground.value;
         });
       }
     }
@@ -756,35 +1343,53 @@ document.addEventListener('DOMContentLoaded', () => {
         const overlayData = window.generateOverlayData();
         
         // Ajouter les métadonnées supplémentaires
-        if (descriptionInput) overlayData.description = descriptionInput.value;
-        if (categorySelect) overlayData.category = categorySelect.value;
-        if (publicCheckbox) overlayData.public = publicCheckbox.checked;
+        overlayData.metadata = {
+          name: saveNameInput ? saveNameInput.value : "Overlay sans nom",
+          description: descriptionInput ? descriptionInput.value : "",
+          category: categorySelect ? categorySelect.value : "other",
+          public: publicCheckbox ? publicCheckbox.checked : false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
         
         // Sauvegarder l'overlay
-        await window.saveOverlay(overlayData);
-        
-        // Activer le bouton de copie d'URL
-        const copyUrlBtn = document.getElementById('copy-url');
-        if (copyUrlBtn) {
-          copyUrlBtn.disabled = false;
+        try {
+          await window.saveOverlay(overlayData);
           
-          // Ajouter l'événement pour copier l'URL
-          copyUrlBtn.onclick = () => {
-            const urlModal = document.getElementById('url-modal');
-            const obsUrlInput = document.getElementById('obs-url');
+          // Activer le bouton de copie d'URL
+          const copyUrlBtn = document.getElementById('copy-url');
+          if (copyUrlBtn) {
+            copyUrlBtn.disabled = false;
             
-            if (urlModal && obsUrlInput) {
-              urlModal.style.display = 'flex';
-              const baseUrl = window.location.origin;
-              obsUrlInput.value = `${baseUrl}/overlay.html?id=${overlayData.id}`;
-            }
-          };
-        }
-        
-        // Fermer le modal
-        const saveModal = document.getElementById('save-modal');
-        if (saveModal) {
-          saveModal.style.display = 'none';
+            // Ajouter l'événement pour copier l'URL
+            copyUrlBtn.onclick = () => {
+              const urlModal = document.getElementById('url-modal');
+              const obsUrlInput = document.getElementById('obs-url');
+              
+              if (urlModal && obsUrlInput) {
+                urlModal.style.display = 'flex';
+                const baseUrl = window.location.origin;
+                const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
+                const userId = userData.id || 'anonymous';
+                
+                // Créer un token encodé pour l'URL
+                const token = btoa(`${userId}-${overlayData.id}`);
+                obsUrlInput.value = `${baseUrl}/overlay.html?token=${token}`;
+              }
+            };
+          }
+          
+          // Fermer le modal
+          const saveModal = document.getElementById('save-modal');
+          if (saveModal) {
+            saveModal.style.display = 'none';
+          }
+          
+          // Afficher une notification de succès
+          showNotification('Overlay sauvegardé avec succès !', 'success');
+        } catch (e) {
+          console.error('Erreur lors de la sauvegarde:', e);
+          showNotification('Erreur lors de la sauvegarde', 'error');
         }
       });
     }
@@ -869,6 +1474,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('viewChanged', (event) => {
     if (event.detail.view === 'editor') {
       initEditor();
+      
+      // Si un ID d'overlay est défini, le charger
+      if (window.currentOverlayId && window.loadOverlay) {
+        window.loadOverlay(window.currentOverlayId);
+      }
     }
   });
   
@@ -887,6 +1497,13 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.forEach(el => {
           el.classList.remove('selected');
           el.style.outline = 'none';
+          
+          // Masquer les poignées de redimensionnement
+          if (el.resizeHandles) {
+            Object.values(el.resizeHandles).forEach(handle => {
+              handle.style.display = 'none';
+            });
+          }
         });
         
         // Afficher le message "aucune sélection"
@@ -898,4 +1515,20 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+  
+  // Charger html2canvas
+  function loadHTML2Canvas() {
+    if (window.html2canvas) return Promise.resolve();
+    
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+  
+  // Charger html2canvas au démarrage
+  loadHTML2Canvas().catch(e => console.error('Erreur lors du chargement de html2canvas:', e));
 });

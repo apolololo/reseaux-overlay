@@ -56,14 +56,23 @@ document.addEventListener('DOMContentLoaded', () => {
             year: 'numeric' 
           });
           
+          // Image de prévisualisation
+          let thumbnailImage = '';
+          if (overlay.thumbnail) {
+            thumbnailImage = `<img src="${overlay.thumbnail}" alt="Aperçu" class="overlay-thumbnail-img">`;
+          } else {
+            thumbnailImage = `<div class="overlay-placeholder">Aperçu</div>`;
+          }
+          
           overlaysHTML += `
             <div class="overlay-card" data-id="${overlay.id}">
               <div class="overlay-preview">
                 <div class="overlay-thumbnail" style="background-color: ${overlay.background || '#000'}">
-                  <span class="overlay-placeholder">Aperçu</span>
+                  ${thumbnailImage}
                 </div>
                 <div class="overlay-actions">
                   <button class="edit-overlay" data-id="${overlay.id}">Éditer</button>
+                  <button class="copy-overlay-url" data-id="${overlay.id}">Copier URL</button>
                   <button class="delete-overlay" data-id="${overlay.id}">Supprimer</button>
                 </div>
               </div>
@@ -86,6 +95,13 @@ document.addEventListener('DOMContentLoaded', () => {
           btn.addEventListener('click', function() {
             const overlayId = this.dataset.id;
             editOverlay(overlayId);
+          });
+        });
+        
+        libraryGrid.querySelectorAll('.copy-overlay-url').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const overlayId = this.dataset.id;
+            copyOverlayUrl(overlayId);
           });
         });
         
@@ -133,8 +149,39 @@ document.addEventListener('DOMContentLoaded', () => {
         nameInput.value = overlay.metadata.name;
       }
       
-      // TODO: Charger les éléments de l'overlay dans l'éditeur
-      console.log('Chargement de l\'overlay', overlayId);
+      // Charger les éléments de l'overlay dans l'éditeur
+      if (window.loadOverlay) {
+        window.loadOverlay(overlayId);
+      } else {
+        console.error("La fonction loadOverlay n'est pas disponible");
+      }
+    };
+    
+    // Fonction pour copier l'URL d'un overlay
+    const copyOverlayUrl = (overlayId) => {
+      // Récupérer l'overlay
+      const overlay = savedOverlays.find(o => o.id === overlayId);
+      if (!overlay) return;
+      
+      // Générer l'URL pour OBS
+      const baseUrl = window.location.origin;
+      const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
+      const userId = userData.id || 'anonymous';
+      
+      // Créer un token encodé pour l'URL
+      const token = btoa(`${userId}-${overlayId}`);
+      const url = `${baseUrl}/overlay.html?token=${token}`;
+      
+      // Copier l'URL dans le presse-papier
+      const tempInput = document.createElement('input');
+      tempInput.value = url;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
+      
+      // Afficher une notification
+      showNotification('URL copiée dans le presse-papier', 'success');
     };
     
     // Fonction pour supprimer un overlay
@@ -148,8 +195,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // Mettre à jour l'affichage
       window.updateLibrary();
       
-      // Afficher un message
-      alert('Overlay supprimé avec succès');
+      // Afficher une notification
+      showNotification('Overlay supprimé avec succès', 'success');
     };
     
     // Initialiser la recherche et le tri
@@ -209,10 +256,44 @@ document.addEventListener('DOMContentLoaded', () => {
           break;
       }
       
-      // TODO: Mettre à jour l'affichage avec les overlays filtrés
-      // Pour l'instant on réinitialise simplement l'affichage
+      // Sauvegarder les overlays filtrés temporairement
+      savedOverlays = filteredOverlays;
+      
+      // Mettre à jour l'affichage
       window.updateLibrary();
+      
+      // Restaurer tous les overlays
+      savedOverlays = JSON.parse(localStorage.getItem('saved_overlays') || '[]');
     };
+    
+    // Afficher une notification
+    function showNotification(message, type = 'info') {
+      // Créer l'élément de notification s'il n'existe pas
+      let notification = document.querySelector('.studio-notification');
+      if (!notification) {
+        notification = document.createElement('div');
+        notification.className = 'studio-notification';
+        document.body.appendChild(notification);
+      }
+      
+      // Définir le type et le message
+      notification.className = `studio-notification ${type}`;
+      notification.textContent = message;
+      
+      // Afficher la notification
+      notification.style.display = 'block';
+      setTimeout(() => {
+        notification.classList.add('visible');
+      }, 10);
+      
+      // Masquer la notification après 3 secondes
+      setTimeout(() => {
+        notification.classList.remove('visible');
+        setTimeout(() => {
+          notification.style.display = 'none';
+        }, 300);
+      }, 3000);
+    }
     
     // Initialiser la recherche
     initSearch();
