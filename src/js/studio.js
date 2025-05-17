@@ -1,33 +1,48 @@
-
-// Importation des fonctions d'authentification partagées
+// Importation des fonctions d'authentification
 import { checkAuthAndRedirect, displayUserInfo } from './auth.js';
 
-// Gestion de l'authentification et du chargement initial
+// Fonction d'initialisation du studio
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Studio.js chargé");
+
     const app = document.getElementById('app');
     const loadingScreen = document.querySelector('.loading-screen');
-    const username = document.querySelector('.username');
+    const usernameSpan = document.querySelector('.username');
+    const logoutBtn = document.querySelector('.logout-btn');
 
-    // Initialisation du studio
-    const initStudio = () => {
-        console.log("Initialisation du studio");
-        // Gestion de la navigation
-        const navButtons = document.querySelectorAll('.nav-btn');
-        const views = document.querySelectorAll('.view-section');
+    const navButtons = document.querySelectorAll('.nav-btn');
+    const views = document.querySelectorAll('.view-section');
 
+    // Vérifie l'authentification de l'utilisateur
+    checkAuthAndRedirect().then(user => {
+        if (user) {
+            displayUserInfo(user);
+            usernameSpan.textContent = user.username || "Utilisateur";
+
+            // Une fois l'utilisateur authentifié, on affiche le studio
+            loadingScreen.style.display = 'none';
+            app.style.display = 'block';
+
+            // Initialise les événements principaux
+            initNavigation();
+            initLogout();
+        }
+    }).catch(err => {
+        console.error("Erreur d'authentification:", err);
+        window.location.href = '/login.html';
+    });
+
+    function initNavigation() {
         navButtons.forEach(btn => {
             btn.addEventListener('click', () => {
-                const viewName = btn.dataset.view;
-                console.log("Navigation vers:", viewName);
-                
-                // Mise à jour des boutons actifs
+                // Activer l'onglet sélectionné
                 navButtons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
 
-                // Affichage de la vue correspondante
+                // Afficher la vue sélectionnée
+                const targetView = btn.dataset.view;
                 views.forEach(view => {
-                    if (view.id === `${viewName}-view`) {
+                    if (view.id === `${targetView}-view`) {
                         view.classList.remove('hidden');
                         view.style.display = 'block';
                     } else {
@@ -35,53 +50,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         view.style.display = 'none';
                     }
                 });
-
-                // Déclencher un événement pour informer les modules spécifiques
-                const event = new CustomEvent('viewChanged', { detail: { view: viewName } });
-                document.dispatchEvent(event);
             });
         });
+    }
 
-        // Gestion du drag & drop des éléments
-        const elements = document.querySelectorAll('.element-item');
-        const canvas = document.getElementById('editor-canvas');
-
-        // Gestion de la déconnexion
-        const logoutButton = document.querySelector('.logout-btn');
-        if (logoutButton) {
-            logoutButton.addEventListener('click', () => {
-                console.log("Déconnexion utilisateur");
-                localStorage.removeItem('twitch_token');
-                localStorage.removeItem('twitch_expires_at');
-                localStorage.removeItem('twitch_user');
-                window.location.href = './auth.html';
-            });
-        }
-
-        // Afficher l'interface du studio et cacher l'écran de chargement
-
-        
-        // Vérifier le hash pour déterminer la vue initiale
-        const hash = window.location.hash.substring(1);
-        console.log("Hash actuel:", hash);
-        if (hash) {
-            // Trouver le bouton correspondant au hash et simuler un clic
-            const hashButton = document.querySelector(`.nav-btn[data-view="${hash}"]`);
-            if (hashButton) {
-                console.log("Navigation automatique vers:", hash);
-                hashButton.click();
-            }
-        }
-    };
-
-    // Démarrer l'application avec un timeout de sécurité
-    // Utiliser la fonction partagée pour vérifier l'authentification et rediriger si nécessaire
-    if (checkAuthAndRedirect('./auth.html')) {
-        console.log("Authentification réussie, initialisation du studio");
-        // Afficher les informations utilisateur en utilisant la fonction partagée
-        displayUserInfo('.username');
-        initStudio();
-        
-
+    function initLogout() {
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('authToken');
+            window.location.href = '/login.html';
+        });
     }
 });
