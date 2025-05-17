@@ -389,7 +389,7 @@ input:focus, select:focus, textarea:focus {
 
 .canvas-container {
   flex: 1;
-  overflow: auto;
+  overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -408,6 +408,8 @@ input:focus, select:focus, textarea:focus {
   background-color: var(--dark-bg);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
+  transform: scale(0.5);
+  transform-origin: top left;
 }
 
 .editor-canvas {
@@ -858,6 +860,38 @@ input:focus, select:focus, textarea:focus {
   bottom: -5px;
   right: -5px;
   cursor: nwse-resize;
+}
+
+.top {
+  top: -5px;
+  left: 50%;
+  width: 50%;
+  height: 10px;
+  cursor: ns-resize;
+}
+
+.bottom {
+  bottom: -5px;
+  left: 50%;
+  width: 50%;
+  height: 10px;
+  cursor: ns-resize;
+}
+
+.left {
+  left: -5px;
+  top: 50%;
+  width: 10px;
+  height: 50%;
+  cursor: ew-resize;
+}
+
+.right {
+  right: -5px;
+  top: 50%;
+  width: 10px;
+  height: 50%;
+  cursor: ew-resize;
 }
 
 /* Responsive */

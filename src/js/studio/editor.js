@@ -246,7 +246,17 @@ document.addEventListener('DOMContentLoaded', () => {
         element.style.minHeight = '30px';
         break;
       case 'image':
-        element.innerHTML = '<div class="placeholder">Cliquez pour ajouter une image</div>';
+        element.innerHTML = `
+          <div class="placeholder">Cliquez pour ajouter une image</div>
+          <div class="resize-handle top-left"></div>
+          <div class="resize-handle top-right"></div>
+          <div class="resize-handle bottom-left"></div>
+          <div class="resize-handle bottom-right"></div>
+          <div class="resize-handle top"></div>
+          <div class="resize-handle bottom"></div>
+          <div class="resize-handle left"></div>
+          <div class="resize-handle right"></div>
+        `;
         element.style.width = '200px';
         element.style.height = '150px';
         element.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
@@ -304,6 +314,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Rendre l'élément déplaçable
     makeElementDraggable(element);
 
+    // Rendre l'élément redimensionnable si c'est une image
+    if (type === 'image') {
+      makeElementResizable(element);
+    }
+
     // Ajouter l'élément au canvas
     canvas.appendChild(element);
 
@@ -354,6 +369,59 @@ document.addEventListener('DOMContentLoaded', () => {
     function closeDragElement() {
       document.removeEventListener('mousemove', elementDrag);
       document.removeEventListener('mouseup', closeDragElement);
+    }
+  }
+
+  // Rendre un élément redimensionnable
+  function makeElementResizable(element) {
+    const handles = element.querySelectorAll('.resize-handle');
+    let startX, startY, startWidth, startHeight, startLeft, startTop, aspectRatio;
+
+    handles.forEach(handle => {
+      handle.addEventListener('mousedown', startResize);
+    });
+
+    function startResize(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      startX = e.clientX;
+      startY = e.clientY;
+      startWidth = parseInt(document.defaultView.getComputedStyle(element).width, 10);
+      startHeight = parseInt(document.defaultView.getComputedStyle(element).height, 10);
+      startLeft = element.offsetLeft;
+      startTop = element.offsetTop;
+      aspectRatio = startWidth / startHeight;
+
+      document.addEventListener('mousemove', doResize);
+      document.addEventListener('mouseup', stopResize);
+    }
+
+    function doResize(e) {
+      const width = startWidth + (e.clientX - startX);
+      const height = startHeight + (e.clientY - startY);
+
+      if (e.target.classList.contains('top') || e.target.classList.contains('bottom')) {
+        element.style.height = `${height}px`;
+        element.style.width = `${height * aspectRatio}px`;
+      } else if (e.target.classList.contains('left') || e.target.classList.contains('right')) {
+        element.style.width = `${width}px`;
+        element.style.height = `${width / aspectRatio}px`;
+      } else {
+        element.style.width = `${width}px`;
+        element.style.height = `${height}px`;
+      }
+
+      // Mettre à jour les valeurs des champs de largeur et de hauteur
+      if (document.getElementById('image-width') && document.getElementById('image-height')) {
+        document.getElementById('image-width').value = Math.round(parseInt(element.style.width));
+        document.getElementById('image-height').value = Math.round(parseInt(element.style.height));
+      }
+    }
+
+    function stopResize() {
+      document.removeEventListener('mousemove', doResize);
+      document.removeEventListener('mouseup', stopResize);
     }
   }
 
@@ -614,10 +682,17 @@ document.addEventListener('DOMContentLoaded', () => {
               reader.onload = (e) => {
                 const img = new Image();
                 img.onload = function() {
-                  element.innerHTML = '';
-                  element.style.backgroundImage = `url(${e.target.result})`;
-                  element.style.backgroundSize = 'cover';
-                  element.style.backgroundPosition = 'center';
+                  element.innerHTML = `
+                    <img src="${e.target.result}" alt="Image" style="width: 100%; height: 100%;">
+                    <div class="resize-handle top-left"></div>
+                    <div class="resize-handle top-right"></div>
+                    <div class="resize-handle bottom-left"></div>
+                    <div class="resize-handle bottom-right"></div>
+                    <div class="resize-handle top"></div>
+                    <div class="resize-handle bottom"></div>
+                    <div class="resize-handle left"></div>
+                    <div class="resize-handle right"></div>
+                  `;
                   element.style.width = `${this.width}px`;
                   element.style.height = `${this.height}px`;
 
@@ -626,6 +701,9 @@ document.addEventListener('DOMContentLoaded', () => {
                   if (imageWidth) imageWidth.value = this.width;
                   const imageHeight = document.getElementById('image-height');
                   if (imageHeight) imageHeight.value = this.height;
+
+                  // Rendre l'élément redimensionnable
+                  makeElementResizable(element);
                 };
                 img.src = e.target.result;
               };
