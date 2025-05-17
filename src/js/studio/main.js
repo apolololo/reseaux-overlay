@@ -14,6 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Fonction pour changer de vue
   const switchView = (viewName) => {
+    console.log('Switching to view:', viewName);
+    
     // Mettre à jour les boutons de navigation
     navButtons.forEach(btn => {
       btn.classList.toggle('active', btn.dataset.view === viewName);
@@ -21,7 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Afficher la vue correspondante
     Object.entries(views).forEach(([name, element]) => {
+      if (!element) return;
       element.classList.toggle('hidden', name !== viewName);
+      element.style.display = name === viewName ? 'block' : 'none';
     });
     
     // Déclencher un événement pour informer les modules spécifiques
@@ -231,6 +235,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   
-  // Initialisation : afficher la vue par défaut (éditeur)
-  switchView('editor');
+  // Vérifier le hash pour déterminer la vue initiale
+  const checkInitialView = () => {
+    const hash = window.location.hash.substring(1);
+    if (hash && views[hash]) {
+      switchView(hash);
+    } else {
+      // Vue par défaut: éditeur
+      switchView('editor');
+    }
+  };
+  
+  // Initialisation : vérifier le hash pour déterminer la vue initiale
+  checkInitialView();
+  
+  // Écouter les changements de hash
+  window.addEventListener('hashchange', checkInitialView);
 });
