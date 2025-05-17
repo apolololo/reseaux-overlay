@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -9,19 +8,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
-  <style>
-    /* Ajout de styles pour les messages d'information */
-    .info-message {
-      margin-top: 15px;
-      background-color: rgba(0, 120, 255, 0.1);
-      color: #0078ff;
-      padding: 10px;
-      border-radius: 5px;
-      text-align: left;
-      font-size: 14px;
-      display: none;
-    }
-  </style>
 </head>
 <body>
   <div class="login-container">
@@ -49,83 +35,32 @@
       <div id="error-container" style="display: none; margin-top: 20px; color: #ff5252; background: rgba(255, 82, 82, 0.1); padding: 12px; border-radius: 8px; text-align: left;">
         <div id="error-message">Une erreur s'est produite</div>
       </div>
-      
-      <div id="info-message" class="info-message">
-        Vérification de votre authentification...
-      </div>
     </div>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      console.log("Page d'authentification chargée");
-      
       const loginButton = document.getElementById('login-button');
       const loading = document.getElementById('loading');
       const errorContainer = document.getElementById('error-container');
       const errorMessage = document.getElementById('error-message');
-      const infoMessage = document.getElementById('info-message');
-      
-      // Afficher un message d'information
-      const showInfo = (message) => {
-        infoMessage.textContent = message;
-        infoMessage.style.display = 'block';
-      };
-      
-      // Afficher une erreur
-      const showError = (message) => {
-        errorContainer.style.display = 'block';
-        errorMessage.textContent = message;
-        loading.classList.remove('active');
-      };
       
       // Vérifier si l'utilisateur est déjà connecté
       const checkAuthentication = () => {
-        showInfo("Vérification de votre authentification...");
-        
         const token = localStorage.getItem('twitch_token');
         const expiresAt = localStorage.getItem('twitch_expires_at');
         
-        if (token && expiresAt) {
-          const now = new Date().getTime();
-          const expiry = parseInt(expiresAt);
-          
-          if (now < expiry) {
-            showInfo("Vous êtes déjà connecté. Redirection...");
-            
-            // Obtenir le paramètre de redirection
-            const urlParams = new URLSearchParams(window.location.search);
-            const redirectTo = urlParams.get('redirect');
-            
-            // Redirection appropriée
-            setTimeout(() => {
-              if (redirectTo === 'studio') {
-                window.location.href = '/src/studio.html';
-              } else {
-                window.location.href = '/index.html';
-              }
-            }, 500);
-            return true;
-          } else {
-            showInfo("Votre session a expiré. Veuillez vous reconnecter.");
-            // Nettoyer les tokens expirés
-            localStorage.removeItem('twitch_token');
-            localStorage.removeItem('twitch_expires_at');
-          }
+        if (token && expiresAt && new Date().getTime() < parseInt(expiresAt)) {
+          // Token valide, rediriger vers la page principale
+          window.location.href = '/index.html';
         }
-        
-        // Masquer le message d'info après vérification
-        setTimeout(() => {
-          infoMessage.style.display = 'none';
-        }, 1500);
 
         // Check if there's an error in URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('error')) {
-          showError(`Erreur: ${urlParams.get('error')} - ${urlParams.get('error_description') || 'Veuillez réessayer'}`);
+          errorContainer.style.display = 'block';
+          errorMessage.textContent = `Erreur: ${urlParams.get('error')} - ${urlParams.get('error_description') || 'Veuillez réessayer'}`;
         }
-        
-        return false;
       };
       
       // Vérifier l'authentification au chargement
@@ -138,22 +73,15 @@
           loading.classList.add('active');
           errorContainer.style.display = 'none';
           
-          // ID client Twitch
+          // ID client Twitch (using environment variable when available)
           const clientId = "z8q1w4g12yrql6cyb5zzwmhe1pnxyn";
           
-          // URL de redirection - assurez-vous qu'elle correspond à celle enregistrée sur Twitch
+          // URL de redirection (utiliser l'URL actuelle pour le développement local)
           const redirectUri = "https://apo-overlay.netlify.app/auth/callback.html";
           
           // Générer un état aléatoire pour la sécurité
           const state = Math.random().toString(36).substring(2, 15);
           localStorage.setItem('twitch_auth_state', state);
-          
-          // Stocker la page de redirection après authentification
-          const urlParams = new URLSearchParams(window.location.search);
-          const redirectAfterAuth = urlParams.get('redirect');
-          if (redirectAfterAuth) {
-            localStorage.setItem('twitch_redirect_after_auth', redirectAfterAuth);
-          }
           
           // Construire l'URL d'authentification Twitch
           const scope = 'user:read:email channel:read:subscriptions moderator:read:followers';
@@ -166,7 +94,9 @@
           window.location.href = authUrl;
         } catch (error) {
           console.error("Erreur lors de la redirection:", error);
-          showError("Une erreur s'est produite lors de la tentative de connexion. Veuillez réessayer.");
+          loading.classList.remove('active');
+          errorContainer.style.display = 'block';
+          errorMessage.textContent = "Une erreur s'est produite lors de la tentative de connexion. Veuillez réessayer.";
         }
       });
     });

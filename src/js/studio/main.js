@@ -4,8 +4,6 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('Studio main.js chargé');
-  
   // Gestion de la navigation
   const navButtons = document.querySelectorAll('.nav-btn');
   const views = {
@@ -240,7 +238,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Vérifier le hash pour déterminer la vue initiale
   const checkInitialView = () => {
     const hash = window.location.hash.substring(1);
-    console.log("Hash actuel :", hash);
     if (hash && views[hash]) {
       switchView(hash);
     } else {
@@ -249,48 +246,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
   
-  // Fonction d'initialisation de l'application
-  const initApp = () => {
-    console.log("Initialisation de l'application studio");
-    
-    // Cacher l'écran de chargement
-    const loadingScreen = document.querySelector('.loading-screen');
-    if (loadingScreen) {
-      loadingScreen.style.opacity = '0';
-      setTimeout(() => {
-        loadingScreen.style.display = 'none';
-      }, 300);
-    }
-    
-    // Afficher l'application
-    const app = document.getElementById('app');
-    if (app) {
-      app.style.display = 'flex';
-      setTimeout(() => {
-        app.classList.add('visible');
-      }, 50);
-    }
-    
-    // Vérifier le hash pour la vue initiale
-    checkInitialView();
-    
-    console.log("Application studio initialisée avec succès");
-  };
-  
-  // Écouter l'événement authComplete
-  document.addEventListener('authComplete', () => {
-    console.log("Événement authComplete reçu, initialisation de l'application");
-    initApp();
-  });
-  
-  // Mécanisme de sécurité pour garantir l'initialisation
-  setTimeout(() => {
-    const loadingScreen = document.querySelector('.loading-screen');
-    if (loadingScreen && loadingScreen.style.display !== 'none') {
-      console.log("Fallback: initialisation de l'application après délai");
-      initApp();
-    }
-  }, 1500);
+  // Initialisation : vérifier le hash pour déterminer la vue initiale
+  checkInitialView();
   
   // Écouter les changements de hash
   window.addEventListener('hashchange', checkInitialView);
