@@ -635,9 +635,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const bringForward = document.getElementById('bring-forward');
     if (bringForward) {
       bringForward.onclick = () => {
-        const zIndex = parseInt(element.style.zIndex || 0);
-        const maxZIndex = Math.max(...Array.from(document.querySelectorAll('.editor-element')).map(el => parseInt(el.style.zIndex || 0)));
-        element.style.zIndex = maxZIndex + 1;
+        const elements = Array.from(document.querySelectorAll('.editor-element'));
+        const currentZIndex = parseInt(element.style.zIndex || 0);
+        const maxZIndex = Math.max(...elements.map(el => parseInt(el.style.zIndex || 0)));
+        
+        // Trouver l'élément juste au-dessus
+        const nextElement = elements.find(el => parseInt(el.style.zIndex || 0) === currentZIndex + 1);
+        
+        if (nextElement) {
+          // Échanger les z-index
+          nextElement.style.zIndex = currentZIndex;
+          element.style.zIndex = currentZIndex + 1;
+        } else {
+          // Si pas d'élément au-dessus, mettre au premier plan
+          element.style.zIndex = maxZIndex + 1;
+        }
+        
         showNotification('Élément déplacé vers l\'avant', 'success');
       };
     }
@@ -645,9 +658,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const sendBackward = document.getElementById('send-backward');
     if (sendBackward) {
       sendBackward.onclick = () => {
-        const zIndex = parseInt(element.style.zIndex || 0);
-        const minZIndex = Math.min(...Array.from(document.querySelectorAll('.editor-element')).map(el => parseInt(el.style.zIndex || 0)));
-        element.style.zIndex = Math.max(0, minZIndex - 1);
+        const elements = Array.from(document.querySelectorAll('.editor-element'));
+        const currentZIndex = parseInt(element.style.zIndex || 0);
+        const minZIndex = Math.min(...elements.map(el => parseInt(el.style.zIndex || 0)));
+        
+        // Trouver l'élément juste en-dessous
+        const prevElement = elements.find(el => parseInt(el.style.zIndex || 0) === currentZIndex - 1);
+        
+        if (prevElement && currentZIndex > 0) {
+          // Échanger les z-index
+          prevElement.style.zIndex = currentZIndex;
+          element.style.zIndex = currentZIndex - 1;
+        } else if (currentZIndex > 0) {
+          // Si pas d'élément en-dessous mais pas encore au fond
+          element.style.zIndex = Math.max(0, minZIndex - 1);
+        }
+        
         showNotification('Élément déplacé vers l\'arrière', 'success');
       };
     }
