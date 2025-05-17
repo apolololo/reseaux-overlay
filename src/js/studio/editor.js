@@ -12,6 +12,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!canvas) return;
 
     // Configuration du canvas d'édition
+    canvas.style.position = 'relative';
+    canvas.style.width = '1920px';
+    canvas.style.height = '1080px';
+    canvas.style.backgroundColor = '#000000';
+    canvas.style.margin = 'auto';
+    canvas.style.transform = 'scale(0.5)';
+    canvas.style.transformOrigin = 'center center';
+    canvas.style.display = 'block';
+
     console.log('Canvas d\'édition initialisé');
 
     // Implémentation du drag & drop des éléments
@@ -347,8 +356,8 @@ document.addEventListener('DOMContentLoaded', () => {
       isDragging = true;
       pos3 = e.clientX;
       pos4 = e.clientY;
-      document.addEventListener('mousemove', elementDrag);
-      document.addEventListener('mouseup', closeDragElement);
+      document.addEventListener('mousemove', elementDrag, { capture: true });
+      document.addEventListener('mouseup', closeDragElement, { capture: true });
 
       // Sélectionner l'élément au clic
       selectElement(element);
