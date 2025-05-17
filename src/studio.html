@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APO Overlay Studio</title>
+  <link rel="stylesheet" href="./styles/studio.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Écran de chargement -->
+  <div class="loading-screen">
+    <div class="loading-logo">APO</div>
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Chargement du Studio...</div>
+  </div>
+
+  <!-- Application principale -->
+  <div id="app" style="display: none;">
+    <!-- En-tête avec navigation -->
+    <header class="studio-header">
+      <div class="logo">APO STUDIO</div>
+      <nav class="main-nav">
+        <button class="nav-btn active" data-view="editor">Éditeur</button>
+        <button class="nav-btn" data-view="library">Ma bibliothèque</button>
+        <button class="nav-btn" data-view="templates">Modèles</button>
+      </nav>
+      <div class="user-controls">
+        <span class="username"></span>
+        <button class="logout-btn">Déconnexion</button>
+      </div>
+    </header>
+
+    <!-- Contenu principal -->
+    <main class="studio-content">
+      <!-- Vue Éditeur -->
+      <section id="editor-view" class="view-section">
+        <div class="editor-layout">
+          <!-- Panneau latéral des outils -->
+          <div class="tools-panel">
+            <h2>Éléments</h2>
+            <div class="elements-list">
+              <div class="element-item" draggable="true" data-type="text">
+                <div class="element-icon">T</div>
+                <div class="element-label">Texte</div>
+              </div>
+              <div class="element-item" draggable="true" data-type="image">
+                <div class="element-icon">🖼️</div>
+                <div class="element-label">Image</div>
+              </div>
+              <div class="element-item" draggable="true" data-type="shape">
+                <div class="element-icon">⬜</div>
+                <div class="element-label">Forme</div>
+              </div>
+              <div class="element-item" draggable="true" data-type="social">
+                <div class="element-icon">📱</div>
+                <div class="element-label">Réseaux sociaux</div>
+              </div>
+              <div class="element-item" draggable="true" data-type="timer">
+                <div class="element-icon">⏱️</div>
+                <div class="element-label">Minuteur</div>
+              </div>
+              <div class="element-item" draggable="true" data-type="creator-code">
+                <div class="element-icon">🏷️</div>
+                <div class="element-label">Code créateur</div>
+              </div>
+            </div>
+
+            <h2>Propriétés</h2>
+            <div class="properties-panel">
+              <div class="no-selection-message">Sélectionnez un élément pour modifier ses propriétés</div>
+              
+              <!-- Propriétés de texte (visible quand un texte est sélectionné) -->
+              <div class="text-properties properties-group" style="display: none;">
+                <div class="property-row">
+                  <label>Texte</label>
+                  <textarea id="text-content" rows="2"></textarea>
+                </div>
+                <div class="property-row">
+                  <label>Police</label>
+                  <select id="font-family">
+                    <option value="Montserrat">Montserrat</option>
+                    <option value="Arial">Arial</option>
+                    <option value="Roboto">Roboto</option>
+                    <option value="Poppins">Poppins</option>
+                  </select>
+                </div>
+                <div class="property-row">
+                  <label>Taille</label>
+                  <input type="range" id="font-size" min="8" max="72" value="16">
+                  <span class="range-value">16px</span>
+                </div>
+                <div class="property-row">
+                  <label>Couleur</label>
+                  <input type="color" id="text-color" value="#ffffff">
+                </div>
+                <div class="property-row buttons-row">
+                  <button id="text-bold" class="format-btn">B</button>
+                  <button id="text-italic" class="format-btn">I</button>
+                  <button id="text-align-left" class="format-btn">⫷</button>
+                  <button id="text-align-center" class="format-btn">≡</button>
+                  <button id="text-align-right" class="format-btn">⫸</button>
+                </div>
+              </div>
+              
+              <!-- Propriétés d'image (visible quand une image est sélectionnée) -->
+              <div class="image-properties properties-group" style="display: none;">
+                <div class="property-row">
+                  <label>Image</label>
+                  <button id="change-image" class="action-btn">Changer l'image</button>
+                </div>
+                <div class="property-row">
+                  <label>Opacité</label>
+                  <input type="range" id="image-opacity" min="0" max="100" value="100">
+                  <span class="range-value">100%</span>
+                </div>
+                <div class="property-row">
+                  <label>Arrondi</label>
+                  <input type="range" id="image-radius" min="0" max="50" value="0">
+                  <span class="range-value">0px</span>
+                </div>
+                <div class="property-row">
+                  <label>Bordure</label>
+                  <input type="range" id="image-border" min="0" max="20" value="0">
+                  <span class="range-value">0px</span>
+                </div>
+                <div class="property-row">
+                  <label>Couleur bordure</label>
+                  <input type="color" id="border-color" value="#ffffff">
+                </div>
+              </div>
+              
+              <!-- Propriétés communes à tous les éléments -->
+              <div class="common-properties properties-group" style="display: none;">
+                <div class="property-row">
+                  <label>Position X</label>
+                  <input type="number" id="position-x" value="0">
+                </div>
+                <div class="property-row">
+                  <label>Position Y</label>
+                  <input type="number" id="position-y" value="0">
+                </div>
+                <div class="property-row">
+                  <label>Largeur</label>
+                  <input type="number" id="element-width" value="100">
+                </div>
+                <div class="property-row">
+                  <label>Hauteur</label>
+                  <input type="number" id="element-height" value="100">
+                </div>
+                <div class="property-row">
+                  <label>Rotation</label>
+                  <input type="range" id="element-rotation" min="0" max="360" value="0">
+                  <span class="range-value">0°</span>
+                </div>
+                <div class="property-row buttons-row">
+                  <button id="bring-forward" class="action-btn">Avancer</button>
+                  <button id="send-backward" class="action-btn">Reculer</button>
+                  <button id="delete-element" class="action-btn delete-btn">Supprimer</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Zone de prévisualisation -->
+          <div class="preview-area">
+            <div class="canvas-controls">
+              <div class="canvas-size">
+                <select id="canvas-preset">
+                  <option value="custom">Personnalisé</option>
+                  <option value="1920x1080" selected>1920 × 1080 (16:9)</option>
+                  <option value="1280x720">1280 × 720 (16:9)</option>
+                  <option value="800x600">800 × 600 (4:3)</option>
+                  <option value="500x500">500 × 500 (Carré)</option>
+                </select>
+                <div class="custom-size" style="display: none;">
+                  <input type="number" id="canvas-width" value="1920" min="100" max="3840">
+                  <span>×</span>
+                  <input type="number" id="canvas-height" value="1080" min="100" max="2160">
+                </div>
+              </div>
+              <div class="canvas-actions">
+                <button id="undo-btn" class="action-btn" disabled>Annuler</button>
+                <button id="redo-btn" class="action-btn" disabled>Rétablir</button>
+                <button id="clear-canvas" class="action-btn">Effacer tout</button>
+              </div>
+            </div>
+            
+            <div class="canvas-container">
+              <div class="canvas-background">
+                <div id="editor-canvas" class="editor-canvas">
+                  <!-- Les éléments seront ajoutés ici dynamiquement -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Barre d'actions en bas -->
+        <div class="action-bar">
+          <div class="overlay-name">
+            <input type="text" id="overlay-name" placeholder="Nom de l'overlay" value="Mon overlay personnalisé">
+          </div>
+          <div class="action-buttons">
+            <button id="preview-overlay" class="action-btn">Prévisualiser</button>
+            <button id="save-overlay" class="primary-btn">Enregistrer</button>
+            <button id="copy-url" class="action-btn" disabled>Copier l'URL pour OBS</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Vue Bibliothèque -->
+      <section id="library-view" class="view-section hidden">
+        <div class="library-header">
+          <h1>Ma bibliothèque d'overlays</h1>
+          <div class="library-actions">
+            <input type="text" placeholder="Rechercher..." id="search-overlays">
+            <select id="sort-overlays">
+              <option value="recent">Plus récents</option>
+              <option value="name">Nom (A-Z)</option>
+              <option value="type">Type</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="overlays-grid">
+          <!-- Les overlays sauvegardés seront affichés ici -->
+          <div class="empty-library-message">
+            <div class="empty-icon">📁</div>
+            <h2>Votre bibliothèque est vide</h2>
+            <p>Créez votre premier overlay personnalisé en utilisant l'éditeur</p>
+            <button class="primary-btn switch-to-editor">Créer un overlay</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Vue Modèles -->
+      <section id="templates-view" class="view-section hidden">
+        <div class="templates-header">
+          <h1>Modèles d'overlays</h1>
+          <div class="templates-filter">
+            <button class="filter-btn active" data-filter="all">Tous</button>
+            <button class="filter-btn" data-filter="starting">Starting Soon</button>
+            <button class="filter-btn" data-filter="brb">Be Right Back</button>
+            <button class="filter-btn" data-filter="ending">Stream Ending</button>
+            <button class="filter-btn" data-filter="social">Réseaux sociaux</button>
+            <button class="filter-btn" data-filter="gaming">Gaming</button>
+          </div>
+        </div>
+        
+        <div class="templates-grid">
+          <!-- Template 1 -->
+          <div class="template-card" data-type="starting">
+            <div class="template-preview">
+              <img src="./images/templates/starting-1.jpg" alt="Starting Soon Template">
+            </div>
+            <div class="template-info">
+              <h3>Starting Soon - Modern</h3>
+              <p>Overlay de démarrage avec minuteur et animations</p>
+              <button class="use-template-btn">Utiliser ce modèle</button>
+            </div>
+          </div>
+          
+          <!-- Template 2 -->
+          <div class="template-card" data-type="brb">
+            <div class="template-preview">
+              <img src="./images/templates/brb-1.jpg" alt="BRB Template">
+            </div>
+            <div class="template-info">
+              <h3>Be Right Back - Minimal</h3>
+              <p>Overlay de pause avec animation discrète</p>
+              <button class="use-template-btn">Utiliser ce modèle</button>
+            </div>
+          </div>
+          
+          <!-- Template 3 -->
+          <div class="template-card" data-type="ending">
+            <div class="template-preview">
+              <img src="./images/templates/ending-1.jpg" alt="Ending Template">
+            </div>
+            <div class="template-info">
+              <h3>Stream Ending - Social</h3>
+              <p>Écran de fin avec réseaux sociaux et remerciements</p>
+              <button class="use-template-btn">Utiliser ce modèle</button>
+            </div>
+          </div>
+          
+          <!-- Template 4 -->
+          <div class="template-card" data-type="social">
+            <div class="template-preview">
+              <img src="./images/templates/social-1.jpg" alt="Social Template">
+            </div>
+            <div class="template-info">
+              <h3>Social Media Bar</h3>
+              <p>Barre de réseaux sociaux animée pour vos streams</p>
+              <button class="use-template-btn">Utiliser ce modèle</button>
+            </div>
+          </div>
+          
+          <!-- Template 5 -->
+          <div class="template-card" data-type="gaming">
+            <div class="template-preview">
+              <img src="./images/templates/gaming-1.jpg" alt="Gaming Template">
+            </div>
+            <div class="template-info">
+              <h3>Gaming HUD</h3>
+              <p>Interface de jeu avec notifications et statistiques</p>
+              <button class="use-template-btn">Utiliser ce modèle</button>
+            </div>
+          </div>
+          
+          <!-- Template 6 -->
+          <div class="template-card" data-type="gaming">
+            <div class="template-preview">
+              <img src="./images/templates/gaming-2.jpg" alt="Gaming Template">
+            </div>
+            <div class="template-info">
+              <h3>Fortnite Stats</h3>
+              <p>Affichage des statistiques Fortnite en temps réel</p>
+              <button class="use-template-btn">Utiliser ce modèle</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modales -->
+  <div class="modal" id="preview-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Prévisualisation de l'overlay</h2>
+        <button class="close-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="preview-frame-container">
+          <iframe id="preview-frame" frameborder="0"></iframe>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn" id="close-preview">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="save-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Enregistrer l'overlay</h2>
+        <button class="close-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="save-form">
+          <div class="form-group">
+            <label for="save-overlay-name">Nom de l'overlay</label>
+            <input type="text" id="save-overlay-name" value="Mon overlay personnalisé">
+          </div>
+          <div class="form-group">
+            <label for="overlay-description">Description (optionnelle)</label>
+            <textarea id="overlay-description" rows="3" placeholder="Décrivez votre overlay..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="overlay-category">Catégorie</label>
+            <select id="overlay-category">
+              <option value="starting">Starting Soon</option>
+              <option value="brb">Be Right Back</option>
+              <option value="ending">Stream Ending</option>
+              <option value="social">Réseaux sociaux</option>
+              <option value="gaming">Gaming</option>
+              <option value="other">Autre</option>
+            </select>
+          </div>
+          <div class="form-group checkbox-group">
+            <input type="checkbox" id="overlay-public" checked>
+            <label for="overlay-public">Rendre public dans la galerie communautaire</label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn" id="cancel-save">Annuler</button>
+        <button class="primary-btn" id="confirm-save">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="url-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>URL pour OBS</h2>
+        <button class="close-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Copiez cette URL et ajoutez-la comme source "Navigateur" dans OBS :</p>
+        <div class="url-container">
+          <input type="text" id="obs-url" readonly>
+          <button id="copy-obs-url">Copier</button>
+        </div>
+        <div class="url-info">
+          <p><strong>Note :</strong> Cette URL est unique à votre compte. Les modifications que vous apporterez à cet overlay seront automatiquement mises à jour dans OBS sans avoir à changer l'URL.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn" id="close-url-modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="./js/studio/auth-check.js"></script>
+  <script src="./js/studio/editor.js"></script>
+  <script src="./js/studio/library.js"></script>
+  <script src="./js/studio/templates.js"></script>
+  <script src="./js/studio/main.js"></script>
+</body>
+</html>
