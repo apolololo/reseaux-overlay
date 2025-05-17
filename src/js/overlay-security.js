@@ -5,6 +5,9 @@
  */
 
 (function() {
+  // Exécuter immédiatement - bloquer l'affichage du contenu par défaut
+  document.documentElement.style.visibility = 'hidden';
+  
   // Vérifier si on est dans un iframe (accès normal via token)
   const isInIframe = window !== window.top;
   
@@ -24,13 +27,18 @@
     }
   };
   
-  // Si on n'est pas dans un iframe et qu'on n'a pas de token valide
-  if (!isInIframe && !hasValidToken()) {
-    console.log('Accès direct à l\'overlay détecté. Redirection vers la version sécurisée...');
+  // Vérifier l'accès valide
+  const isValidAccess = isInIframe || hasValidToken();
+  
+  // Si l'accès est valide, afficher le contenu
+  if (isValidAccess) {
+    document.documentElement.style.visibility = 'visible';
+  } else {
+    // Si l'accès n'est pas valide, rediriger vers la page principale
+    console.log('Accès direct non autorisé à l\'overlay détecté. Redirection...');
     
-    // Bloquer l'affichage du contenu
-    document.body.innerHTML = '';
-    document.body.style.display = 'none';
+    // Maintenir le contenu caché
+    document.documentElement.style.visibility = 'hidden';
     
     // Rediriger immédiatement vers la page principale
     window.location.href = '/index.html';
