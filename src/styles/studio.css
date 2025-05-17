@@ -827,6 +827,39 @@ input:focus, select:focus, textarea:focus {
   border-radius: var(--radius-sm);
 }
 
+/* Poignées de redimensionnement */
+.resize-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: var(--primary-color);
+  z-index: 10;
+}
+
+.top-left {
+  top: -5px;
+  left: -5px;
+  cursor: nwse-resize;
+}
+
+.top-right {
+  top: -5px;
+  right: -5px;
+  cursor: nesw-resize;
+}
+
+.bottom-left {
+  bottom: -5px;
+  left: -5px;
+  cursor: nesw-resize;
+}
+
+.bottom-right {
+  bottom: -5px;
+  right: -5px;
+  cursor: nwse-resize;
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
   .editor-layout {
