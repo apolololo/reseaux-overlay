@@ -56,15 +56,25 @@ document.addEventListener('DOMContentLoaded', () => {
             year: 'numeric' 
           });
           
+          // Générer une miniature de prévisualisation
+          let previewImage = '';
+          if (overlay.elements && overlay.elements.length > 0) {
+            // Si l'overlay a des éléments, on pourrait générer une miniature
+            previewImage = '<div class="overlay-preview-image">Aperçu généré</div>';
+          }
+          
           overlaysHTML += `
             <div class="overlay-card" data-id="${overlay.id}">
               <div class="overlay-preview">
                 <div class="overlay-thumbnail" style="background-color: ${overlay.background || '#000'}">
-                  <span class="overlay-placeholder">Aperçu</span>
+                  ${previewImage || '<span class="overlay-placeholder">Aperçu</span>'}
                 </div>
                 <div class="overlay-actions">
                   <button class="edit-overlay" data-id="${overlay.id}">Éditer</button>
                   <button class="delete-overlay" data-id="${overlay.id}">Supprimer</button>
+                  <button class="copy-obs-url" data-id="${overlay.id}" title="Copier l'URL pour OBS">
+                    <span class="icon">🔗</span>
+                  </button>
                 </div>
               </div>
               <div class="overlay-info">
@@ -95,6 +105,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (confirm('Voulez-vous vraiment supprimer cet overlay ?')) {
               deleteOverlay(overlayId);
             }
+          });
+        });
+        
+        // Ajouter l'événement pour copier l'URL OBS
+        libraryGrid.querySelectorAll('.copy-obs-url').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const overlayId = this.dataset.id;
+            copyOverlayUrl(overlayId);
           });
         });
       }
@@ -150,6 +168,31 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Afficher un message
       alert('Overlay supprimé avec succès');
+    };
+    
+    // Fonction pour copier l'URL de l'overlay pour OBS
+    const copyOverlayUrl = (overlayId) => {
+      // Récupérer le token d'authentification
+      const token = localStorage.getItem('twitch_token');
+      if (!token) {
+        alert('Vous devez être connecté pour générer une URL d\'overlay');
+        return;
+      }
+      
+      // Générer l'URL avec le token
+      const baseUrl = window.location.origin;
+      const overlayUrl = `${baseUrl}/overlay.html?id=${overlayId}&token=${token}`;
+      
+      // Créer un élément temporaire pour copier l'URL
+      const tempInput = document.createElement('input');
+      tempInput.value = overlayUrl;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
+      
+      // Afficher un message de confirmation
+      alert('URL copiée dans le presse-papiers. Vous pouvez maintenant l\'utiliser dans OBS comme source de navigateur.');
     };
     
     // Initialiser la recherche et le tri

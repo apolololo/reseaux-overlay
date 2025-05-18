@@ -386,9 +386,114 @@ document.addEventListener('DOMContentLoaded', () => {
         if (sizeValue) sizeValue.textContent = `${size || 16}px`;
       }
       
-      // Couleur
+      // Couleur du texte
       const textColor = document.getElementById('text-color');
       if (textColor) textColor.value = element.style.color || '#ffffff';
+      
+      // Couleur de fond
+      const bgColor = document.getElementById('text-bg-color');
+      if (bgColor) {
+        bgColor.value = element.style.backgroundColor || 'rgba(0, 0, 0, 0)';
+      }
+      
+      // Opacité du texte
+      const textOpacity = document.getElementById('text-opacity');
+      if (textOpacity) {
+        const opacity = parseFloat(element.style.opacity) * 100 || 100;
+        textOpacity.value = opacity;
+        const opacityValue = textOpacity.nextElementSibling;
+        if (opacityValue) opacityValue.textContent = `${opacity}%`;
+      }
+      
+      // Alignement du texte
+      const textAlign = document.getElementById('text-align');
+      if (textAlign) {
+        textAlign.value = element.style.textAlign || 'left';
+      }
+      
+      // Gras
+      const fontWeight = document.getElementById('font-weight');
+      if (fontWeight) {
+        fontWeight.checked = element.style.fontWeight === 'bold';
+      }
+      
+      // Italique
+      const fontStyle = document.getElementById('font-style');
+      if (fontStyle) {
+        fontStyle.checked = element.style.fontStyle === 'italic';
+      }
+      
+      // Soulignement
+      const textDecoration = document.getElementById('text-decoration');
+      if (textDecoration) {
+        textDecoration.checked = element.style.textDecoration === 'underline';
+      }
+      
+      // Espacement des lettres
+      const letterSpacing = document.getElementById('letter-spacing');
+      if (letterSpacing) {
+        const spacing = parseFloat(element.style.letterSpacing) || 0;
+        letterSpacing.value = spacing;
+        const spacingValue = letterSpacing.nextElementSibling;
+        if (spacingValue) spacingValue.textContent = `${spacing}px`;
+      }
+      
+      // Bordure
+      const textBorder = document.getElementById('text-border');
+      if (textBorder) {
+        textBorder.value = element.style.border || 'none';
+      }
+    } else if (element.classList.contains('timer-element')) {
+      const timerProperties = document.querySelector('.timer-properties');
+      if (timerProperties) timerProperties.style.display = 'block';
+      
+      // Format du minuteur
+      const timerFormat = document.getElementById('timer-format');
+      if (timerFormat) {
+        timerFormat.value = element.dataset.format || 'mm:ss';
+      }
+      
+      // Durée du minuteur
+      const timerDuration = document.getElementById('timer-duration');
+      if (timerDuration) {
+        timerDuration.value = element.dataset.duration || '300';
+      }
+      
+      // Couleur du texte du minuteur
+      const timerColor = document.getElementById('timer-color');
+      if (timerColor) {
+        timerColor.value = element.style.color || '#ffffff';
+      }
+      
+      // Couleur de fond du minuteur
+      const timerBgColor = document.getElementById('timer-bg-color');
+      if (timerBgColor) {
+        timerBgColor.value = element.style.backgroundColor || 'rgba(0, 0, 0, 0.7)';
+      }
+      
+      // Taille de police du minuteur
+      const timerFontSize = document.getElementById('timer-font-size');
+      if (timerFontSize) {
+        const size = parseInt(element.style.fontSize);
+        timerFontSize.value = size || 24;
+        const sizeValue = timerFontSize.nextElementSibling;
+        if (sizeValue) sizeValue.textContent = `${size || 24}px`;
+      }
+      
+      // Police du minuteur
+      const timerFontFamily = document.getElementById('timer-font-family');
+      if (timerFontFamily) {
+        timerFontFamily.value = element.style.fontFamily.split(',')[0].replace(/['"]/g, '') || 'monospace';
+      }
+      
+      // Bordure du minuteur
+      const timerBorderRadius = document.getElementById('timer-border-radius');
+      if (timerBorderRadius) {
+        const radius = parseInt(element.style.borderRadius) || 4;
+        timerBorderRadius.value = radius;
+        const radiusValue = timerBorderRadius.nextElementSibling;
+        if (radiusValue) radiusValue.textContent = `${radius}px`;
+      }
     } else if (element.classList.contains('image-element')) {
       const imageProperties = document.querySelector('.image-properties');
       if (imageProperties) imageProperties.style.display = 'block';
@@ -528,11 +633,37 @@ document.addEventListener('DOMContentLoaded', () => {
         };
       }
       
-      // Couleur
+      // Couleur du texte
       const textColor = document.getElementById('text-color');
       if (textColor) {
         textColor.oninput = () => {
           element.style.color = textColor.value;
+        };
+      }
+      
+      // Couleur de fond
+      const bgColor = document.getElementById('text-bg-color');
+      if (bgColor) {
+        bgColor.oninput = () => {
+          element.style.backgroundColor = bgColor.value;
+        };
+      }
+      
+      // Opacité du texte
+      const textOpacity = document.getElementById('text-opacity');
+      if (textOpacity) {
+        textOpacity.oninput = () => {
+          element.style.opacity = textOpacity.value / 100;
+          const opacityValue = textOpacity.nextElementSibling;
+          if (opacityValue) opacityValue.textContent = `${textOpacity.value}%`;
+        };
+      }
+      
+      // Alignement du texte
+      const textAlign = document.getElementById('text-align');
+      if (textAlign) {
+        textAlign.onchange = () => {
+          element.style.textAlign = textAlign.value;
         };
       }
       
@@ -561,6 +692,99 @@ document.addEventListener('DOMContentLoaded', () => {
             element.style.fontStyle = 'italic';
             textItalic.classList.add('active');
           }
+        };
+      }
+      
+      // Soulignement
+      const textDecoration = document.getElementById('text-decoration');
+      if (textDecoration) {
+        textDecoration.onchange = () => {
+          element.style.textDecoration = textDecoration.checked ? 'underline' : 'none';
+        };
+      }
+      
+      // Espacement des lettres
+      const letterSpacing = document.getElementById('letter-spacing');
+      if (letterSpacing) {
+        letterSpacing.oninput = () => {
+          element.style.letterSpacing = `${letterSpacing.value}px`;
+          const spacingValue = letterSpacing.nextElementSibling;
+          if (spacingValue) spacingValue.textContent = `${letterSpacing.value}px`;
+        };
+      }
+      
+      // Bordure
+      const textBorder = document.getElementById('text-border');
+      if (textBorder) {
+        textBorder.onchange = () => {
+          element.style.border = textBorder.value;
+        };
+      }
+    }
+    
+    // Propriétés du minuteur
+    if (element.classList.contains('timer-element')) {
+      // Format du minuteur
+      const timerFormat = document.getElementById('timer-format');
+      if (timerFormat) {
+        timerFormat.onchange = () => {
+          element.dataset.format = timerFormat.value;
+          // Mettre à jour l'affichage du minuteur selon le format
+          updateTimerDisplay(element);
+        };
+      }
+      
+      // Durée du minuteur
+      const timerDuration = document.getElementById('timer-duration');
+      if (timerDuration) {
+        timerDuration.onchange = () => {
+          element.dataset.duration = timerDuration.value;
+          // Mettre à jour l'affichage du minuteur
+          updateTimerDisplay(element);
+        };
+      }
+      
+      // Couleur du texte du minuteur
+      const timerColor = document.getElementById('timer-color');
+      if (timerColor) {
+        timerColor.oninput = () => {
+          element.style.color = timerColor.value;
+        };
+      }
+      
+      // Couleur de fond du minuteur
+      const timerBgColor = document.getElementById('timer-bg-color');
+      if (timerBgColor) {
+        timerBgColor.oninput = () => {
+          element.style.backgroundColor = timerBgColor.value;
+        };
+      }
+      
+      // Taille de police du minuteur
+      const timerFontSize = document.getElementById('timer-font-size');
+      if (timerFontSize) {
+        timerFontSize.oninput = () => {
+          element.style.fontSize = `${timerFontSize.value}px`;
+          const sizeValue = timerFontSize.nextElementSibling;
+          if (sizeValue) sizeValue.textContent = `${timerFontSize.value}px`;
+        };
+      }
+      
+      // Police du minuteur
+      const timerFontFamily = document.getElementById('timer-font-family');
+      if (timerFontFamily) {
+        timerFontFamily.onchange = () => {
+          element.style.fontFamily = timerFontFamily.value;
+        };
+      }
+      
+      // Bordure du minuteur
+      const timerBorderRadius = document.getElementById('timer-border-radius');
+      if (timerBorderRadius) {
+        timerBorderRadius.oninput = () => {
+          element.style.borderRadius = `${timerBorderRadius.value}px`;
+          const radiusValue = timerBorderRadius.nextElementSibling;
+          if (radiusValue) radiusValue.textContent = `${timerBorderRadius.value}px`;
         };
       }
     }
@@ -801,9 +1025,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const obsUrlInput = document.getElementById('obs-url');
             
             if (urlModal && obsUrlInput) {
+              // Récupérer le token d'authentification
+              const token = localStorage.getItem('twitch_token');
+              if (!token) {
+                alert('Vous devez être connecté pour générer une URL d\'overlay');
+                return;
+              }
+              
               urlModal.style.display = 'flex';
               const baseUrl = window.location.origin;
-              obsUrlInput.value = `${baseUrl}/overlay.html?id=${overlayData.id}`;
+              obsUrlInput.value = `${baseUrl}/overlay.html?id=${overlayData.id}&token=${token}`;
             }
           };
         }
@@ -1086,5 +1317,36 @@ document.addEventListener('DOMContentLoaded', () => {
       case 'w': return 'w-resize';
       default: return 'move';
     }
+  }
+  
+  // Fonction pour mettre à jour l'affichage du minuteur
+  function updateTimerDisplay(element) {
+    const format = element.dataset.format || 'mm:ss';
+    const duration = parseInt(element.dataset.duration || '300');
+    
+    // Calculer les heures, minutes et secondes
+    const hours = Math.floor(duration / 3600);
+    const minutes = Math.floor((duration % 3600) / 60);
+    const seconds = duration % 60;
+    
+    // Formater l'affichage selon le format choisi
+    let display = '';
+    switch(format) {
+      case 'hh:mm:ss':
+        display = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        break;
+      case 'mm:ss':
+        display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        break;
+      case 'ss':
+        display = `${duration.toString().padStart(2, '0')}`;
+        break;
+      case 'mm:ss.ms':
+        display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.00`;
+        break;
+    }
+    
+    // Mettre à jour l'affichage
+    element.innerText = display;
   }
 });
