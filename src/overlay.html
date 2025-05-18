@@ -35,7 +35,7 @@
             display: none;
         }
     </style>
-    <script src="../js/overlay-security.js"></script>
+    <script src="../../js/overlay-security.js" type="module"></script>
 </head>
 <body>
     <div id="overlay-container"></div>
@@ -73,14 +73,17 @@
                 const savedOverlaysStr = localStorage.getItem('saved_overlays');
                 console.log("Données sauvegardées:", savedOverlaysStr ? "Présentes" : "Absentes");
                 
+                if (!savedOverlaysStr) {
+                    throw new Error("Aucun overlay sauvegardé trouvé");
+                }
+                
                 const savedOverlays = JSON.parse(savedOverlaysStr || '[]');
                 const overlay = savedOverlays.find(o => o.id === id);
 
                 if (!overlay) {
                     console.error("Overlay non trouvé avec ID:", id);
-                    console.log("Overlays disponibles:", savedOverlays.map(o => o.id));
-                    showError('Overlay non trouvé');
-                    return;
+                    console.log("Overlays disponibles:", savedOverlays.map(o => o.id).join(", "));
+                    throw new Error(`Overlay non trouvé avec ID: ${id}`);
                 }
 
                 console.log("Overlay trouvé:", overlay);

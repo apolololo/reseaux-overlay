@@ -1,3 +1,4 @@
+
 /**
  * Module de bibliothèque pour le Studio
  * Gère l'affichage et l'interaction avec les overlays sauvegardés
@@ -178,6 +179,14 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Créer un jeton simple qui contient l'ID utilisateur et l'ID de l'overlay
         const tokenData = `${userId}-${overlayId}`;
+        console.log("Données du token avant encodage:", tokenData);
+        
+        // Vérifier que le tokenData contient bien le séparateur
+        if (!tokenData.includes('-')) {
+          console.error("Erreur: TokenData ne contient pas de séparateur:", tokenData);
+          alert("Erreur lors de la génération du token. UserId ou OverlayId manquant.");
+          return;
+        }
         
         // Encoder en base64 pour plus de lisibilité
         const token = btoa(tokenData);

@@ -1,3 +1,4 @@
+
 // Gestion de la navigation
 document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -50,6 +51,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Créer un jeton simple qui contient l'ID utilisateur et le chemin de l'overlay
     const tokenData = userId + '-' + overlayPath;
+    
+    // Vérifier que le tokenData contient bien le séparateur
+    if (!tokenData.includes('-')) {
+      console.error("Erreur: TokenData ne contient pas de séparateur:", tokenData);
+      return null;
+    }
     
     // Encoder en base64 pour plus de lisibilité
     const token = btoa(tokenData);
@@ -143,6 +150,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Générer un nouveau jeton pour cet overlay (format simple)
     const token = generateOverlayToken(localPath);
+    
+    if (!token) {
+      alert("Erreur lors de la génération du token. Veuillez réessayer.");
+      return;
+    }
     
     // Construire l'URL avec le jeton
     const overlayUrl = new URL('/overlay.html', PRODUCTION_URL);

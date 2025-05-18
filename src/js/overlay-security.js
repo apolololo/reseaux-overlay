@@ -15,8 +15,11 @@
   
   console.log("Is in iframe:", isInIframe);
   
-  // Si l'accès est valide (dans un iframe), afficher le contenu
-  if (isInIframe) {
+  // Vérifier si nous sommes dans l'URL d'overlay principale
+  const isMainOverlayUrl = window.location.pathname.endsWith('/overlay.html');
+  
+  // Si l'accès est valide (dans un iframe ou que c'est l'overlay principal), afficher le contenu
+  if (isInIframe || isMainOverlayUrl) {
     document.documentElement.style.visibility = 'visible';
     
     // Bloquer les téléchargements directs d'images et autres ressources
@@ -35,9 +38,10 @@
   } else {
     // Accès direct détecté - vérifier si nous sommes dans une preview du studio
     const isStudioPreview = window.location.href.includes('preview=true');
+    const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     
-    if (isStudioPreview) {
-      console.log('Preview du studio détecté - affichage du contenu autorisé');
+    if (isStudioPreview || isLocalHost) {
+      console.log('Preview du studio ou environnement de développement détecté - affichage du contenu autorisé');
       document.documentElement.style.visibility = 'visible';
     } else {
       // Si l'accès n'est pas valide et n'est pas une preview, rediriger
@@ -46,8 +50,14 @@
       // Maintenir le contenu caché
       document.documentElement.style.visibility = 'hidden';
       
-      // Rediriger immédiatement vers la page principale
-      window.location.href = '/index.html';
+      // Générer un token temporaire pour ce chemin d'overlay
+      const tempUserId = 'temp-user';
+      const currentPath = window.location.pathname;
+      const tokenData = `${tempUserId}-${currentPath}`;
+      const token = btoa(tokenData);
+      
+      // Rediriger vers la page principale avec ce token
+      window.location.href = `/overlay.html?token=${token}`;
     }
   }
 })();
