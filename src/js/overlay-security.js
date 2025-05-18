@@ -33,13 +33,21 @@
     
     console.log("Overlay security passed - content visible");
   } else {
-    // Si l'accès n'est pas valide, rediriger vers la page principale
-    console.log('Accès direct non autorisé à l\'overlay détecté. Redirection...');
+    // Accès direct détecté - vérifier si nous sommes dans une preview du studio
+    const isStudioPreview = window.location.href.includes('preview=true');
     
-    // Maintenir le contenu caché
-    document.documentElement.style.visibility = 'hidden';
-    
-    // Rediriger immédiatement vers la page principale
-    window.location.href = '/index.html';
+    if (isStudioPreview) {
+      console.log('Preview du studio détecté - affichage du contenu autorisé');
+      document.documentElement.style.visibility = 'visible';
+    } else {
+      // Si l'accès n'est pas valide et n'est pas une preview, rediriger
+      console.log('Accès direct non autorisé à l\'overlay détecté. Redirection...');
+      
+      // Maintenir le contenu caché
+      document.documentElement.style.visibility = 'hidden';
+      
+      // Rediriger immédiatement vers la page principale
+      window.location.href = '/index.html';
+    }
   }
 })();

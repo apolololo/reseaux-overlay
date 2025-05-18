@@ -35,6 +35,7 @@
             display: none;
         }
     </style>
+    <script src="../js/overlay-security.js"></script>
 </head>
 <body>
     <div id="overlay-container"></div>
@@ -51,6 +52,7 @@
 
         // Fonction pour afficher un message d'erreur
         function showError(message) {
+            console.error("Erreur d'overlay:", message);
             const errorElement = document.getElementById('error-message');
             errorElement.textContent = message;
             errorElement.style.display = 'block';
@@ -59,6 +61,7 @@
         // Fonction pour charger et afficher l'overlay
         async function loadOverlay() {
             const { id } = getUrlParams();
+            console.log("Chargement de l'overlay avec ID:", id);
 
             if (!id) {
                 showError('ID d\'overlay manquant');
@@ -67,35 +70,52 @@
 
             try {
                 // Récupérer les données de l'overlay depuis le localStorage
-                const savedOverlays = JSON.parse(localStorage.getItem('saved_overlays') || '[]');
+                const savedOverlaysStr = localStorage.getItem('saved_overlays');
+                console.log("Données sauvegardées:", savedOverlaysStr ? "Présentes" : "Absentes");
+                
+                const savedOverlays = JSON.parse(savedOverlaysStr || '[]');
                 const overlay = savedOverlays.find(o => o.id === id);
 
                 if (!overlay) {
+                    console.error("Overlay non trouvé avec ID:", id);
+                    console.log("Overlays disponibles:", savedOverlays.map(o => o.id));
                     showError('Overlay non trouvé');
                     return;
                 }
 
+                console.log("Overlay trouvé:", overlay);
+
                 // Appliquer les dimensions
                 const container = document.getElementById('overlay-container');
-                container.style.width = `${overlay.size.width}px`;
-                container.style.height = `${overlay.size.height}px`;
+                if (overlay.size) {
+                    container.style.width = `${overlay.size.width}px`;
+                    container.style.height = `${overlay.size.height}px`;
+                }
 
                 // Appliquer le fond
-                document.body.style.backgroundColor = overlay.background;
+                document.body.style.backgroundColor = overlay.background || 'transparent';
 
                 // Créer les éléments
-                overlay.elements.forEach(element => {
-                    const div = document.createElement('div');
-                    div.className = `overlay-element ${element.type}-element`;
-                    div.innerHTML = element.content;
+                if (overlay.elements && Array.isArray(overlay.elements)) {
+                    overlay.elements.forEach(element => {
+                        if (!element) return;
+                        
+                        const div = document.createElement('div');
+                        div.className = `overlay-element ${element.type}-element`;
+                        div.innerHTML = element.content || '';
 
-                    // Appliquer les styles
-                    Object.entries(element.style).forEach(([key, value]) => {
-                        if (value) div.style[key] = value;
+                        // Appliquer les styles
+                        if (element.style) {
+                            Object.entries(element.style).forEach(([key, value]) => {
+                                if (value) div.style[key] = value;
+                            });
+                        }
+
+                        container.appendChild(div);
                     });
+                }
 
-                    container.appendChild(div);
-                });
+                console.log("Overlay chargé avec succès");
 
             } catch (error) {
                 console.error('Erreur lors du chargement de l\'overlay:', error);

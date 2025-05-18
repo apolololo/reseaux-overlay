@@ -54,20 +54,28 @@
       const params = new URLSearchParams(window.location.search);
       const token = params.get('token');
       
+      console.log("Initialisation de l'overlay avec token:", token);
+      
       if (!token) {
         showError("Token d'overlay manquant", "Veuillez utiliser un lien valide généré depuis l'application APO Overlays.");
         return;
       }
       
       try {
-        // Format du token: userID-overlayID (encodé en base64)
-        const decodedData = atob(token);
-        console.log("Token décodé:", decodedData);
+        // Essayer de décoder le token (format: userID-overlayID encodé en base64)
+        let decodedData;
+        try {
+          decodedData = atob(token);
+          console.log("Token décodé:", decodedData);
+        } catch (e) {
+          console.error("Erreur lors du décodage base64:", e);
+          throw new Error("Format de token invalide (erreur de décodage base64)");
+        }
         
         const separatorIndex = decodedData.indexOf('-');
         
         if (separatorIndex === -1) {
-          throw new Error("Format de token invalide");
+          throw new Error("Format de token invalide (séparateur manquant)");
         }
         
         const userId = decodedData.substring(0, separatorIndex);
@@ -76,17 +84,20 @@
         console.log("User ID:", userId);
         console.log("Overlay ID:", overlayId);
         
-        // Récupérer les données de l'overlay depuis le localStorage
-        const savedOverlays = JSON.parse(localStorage.getItem('saved_overlays') || '[]');
-        const overlay = savedOverlays.find(o => o.id === overlayId);
+        // Support pour les anciens et nouveaux formats d'ID d'overlay
+        // Les anciens formats sont des chemins, les nouveaux sont des identifiants
+        let overlayUrl;
         
-        if (!overlay) {
-          throw new Error("Overlay non trouvé");
+        if (overlayId.includes('/')) {
+          // Ancien format: chemin direct vers l'overlay
+          overlayUrl = new URL(overlayId, window.location.origin);
+        } else {
+          // Nouveau format: ID d'overlay stocké dans localStorage
+          overlayUrl = new URL('src/overlay.html', window.location.origin);
+          overlayUrl.searchParams.set('id', overlayId);
         }
         
-        // Construire l'URL de l'overlay
-        const overlayUrl = new URL('src/overlay.html', window.location.origin);
-        overlayUrl.searchParams.set('id', overlayId);
+        console.log("URL de l'overlay à charger:", overlayUrl.toString());
         
         // Transférer tous les paramètres de l'URL actuelle vers l'URL de l'overlay
         params.forEach((value, key) => {
@@ -108,7 +119,7 @@
         
         document.getElementById('overlay-container').appendChild(iframe);
       } catch (error) {
-        console.error("Erreur lors du décodage du token:", error);
+        console.error("Erreur lors du traitement du token:", error);
         showError("Token d'overlay invalide", `Ce lien d'overlay n'est pas valide ou a expiré. Erreur: ${error.message}`);
       }
     });
@@ -119,7 +130,10 @@
           <div class="error-icon">⚠️</div>
           <div class="error-message">${title}</div>
           <div class="error-details">${message}</div>
-          <div class="debug-info">Token: ${new URLSearchParams(window.location.search).get('token') || 'non fourni'}</div>
+          <div class="debug-info">
+            Token: ${new URLSearchParams(window.location.search).get('token') || 'non fourni'}<br>
+            URL: ${window.location.href}
+          </div>
         </div>
       `;
     }

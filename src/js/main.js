@@ -54,6 +54,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Encoder en base64 pour plus de lisibilité
     const token = btoa(tokenData);
     
+    console.log("Génération de token pour:", overlayPath);
+    console.log("Token généré:", token);
+    console.log("Données encodées:", tokenData);
+    
     return token;
   }
 
@@ -151,6 +155,8 @@ document.addEventListener('DOMContentLoaded', () => {
         overlayUrl.searchParams.set(key, value);
       }
     });
+    
+    console.log("URL finale de l'overlay:", overlayUrl.toString());
     
     try {
       await navigator.clipboard.writeText(overlayUrl.toString());

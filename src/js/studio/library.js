@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const baseUrl = window.location.origin;
         const overlayUrl = `${baseUrl}/overlay.html?token=${token}`;
         
-        // Créer un élément temporaire pour copier l'URL
+        // Copier l'URL dans le presse-papiers
         const tempInput = document.createElement('input');
         tempInput.value = overlayUrl;
         document.body.appendChild(tempInput);
@@ -196,6 +196,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Afficher un message de confirmation
         alert('URL copiée dans le presse-papiers. Vous pouvez maintenant l\'utiliser dans OBS comme source de navigateur.');
+        
+        // Afficher l'URL pour le débogage
+        console.log("URL de l'overlay copiée:", overlayUrl);
+        console.log("Token:", token);
+        console.log("Données du token:", tokenData);
       } catch (error) {
         console.error('Erreur lors de la génération de l\'URL:', error);
         alert('Une erreur est survenue lors de la génération de l\'URL. Veuillez réessayer.');
