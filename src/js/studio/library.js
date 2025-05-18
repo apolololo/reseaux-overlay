@@ -251,7 +251,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // Ne pas afficher d'erreur à l'utilisateur car c'est une opération en arrière-plan
       }
     }
-    };
     
     // Initialiser la recherche et le tri
     const initSearch = () => {
