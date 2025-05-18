@@ -775,14 +775,6 @@ document.addEventListener('DOMContentLoaded', () => {
           element.style.border = textBorder.value;
         };
       }
-      
-      // Bordure
-      const textBorder = document.getElementById('text-border');
-      if (textBorder) {
-        textBorder.onchange = () => {
-          element.style.border = textBorder.value;
-        };
-      }
     }
     
     // Propriétés du minuteur
