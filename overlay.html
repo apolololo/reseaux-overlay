@@ -38,6 +38,12 @@
       opacity: 0.7;
       max-width: 600px;
     }
+    .debug-info {
+      margin-top: 20px;
+      font-size: 12px;
+      opacity: 0.5;
+      font-family: monospace;
+    }
   </style>
 </head>
 <body>
@@ -53,11 +59,11 @@
         return;
       }
       
-      // Le jeton est simple: userID-overlayPath
-      // Pas besoin de vérifier dans le localStorage
       try {
-        // Format du token: userID-overlayPath (encodé en base64)
+        // Format du token: userID-overlayID (encodé en base64)
         const decodedData = atob(token);
+        console.log("Token décodé:", decodedData);
+        
         const separatorIndex = decodedData.indexOf('-');
         
         if (separatorIndex === -1) {
@@ -65,35 +71,22 @@
         }
         
         const userId = decodedData.substring(0, separatorIndex);
-        let overlayPath = decodedData.substring(separatorIndex + 1);
+        const overlayId = decodedData.substring(separatorIndex + 1);
         
-        // S'assurer que le chemin commence par / si ce n'est pas déjà le cas
-        if (!overlayPath.startsWith('/')) {
-          overlayPath = '/' + overlayPath;
-        }
+        console.log("User ID:", userId);
+        console.log("Overlay ID:", overlayId);
         
-        // S'assurer que le chemin est valide (sécurité renforcée)
-        if (!overlayPath.includes('/overlays/') || !overlayPath.endsWith('.html')) {
-          throw new Error("Chemin d'overlay non valide");
-        }
+        // Récupérer les données de l'overlay depuis le localStorage
+        const savedOverlays = JSON.parse(localStorage.getItem('saved_overlays') || '[]');
+        const overlay = savedOverlays.find(o => o.id === overlayId);
         
-        // Vérifier les chemins autorisés
-        const validPaths = [
-          '/src/overlays/apo/overlay.html',
-          '/src/overlays/starting/overlay.html',
-          '/src/overlays/brb/overlay.html',
-          '/src/overlays/brb/overlay-video.html',
-          '/src/overlays/end/overlay.html',
-          '/src/overlays/game-status/overlay.html',
-          '/src/overlays/maps/overlay.html'
-        ];
-        
-        if (!validPaths.includes(overlayPath)) {
-          throw new Error("Chemin d'overlay non autorisé");
+        if (!overlay) {
+          throw new Error("Overlay non trouvé");
         }
         
         // Construire l'URL de l'overlay
-        const overlayUrl = new URL(overlayPath, window.location.origin);
+        const overlayUrl = new URL('src/overlay.html', window.location.origin);
+        overlayUrl.searchParams.set('id', overlayId);
         
         // Transférer tous les paramètres de l'URL actuelle vers l'URL de l'overlay
         params.forEach((value, key) => {
@@ -113,13 +106,10 @@
         iframe.style.left = '0';
         iframe.sandbox = 'allow-scripts allow-same-origin'; // Restrictions de sécurité
         
-        // Ajouter un attribut de sécurité pour empêcher le téléchargement
-        iframe.setAttribute('oncontextmenu', 'return false;');
-        
         document.getElementById('overlay-container').appendChild(iframe);
       } catch (error) {
         console.error("Erreur lors du décodage du token:", error);
-        showError("Token d'overlay invalide", "Ce lien d'overlay n'est pas valide ou a expiré.");
+        showError("Token d'overlay invalide", `Ce lien d'overlay n'est pas valide ou a expiré. Erreur: ${error.message}`);
       }
     });
     
@@ -129,6 +119,7 @@
           <div class="error-icon">⚠️</div>
           <div class="error-message">${title}</div>
           <div class="error-details">${message}</div>
+          <div class="debug-info">Token: ${new URLSearchParams(window.location.search).get('token') || 'non fourni'}</div>
         </div>
       `;
     }

@@ -1,14 +1,19 @@
+
 /**
  * Sécurité des overlays - Ce script est à inclure dans tous les fichiers d'overlay
  * Il redirige vers l'accès sécurisé si l'overlay est accédé directement
  */
 
 (function() {
+  console.log("Initializing overlay security script");
+  
   // Exécuter immédiatement - bloquer l'affichage du contenu par défaut
   document.documentElement.style.visibility = 'hidden';
   
   // Vérifier si on est dans un iframe (accès normal via token)
   const isInIframe = window !== window.top;
+  
+  console.log("Is in iframe:", isInIframe);
   
   // Si l'accès est valide (dans un iframe), afficher le contenu
   if (isInIframe) {
@@ -25,6 +30,8 @@
       e.preventDefault();
       return false;
     });
+    
+    console.log("Overlay security passed - content visible");
   } else {
     // Si l'accès n'est pas valide, rediriger vers la page principale
     console.log('Accès direct non autorisé à l\'overlay détecté. Redirection...');

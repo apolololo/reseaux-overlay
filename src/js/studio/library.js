@@ -1,4 +1,3 @@
-
 /**
  * Module de bibliothèque pour le Studio
  * Gère l'affichage et l'interaction avec les overlays sauvegardés
@@ -171,44 +170,21 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     // Fonction pour copier l'URL de l'overlay pour OBS
-    const copyOverlayUrl = async (overlayId) => {
-      // Récupérer le token d'authentification
-      const token = localStorage.getItem('twitch_token');
-      if (!token) {
-        alert('Vous devez être connecté pour générer une URL d\'overlay');
-        return;
-      }
-
+    const copyOverlayUrl = (overlayId) => {
       try {
-        // Valider le token avant de générer l'URL
-        const response = await fetch('https://id.twitch.tv/oauth2/validate', {
-          headers: {
-            'Authorization': `OAuth ${token}`
-          }
-        });
-
-        const data = await response.json();
-
-        if (!response.ok || !data.login) {
-          // Si le token est invalide ou expiré
-          alert('Votre session a expiré. Veuillez vous reconnecter.');
-          // Supprimer le token invalide
-          localStorage.removeItem('twitch_token');
-          // Rediriger vers la page de connexion
-          window.location.href = '/auth/twitch';
-          return;
-        }
-
-        // Vérifier la date d'expiration du token
-        const expiresIn = data.expires_in;
-        if (expiresIn < 3600) { // Si le token expire dans moins d'une heure
-          // Rafraîchir le token en arrière-plan
-          refreshToken();
-        }
-
-        // Générer l'URL avec le token validé
+        // Récupérer l'ID utilisateur Twitch
+        const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
+        const userId = userData?.id || 'anonymous';
+        
+        // Créer un jeton simple qui contient l'ID utilisateur et l'ID de l'overlay
+        const tokenData = `${userId}-${overlayId}`;
+        
+        // Encoder en base64 pour plus de lisibilité
+        const token = btoa(tokenData);
+        
+        // Générer l'URL avec le token
         const baseUrl = window.location.origin;
-        const overlayUrl = `${baseUrl}/overlay.html?id=${overlayId}&token=${token}`;
+        const overlayUrl = `${baseUrl}/overlay.html?token=${token}`;
         
         // Créer un élément temporaire pour copier l'URL
         const tempInput = document.createElement('input');
@@ -221,36 +197,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Afficher un message de confirmation
         alert('URL copiée dans le presse-papiers. Vous pouvez maintenant l\'utiliser dans OBS comme source de navigateur.');
       } catch (error) {
-        console.error('Erreur lors de la validation du token:', error);
-        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-          alert('Impossible de vérifier votre connexion. Veuillez vérifier votre connexion internet et réessayer.');
-        } else {
-          alert('Une erreur est survenue lors de la génération de l\'URL. Veuillez réessayer.');
-        }
+        console.error('Erreur lors de la génération de l\'URL:', error);
+        alert('Une erreur est survenue lors de la génération de l\'URL. Veuillez réessayer.');
       }
     };
-    
-    // Fonction pour rafraîchir le token
-    const refreshToken = async () => {
-      try {
-        const response = await fetch('/auth/refresh', {
-          method: 'POST',
-          credentials: 'include'
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok && data.access_token) {
-          localStorage.setItem('twitch_token', data.access_token);
-          console.log('Token rafraîchi avec succès');
-        } else {
-          throw new Error('Échec du rafraîchissement du token');
-        }
-      } catch (error) {
-        console.error('Erreur lors du rafraîchissement du token:', error);
-        // Ne pas afficher d'erreur à l'utilisateur car c'est une opération en arrière-plan
-      }
-    }
     
     // Initialiser la recherche et le tri
     const initSearch = () => {
