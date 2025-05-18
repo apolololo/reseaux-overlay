@@ -1,3 +1,4 @@
+
 /**
  * Module d'édition pour le Studio
  * Gère les fonctionnalités de l'éditeur visuel d'overlays
@@ -5,24 +6,24 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Éditeur chargé');
-
+  
   // Initialiser le canvas d'édition
   const initEditor = () => {
     const canvas = document.getElementById('editor-canvas');
     if (!canvas) return;
-
+    
     // Configuration du canvas d'édition
     console.log('Canvas d\'édition initialisé');
-
+    
     // Implémentation du drag & drop des éléments
     setupDragAndDrop(canvas);
-
+    
     // Configuration du redimensionnement du canvas
     setupCanvasSize();
-
+    
     // Configuration des boutons d'action
     setupActionButtons();
-
+    
     // Fonction pour générer les données de prévisualisation
     window.generatePreviewData = () => {
       const canvas = document.getElementById('editor-canvas');
@@ -33,15 +34,15 @@ document.addEventListener('DOMContentLoaded', () => {
           size: { width: 1920, height: 1080 }
         };
       }
-
+      
       // Récupérer les éléments du canvas
       const elements = [];
       const canvasElements = canvas.querySelectorAll('.editor-element');
-
+      
       canvasElements.forEach(element => {
         const rect = element.getBoundingClientRect();
         const canvasRect = canvas.getBoundingClientRect();
-
+        
         elements.push({
           type: element.dataset.type,
           content: element.innerHTML,
@@ -64,14 +65,14 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
       });
-
+      
       // Récupérer la taille du canvas
       const canvasPreset = document.getElementById('canvas-preset');
       const presetValue = canvasPreset ? canvasPreset.value : '1920x1080';
-
+      
       let width = 1920;
       let height = 1080;
-
+      
       if (presetValue !== 'custom') {
         const [w, h] = presetValue.split('x');
         width = parseInt(w);
@@ -82,42 +83,42 @@ document.addEventListener('DOMContentLoaded', () => {
         width = canvasWidth ? parseInt(canvasWidth.value) : 1920;
         height = canvasHeight ? parseInt(canvasHeight.value) : 1080;
       }
-
+      
       return {
         elements: elements,
         background: '#000000', // Pour l'instant, fond noir fixe
         size: { width, height }
       };
     };
-
+    
     // Fonction pour générer le HTML de prévisualisation
     window.generatePreviewHtml = (data) => {
       let elementsHtml = '';
-
+      
       data.elements.forEach(element => {
         const style = Object.entries(element.style)
           .filter(([key, value]) => value) // Ne garder que les propriétés avec une valeur
           .map(([key, value]) => `${key}: ${value}`)
           .join('; ');
-
+        
         elementsHtml += `
           <div class="preview-element ${element.type}-element" style="${style}">
             ${element.content}
           </div>
         `;
       });
-
+      
       return `<!DOCTYPE html>
       <html>
       <head>
         <title>Prévisualisation</title>
         <style>
-          body {
-            margin: 0;
-            padding: 0;
-            background: ${data.background};
-            width: ${data.size.width}px;
-            height: ${data.size.height}px;
+          body { 
+            margin: 0; 
+            padding: 0; 
+            background: ${data.background}; 
+            width: ${data.size.width}px; 
+            height: ${data.size.height}px; 
             overflow: hidden;
             font-family: Arial, sans-serif;
           }
@@ -131,35 +132,35 @@ document.addEventListener('DOMContentLoaded', () => {
       </body>
       </html>`;
     };
-
+    
     // Fonction pour générer les données complètes de l'overlay
     window.generateOverlayData = () => {
       const previewData = window.generatePreviewData();
       const nameInput = document.getElementById('overlay-name');
-
+      
       // Ajouter une propriété id si l'overlay est déjà sauvegardé
       if (window.currentOverlayId) {
         previewData.id = window.currentOverlayId;
       } else {
         previewData.id = 'overlay-' + Date.now();
       }
-
+      
       // Ajouter le nom de l'overlay
       previewData.name = nameInput ? nameInput.value : "Overlay sans titre";
-
+      
       return previewData;
     };
-
+    
     // Fonction pour sauvegarder un overlay
     window.saveOverlay = async (data) => {
       console.log('Sauvegarde de l\'overlay', data);
-
+      
       // Récupérer les overlays déjà sauvegardés
       const savedOverlays = JSON.parse(localStorage.getItem('saved_overlays') || '[]');
-
+      
       // Vérifier si l'overlay existe déjà
       const existingIndex = savedOverlays.findIndex(o => o.id === data.id);
-
+      
       if (existingIndex >= 0) {
         // Mettre à jour l'overlay existant
         savedOverlays[existingIndex] = data;
@@ -167,24 +168,24 @@ document.addEventListener('DOMContentLoaded', () => {
         // Ajouter le nouvel overlay
         savedOverlays.push(data);
       }
-
+      
       // Enregistrer les modifications
       localStorage.setItem('saved_overlays', JSON.stringify(savedOverlays));
-
+      
       // Retourner l'ID de l'overlay
       window.currentOverlayId = data.id;
-
+      
       // Afficher une notification de succès
       showNotification('Overlay sauvegardé avec succès!', 'success');
-
+      
       return { id: data.id };
     };
   };
-
+  
   // Configuration du drag & drop
   function setupDragAndDrop(canvas) {
     const elements = document.querySelectorAll('.element-item');
-
+    
     if (elements && canvas) {
       elements.forEach(element => {
         element.addEventListener('dragstart', (e) => {
@@ -197,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         canvas.classList.add('dragover');
       });
-
+      
       canvas.addEventListener('dragleave', (e) => {
         canvas.classList.remove('dragover');
       });
@@ -207,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
         canvas.classList.remove('dragover');
         const type = e.dataTransfer.getData('text/plain');
         console.log('Drop event triggered with element type:', type);
-
+        
         const rect = canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
@@ -217,13 +218,13 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   }
-
+  
   // Création d'éléments sur le canvas
   function createCanvasElement(type, x, y) {
     console.log('Création d\'élément:', type, 'à', x, y);
     const canvas = document.getElementById('editor-canvas');
     if (!canvas) return;
-
+    
     const element = document.createElement('div');
     element.className = `editor-element ${type}-element`;
     element.dataset.type = type;
@@ -231,9 +232,6 @@ document.addEventListener('DOMContentLoaded', () => {
     element.style.left = `${x}px`;
     element.style.top = `${y}px`;
     element.style.cursor = 'move';
-
-    // Ajoutez cette ligne pour initialiser le z-index
-    element.style.zIndex = document.querySelectorAll('.editor-element').length;
 
     switch (type) {
       case 'text':
@@ -246,17 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
         element.style.minHeight = '30px';
         break;
       case 'image':
-        element.innerHTML = `
-          <div class="placeholder">Cliquez pour ajouter une image</div>
-          <div class="resize-handle top-left"></div>
-          <div class="resize-handle top-right"></div>
-          <div class="resize-handle bottom-left"></div>
-          <div class="resize-handle bottom-right"></div>
-          <div class="resize-handle top"></div>
-          <div class="resize-handle bottom"></div>
-          <div class="resize-handle left"></div>
-          <div class="resize-handle right"></div>
-        `;
+        element.innerHTML = '<div class="placeholder">Cliquez pour ajouter une image</div>';
         element.style.width = '200px';
         element.style.height = '150px';
         element.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
@@ -271,7 +259,20 @@ document.addEventListener('DOMContentLoaded', () => {
         element.style.backgroundColor = '#ffffff';
         element.style.border = '2px solid #000000';
         break;
-
+      case 'social':
+        element.innerHTML = `
+          <div class="social-element">
+            <img src="../images/twitch.png" alt="Twitch" style="width: 24px; height: 24px; margin-right: 8px;">
+            <span>@votre_pseudo</span>
+          </div>
+        `;
+        element.style.display = 'flex';
+        element.style.alignItems = 'center';
+        element.style.padding = '8px';
+        element.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        element.style.color = '#ffffff';
+        element.style.borderRadius = '4px';
+        break;
       case 'timer':
         element.innerHTML = '00:00';
         element.style.fontFamily = 'monospace';
@@ -281,22 +282,32 @@ document.addEventListener('DOMContentLoaded', () => {
         element.style.color = '#ffffff';
         element.style.borderRadius = '4px';
         break;
+      case 'creator-code':
+        element.innerHTML = `
+          <div class="creator-code-element">
+            <span>CODE : APO21</span>
+            <span class="tag" style="background-color: red; padding: 2px 5px; margin-left: 5px; border-radius: 3px;">#AD</span>
+          </div>
+        `;
+        element.style.fontFamily = 'Arial, sans-serif';
+        element.style.fontWeight = 'bold';
+        element.style.padding = '8px';
+        element.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        element.style.color = '#ffffff';
+        element.style.display = 'inline-block';
+        element.style.borderRadius = '4px';
+        break;
     }
 
     // Rendre l'élément déplaçable
     makeElementDraggable(element);
 
-    // Rendre l'élément redimensionnable si c'est une image
-    if (type === 'image') {
-      makeElementResizable(element);
-    }
-
     // Ajouter l'élément au canvas
     canvas.appendChild(element);
-
+    
     // Sélectionner l'élément nouvellement créé
     selectElement(element);
-
+    
     console.log('Élément ajouté au canvas');
     return element;
   }
@@ -304,7 +315,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Rendre un élément déplaçable
   function makeElementDraggable(element) {
     let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-    let isDragging = false;
 
     element.addEventListener('mousedown', dragMouseDown);
 
@@ -312,16 +322,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.target !== element && e.target.contentEditable === 'true') {
         return; // Permet l'édition du contenu sans déplacer
       }
-      if (isDragging) return; // Empêche les événements multiples
-      
       e.preventDefault();
       e.stopPropagation(); // Empêche la propagation au canvas
-      isDragging = true;
       pos3 = e.clientX;
       pos4 = e.clientY;
       document.addEventListener('mousemove', elementDrag);
       document.addEventListener('mouseup', closeDragElement);
-
+      
       // Sélectionner l'élément au clic
       selectElement(element);
     }
@@ -334,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
       pos4 = e.clientY;
       element.style.top = `${element.offsetTop - pos2}px`;
       element.style.left = `${element.offsetLeft - pos1}px`;
-
+      
       // Mettre à jour les valeurs des champs de position
       if (document.getElementById('position-x') && document.getElementById('position-y')) {
         document.getElementById('position-x').value = Math.round(element.offsetLeft);
@@ -343,89 +350,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function closeDragElement() {
-      isDragging = false;
       document.removeEventListener('mousemove', elementDrag);
       document.removeEventListener('mouseup', closeDragElement);
-    }
-  }
-
-  // Rendre un élément redimensionnable
-  function makeElementResizable(element) {
-    const handles = element.querySelectorAll('.resize-handle');
-    let startX, startY, startWidth, startHeight, startLeft, startTop, aspectRatio;
-
-    handles.forEach(handle => {
-      handle.addEventListener('mousedown', startResize);
-    });
-
-    function startResize(e) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      startX = e.clientX;
-      startY = e.clientY;
-      startWidth = parseInt(document.defaultView.getComputedStyle(element).width, 10);
-      startHeight = parseInt(document.defaultView.getComputedStyle(element).height, 10);
-      startLeft = element.offsetLeft;
-      startTop = element.offsetTop;
-      aspectRatio = startWidth / startHeight;
-
-      document.addEventListener('mousemove', doResize);
-      document.addEventListener('mouseup', stopResize);
-    }
-
-    function doResize(e) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      // Calcul des nouvelles dimensions en maintenant le ratio
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
-      let newWidth, newHeight;
-
-      // Maintenir le ratio d'aspect pour un redimensionnement proportionnel
-      if (e.shiftKey) {
-        if (Math.abs(dx) > Math.abs(dy)) {
-          newWidth = startWidth + dx;
-          newHeight = newWidth / aspectRatio;
-        } else {
-          newHeight = startHeight + dy;
-          newWidth = newHeight * aspectRatio;
-        }
-      } else {
-        newWidth = startWidth + dx;
-        newHeight = startHeight + dy;
-      }
-
-      // Appliquer les nouvelles dimensions avec une taille minimale
-      if (newWidth >= 50 && newHeight >= 50) {
-        element.style.width = `${newWidth}px`;
-        element.style.height = `${newHeight}px`;
-      }
-      const width = startWidth + (e.clientX - startX);
-      const height = startHeight + (e.clientY - startY);
-
-      if (e.target.classList.contains('top') || e.target.classList.contains('bottom')) {
-        element.style.height = `${height}px`;
-        element.style.width = `${height * aspectRatio}px`;
-      } else if (e.target.classList.contains('left') || e.target.classList.contains('right')) {
-        element.style.width = `${width}px`;
-        element.style.height = `${width / aspectRatio}px`;
-      } else {
-        element.style.width = `${width}px`;
-        element.style.height = `${height}px`;
-      }
-
-      // Mettre à jour les valeurs des champs de largeur et de hauteur
-      if (document.getElementById('image-width') && document.getElementById('image-height')) {
-        document.getElementById('image-width').value = Math.round(parseInt(element.style.width));
-        document.getElementById('image-height').value = Math.round(parseInt(element.style.height));
-      }
-    }
-
-    function stopResize() {
-      document.removeEventListener('mousemove', doResize);
-      document.removeEventListener('mouseup', stopResize);
     }
   }
 
@@ -434,16 +360,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Désélectionner tous les éléments
     const elements = document.querySelectorAll('.editor-element');
     elements.forEach(el => el.classList.remove('selected'));
-
+    
     // Sélectionner l'élément actuel
     element.classList.add('selected');
-
+    
     // Ajouter une bordure visible pour indiquer la sélection
     elements.forEach(el => {
       el.style.outline = 'none';
     });
     element.style.outline = '2px solid #0066ff';
-
+    
     // Afficher les propriétés correspondantes
     showElementProperties(element);
   }
@@ -460,15 +386,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (element.classList.contains('text-element')) {
       const textProperties = document.querySelector('.text-properties');
       if (textProperties) textProperties.style.display = 'block';
-
+      
       // Mettre à jour les champs de propriétés
       const textContent = document.getElementById('text-content');
       if (textContent) textContent.value = element.innerText;
-
+      
       // Police
       const fontFamily = document.getElementById('font-family');
       if (fontFamily) fontFamily.value = element.style.fontFamily.split(',')[0].replace(/['"]/g, '');
-
+      
       // Taille de police
       const fontSize = document.getElementById('font-size');
       if (fontSize) {
@@ -477,14 +403,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const sizeValue = fontSize.nextElementSibling;
         if (sizeValue) sizeValue.textContent = `${size || 16}px`;
       }
-
+      
       // Couleur
       const textColor = document.getElementById('text-color');
       if (textColor) textColor.value = element.style.color || '#ffffff';
     } else if (element.classList.contains('image-element')) {
       const imageProperties = document.querySelector('.image-properties');
       if (imageProperties) imageProperties.style.display = 'block';
-
+      
       // Opacité
       const imageOpacity = document.getElementById('image-opacity');
       if (imageOpacity) {
@@ -493,7 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const opacityValue = imageOpacity.nextElementSibling;
         if (opacityValue) opacityValue.textContent = `${opacity}%`;
       }
-
+      
       // Arrondi
       const imageRadius = document.getElementById('image-radius');
       if (imageRadius) {
@@ -502,45 +428,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const radiusValue = imageRadius.nextElementSibling;
         if (radiusValue) radiusValue.textContent = `${radius}px`;
       }
-
-      // Largeur
-      const imageWidth = document.getElementById('image-width');
-      if (imageWidth) {
-        imageWidth.value = Math.round(element.offsetWidth);
-      }
-
-      // Hauteur
-      const imageHeight = document.getElementById('image-height');
-      if (imageHeight) {
-        imageHeight.value = Math.round(element.offsetHeight);
-      }
     }
 
     // Mettre à jour les propriétés communes
     const commonProperties = document.querySelector('.common-properties');
     if (commonProperties) {
       commonProperties.style.display = 'block';
-
+      
       // Position X
       if (document.getElementById('position-x')) {
         document.getElementById('position-x').value = Math.round(element.offsetLeft);
       }
-
+      
       // Position Y
       if (document.getElementById('position-y')) {
         document.getElementById('position-y').value = Math.round(element.offsetTop);
       }
-
+      
       // Largeur
       if (document.getElementById('element-width')) {
         document.getElementById('element-width').value = Math.round(element.offsetWidth);
       }
-
+      
       // Hauteur
       if (document.getElementById('element-height')) {
         document.getElementById('element-height').value = Math.round(element.offsetHeight);
       }
-
+      
       // Rotation
       const rotation = document.getElementById('element-rotation');
       if (rotation) {
@@ -555,11 +469,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (rotationValue) rotationValue.textContent = `${angle}°`;
       }
     }
-
+    
     // Configurer les événements pour les propriétés
     setupPropertyEvents(element);
   }
-
+  
   // Configurer les événements pour les champs de propriétés
   function setupPropertyEvents(element) {
     // Position X
@@ -569,7 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
         element.style.left = `${posX.value}px`;
       };
     }
-
+    
     // Position Y
     const posY = document.getElementById('position-y');
     if (posY) {
@@ -577,7 +491,7 @@ document.addEventListener('DOMContentLoaded', () => {
         element.style.top = `${posY.value}px`;
       };
     }
-
+    
     // Largeur
     const width = document.getElementById('element-width');
     if (width) {
@@ -585,7 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
         element.style.width = `${width.value}px`;
       };
     }
-
+    
     // Hauteur
     const height = document.getElementById('element-height');
     if (height) {
@@ -593,7 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
         element.style.height = `${height.value}px`;
       };
     }
-
+    
     // Rotation
     const rotation = document.getElementById('element-rotation');
     if (rotation) {
@@ -603,7 +517,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (rotationValue) rotationValue.textContent = `${rotation.value}°`;
       };
     }
-
+    
     // Mise en forme du texte
     if (element.classList.contains('text-element')) {
       // Contenu du texte
@@ -613,7 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
           element.innerText = textContent.value;
         };
       }
-
+      
       // Police
       const fontFamily = document.getElementById('font-family');
       if (fontFamily) {
@@ -621,7 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {
           element.style.fontFamily = fontFamily.value;
         };
       }
-
+      
       // Taille de police
       const fontSize = document.getElementById('font-size');
       if (fontSize) {
@@ -631,7 +545,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (sizeValue) sizeValue.textContent = `${fontSize.value}px`;
         };
       }
-
+      
       // Couleur
       const textColor = document.getElementById('text-color');
       if (textColor) {
@@ -639,7 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
           element.style.color = textColor.value;
         };
       }
-
+      
       // Gras
       const textBold = document.getElementById('text-bold');
       if (textBold) {
@@ -653,7 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         };
       }
-
+      
       // Italique
       const textItalic = document.getElementById('text-italic');
       if (textItalic) {
@@ -668,7 +582,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
       }
     }
-
+    
     // Propriétés d'image
     if (element.classList.contains('image-element')) {
       // Changer l'image
@@ -684,32 +598,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (file) {
               const reader = new FileReader();
               reader.onload = (e) => {
-                const img = new Image();
-                img.onload = function() {
-                  element.innerHTML = `
-                    <img src="${e.target.result}" alt="Image" style="width: 100%; height: 100%;">
-                    <div class="resize-handle top-left"></div>
-                    <div class="resize-handle top-right"></div>
-                    <div class="resize-handle bottom-left"></div>
-                    <div class="resize-handle bottom-right"></div>
-                    <div class="resize-handle top"></div>
-                    <div class="resize-handle bottom"></div>
-                    <div class="resize-handle left"></div>
-                    <div class="resize-handle right"></div>
-                  `;
-                  element.style.width = `${this.width}px`;
-                  element.style.height = `${this.height}px`;
-
-                  // Mettre à jour les champs de largeur et de hauteur
-                  const imageWidth = document.getElementById('image-width');
-                  if (imageWidth) imageWidth.value = this.width;
-                  const imageHeight = document.getElementById('image-height');
-                  if (imageHeight) imageHeight.value = this.height;
-
-                  // Rendre l'élément redimensionnable
-                  makeElementResizable(element);
-                };
-                img.src = e.target.result;
+                element.innerHTML = '';
+                element.style.backgroundImage = `url(${e.target.result})`;
+                element.style.backgroundSize = 'cover';
+                element.style.backgroundPosition = 'center';
               };
               reader.readAsDataURL(file);
             }
@@ -717,7 +609,7 @@ document.addEventListener('DOMContentLoaded', () => {
           fileInput.click();
         };
       }
-
+      
       // Opacité
       const imageOpacity = document.getElementById('image-opacity');
       if (imageOpacity) {
@@ -727,7 +619,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (opacityValue) opacityValue.textContent = `${imageOpacity.value}%`;
         };
       }
-
+      
       // Arrondi
       const imageRadius = document.getElementById('image-radius');
       if (imageRadius) {
@@ -737,87 +629,41 @@ document.addEventListener('DOMContentLoaded', () => {
           if (radiusValue) radiusValue.textContent = `${imageRadius.value}px`;
         };
       }
-
-      // Largeur
-      const imageWidth = document.getElementById('image-width');
-      if (imageWidth) {
-        imageWidth.onchange = () => {
-          element.style.width = `${imageWidth.value}px`;
-        };
-      }
-
-      // Hauteur
-      const imageHeight = document.getElementById('image-height');
-      if (imageHeight) {
-        imageHeight.onchange = () => {
-          element.style.height = `${imageHeight.value}px`;
-        };
-      }
     }
-
+    
     // Boutons d'avant-plan/arrière-plan
     const bringForward = document.getElementById('bring-forward');
     if (bringForward) {
       bringForward.onclick = () => {
-        const elements = Array.from(document.querySelectorAll('.editor-element'));
-        const currentZIndex = parseInt(element.style.zIndex || 0);
-        const maxZIndex = Math.max(...elements.map(el => parseInt(el.style.zIndex || 0)));
-
-        // Trouver l'élément juste au-dessus
-        const nextElement = elements.find(el => parseInt(el.style.zIndex || 0) === currentZIndex + 1);
-
-        if (nextElement) {
-          // Échanger les z-index
-          nextElement.style.zIndex = currentZIndex;
-          element.style.zIndex = currentZIndex + 1;
-        } else {
-          // Si pas d'élément au-dessus, mettre au premier plan
-          element.style.zIndex = maxZIndex + 1;
-        }
-
-        showNotification('Élément déplacé vers l\'avant', 'success');
+        const zIndex = parseInt(element.style.zIndex || 0);
+        element.style.zIndex = zIndex + 1;
       };
     }
-
+    
     const sendBackward = document.getElementById('send-backward');
     if (sendBackward) {
       sendBackward.onclick = () => {
-        const elements = Array.from(document.querySelectorAll('.editor-element'));
-        const currentZIndex = parseInt(element.style.zIndex || 0);
-        const minZIndex = Math.min(...elements.map(el => parseInt(el.style.zIndex || 0)));
-
-        // Trouver l'élément juste en-dessous
-        const prevElement = elements.find(el => parseInt(el.style.zIndex || 0) === currentZIndex - 1);
-
-        if (prevElement && currentZIndex > 0) {
-          // Échanger les z-index
-          prevElement.style.zIndex = currentZIndex;
-          element.style.zIndex = currentZIndex - 1;
-        } else if (currentZIndex > 0) {
-          // Si pas d'élément en-dessous mais pas encore au fond
-          element.style.zIndex = Math.max(0, minZIndex - 1);
-        }
-
-        showNotification('Élément déplacé vers l\'arrière', 'success');
+        const zIndex = parseInt(element.style.zIndex || 0);
+        element.style.zIndex = Math.max(0, zIndex - 1);
       };
     }
-
+    
     // Suppression d'élément
     const deleteBtn = document.getElementById('delete-element');
     if (deleteBtn) {
       deleteBtn.onclick = () => {
         element.remove();
-
+        
         // Réinitialiser le panneau des propriétés
         const propertiesGroups = document.querySelectorAll('.properties-group');
         propertiesGroups.forEach(group => group.style.display = 'none');
-
+        
         const noSelection = document.querySelector('.no-selection-message');
         if (noSelection) noSelection.style.display = 'block';
       };
     }
   }
-
+  
   // Configuration de la taille du canvas
   function setupCanvasSize() {
     const canvasPreset = document.getElementById('canvas-preset');
@@ -825,7 +671,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const canvasWidth = document.getElementById('canvas-width');
     const canvasHeight = document.getElementById('canvas-height');
     const canvas = document.getElementById('editor-canvas');
-
+    
     if (canvasPreset && customSizeDiv && canvas) {
       // Gestion du changement de preset
       canvasPreset.addEventListener('change', () => {
@@ -838,20 +684,20 @@ document.addEventListener('DOMContentLoaded', () => {
           canvas.style.height = `${height}px`;
         }
       });
-
+      
       // Gestion des dimensions personnalisées
       if (canvasWidth && canvasHeight) {
         canvasWidth.addEventListener('change', () => {
           canvas.style.width = `${canvasWidth.value}px`;
         });
-
+        
         canvasHeight.addEventListener('change', () => {
           canvas.style.height = `${canvasHeight.value}px`;
         });
       }
     }
   }
-
+  
   // Configuration des boutons d'action
   function setupActionButtons() {
     // Prévisualisation
@@ -860,14 +706,14 @@ document.addEventListener('DOMContentLoaded', () => {
       previewBtn.addEventListener('click', () => {
         const previewData = window.generatePreviewData();
         const previewHtml = window.generatePreviewHtml(previewData);
-
+        
         // Afficher la prévisualisation dans une modal
         const previewModal = document.getElementById('preview-modal');
         const previewFrame = document.getElementById('preview-frame');
-
+        
         if (previewModal && previewFrame) {
           previewModal.style.display = 'flex';
-
+          
           const frameDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
           frameDoc.open();
           frameDoc.write(previewHtml);
@@ -875,7 +721,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     }
-
+    
     // Sauvegarder
     const saveBtn = document.getElementById('save-overlay');
     if (saveBtn) {
@@ -883,14 +729,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const saveModal = document.getElementById('save-modal');
         const saveNameInput = document.getElementById('save-overlay-name');
         const overlayNameInput = document.getElementById('overlay-name');
-
+        
         if (saveModal && saveNameInput && overlayNameInput) {
           saveModal.style.display = 'flex';
           saveNameInput.value = overlayNameInput.value;
         }
       });
     }
-
+    
     // Confirmer la sauvegarde
     const confirmSaveBtn = document.getElementById('confirm-save');
     if (confirmSaveBtn) {
@@ -900,33 +746,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const descriptionInput = document.getElementById('overlay-description');
         const categorySelect = document.getElementById('overlay-category');
         const publicCheckbox = document.getElementById('overlay-public');
-
+        
         // Mettre à jour le nom de l'overlay
         if (overlayNameInput && saveNameInput) {
           overlayNameInput.value = saveNameInput.value;
         }
-
+        
         // Récupérer les données de l'overlay
         const overlayData = window.generateOverlayData();
-
+        
         // Ajouter les métadonnées supplémentaires
         if (descriptionInput) overlayData.description = descriptionInput.value;
         if (categorySelect) overlayData.category = categorySelect.value;
         if (publicCheckbox) overlayData.public = publicCheckbox.checked;
-
+        
         // Sauvegarder l'overlay
         await window.saveOverlay(overlayData);
-
+        
         // Activer le bouton de copie d'URL
         const copyUrlBtn = document.getElementById('copy-url');
         if (copyUrlBtn) {
           copyUrlBtn.disabled = false;
-
+          
           // Ajouter l'événement pour copier l'URL
           copyUrlBtn.onclick = () => {
             const urlModal = document.getElementById('url-modal');
             const obsUrlInput = document.getElementById('obs-url');
-
+            
             if (urlModal && obsUrlInput) {
               urlModal.style.display = 'flex';
               const baseUrl = window.location.origin;
@@ -934,7 +780,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           };
         }
-
+        
         // Fermer le modal
         const saveModal = document.getElementById('save-modal');
         if (saveModal) {
@@ -942,7 +788,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     }
-
+    
     // Fermer les modals
     const closeButtons = document.querySelectorAll('.close-modal, #close-preview, #cancel-save, #close-url-modal');
     closeButtons.forEach(button => {
@@ -953,7 +799,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
     });
-
+    
     // Copier l'URL pour OBS
     const copyObsUrlBtn = document.getElementById('copy-obs-url');
     if (copyObsUrlBtn) {
@@ -966,7 +812,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     }
-
+    
     // Effacer tout
     const clearCanvasBtn = document.getElementById('clear-canvas');
     if (clearCanvasBtn) {
@@ -977,11 +823,11 @@ document.addEventListener('DOMContentLoaded', () => {
             while (canvas.firstChild) {
               canvas.removeChild(canvas.firstChild);
             }
-
+            
             // Réinitialiser le panneau des propriétés
             const propertiesGroups = document.querySelectorAll('.properties-group');
             propertiesGroups.forEach(group => group.style.display = 'none');
-
+            
             const noSelection = document.querySelector('.no-selection-message');
             if (noSelection) noSelection.style.display = 'block';
           }
@@ -989,7 +835,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   }
-
+  
   // Afficher une notification
   function showNotification(message, type = 'info') {
     // Créer l'élément de notification s'il n'existe pas
@@ -999,17 +845,17 @@ document.addEventListener('DOMContentLoaded', () => {
       notification.className = 'studio-notification';
       document.body.appendChild(notification);
     }
-
+    
     // Définir le type et le message
     notification.className = `studio-notification ${type}`;
     notification.textContent = message;
-
+    
     // Afficher la notification
     notification.style.display = 'block';
     setTimeout(() => {
       notification.classList.add('visible');
     }, 10);
-
+    
     // Masquer la notification après 3 secondes
     setTimeout(() => {
       notification.classList.remove('visible');
@@ -1025,12 +871,12 @@ document.addEventListener('DOMContentLoaded', () => {
       initEditor();
     }
   });
-
+  
   // Initialiser l'éditeur si c'est la vue par défaut
   if (document.getElementById('editor-view') && !document.getElementById('editor-view').classList.contains('hidden')) {
     initEditor();
   }
-
+  
   // Détecter les clics sur le canvas pour désélectionner les éléments
   const canvas = document.getElementById('editor-canvas');
   if (canvas) {
@@ -1042,11 +888,11 @@ document.addEventListener('DOMContentLoaded', () => {
           el.classList.remove('selected');
           el.style.outline = 'none';
         });
-
+        
         // Afficher le message "aucune sélection"
         const propertiesGroups = document.querySelectorAll('.properties-group');
         propertiesGroups.forEach(group => group.style.display = 'none');
-
+        
         const noSelection = document.querySelector('.no-selection-message');
         if (noSelection) noSelection.style.display = 'block';
       }
