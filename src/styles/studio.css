@@ -285,14 +285,47 @@ input:focus, select:focus, textarea:focus {
   color: var(--text-muted);
 }
 
+.property-row .inline-label {
+  display: inline;
+  margin-left: 5px;
+  vertical-align: middle;
+}
+
 .property-row input[type="range"] {
-  width: 100%;
+  width: calc(100% - 50px);
   margin-right: 10px;
 }
 
+.property-row input[type="checkbox"] {
+  width: auto;
+  vertical-align: middle;
+  margin-left: 5px;
+}
+
 .range-value {
+  display: inline-block;
+  width: 42px;
+  text-align: right;
   font-size: 0.8rem;
   color: var(--text-muted);
+}
+
+.align-buttons {
+  display: flex;
+  gap: 5px;
+}
+
+.align-buttons .format-btn {
+  flex: 1;
+}
+
+.resize-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: var(--primary-color);
+  border-radius: 50%;
+  z-index: 1000;
 }
 
 .buttons-row {

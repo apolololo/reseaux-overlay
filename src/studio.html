@@ -85,12 +85,94 @@
                   <label>Couleur</label>
                   <input type="color" id="text-color" value="#ffffff">
                 </div>
+                <div class="property-row">
+                  <label>Couleur de fond</label>
+                  <input type="color" id="text-bg-color" value="#000000">
+                  <input type="checkbox" id="bg-transparent" checked>
+                  <label for="bg-transparent" class="inline-label">Transparent</label>
+                </div>
+                <div class="property-row">
+                  <label>Opacité</label>
+                  <input type="range" id="text-opacity" min="0" max="100" value="100">
+                  <span class="range-value">100%</span>
+                </div>
                 <div class="property-row buttons-row">
                   <button id="text-bold" class="format-btn">B</button>
                   <button id="text-italic" class="format-btn">I</button>
-                  <button id="text-align-left" class="format-btn">⫷</button>
-                  <button id="text-align-center" class="format-btn">≡</button>
-                  <button id="text-align-right" class="format-btn">⫸</button>
+                  <button id="text-underline" class="format-btn">U</button>
+                </div>
+                <div class="property-row">
+                  <label>Alignement</label>
+                  <div class="align-buttons">
+                    <button id="text-align-left" class="format-btn active">⫷</button>
+                    <button id="text-align-center" class="format-btn">≡</button>
+                    <button id="text-align-right" class="format-btn">⫸</button>
+                  </div>
+                </div>
+                <div class="property-row">
+                  <label>Espacement</label>
+                  <input type="range" id="letter-spacing" min="0" max="10" value="0">
+                  <span class="range-value">0px</span>
+                </div>
+                <div class="property-row">
+                  <label>Bordure</label>
+                  <select id="text-border">
+                    <option value="none">Aucune</option>
+                    <option value="1px solid white">Fine</option>
+                    <option value="2px solid white">Moyenne</option>
+                    <option value="3px solid white">Épaisse</option>
+                  </select>
+                </div>
+              </div>
+              
+              <!-- Propriétés du minuteur (visible quand un minuteur est sélectionné) -->
+              <div class="timer-properties properties-group" style="display: none;">
+                <div class="property-row">
+                  <label>Format</label>
+                  <select id="timer-format">
+                    <option value="mm:ss">mm:ss</option>
+                    <option value="hh:mm:ss">hh:mm:ss</option>
+                    <option value="ss">ss</option>
+                    <option value="mm:ss.ms">mm:ss.ms</option>
+                  </select>
+                </div>
+                <div class="property-row">
+                  <label>Durée (sec)</label>
+                  <input type="number" id="timer-duration" min="1" max="86400" value="300">
+                </div>
+                <div class="property-row">
+                  <label>Police</label>
+                  <select id="timer-font-family">
+                    <option value="monospace">Monospace</option>
+                    <option value="Montserrat">Montserrat</option>
+                    <option value="Arial">Arial</option>
+                    <option value="Roboto">Roboto</option>
+                  </select>
+                </div>
+                <div class="property-row">
+                  <label>Taille</label>
+                  <input type="range" id="timer-font-size" min="8" max="72" value="24">
+                  <span class="range-value">24px</span>
+                </div>
+                <div class="property-row">
+                  <label>Couleur texte</label>
+                  <input type="color" id="timer-color" value="#ffffff">
+                </div>
+                <div class="property-row">
+                  <label>Couleur fond</label>
+                  <input type="color" id="timer-bg-color" value="#000000">
+                  <input type="checkbox" id="timer-bg-transparent">
+                  <label for="timer-bg-transparent" class="inline-label">Transparent</label>
+                </div>
+                <div class="property-row">
+                  <label>Arrondi</label>
+                  <input type="range" id="timer-border-radius" min="0" max="20" value="4">
+                  <span class="range-value">4px</span>
+                </div>
+                <div class="property-row">
+                  <label>Padding</label>
+                  <input type="range" id="timer-padding" min="0" max="20" value="8">
+                  <span class="range-value">8px</span>
                 </div>
               </div>
               
@@ -118,6 +200,14 @@
                 <div class="property-row">
                   <label>Couleur bordure</label>
                   <input type="color" id="border-color" value="#ffffff">
+                </div>
+                <div class="property-row">
+                  <label>Ajustement</label>
+                  <select id="image-fit">
+                    <option value="cover">Remplir</option>
+                    <option value="contain">Contenir</option>
+                    <option value="none">Aucun</option>
+                  </select>
                 </div>
               </div>
               

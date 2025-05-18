@@ -645,7 +645,25 @@ document.addEventListener('DOMContentLoaded', () => {
       const bgColor = document.getElementById('text-bg-color');
       if (bgColor) {
         bgColor.oninput = () => {
-          element.style.backgroundColor = bgColor.value;
+          if (document.getElementById('bg-transparent') && 
+              document.getElementById('bg-transparent').checked) {
+            element.style.backgroundColor = 'transparent';
+          } else {
+            element.style.backgroundColor = bgColor.value;
+          }
+        };
+      }
+      
+      // Transparence du fond
+      const bgTransparent = document.getElementById('bg-transparent');
+      if (bgTransparent) {
+        bgTransparent.onchange = () => {
+          if (bgTransparent.checked) {
+            element.style.backgroundColor = 'transparent';
+          } else {
+            const bgColor = document.getElementById('text-bg-color');
+            element.style.backgroundColor = bgColor ? bgColor.value : '#000000';
+          }
         };
       }
       
@@ -659,11 +677,42 @@ document.addEventListener('DOMContentLoaded', () => {
         };
       }
       
-      // Alignement du texte
-      const textAlign = document.getElementById('text-align');
-      if (textAlign) {
-        textAlign.onchange = () => {
-          element.style.textAlign = textAlign.value;
+      // Alignement du texte - gauche
+      const textAlignLeft = document.getElementById('text-align-left');
+      if (textAlignLeft) {
+        textAlignLeft.onclick = () => {
+          element.style.textAlign = 'left';
+          // Mettre à jour les classes des boutons
+          document.querySelectorAll('.align-buttons .format-btn').forEach(btn => {
+            btn.classList.remove('active');
+          });
+          textAlignLeft.classList.add('active');
+        };
+      }
+      
+      // Alignement du texte - centre
+      const textAlignCenter = document.getElementById('text-align-center');
+      if (textAlignCenter) {
+        textAlignCenter.onclick = () => {
+          element.style.textAlign = 'center';
+          // Mettre à jour les classes des boutons
+          document.querySelectorAll('.align-buttons .format-btn').forEach(btn => {
+            btn.classList.remove('active');
+          });
+          textAlignCenter.classList.add('active');
+        };
+      }
+      
+      // Alignement du texte - droite
+      const textAlignRight = document.getElementById('text-align-right');
+      if (textAlignRight) {
+        textAlignRight.onclick = () => {
+          element.style.textAlign = 'right';
+          // Mettre à jour les classes des boutons
+          document.querySelectorAll('.align-buttons .format-btn').forEach(btn => {
+            btn.classList.remove('active');
+          });
+          textAlignRight.classList.add('active');
         };
       }
       
@@ -696,10 +745,16 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       // Soulignement
-      const textDecoration = document.getElementById('text-decoration');
-      if (textDecoration) {
-        textDecoration.onchange = () => {
-          element.style.textDecoration = textDecoration.checked ? 'underline' : 'none';
+      const textUnderline = document.getElementById('text-underline');
+      if (textUnderline) {
+        textUnderline.onclick = () => {
+          if (element.style.textDecoration === 'underline') {
+            element.style.textDecoration = 'none';
+            textUnderline.classList.remove('active');
+          } else {
+            element.style.textDecoration = 'underline';
+            textUnderline.classList.add('active');
+          }
         };
       }
       
@@ -710,6 +765,14 @@ document.addEventListener('DOMContentLoaded', () => {
           element.style.letterSpacing = `${letterSpacing.value}px`;
           const spacingValue = letterSpacing.nextElementSibling;
           if (spacingValue) spacingValue.textContent = `${letterSpacing.value}px`;
+        };
+      }
+      
+      // Bordure du texte
+      const textBorder = document.getElementById('text-border');
+      if (textBorder) {
+        textBorder.onchange = () => {
+          element.style.border = textBorder.value;
         };
       }
       
@@ -808,15 +871,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 const img = new Image();
                 img.onload = () => {
                   // Définir la taille de l'élément à la taille réelle de l'image
-                  element.style.width = `${img.width}px`;
-                  element.style.height = `${img.height}px`;
+                  // Limiter la taille maximale à 800px pour les grandes images
+                  let width = img.width;
+                  let height = img.height;
+                  
+                  const maxSize = 800;
+                  if (width > maxSize || height > maxSize) {
+                    const ratio = width / height;
+                    if (width > height) {
+                      width = maxSize;
+                      height = maxSize / ratio;
+                    } else {
+                      height = maxSize;
+                      width = maxSize * ratio;
+                    }
+                  }
+                  
+                  element.style.width = `${width}px`;
+                  element.style.height = `${height}px`;
+                  
+                  // Stocker les dimensions originales dans des attributs data
+                  element.dataset.originalWidth = img.width;
+                  element.dataset.originalHeight = img.height;
+                  element.dataset.aspectRatio = img.width / img.height;
                   
                   // Mettre à jour les champs de propriétés
                   if (document.getElementById('element-width')) {
-                    document.getElementById('element-width').value = img.width;
+                    document.getElementById('element-width').value = Math.round(width);
                   }
                   if (document.getElementById('element-height')) {
-                    document.getElementById('element-height').value = img.height;
+                    document.getElementById('element-height').value = Math.round(height);
+                  }
+                  
+                  // Définir l'ajustement de l'image
+                  const imageFit = document.getElementById('image-fit');
+                  if (imageFit) {
+                    element.style.backgroundSize = imageFit.value || 'cover';
+                  } else {
+                    element.style.backgroundSize = 'contain';
                   }
                   
                   // Ajouter des poignées de redimensionnement
@@ -827,8 +919,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Appliquer l'image comme fond
                 element.innerHTML = '';
                 element.style.backgroundImage = `url(${e.target.result})`;
-                element.style.backgroundSize = 'cover';
                 element.style.backgroundPosition = 'center';
+                element.style.backgroundRepeat = 'no-repeat';
               };
               reader.readAsDataURL(file);
             }
@@ -854,6 +946,131 @@ document.addEventListener('DOMContentLoaded', () => {
           element.style.borderRadius = `${imageRadius.value}px`;
           const radiusValue = imageRadius.nextElementSibling;
           if (radiusValue) radiusValue.textContent = `${imageRadius.value}px`;
+        };
+      }
+      
+      // Bordure
+      const imageBorder = document.getElementById('image-border');
+      if (imageBorder) {
+        imageBorder.oninput = () => {
+          const borderColor = document.getElementById('border-color');
+          const color = borderColor ? borderColor.value : '#ffffff';
+          element.style.border = `${imageBorder.value}px solid ${color}`;
+          const borderValue = imageBorder.nextElementSibling;
+          if (borderValue) borderValue.textContent = `${imageBorder.value}px`;
+        };
+      }
+      
+      // Couleur de bordure
+      const borderColor = document.getElementById('border-color');
+      if (borderColor) {
+        borderColor.oninput = () => {
+          const imageBorder = document.getElementById('image-border');
+          const width = imageBorder ? imageBorder.value : '0';
+          if (width > 0) {
+            element.style.border = `${width}px solid ${borderColor.value}`;
+          }
+        };
+      }
+      
+      // Ajustement de l'image
+      const imageFit = document.getElementById('image-fit');
+      if (imageFit) {
+        imageFit.onchange = () => {
+          element.style.backgroundSize = imageFit.value;
+        };
+      }
+    }
+    
+    // Propriétés du minuteur
+    if (element.classList.contains('timer-element')) {
+      // Format du minuteur
+      const timerFormat = document.getElementById('timer-format');
+      if (timerFormat) {
+        timerFormat.onchange = () => {
+          element.dataset.format = timerFormat.value;
+          updateTimerDisplay(element);
+        };
+      }
+      
+      // Durée du minuteur
+      const timerDuration = document.getElementById('timer-duration');
+      if (timerDuration) {
+        timerDuration.onchange = () => {
+          element.dataset.duration = timerDuration.value;
+          updateTimerDisplay(element);
+        };
+      }
+      
+      // Couleur du texte du minuteur
+      const timerColor = document.getElementById('timer-color');
+      if (timerColor) {
+        timerColor.oninput = () => {
+          element.style.color = timerColor.value;
+        };
+      }
+      
+      // Couleur de fond du minuteur
+      const timerBgColor = document.getElementById('timer-bg-color');
+      if (timerBgColor) {
+        timerBgColor.oninput = () => {
+          if (document.getElementById('timer-bg-transparent') && 
+              document.getElementById('timer-bg-transparent').checked) {
+            element.style.backgroundColor = 'transparent';
+          } else {
+            element.style.backgroundColor = timerBgColor.value;
+          }
+        };
+      }
+      
+      // Transparence du fond du minuteur
+      const timerBgTransparent = document.getElementById('timer-bg-transparent');
+      if (timerBgTransparent) {
+        timerBgTransparent.onchange = () => {
+          if (timerBgTransparent.checked) {
+            element.style.backgroundColor = 'transparent';
+          } else {
+            const timerBgColor = document.getElementById('timer-bg-color');
+            element.style.backgroundColor = timerBgColor ? timerBgColor.value : 'rgba(0, 0, 0, 0.7)';
+          }
+        };
+      }
+      
+      // Taille de police du minuteur
+      const timerFontSize = document.getElementById('timer-font-size');
+      if (timerFontSize) {
+        timerFontSize.oninput = () => {
+          element.style.fontSize = `${timerFontSize.value}px`;
+          const sizeValue = timerFontSize.nextElementSibling;
+          if (sizeValue) sizeValue.textContent = `${timerFontSize.value}px`;
+        };
+      }
+      
+      // Police du minuteur
+      const timerFontFamily = document.getElementById('timer-font-family');
+      if (timerFontFamily) {
+        timerFontFamily.onchange = () => {
+          element.style.fontFamily = timerFontFamily.value;
+        };
+      }
+      
+      // Bordure arrondie du minuteur
+      const timerBorderRadius = document.getElementById('timer-border-radius');
+      if (timerBorderRadius) {
+        timerBorderRadius.oninput = () => {
+          element.style.borderRadius = `${timerBorderRadius.value}px`;
+          const radiusValue = timerBorderRadius.nextElementSibling;
+          if (radiusValue) radiusValue.textContent = `${timerBorderRadius.value}px`;
+        };
+      }
+      
+      // Padding du minuteur
+      const timerPadding = document.getElementById('timer-padding');
+      if (timerPadding) {
+        timerPadding.oninput = () => {
+          element.style.padding = `${timerPadding.value}px`;
+          const paddingValue = timerPadding.nextElementSibling;
+          if (paddingValue) paddingValue.textContent = `${timerPadding.value}px`;
         };
       }
     }
@@ -1235,43 +1452,132 @@ document.addEventListener('DOMContentLoaded', () => {
           const dx = e.clientX - startX;
           const dy = e.clientY - startY;
           
+          // Vérifier si c'est une image et si on doit maintenir le ratio d'aspect
+          const isImage = element.classList.contains('image-element');
+          const aspectRatio = isImage ? parseFloat(element.dataset.aspectRatio) || 1 : null;
+          
           // Appliquer le redimensionnement selon la position de la poignée
+          let newWidth, newHeight, newLeft, newTop;
+          
           switch(pos) {
             case 'nw': // Nord-ouest
-              element.style.width = `${startWidth - dx}px`;
-              element.style.height = `${startHeight - dy}px`;
-              element.style.left = `${startLeft + dx}px`;
-              element.style.top = `${startTop + dy}px`;
+              newWidth = startWidth - dx;
+              
+              if (isImage && aspectRatio) {
+                newHeight = newWidth / aspectRatio;
+                newLeft = startLeft + (startWidth - newWidth);
+                newTop = startTop + (startHeight - newHeight);
+              } else {
+                newHeight = startHeight - dy;
+                newLeft = startLeft + dx;
+                newTop = startTop + dy;
+              }
               break;
+              
             case 'n': // Nord
-              element.style.height = `${startHeight - dy}px`;
-              element.style.top = `${startTop + dy}px`;
+              newHeight = startHeight - dy;
+              
+              if (isImage && aspectRatio) {
+                newWidth = newHeight * aspectRatio;
+                newLeft = startLeft + (startWidth - newWidth) / 2;
+                newTop = startTop + dy;
+              } else {
+                newWidth = startWidth;
+                newLeft = startLeft;
+                newTop = startTop + dy;
+              }
               break;
+              
             case 'ne': // Nord-est
-              element.style.width = `${startWidth + dx}px`;
-              element.style.height = `${startHeight - dy}px`;
-              element.style.top = `${startTop + dy}px`;
+              newWidth = startWidth + dx;
+              
+              if (isImage && aspectRatio) {
+                newHeight = newWidth / aspectRatio;
+                newLeft = startLeft;
+                newTop = startTop + (startHeight - newHeight);
+              } else {
+                newHeight = startHeight - dy;
+                newLeft = startLeft;
+                newTop = startTop + dy;
+              }
               break;
+              
             case 'e': // Est
-              element.style.width = `${startWidth + dx}px`;
+              newWidth = startWidth + dx;
+              
+              if (isImage && aspectRatio) {
+                newHeight = newWidth / aspectRatio;
+                newLeft = startLeft;
+                newTop = startTop + (startHeight - newHeight) / 2;
+              } else {
+                newHeight = startHeight;
+                newLeft = startLeft;
+                newTop = startTop;
+              }
               break;
+              
             case 'se': // Sud-est
-              element.style.width = `${startWidth + dx}px`;
-              element.style.height = `${startHeight + dy}px`;
+              newWidth = startWidth + dx;
+              
+              if (isImage && aspectRatio) {
+                newHeight = newWidth / aspectRatio;
+                newLeft = startLeft;
+                newTop = startTop;
+              } else {
+                newHeight = startHeight + dy;
+                newLeft = startLeft;
+                newTop = startTop;
+              }
               break;
+              
             case 's': // Sud
-              element.style.height = `${startHeight + dy}px`;
+              newHeight = startHeight + dy;
+              
+              if (isImage && aspectRatio) {
+                newWidth = newHeight * aspectRatio;
+                newLeft = startLeft + (startWidth - newWidth) / 2;
+                newTop = startTop;
+              } else {
+                newWidth = startWidth;
+                newLeft = startLeft;
+                newTop = startTop;
+              }
               break;
+              
             case 'sw': // Sud-ouest
-              element.style.width = `${startWidth - dx}px`;
-              element.style.height = `${startHeight + dy}px`;
-              element.style.left = `${startLeft + dx}px`;
+              newWidth = startWidth - dx;
+              
+              if (isImage && aspectRatio) {
+                newHeight = newWidth / aspectRatio;
+                newLeft = startLeft + dx;
+                newTop = startTop;
+              } else {
+                newHeight = startHeight + dy;
+                newLeft = startLeft + dx;
+                newTop = startTop;
+              }
               break;
+              
             case 'w': // Ouest
-              element.style.width = `${startWidth - dx}px`;
-              element.style.left = `${startLeft + dx}px`;
+              newWidth = startWidth - dx;
+              
+              if (isImage && aspectRatio) {
+                newHeight = newWidth / aspectRatio;
+                newLeft = startLeft + dx;
+                newTop = startTop + (startHeight - newHeight) / 2;
+              } else {
+                newHeight = startHeight;
+                newLeft = startLeft + dx;
+                newTop = startTop;
+              }
               break;
           }
+          
+          // Appliquer les nouvelles dimensions et position
+          element.style.width = `${newWidth}px`;
+          element.style.height = `${newHeight}px`;
+          element.style.left = `${newLeft}px`;
+          element.style.top = `${newTop}px`;
           
           // Mettre à jour les champs de propriétés
           if (document.getElementById('element-width')) {
