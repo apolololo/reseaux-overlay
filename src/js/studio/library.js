@@ -171,28 +171,48 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     // Fonction pour copier l'URL de l'overlay pour OBS
-    const copyOverlayUrl = (overlayId) => {
+    const copyOverlayUrl = async (overlayId) => {
       // Récupérer le token d'authentification
       const token = localStorage.getItem('twitch_token');
       if (!token) {
         alert('Vous devez être connecté pour générer une URL d\'overlay');
         return;
       }
-      
-      // Générer l'URL avec le token
-      const baseUrl = window.location.origin;
-      const overlayUrl = `${baseUrl}/overlay.html?id=${overlayId}&token=${token}`;
-      
-      // Créer un élément temporaire pour copier l'URL
-      const tempInput = document.createElement('input');
-      tempInput.value = overlayUrl;
-      document.body.appendChild(tempInput);
-      tempInput.select();
-      document.execCommand('copy');
-      document.body.removeChild(tempInput);
-      
-      // Afficher un message de confirmation
-      alert('URL copiée dans le presse-papiers. Vous pouvez maintenant l\'utiliser dans OBS comme source de navigateur.');
+
+      try {
+        // Valider le token avant de générer l'URL
+        const response = await fetch('https://id.twitch.tv/oauth2/validate', {
+          headers: {
+            'Authorization': `OAuth ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          // Si le token est invalide, demander à l'utilisateur de se reconnecter
+          alert('Votre session a expiré. Veuillez vous reconnecter.');
+          // Supprimer le token invalide
+          localStorage.removeItem('twitch_token');
+          return;
+        }
+
+        // Générer l'URL avec le token validé
+        const baseUrl = window.location.origin;
+        const overlayUrl = `${baseUrl}/overlay.html?id=${overlayId}&token=${token}`;
+        
+        // Créer un élément temporaire pour copier l'URL
+        const tempInput = document.createElement('input');
+        tempInput.value = overlayUrl;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        
+        // Afficher un message de confirmation
+        alert('URL copiée dans le presse-papiers. Vous pouvez maintenant l\'utiliser dans OBS comme source de navigateur.');
+      } catch (error) {
+        console.error('Erreur lors de la validation du token:', error);
+        alert('Une erreur est survenue lors de la génération de l\'URL. Veuillez réessayer.');
+      }
     };
     
     // Initialiser la recherche et le tri
