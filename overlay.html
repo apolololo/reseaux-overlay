@@ -87,8 +87,8 @@
         console.log("URL actuelle:", window.location.href);
         console.log("Origin:", window.location.origin);
         
-        // Toujours utiliser le nouveau format avec ID d'overlay
-        let overlayUrl = new URL('src/overlay.html', window.location.origin);
+        // Toujours utiliser le chemin relatif correct avec src/overlay.html
+        const overlayUrl = new URL('src/overlay.html', window.location.origin);
         overlayUrl.searchParams.set('id', overlayId);
         
         console.log("URL de l'overlay à charger:", overlayUrl.toString());

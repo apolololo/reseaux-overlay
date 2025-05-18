@@ -1,3 +1,4 @@
+
 /**
  * Script principal du Studio
  * Gère la navigation entre les différentes vues et les fonctionnalités communes
@@ -166,14 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Fermer la modale
         window.closeModal('save-modal');
         
-        // Activer le bouton de copie d'URL
-        const copyUrlBtn = document.getElementById('copy-url');
-        if (copyUrlBtn) {
-          copyUrlBtn.disabled = false;
-        }
-        
         // Afficher un message de succès
-        alert('Overlay sauvegardé avec succès !');
+        alert('Overlay sauvegardé avec succès ! Vous pouvez obtenir l\'URL pour OBS depuis la bibliothèque.');
         
         // Mettre à jour la bibliothèque
         if (window.updateLibrary) {
@@ -186,54 +181,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   
-  // Bouton de copie d'URL
-  const copyUrlBtn = document.getElementById('copy-url');
-  if (copyUrlBtn) {
-    copyUrlBtn.addEventListener('click', () => {
-      // Récupérer l'ID de l'overlay actuel
-      const overlayId = window.currentOverlayId;
-      
-      if (!overlayId) {
-        alert('Veuillez d\'abord sauvegarder l\'overlay pour obtenir une URL.');
-        return;
-      }
-      
-      // Générer l'URL pour OBS
-      const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
-      const userId = userData.id || 'anonymous';
-      
-      const obsUrl = new URL('/overlay.html', window.location.origin);
-      const token = btoa(`${userId}-${overlayId}`);
-      obsUrl.searchParams.set('token', token);
-      
-      // Afficher l'URL dans la modale
-      const obsUrlInput = document.getElementById('obs-url');
-      if (obsUrlInput) {
-        obsUrlInput.value = obsUrl.toString();
-      }
-      
-      // Ouvrir la modale
-      window.openModal('url-modal');
-    });
-  }
-  
-  // Bouton de copie d'URL dans la modale
-  const copyObsUrlBtn = document.getElementById('copy-obs-url');
-  if (copyObsUrlBtn) {
-    copyObsUrlBtn.addEventListener('click', () => {
-      const obsUrlInput = document.getElementById('obs-url');
-      if (obsUrlInput) {
-        obsUrlInput.select();
-        document.execCommand('copy');
-        
-        // Feedback visuel
-        copyObsUrlBtn.textContent = 'Copié !';
-        setTimeout(() => {
-          copyObsUrlBtn.textContent = 'Copier';
-        }, 2000);
-      }
-    });
-  }
+  // Note: Nous avons supprimé le bouton de copie d'URL et la modale associée
+  // pour éviter les incohérences. Seule la fonctionnalité depuis la bibliothèque
+  // reste disponible.
   
   // Vérifier le hash pour déterminer la vue initiale
   const checkInitialView = () => {

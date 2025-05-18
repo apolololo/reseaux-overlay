@@ -17,7 +17,7 @@
   console.log("Is in iframe:", isInIframe);
   
   // Vérifier si nous sommes dans l'URL d'overlay principale ou dans une URL avec le paramètre preview
-  const isMainOverlayUrl = window.location.pathname.endsWith('/overlay.html');
+  const isMainOverlayUrl = window.location.pathname.includes('/overlay.html');
   const isPreview = new URLSearchParams(window.location.search).get('preview') === 'true';
   
   console.log("Is main overlay URL:", isMainOverlayUrl);
