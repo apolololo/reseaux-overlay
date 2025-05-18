@@ -435,20 +435,29 @@ input:focus, select:focus, textarea:focus {
     linear-gradient(-45deg, transparent 75%, rgba(60, 60, 82, 0.2) 75%);
   background-size: 20px 20px;
   background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  min-height: 400px;
 }
 
 .canvas-background {
   background-color: var(--dark-bg);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 640px;
+  min-height: 360px;
 }
 
 .editor-canvas {
   width: 1920px;
   height: 1080px;
   position: relative;
-  transform-origin: top left;
+  transform-origin: center center;
   background-color: transparent;
+  max-width: 100%;
+  max-height: 100%;
+  transition: transform var(--transition-normal);
 }
 
 /* Barre d'actions */

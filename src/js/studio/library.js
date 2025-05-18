@@ -187,12 +187,23 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
 
-        if (!response.ok) {
-          // Si le token est invalide, demander à l'utilisateur de se reconnecter
+        const data = await response.json();
+
+        if (!response.ok || !data.login) {
+          // Si le token est invalide ou expiré
           alert('Votre session a expiré. Veuillez vous reconnecter.');
           // Supprimer le token invalide
           localStorage.removeItem('twitch_token');
+          // Rediriger vers la page de connexion
+          window.location.href = '/auth/twitch';
           return;
+        }
+
+        // Vérifier la date d'expiration du token
+        const expiresIn = data.expires_in;
+        if (expiresIn < 3600) { // Si le token expire dans moins d'une heure
+          // Rafraîchir le token en arrière-plan
+          refreshToken();
         }
 
         // Générer l'URL avec le token validé
@@ -211,8 +222,35 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('URL copiée dans le presse-papiers. Vous pouvez maintenant l\'utiliser dans OBS comme source de navigateur.');
       } catch (error) {
         console.error('Erreur lors de la validation du token:', error);
-        alert('Une erreur est survenue lors de la génération de l\'URL. Veuillez réessayer.');
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+          alert('Impossible de vérifier votre connexion. Veuillez vérifier votre connexion internet et réessayer.');
+        } else {
+          alert('Une erreur est survenue lors de la génération de l\'URL. Veuillez réessayer.');
+        }
       }
+    };
+    
+    // Fonction pour rafraîchir le token
+    const refreshToken = async () => {
+      try {
+        const response = await fetch('/auth/refresh', {
+          method: 'POST',
+          credentials: 'include'
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.access_token) {
+          localStorage.setItem('twitch_token', data.access_token);
+          console.log('Token rafraîchi avec succès');
+        } else {
+          throw new Error('Échec du rafraîchissement du token');
+        }
+      } catch (error) {
+        console.error('Erreur lors du rafraîchissement du token:', error);
+        // Ne pas afficher d'erreur à l'utilisateur car c'est une opération en arrière-plan
+      }
+    }
     };
     
     // Initialiser la recherche et le tri
