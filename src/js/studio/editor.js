@@ -225,6 +225,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('editor-canvas');
     if (!canvas) return;
     
+    // Vérifier si un élément existe déjà à cette position
+    // pour éviter la duplication lors du premier déplacement
+    const existingElements = document.querySelectorAll('.editor-element');
+    for (let el of existingElements) {
+      const elLeft = parseInt(el.style.left);
+      const elTop = parseInt(el.style.top);
+      // Si un élément existe déjà à moins de 10px de cette position, ne pas créer de nouvel élément
+      if (Math.abs(elLeft - x) < 10 && Math.abs(elTop - y) < 10) {
+        console.log('Élément déjà présent à cette position, annulation de la création');
+        return null;
+      }
+    }
+    
     const element = document.createElement('div');
     element.className = `editor-element ${type}-element`;
     element.dataset.type = type;
@@ -242,6 +255,8 @@ document.addEventListener('DOMContentLoaded', () => {
         element.style.fontSize = '24px';
         element.style.minWidth = '200px';
         element.style.minHeight = '30px';
+        element.style.padding = '10px';
+        element.style.backgroundColor = 'rgba(0, 0, 0, 0)'; // Fond transparent par défaut
         break;
       case 'image':
         element.innerHTML = '<div class="placeholder">Cliquez pour ajouter une image</div>';
@@ -253,26 +268,6 @@ document.addEventListener('DOMContentLoaded', () => {
         element.style.alignItems = 'center';
         element.style.color = '#ffffff';
         break;
-      case 'shape':
-        element.style.width = '100px';
-        element.style.height = '100px';
-        element.style.backgroundColor = '#ffffff';
-        element.style.border = '2px solid #000000';
-        break;
-      case 'social':
-        element.innerHTML = `
-          <div class="social-element">
-            <img src="../images/twitch.png" alt="Twitch" style="width: 24px; height: 24px; margin-right: 8px;">
-            <span>@votre_pseudo</span>
-          </div>
-        `;
-        element.style.display = 'flex';
-        element.style.alignItems = 'center';
-        element.style.padding = '8px';
-        element.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-        element.style.color = '#ffffff';
-        element.style.borderRadius = '4px';
-        break;
       case 'timer':
         element.innerHTML = '00:00';
         element.style.fontFamily = 'monospace';
@@ -281,21 +276,8 @@ document.addEventListener('DOMContentLoaded', () => {
         element.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
         element.style.color = '#ffffff';
         element.style.borderRadius = '4px';
-        break;
-      case 'creator-code':
-        element.innerHTML = `
-          <div class="creator-code-element">
-            <span>CODE : APO21</span>
-            <span class="tag" style="background-color: red; padding: 2px 5px; margin-left: 5px; border-radius: 3px;">#AD</span>
-          </div>
-        `;
-        element.style.fontFamily = 'Arial, sans-serif';
-        element.style.fontWeight = 'bold';
-        element.style.padding = '8px';
-        element.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-        element.style.color = '#ffffff';
-        element.style.display = 'inline-block';
-        element.style.borderRadius = '4px';
+        element.dataset.format = 'mm:ss'; // Format par défaut
+        element.dataset.duration = '300'; // 5 minutes par défaut
         break;
     }
 
@@ -598,6 +580,27 @@ document.addEventListener('DOMContentLoaded', () => {
             if (file) {
               const reader = new FileReader();
               reader.onload = (e) => {
+                // Créer une image temporaire pour obtenir les dimensions réelles
+                const img = new Image();
+                img.onload = () => {
+                  // Définir la taille de l'élément à la taille réelle de l'image
+                  element.style.width = `${img.width}px`;
+                  element.style.height = `${img.height}px`;
+                  
+                  // Mettre à jour les champs de propriétés
+                  if (document.getElementById('element-width')) {
+                    document.getElementById('element-width').value = img.width;
+                  }
+                  if (document.getElementById('element-height')) {
+                    document.getElementById('element-height').value = img.height;
+                  }
+                  
+                  // Ajouter des poignées de redimensionnement
+                  addResizeHandles(element);
+                };
+                img.src = e.target.result;
+                
+                // Appliquer l'image comme fond
                 element.innerHTML = '';
                 element.style.backgroundImage = `url(${e.target.result})`;
                 element.style.backgroundSize = 'cover';
@@ -635,16 +638,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const bringForward = document.getElementById('bring-forward');
     if (bringForward) {
       bringForward.onclick = () => {
-        const zIndex = parseInt(element.style.zIndex || 0);
-        element.style.zIndex = zIndex + 1;
+        // Récupérer tous les éléments pour comparer les z-index
+        const allElements = document.querySelectorAll('.editor-element');
+        let maxZIndex = 0;
+        
+        // Trouver le z-index maximum actuel
+        allElements.forEach(el => {
+          const elZIndex = parseInt(el.style.zIndex || 0);
+          if (elZIndex > maxZIndex) maxZIndex = elZIndex;
+        });
+        
+        // Définir un z-index supérieur au maximum actuel
+        element.style.zIndex = maxZIndex + 1;
+        console.log('Élément avancé au z-index:', element.style.zIndex);
       };
     }
     
     const sendBackward = document.getElementById('send-backward');
     if (sendBackward) {
       sendBackward.onclick = () => {
-        const zIndex = parseInt(element.style.zIndex || 0);
-        element.style.zIndex = Math.max(0, zIndex - 1);
+        // Récupérer tous les éléments pour comparer les z-index
+        const allElements = document.querySelectorAll('.editor-element');
+        let minZIndex = 0;
+        
+        // Trouver le z-index minimum actuel (sauf 0)
+        allElements.forEach(el => {
+          if (el !== element) {
+            const elZIndex = parseInt(el.style.zIndex || 0);
+            if (elZIndex < minZIndex || minZIndex === 0) minZIndex = elZIndex;
+          }
+        });
+        
+        // Définir un z-index inférieur au minimum actuel, mais pas en dessous de 0
+        element.style.zIndex = Math.max(0, minZIndex - 1);
+        console.log('Élément reculé au z-index:', element.style.zIndex);
       };
     }
     
@@ -897,5 +924,167 @@ document.addEventListener('DOMContentLoaded', () => {
         if (noSelection) noSelection.style.display = 'block';
       }
     });
+  }
+  
+  // Fonction pour ajouter des poignées de redimensionnement à un élément
+  function addResizeHandles(element) {
+    // Supprimer les poignées existantes si elles existent
+    const existingHandles = element.querySelectorAll('.resize-handle');
+    existingHandles.forEach(handle => handle.remove());
+    
+    // Positions des poignées (coins et milieux des côtés)
+    const positions = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
+    
+    // Créer les poignées
+    positions.forEach(pos => {
+      const handle = document.createElement('div');
+      handle.className = `resize-handle resize-${pos}`;
+      handle.style.position = 'absolute';
+      handle.style.width = '10px';
+      handle.style.height = '10px';
+      handle.style.backgroundColor = '#0066ff';
+      handle.style.borderRadius = '50%';
+      handle.style.zIndex = '1000';
+      handle.style.cursor = getCursorStyle(pos);
+      
+      // Positionner la poignée
+      switch(pos) {
+        case 'nw': // Nord-ouest (coin supérieur gauche)
+          handle.style.top = '-5px';
+          handle.style.left = '-5px';
+          break;
+        case 'n': // Nord (milieu supérieur)
+          handle.style.top = '-5px';
+          handle.style.left = 'calc(50% - 5px)';
+          break;
+        case 'ne': // Nord-est (coin supérieur droit)
+          handle.style.top = '-5px';
+          handle.style.right = '-5px';
+          break;
+        case 'e': // Est (milieu droit)
+          handle.style.top = 'calc(50% - 5px)';
+          handle.style.right = '-5px';
+          break;
+        case 'se': // Sud-est (coin inférieur droit)
+          handle.style.bottom = '-5px';
+          handle.style.right = '-5px';
+          break;
+        case 's': // Sud (milieu inférieur)
+          handle.style.bottom = '-5px';
+          handle.style.left = 'calc(50% - 5px)';
+          break;
+        case 'sw': // Sud-ouest (coin inférieur gauche)
+          handle.style.bottom = '-5px';
+          handle.style.left = '-5px';
+          break;
+        case 'w': // Ouest (milieu gauche)
+          handle.style.top = 'calc(50% - 5px)';
+          handle.style.left = '-5px';
+          break;
+      }
+      
+      // Ajouter l'événement de redimensionnement
+      handle.addEventListener('mousedown', (e) => {
+        e.stopPropagation(); // Empêcher la propagation au parent
+        e.preventDefault();
+        
+        // Position initiale de la souris
+        const startX = e.clientX;
+        const startY = e.clientY;
+        
+        // Dimensions et position initiales de l'élément
+        const startWidth = element.offsetWidth;
+        const startHeight = element.offsetHeight;
+        const startLeft = element.offsetLeft;
+        const startTop = element.offsetTop;
+        
+        // Fonction de redimensionnement
+        function resize(e) {
+          // Calculer le déplacement
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+          
+          // Appliquer le redimensionnement selon la position de la poignée
+          switch(pos) {
+            case 'nw': // Nord-ouest
+              element.style.width = `${startWidth - dx}px`;
+              element.style.height = `${startHeight - dy}px`;
+              element.style.left = `${startLeft + dx}px`;
+              element.style.top = `${startTop + dy}px`;
+              break;
+            case 'n': // Nord
+              element.style.height = `${startHeight - dy}px`;
+              element.style.top = `${startTop + dy}px`;
+              break;
+            case 'ne': // Nord-est
+              element.style.width = `${startWidth + dx}px`;
+              element.style.height = `${startHeight - dy}px`;
+              element.style.top = `${startTop + dy}px`;
+              break;
+            case 'e': // Est
+              element.style.width = `${startWidth + dx}px`;
+              break;
+            case 'se': // Sud-est
+              element.style.width = `${startWidth + dx}px`;
+              element.style.height = `${startHeight + dy}px`;
+              break;
+            case 's': // Sud
+              element.style.height = `${startHeight + dy}px`;
+              break;
+            case 'sw': // Sud-ouest
+              element.style.width = `${startWidth - dx}px`;
+              element.style.height = `${startHeight + dy}px`;
+              element.style.left = `${startLeft + dx}px`;
+              break;
+            case 'w': // Ouest
+              element.style.width = `${startWidth - dx}px`;
+              element.style.left = `${startLeft + dx}px`;
+              break;
+          }
+          
+          // Mettre à jour les champs de propriétés
+          if (document.getElementById('element-width')) {
+            document.getElementById('element-width').value = Math.round(element.offsetWidth);
+          }
+          if (document.getElementById('element-height')) {
+            document.getElementById('element-height').value = Math.round(element.offsetHeight);
+          }
+          if (document.getElementById('position-x')) {
+            document.getElementById('position-x').value = Math.round(element.offsetLeft);
+          }
+          if (document.getElementById('position-y')) {
+            document.getElementById('position-y').value = Math.round(element.offsetTop);
+          }
+        }
+        
+        // Fonction pour arrêter le redimensionnement
+        function stopResize() {
+          document.removeEventListener('mousemove', resize);
+          document.removeEventListener('mouseup', stopResize);
+        }
+        
+        // Ajouter les écouteurs d'événements
+        document.addEventListener('mousemove', resize);
+        document.addEventListener('mouseup', stopResize);
+      });
+      
+      // Ajouter la poignée à l'élément
+      element.appendChild(handle);
+    });
+  }
+  
+  // Fonction pour obtenir le style de curseur en fonction de la position
+  function getCursorStyle(position) {
+    switch(position) {
+      case 'nw': return 'nw-resize';
+      case 'n': return 'n-resize';
+      case 'ne': return 'ne-resize';
+      case 'e': return 'e-resize';
+      case 'se': return 'se-resize';
+      case 's': return 's-resize';
+      case 'sw': return 'sw-resize';
+      case 'w': return 'w-resize';
+      default: return 'move';
+    }
   }
 });
