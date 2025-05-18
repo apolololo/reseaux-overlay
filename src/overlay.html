@@ -62,6 +62,7 @@
         async function loadOverlay() {
             const { id } = getUrlParams();
             console.log("Chargement de l'overlay avec ID:", id);
+            console.log("URL complète:", window.location.href);
 
             if (!id) {
                 showError('ID d\'overlay manquant');
@@ -78,11 +79,13 @@
                 }
                 
                 const savedOverlays = JSON.parse(savedOverlaysStr || '[]');
+                console.log("Overlays disponibles:", savedOverlays.map(o => ({ id: o.id, name: o.metadata?.name })));
+                
                 const overlay = savedOverlays.find(o => o.id === id);
 
                 if (!overlay) {
                     console.error("Overlay non trouvé avec ID:", id);
-                    console.log("Overlays disponibles:", savedOverlays.map(o => o.id).join(", "));
+                    console.log("Overlays disponibles IDs:", savedOverlays.map(o => o.id).join(", "));
                     throw new Error(`Overlay non trouvé avec ID: ${id}`);
                 }
 

@@ -6,6 +6,7 @@
 
 (function() {
   console.log("Initializing overlay security script");
+  console.log("Current URL:", window.location.href);
   
   // Exécuter immédiatement - bloquer l'affichage du contenu par défaut
   document.documentElement.style.visibility = 'hidden';
@@ -15,11 +16,15 @@
   
   console.log("Is in iframe:", isInIframe);
   
-  // Vérifier si nous sommes dans l'URL d'overlay principale
+  // Vérifier si nous sommes dans l'URL d'overlay principale ou dans une URL avec le paramètre preview
   const isMainOverlayUrl = window.location.pathname.endsWith('/overlay.html');
+  const isPreview = new URLSearchParams(window.location.search).get('preview') === 'true';
   
-  // Si l'accès est valide (dans un iframe ou que c'est l'overlay principal), afficher le contenu
-  if (isInIframe || isMainOverlayUrl) {
+  console.log("Is main overlay URL:", isMainOverlayUrl);
+  console.log("Is preview:", isPreview);
+  
+  // Si l'accès est valide (dans un iframe ou que c'est l'overlay principal ou une preview), afficher le contenu
+  if (isInIframe || isMainOverlayUrl || isPreview) {
     document.documentElement.style.visibility = 'visible';
     
     // Bloquer les téléchargements directs d'images et autres ressources
@@ -36,7 +41,7 @@
     
     console.log("Overlay security passed - content visible");
   } else {
-    // Accès direct détecté - vérifier si nous sommes dans une preview du studio
+    // Accès direct détecté - vérifier si nous sommes dans une preview du studio ou en local
     const isStudioPreview = window.location.href.includes('preview=true');
     const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     
@@ -56,8 +61,12 @@
       const tokenData = `${tempUserId}-${currentPath}`;
       const token = btoa(tokenData);
       
+      console.log("Generating temporary token for redirection:", tokenData);
+      
       // Rediriger vers la page principale avec ce token
-      window.location.href = `/overlay.html?token=${token}`;
+      const redirectUrl = `/overlay.html?token=${token}`;
+      console.log("Redirecting to:", redirectUrl);
+      window.location.href = redirectUrl;
     }
   }
 })();

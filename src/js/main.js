@@ -1,4 +1,3 @@
-
 // Gestion de la navigation
 document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -16,10 +15,9 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 document.addEventListener('DOMContentLoaded', () => {
   // Vérification de l'authentification
   const checkAuth = () => {
+    // Vérifier si le token existe et n'est pas expiré
     const token = localStorage.getItem('twitch_token');
     const expiresAt = localStorage.getItem('twitch_expires_at');
-    
-    // Vérifier si le token existe et n'est pas expiré
     if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
       // Rediriger vers la page d'authentification
       window.location.href = './src/auth.html';
@@ -33,6 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // L'URL de production sera automatiquement détectée
   const PRODUCTION_URL = window.location.origin;
+  console.log("Détection de l'URL de production:", PRODUCTION_URL);
+  
   const previewContainer = document.querySelector('.preview-background');
   const previewFrame = document.getElementById('overlay-preview');
   const bgColor = document.getElementById('bg-color');
@@ -64,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("Génération de token pour:", overlayPath);
     console.log("Token généré:", token);
     console.log("Données encodées:", tokenData);
+    console.log("Origin utilisé:", PRODUCTION_URL);
     
     return token;
   }
@@ -86,7 +87,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
       
+      // Ajouter le paramètre preview pour le contournement de sécurité
+      newUrl.searchParams.set('preview', 'true');
+      
       previewFrame.src = newUrl.toString();
+      console.log("Overlay iframe source set to:", previewFrame.src);
       
       // Mise à jour de la taille recommandée
       const size = item.dataset.size;
@@ -163,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Copier tous les paramètres pertinents de la preview
     const previewUrl = new URL(previewFrame.src);
     previewUrl.searchParams.forEach((value, key) => {
-      if (key !== 'token') { // Ne pas copier l'ancien token s'il existe
+      if (key !== 'token' && key !== 'preview') { // Ne pas copier l'ancien token ni le paramètre preview
         overlayUrl.searchParams.set(key, value);
       }
     });

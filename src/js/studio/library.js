@@ -1,4 +1,3 @@
-
 /**
  * Module de bibliothèque pour le Studio
  * Gère l'affichage et l'interaction avec les overlays sauvegardés
@@ -134,68 +133,50 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Fonction pour éditer un overlay
     const editOverlay = (overlayId) => {
-      // Charger les données de l'overlay
       const overlay = savedOverlays.find(o => o.id === overlayId);
       if (!overlay) return;
       
-      // Enregistrer l'ID de l'overlay courant
       window.currentOverlayId = overlayId;
       
-      // Passer à la vue éditeur
       const event = new CustomEvent('viewChanged', { detail: { view: 'editor' } });
       document.dispatchEvent(event);
       
-      // Mettre à jour le nom de l'overlay
       const nameInput = document.getElementById('overlay-name');
       if (nameInput && overlay.metadata?.name) {
         nameInput.value = overlay.metadata.name;
       }
       
-      // TODO: Charger les éléments de l'overlay dans l'éditeur
       console.log('Chargement de l\'overlay', overlayId);
     };
     
     // Fonction pour supprimer un overlay
     const deleteOverlay = (overlayId) => {
-      // Supprimer l'overlay de la liste
       savedOverlays = savedOverlays.filter(o => o.id !== overlayId);
-      
-      // Mettre à jour le stockage
       localStorage.setItem('saved_overlays', JSON.stringify(savedOverlays));
-      
-      // Mettre à jour l'affichage
       window.updateLibrary();
-      
-      // Afficher un message
       alert('Overlay supprimé avec succès');
     };
     
     // Fonction pour copier l'URL de l'overlay pour OBS
     const copyOverlayUrl = (overlayId) => {
       try {
-        // Récupérer l'ID utilisateur Twitch
         const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
         const userId = userData?.id || 'anonymous';
         
-        // Créer un jeton simple qui contient l'ID utilisateur et l'ID de l'overlay
         const tokenData = `${userId}-${overlayId}`;
         console.log("Données du token avant encodage:", tokenData);
         
-        // Vérifier que le tokenData contient bien le séparateur
         if (!tokenData.includes('-')) {
           console.error("Erreur: TokenData ne contient pas de séparateur:", tokenData);
           alert("Erreur lors de la génération du token. UserId ou OverlayId manquant.");
           return;
         }
         
-        // Encoder en base64 pour plus de lisibilité
         const token = btoa(tokenData);
         
-        // Générer l'URL avec le token
         const baseUrl = window.location.origin;
         const overlayUrl = `${baseUrl}/overlay.html?token=${token}`;
         
-        // Copier l'URL dans le presse-papiers
         const tempInput = document.createElement('input');
         tempInput.value = overlayUrl;
         document.body.appendChild(tempInput);
@@ -203,13 +184,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.execCommand('copy');
         document.body.removeChild(tempInput);
         
-        // Afficher un message de confirmation
         alert('URL copiée dans le presse-papiers. Vous pouvez maintenant l\'utiliser dans OBS comme source de navigateur.');
         
-        // Afficher l'URL pour le débogage
         console.log("URL de l'overlay copiée:", overlayUrl);
         console.log("Token:", token);
         console.log("Données du token:", tokenData);
+        console.log("Origin utilisé:", baseUrl);
       } catch (error) {
         console.error('Erreur lors de la génération de l\'URL:', error);
         alert('Une erreur est survenue lors de la génération de l\'URL. Veuillez réessayer.');
@@ -238,7 +218,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const filterOverlays = (search, sort) => {
       let filteredOverlays = [...savedOverlays];
       
-      // Filtrer par recherche
       if (search) {
         const searchLower = search.toLowerCase();
         filteredOverlays = filteredOverlays.filter(overlay => {
@@ -248,7 +227,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
       
-      // Tri des résultats
       switch (sort) {
         case 'recent':
           filteredOverlays.sort((a, b) => {
@@ -273,8 +251,6 @@ document.addEventListener('DOMContentLoaded', () => {
           break;
       }
       
-      // TODO: Mettre à jour l'affichage avec les overlays filtrés
-      // Pour l'instant on réinitialise simplement l'affichage
       window.updateLibrary();
     };
     

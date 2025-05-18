@@ -84,20 +84,12 @@
         
         console.log("User ID:", userId);
         console.log("Overlay ID:", overlayId);
+        console.log("URL actuelle:", window.location.href);
+        console.log("Origin:", window.location.origin);
         
-        // Nouveau format: ID d'overlay stocké dans localStorage ou chemin direct
-        let overlayUrl;
-        
-        if (overlayId.includes('/')) {
-          // Ancien format: chemin direct vers l'overlay
-          overlayUrl = new URL(overlayId, window.location.origin);
-          console.log("Format ancien: URL directe -", overlayUrl.toString());
-        } else {
-          // Nouveau format: ID d'overlay stocké dans localStorage
-          overlayUrl = new URL('src/overlay.html', window.location.origin);
-          overlayUrl.searchParams.set('id', overlayId);
-          console.log("Format nouveau: ID d'overlay -", overlayId);
-        }
+        // Toujours utiliser le nouveau format avec ID d'overlay
+        let overlayUrl = new URL('src/overlay.html', window.location.origin);
+        overlayUrl.searchParams.set('id', overlayId);
         
         console.log("URL de l'overlay à charger:", overlayUrl.toString());
         
