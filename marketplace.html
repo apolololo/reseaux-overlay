@@ -286,6 +286,34 @@
       font-size: 0.8em;
       font-weight: 600;
     }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+
+    .empty-state svg {
+      color: var(--primary);
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      color: var(--text-primary);
+      font-size: 1.5em;
+      margin: 0 0 10px 0;
+    }
+
+    .empty-state p {
+      margin: 0;
+      max-width: 400px;
+      line-height: 1.6;
+    }
   </style>
 </head>
 <body>
@@ -324,24 +352,14 @@
         <input type="text" class="search-bar" placeholder="Rechercher un overlay...">
       </div>
 
-      <div class="overlays-grid">
-        <!-- Exemple d'overlay card -->
-        <div class="overlay-card">
-          <div class="overlay-preview">
-            Aperçu
-          </div>
-          <div class="overlay-info">
-            <h3 class="overlay-title">Overlay Gaming</h3>
-            <div class="overlay-author">
-              <img src="" alt="Author" class="author-avatar">
-              <span>Créé par APO</span>
-            </div>
-            <div class="overlay-tags">
-              <span class="overlay-tag">Gaming</span>
-              <span class="overlay-tag">Stream</span>
-            </div>
-          </div>
-        </div>
+      <div class="empty-state">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+          <line x1="12" y1="22.08" x2="12" y2="12"></line>
+        </svg>
+        <h3>Aucun overlay disponible</h3>
+        <p>La marketplace est actuellement vide. Revenez plus tard pour découvrir de nouveaux overlays.</p>
       </div>
     </div>
   </div>
