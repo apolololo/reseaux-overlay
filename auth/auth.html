@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connexion - APO Overlays</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Montserrat', sans-serif;
+      background: #0e0e10;
+      color: #efeff1;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .login-container {
+      text-align: center;
+      padding: 40px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    .login-title {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      color: #9146FF;
+    }
+    .login-subtitle {
+      margin-bottom: 30px;
+      color: #adadb8;
+    }
+    .twitch-button {
+      background: #9146FF;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 1.1em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Montserrat', sans-serif;
+      transition: background-color 0.2s;
+    }
+    .twitch-button:hover {
+      background: #7c3ad1;
+    }
+    .twitch-icon {
+      width: 24px;
+      height: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h1 class="login-title">APO Overlays</h1>
+    <p class="login-subtitle">Connectez-vous avec votre compte Twitch pour accéder à votre dashboard</p>
+    <button class="twitch-button" onclick="loginWithTwitch()">
+      <svg class="twitch-icon" viewBox="0 0 24 24" fill="white">
+        <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/>
+      </svg>
+      Se connecter avec Twitch
+    </button>
+  </div>
+
+  <script>
+    function loginWithTwitch() {
+      const clientId = 'z8q1w4g12yrql6cyb5zzwmhe1pnxyn';
+      const redirectUri = 'https://apo-overlay.netlify.app/auth/callback.html';
+      const scope = 'user:read:email';
+      
+      // Générer un état aléatoire pour la sécurité
+      const state = Math.random().toString(36).substring(7);
+      localStorage.setItem('twitch_auth_state', state);
+      
+      // Construire l'URL d'authentification Twitch
+      const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}`;
+      
+      // Rediriger vers la page d'authentification Twitch
+      window.location.href = authUrl;
+    }
+  </script>
+</body>
+</html> 

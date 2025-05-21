@@ -75,7 +75,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       const userData = JSON.parse(localStorage.getItem('twitch_user'));
       if (!userData) {
-        window.location.href = '/auth/auth.html';
+        window.location.href = './auth/auth.html';
         return;
       }
 
@@ -87,7 +87,7 @@
       localStorage.removeItem('twitch_token');
       localStorage.removeItem('twitch_expires_at');
       localStorage.removeItem('twitch_user');
-      window.location.href = '/auth/auth.html';
+      window.location.href = './auth/auth.html';
     }
   </script>
 </body>
