@@ -9,7 +9,8 @@ export default defineConfig({
         auth: 'auth/auth.html',
         callback: 'auth/callback.html',
         marketplace: 'marketplace.html',
-        myOverlays: 'my-overlays.html'
+        myOverlays: 'my-overlays.html',
+        editor: 'editor.html'
       }
     },
     assetsDir: 'assets',
