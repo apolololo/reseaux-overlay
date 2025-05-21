@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -8,7 +7,7 @@
   <link rel="stylesheet" href="./src/overlay.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
   <div id="loading-screen" class="loading-screen">
@@ -18,14 +17,24 @@
 
   <div id="app" class="dashboard-container" style="display: none;">
     <header class="dashboard-header">
-      <div id="twitch-info" class="user-info"></div>
-      <button id="logout-button" class="logout-button">Déconnexion</button>
+      <div id="twitch-info" class="user-info">
+        <img id="user-avatar" src="" alt="Avatar" class="user-avatar" />
+        <span id="user-name" class="user-name"></span>
+      </div>
+      <button id="logout-button" class="logout-button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M16 17L21 12L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Déconnexion
+      </button>
     </header>
 
     <main class="dashboard-content">
       <div class="welcome-message">
         <h1>Bienvenue sur votre Dashboard</h1>
-        <p>Connecté avec votre compte Twitch</p>
+        <p>Gérez vos overlays et personnalisez votre expérience de streaming</p>
       </div>
     </main>
   </div>
