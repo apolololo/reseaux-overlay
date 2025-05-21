@@ -1,13 +1,15 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: '/',
+  base: 'https://apo-overlay.netlify.app/',
   build: {
     rollupOptions: {
       input: {
         main: 'index.html',
         auth: 'auth/auth.html',
-        callback: 'auth/callback.html'
+        callback: 'auth/callback.html',
+        marketplace: 'marketplace.html',
+        myOverlays: 'my-overlays.html'
       }
     },
     assetsDir: 'assets',
