@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/src/overlay.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="login-container">
@@ -27,9 +27,9 @@
         <div id="loading-text" class="loading-text">Vérification...</div>
       </div>
 
-      <div id="error-container" class="error-container">
-        <p id="error-message" class="error-message"></p>
-        <button id="retry-button" class="login-button" style="margin-top: 1rem;">
+      <div id="error-container" style="display: none; margin-top: 20px; color: #ff5252; background: rgba(255, 82, 82, 0.1); padding: 12px; border-radius: 8px; text-align: left;">
+        <div id="error-message">Une erreur s'est produite</div>
+        <button id="retry-button" style="margin-top: 12px; background: #9146FF; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
           Réessayer
         </button>
       </div>
@@ -64,6 +64,9 @@
       const exchangeCodeForToken = async (code) => {
         try {
           loadingText.textContent = "Échange du code contre un token...";
+          console.log("Échange du code contre un token...", code);
+          console.log("URL de redirection utilisée:", 'https://apo-overlay.netlify.app/auth/callback.html');
+          console.log("Client ID utilisé (dans auth.html):", "z8q1w4g12yrql6cyb5zzwmhe1pnxyn");
           
           // Appel à notre fonction Supabase Edge qui gère l'échange de code
           const response = await fetch('https://uejmtvhqzadtxrqtowtm.supabase.co/functions/v1/twitch-auth', {
@@ -83,13 +86,16 @@
             try {
               const errorJson = await response.json();
               errorText = JSON.stringify(errorJson);
+              console.error("Erreur de la fonction Supabase (JSON):", errorJson);
             } catch (e) {
               errorText = await response.text();
+              console.error("Erreur de la fonction Supabase (texte):", errorText);
             }
             throw new Error('Erreur lors de l\'échange du code: ' + response.status + ' ' + errorText);
           }
           
           const data = await response.json();
+          console.log("Données reçues:", data);
           
           if (data.error) {
             throw new Error(data.error);
@@ -103,16 +109,19 @@
           // Stocker également les infos utilisateur si retournées
           if (data.user) {
             localStorage.setItem('twitch_user', JSON.stringify(data.user));
+            console.log("Informations utilisateur stockées:", data.user);
           }
           
           // Stocker les informations des abonnés si disponibles
           if (data.subscriberCount !== undefined) {
             localStorage.setItem('twitch_subscriber_count', data.subscriberCount.toString());
+            console.log("Nombre d'abonnés stocké:", data.subscriberCount);
           }
           
           // Stocker les points d'abonnement si disponibles
           if (data.subscriberPoints !== undefined) {
             localStorage.setItem('twitch_subscriber_points', data.subscriberPoints.toString());
+            console.log("Points d'abonnement stockés:", data.subscriberPoints);
           }
           
           loadingText.textContent = "Connexion réussie !";
@@ -146,6 +155,7 @@
       
       // Traiter les paramètres d'URL
       const params = getUrlParams();
+      console.log("Paramètres reçus:", params);
       
       // Vérifier si l'état correspond
       const storedState = localStorage.getItem('twitch_auth_state');
@@ -156,14 +166,17 @@
         loadingText.textContent = params.error_description || params.error;
         errorContainer.style.display = 'block';
         errorMessage.textContent = params.error_description || params.error;
+        console.error("Erreur Twitch:", params.error, params.error_description);
       } else if (!params.state || params.state !== storedState) {
         // Vérification de l'état échouée (possible attaque CSRF)
         statusMessage.textContent = "Erreur de sécurité";
         loadingText.textContent = "Vérification d'état échouée";
         errorContainer.style.display = 'block';
         errorMessage.textContent = "Erreur de sécurité (état invalide)";
+        console.error("État invalide:", params.state, "attendu:", storedState);
       } else if (params.code) {
         // Échanger le code contre un token
+        console.log("Code d'autorisation reçu, échange en cours...");
         await exchangeCodeForToken(params.code);
       } else {
         // Aucun code ou erreur dans l'URL
@@ -171,6 +184,7 @@
         loadingText.textContent = "Aucun code d'autorisation reçu";
         errorContainer.style.display = 'block';
         errorMessage.textContent = "Aucun code d'autorisation n'a été reçu";
+        console.error("Aucun code reçu dans l'URL");
       }
       
       // Nettoyer l'état stocké
