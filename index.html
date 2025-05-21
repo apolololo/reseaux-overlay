@@ -3,89 +3,91 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard - APO</title>
-  <link rel="stylesheet" href="./src/overlay.css" />
+  <title>Dashboard - APO Overlays</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Montserrat', sans-serif;
+      background: #0e0e10;
+      color: #efeff1;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      border-bottom: 1px solid #2d2d3a;
+    }
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+    .user-name {
+      font-weight: 700;
+    }
+    .logout-btn {
+      background: #9146FF;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Montserrat', sans-serif;
+    }
+    .dashboard-content {
+      margin-top: 40px;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-  <div id="loading-screen" class="loading-screen">
-    <div class="loading-spinner"></div>
-    <div class="loading-text">Chargement...</div>
-  </div>
-
-  <div id="app" class="dashboard-container" style="display: none;">
-    <header class="dashboard-header">
-      <div id="twitch-info" class="user-info">
-        <img id="user-avatar" src="" alt="Avatar" class="user-avatar" />
+  <div class="container">
+    <div class="header">
+      <h1>Dashboard</h1>
+      <div class="user-info">
+        <img id="user-avatar" class="user-avatar" src="" alt="Avatar">
         <span id="user-name" class="user-name"></span>
+        <button class="logout-btn" onclick="logout()">Déconnexion</button>
       </div>
-      <button id="logout-button" class="logout-button">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M16 17L21 12L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        Déconnexion
-      </button>
-    </header>
-
-    <main class="dashboard-content">
-      <div class="welcome-message">
-        <h1>Bienvenue sur votre Dashboard</h1>
-        <p>Gérez vos overlays et personnalisez votre expérience de streaming</p>
-      </div>
-    </main>
+    </div>
+    <div class="dashboard-content">
+      <h2>Bienvenue sur votre dashboard</h2>
+      <p>Cette interface est en cours de développement.</p>
+    </div>
   </div>
 
   <script>
-    const app = document.getElementById('app');
-    const loadingScreen = document.getElementById('loading-screen');
+    document.addEventListener('DOMContentLoaded', () => {
+      const userData = JSON.parse(localStorage.getItem('twitch_user'));
+      if (!userData) {
+        window.location.href = '/auth/auth.html';
+        return;
+      }
 
-    const checkAuth = () => {
-      const token = localStorage.getItem('twitch_token');
-      const expiresAt = localStorage.getItem('twitch_expires_at');
-      const userData = localStorage.getItem('twitch_user');
-      
-      if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
-        window.location.href = './src/auth.html';
-        return false;
-      }
-      
-      loadingScreen.style.display = 'none';
-      app.style.display = 'flex';
-      
-      if (userData) {
-        try {
-          const user = JSON.parse(userData);
-          const twitchInfo = document.getElementById('twitch-info');
-          if (twitchInfo && user) {
-            twitchInfo.innerHTML = `
-              <div class="user-profile">
-                ${user.profile_image_url ? `<img src="${user.profile_image_url}" alt="${user.display_name}">` : ''}
-                <span class="username">${user.display_name || 'Utilisateur Twitch'}</span>
-              </div>
-            `;
-          }
-        } catch (e) {
-          console.error("Erreur lors de l'affichage des infos utilisateur", e);
-        }
-      }
-      
-      return true;
-    };
-    
-    checkAuth();
-    
-    const logoutButton = document.getElementById('logout-button');
-    if (logoutButton) {
-      logoutButton.addEventListener('click', () => {
-        localStorage.removeItem('twitch_token');
-        localStorage.removeItem('twitch_expires_at');
-        localStorage.removeItem('twitch_user');
-        window.location.href = './src/auth.html';
-      });
+      document.getElementById('user-avatar').src = userData.profile_image_url;
+      document.getElementById('user-name').textContent = userData.display_name;
+    });
+
+    function logout() {
+      localStorage.removeItem('twitch_token');
+      localStorage.removeItem('twitch_expires_at');
+      localStorage.removeItem('twitch_user');
+      window.location.href = '/auth/auth.html';
     }
   </script>
 </body>
