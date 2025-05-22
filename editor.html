@@ -4,11 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Éditeur d'Overlay - APO Overlays</title>
+  
+  <!-- Fonts et CSS externes -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css" rel="stylesheet">
+  
+  <!-- Scripts CodeMirror -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
@@ -16,90 +20,46 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchbrackets.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/xml-fold.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/html-hint.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/css-hint.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/javascript-hint.min.js"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.css" rel="stylesheet">
+  
   <style>
     :root {
-      --primary: #9146FF;
-      --primary-dark: #7c3ad1;
-      --secondary: #00ADB5;
-      --accent: #FF6B6B;
-      --bg-dark: #0e0e10;
-      --bg-card: rgba(255, 255, 255, 0.05);
-      --text-primary: #efeff1;
-      --text-secondary: #adadb8;
-      --border-color: rgba(255, 255, 255, 0.1);
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary: #64748b;
+      --background: #0f172a;
+      --surface: #1e293b;
+      --surface-light: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --error: #ef4444;
+      --success: #22c55e;
+      --border-color: #475569;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
     body {
-      margin: 0;
-      padding: 0;
       font-family: 'Montserrat', sans-serif;
-      background: var(--bg-dark);
+      background: var(--background);
       color: var(--text-primary);
       min-height: 100vh;
-    }
-
-    .auth-background {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      overflow: hidden;
-    }
-
-    .auth-gradient-circle {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(60px);
-      opacity: 0.5;
-    }
-
-    .auth-circle-1 {
-      width: 300px;
-      height: 300px;
-      background: var(--primary);
-      top: -100px;
-      left: -100px;
-      animation: float 8s ease-in-out infinite;
-    }
-
-    .auth-circle-2 {
-      width: 400px;
-      height: 400px;
-      background: var(--secondary);
-      bottom: -150px;
-      right: -150px;
-      animation: float 12s ease-in-out infinite;
-    }
-
-    .auth-circle-3 {
-      width: 200px;
-      height: 200px;
-      background: var(--accent);
-      bottom: 50%;
-      left: 50%;
-      transform: translate(-50%, 50%);
-      animation: float 10s ease-in-out infinite;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-20px); }
+      display: flex;
+      flex-direction: column;
     }
 
     .container {
-      max-width: 1400px;
-      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
       padding: 20px;
-      position: relative;
-      z-index: 1;
+      gap: 20px;
+      max-width: 1920px;
+      margin: 0 auto;
+      width: 100%;
     }
 
     .header {
@@ -107,25 +67,21 @@
       justify-content: space-between;
       align-items: center;
       padding: 20px;
-      background: var(--bg-card);
-      border-radius: 16px;
-      backdrop-filter: blur(10px);
-      border: 1px solid var(--border-color);
-      margin-bottom: 30px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      background: var(--surface);
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
 
     .header-left {
       display: flex;
       align-items: center;
-      gap: 30px;
+      gap: 40px;
     }
 
     .header h1 {
-      margin: 0;
-      color: var(--primary);
-      font-size: 2em;
-      font-weight: 900;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
     }
 
     .main-nav {
@@ -136,97 +92,34 @@
     .nav-link {
       color: var(--text-secondary);
       text-decoration: none;
-      font-weight: 600;
-      padding: 8px 16px;
-      border-radius: 8px;
-      transition: all 0.3s ease;
+      font-weight: 500;
+      transition: color 0.3s ease;
     }
 
     .nav-link:hover {
-      color: var(--primary);
-      background: rgba(145, 70, 255, 0.1);
-    }
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      background: rgba(255, 255, 255, 0.05);
-      padding: 10px 20px;
-      border-radius: 12px;
-      border: 1px solid var(--border-color);
-    }
-
-    .user-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: 2px solid var(--primary);
-    }
-
-    .user-name {
-      font-weight: 700;
       color: var(--text-primary);
-    }
-
-    .logout-btn {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .logout-btn:hover {
-      background: var(--primary-dark);
-      transform: translateY(-2px);
-    }
-
-    .logout-btn:active {
-      transform: translateY(0);
     }
 
     .editor-container {
-      display: grid;
-      grid-template-columns: 250px 1fr 400px;
+      display: flex;
       gap: 20px;
-      height: calc(100vh - 200px);
+      flex: 1;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
 
     .file-explorer {
-      background: var(--bg-card);
-      border-radius: 16px;
-      padding: 20px;
-      backdrop-filter: blur(10px);
-      border: 1px solid var(--border-color);
       display: flex;
       flex-direction: column;
-    }
-
-    .file-explorer-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .file-explorer-title {
-      color: var(--text-primary);
-      font-size: 1.2em;
-      font-weight: 700;
-      margin: 0;
-    }
-
-    .file-list {
-      flex: 1;
-      overflow-y: auto;
+      gap: 10px;
     }
 
     .file-item {
@@ -234,20 +127,16 @@
       align-items: center;
       gap: 10px;
       padding: 10px;
-      border-radius: 8px;
+      border-radius: 6px;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: background 0.3s ease;
       color: var(--text-secondary);
     }
 
-    .file-item:hover {
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-primary);
-    }
-
+    .file-item:hover,
     .file-item.active {
-      background: rgba(145, 70, 255, 0.1);
-      color: var(--primary);
+      background: var(--surface-light);
+      color: var(--text-primary);
     }
 
     .file-icon {
@@ -255,137 +144,30 @@
       height: 20px;
     }
 
-    .file-name {
-      font-size: 0.9em;
-    }
-
-    .code-editor {
-      background: #1e1e1e;
-      border-radius: 16px;
-      overflow: hidden;
+    .main-content {
+      flex: 1;
       display: flex;
       flex-direction: column;
+      gap: 20px;
     }
 
-    .editor-header {
-      display: flex;
-      align-items: center;
-      padding: 10px 20px;
-      background: #252526;
-      border-bottom: 1px solid #3c3c3c;
-    }
-
-    .editor-tabs {
-      display: flex;
-      gap: 2px;
-    }
-
-    .editor-tab {
-      padding: 8px 16px;
-      cursor: pointer;
-      font-size: 0.9em;
-      color: #969696;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: #2d2d2d;
-      border-right: 1px solid #3c3c3c;
-    }
-
-    .editor-tab:hover {
-      color: #fff;
-    }
-
-    .editor-tab.active {
-      background: #1e1e1e;
-      color: #fff;
-      border-bottom: 2px solid var(--primary);
-    }
-
-    .editor-tab svg {
-      width: 16px;
-      height: 16px;
+    .editor-wrapper {
+      flex: 1;
+      background: var(--surface);
+      border-radius: 12px;
+      overflow: hidden;
     }
 
     .CodeMirror {
       height: 100% !important;
       font-family: 'Fira Code', monospace;
       font-size: 14px;
-      line-height: 1.6;
     }
 
-    .CodeMirror-gutters {
-      background: #1e1e1e !important;
-      border-right: 1px solid #3c3c3c !important;
-    }
-
-    .CodeMirror-linenumber {
-      color: #858585 !important;
-    }
-
-    .CodeMirror-cursor {
-      border-left: 2px solid #fff !important;
-    }
-
-    .CodeMirror-selected {
-      background: rgba(145, 70, 255, 0.2) !important;
-    }
-
-    .CodeMirror-matchingbracket {
-      color: #fff !important;
-      font-weight: bold;
-    }
-
-    .cm-s-dracula .CodeMirror-gutters {
-      background: #1e1e1e !important;
-    }
-
-    .cm-s-dracula .CodeMirror-linenumber {
-      color: #858585 !important;
-    }
-
-    .cm-s-dracula .CodeMirror-cursor {
-      border-left: 2px solid #fff !important;
-    }
-
-    .cm-s-dracula .CodeMirror-selected {
-      background: rgba(145, 70, 255, 0.2) !important;
-    }
-
-    .cm-s-dracula .CodeMirror-matchingbracket {
-      color: #fff !important;
-      font-weight: bold;
-    }
-
-    .preview-panel {
-      background: var(--bg-card);
-      border-radius: 16px;
-      padding: 20px;
-      backdrop-filter: blur(10px);
-      border: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-    }
-
-    .preview-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .preview-title {
-      color: var(--text-primary);
-      font-size: 1.2em;
-      font-weight: 700;
-      margin: 0;
-    }
-
-    .preview-content {
-      flex: 1;
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 8px;
+    .preview-container {
+      height: 400px;
+      background: var(--surface);
+      border-radius: 12px;
       overflow: hidden;
     }
 
@@ -393,29 +175,26 @@
       width: 100%;
       height: 100%;
       border: none;
+      background: white;
     }
 
-    .action-buttons {
+    .actions {
       display: flex;
       gap: 10px;
-      margin-top: 20px;
     }
 
     .action-btn {
-      background: var(--primary);
-      color: white;
-      border: none;
       padding: 12px 24px;
       border-radius: 8px;
-      cursor: pointer;
-      font-family: 'Montserrat', sans-serif;
+      border: none;
+      background: var(--primary);
+      color: white;
       font-weight: 600;
+      cursor: pointer;
       transition: all 0.3s ease;
       display: flex;
       align-items: center;
       gap: 8px;
-      flex: 1;
-      justify-content: center;
     }
 
     .action-btn:hover {
@@ -428,25 +207,45 @@
     }
 
     .action-btn.secondary {
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-primary);
+      background: transparent;
       border: 1px solid var(--border-color);
+      color: var(--text-primary);
     }
 
     .action-btn.secondary:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--surface-light);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 12px 24px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+    }
+
+    .toast.success {
+      background: var(--success);
+    }
+
+    .toast.error {
+      background: var(--error);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
     }
   </style>
 </head>
 <body>
-  <div class="auth-background">
-    <div class="auth-gradient-circle auth-circle-1"></div>
-    <div class="auth-gradient-circle auth-circle-2"></div>
-    <div class="auth-gradient-circle auth-circle-3"></div>
-  </div>
-
   <div class="container">
-    <div class="header">
+    <header class="header">
       <div class="header-left">
         <h1>Éditeur d'Overlay</h1>
         <nav class="main-nav">
@@ -455,145 +254,69 @@
           <a href="my-overlays.html" class="nav-link">Mes Overlays</a>
         </nav>
       </div>
-      <div class="user-info">
-        <img id="user-avatar" class="user-avatar" src="" alt="Avatar">
-        <span id="user-name" class="user-name"></span>
-        <button class="logout-btn" onclick="logout()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-            <polyline points="16 17 21 12 16 7"></polyline>
-            <line x1="21" y1="12" x2="9" y2="12"></line>
+      <div class="actions">
+        <button class="action-btn secondary" onclick="saveOverlay()">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
           </svg>
-          Déconnexion
+          Enregistrer
+        </button>
+        <button class="action-btn" onclick="publishOverlay()">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+          </svg>
+          Publier
         </button>
       </div>
-    </div>
+    </header>
 
     <div class="editor-container">
-      <div class="file-explorer">
-        <div class="file-explorer-header">
-          <h2 class="file-explorer-title">Fichiers</h2>
-        </div>
-        <div class="file-list">
-          <div class="file-item active" data-file="html">
-            <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-              <polyline points="10 9 9 9 8 9"></polyline>
+      <aside class="sidebar">
+        <div class="file-explorer">
+          <div class="file-item" onclick="switchFile('html')" data-file="html">
+            <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
-            <span class="file-name">index.html</span>
+            index.html
           </div>
-          <div class="file-item" data-file="css">
-            <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-              <polyline points="10 9 9 9 8 9"></polyline>
+          <div class="file-item" onclick="switchFile('css')" data-file="css">
+            <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
             </svg>
-            <span class="file-name">style.css</span>
+            style.css
           </div>
-          <div class="file-item" data-file="js">
-            <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-              <polyline points="10 9 9 9 8 9"></polyline>
+          <div class="file-item" onclick="switchFile('js')" data-file="js">
+            <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
             </svg>
-            <span class="file-name">script.js</span>
+            script.js
           </div>
         </div>
-      </div>
+      </aside>
 
-      <div class="code-editor">
-        <div class="editor-header">
-          <div class="editor-tabs">
-            <div class="editor-tab active" data-file="html">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10 9 9 9 8 9"></polyline>
-              </svg>
-              index.html
-            </div>
-            <div class="editor-tab" data-file="css">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10 9 9 9 8 9"></polyline>
-              </svg>
-              style.css
-            </div>
-            <div class="editor-tab" data-file="js">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10 9 9 9 8 9"></polyline>
-              </svg>
-              script.js
-            </div>
-          </div>
+      <main class="main-content">
+        <div class="editor-wrapper" id="editor"></div>
+        <div class="preview-container">
+          <iframe id="preview" class="preview-iframe" sandbox="allow-scripts"></iframe>
         </div>
-        <textarea id="editor"></textarea>
-      </div>
-
-      <div class="preview-panel">
-        <div class="preview-header">
-          <h2 class="preview-title">Aperçu</h2>
-        </div>
-        <div class="preview-content">
-          <iframe id="preview" class="preview-iframe"></iframe>
-        </div>
-        <div class="action-buttons">
-          <button class="action-btn secondary" onclick="saveOverlay()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-              <polyline points="17 21 17 13 7 13 7 21"></polyline>
-              <polyline points="7 3 7 8 15 8"></polyline>
-            </svg>
-            Enregistrer
-          </button>
-          <button class="action-btn" onclick="publishOverlay()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 20V10"></path>
-              <path d="M18 20V4"></path>
-              <path d="M6 20v-4"></path>
-            </svg>
-            Publier
-          </button>
-        </div>
-      </div>
+      </main>
     </div>
   </div>
 
+  <div id="toast" class="toast"></div>
+
   <script>
-    // Initialisation de CodeMirror avec des options améliorées
-    const editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
+    // Configuration de l'éditeur CodeMirror
+    const editor = CodeMirror(document.getElementById('editor'), {
       mode: 'htmlmixed',
       theme: 'dracula',
       lineNumbers: true,
-      autoCloseTags: true,
       autoCloseBrackets: true,
       matchBrackets: true,
       indentUnit: 2,
       tabSize: 2,
       lineWrapping: true,
-      foldGutter: true,
-      gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
       extraKeys: {
-        'Ctrl-Space': 'autocomplete',
-        'Ctrl-/': 'toggleComment',
-        'Ctrl-F': 'findPersistent',
-        'Ctrl-H': 'replace',
         'Ctrl-S': function(cm) {
           saveOverlay();
         }
@@ -622,7 +345,7 @@
 </html>`,
       css: `/* Styles de votre overlay */
 .overlay {
-  font-family: Arial, sans-serif;
+  font-family: 'Montserrat', sans-serif;
   color: white;
   padding: 20px;
 }
@@ -641,124 +364,102 @@ h1 {
 document.addEventListener('DOMContentLoaded', () => {
   // Votre code ici
   console.log('Overlay chargé !');
-});`
+});
+`
     };
 
-    // Gestion des fichiers
     let currentFile = 'html';
-    editor.setValue(defaultFiles[currentFile]);
+    let files = JSON.parse(localStorage.getItem('current_overlay')) || defaultFiles;
 
-    // Gestion des onglets et de l'explorateur de fichiers
+    // Initialisation de l'éditeur
+    editor.setValue(files[currentFile]);
+    updateFileHighlight();
+    updatePreview();
+
+    // Gestion des fichiers
     function switchFile(fileType) {
-      document.querySelector('.file-item.active').classList.remove('active');
-      document.querySelector(`.file-item[data-file="${fileType}"]`).classList.add('active');
-      
-      document.querySelector('.editor-tab.active').classList.remove('active');
-      document.querySelector(`.editor-tab[data-file="${fileType}"]`).classList.add('active');
-      
       currentFile = fileType;
-      editor.setValue(defaultFiles[fileType]);
+      files[currentFile] = editor.getValue();
       
-      switch(fileType) {
-        case 'html':
-          editor.setOption('mode', 'htmlmixed');
-          break;
-        case 'css':
-          editor.setOption('mode', 'css');
-          break;
-        case 'js':
-          editor.setOption('mode', 'javascript');
-          break;
-      }
+      editor.setOption('mode', {
+        'html': 'htmlmixed',
+        'css': 'css',
+        'js': 'javascript'
+      }[fileType]);
       
-      updatePreview();
+      editor.setValue(files[fileType]);
+      updateFileHighlight();
     }
 
-    // Événements pour les onglets
-    document.querySelectorAll('.editor-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        switchFile(tab.dataset.file);
+    function updateFileHighlight() {
+      document.querySelectorAll('.file-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.file === currentFile);
       });
-    });
+    }
 
-    // Événements pour l'explorateur de fichiers
-    document.querySelectorAll('.file-item').forEach(item => {
-      item.addEventListener('click', () => {
-        switchFile(item.dataset.file);
-      });
-    });
-
-    // Mise à jour de l'aperçu
+    // Mise à jour de la prévisualisation
     function updatePreview() {
       const preview = document.getElementById('preview');
-      const content = editor.getValue();
-      
-      if (currentFile === 'html') {
-        preview.srcdoc = content;
-      } else {
-        // Pour CSS et JS, on met à jour le contenu dans l'iframe
-        const iframe = preview.contentWindow;
-        if (currentFile === 'css') {
-          const style = iframe.document.createElement('style');
-          style.textContent = content;
-          iframe.document.head.appendChild(style);
-        } else if (currentFile === 'js') {
-          const script = iframe.document.createElement('script');
-          script.textContent = content;
-          iframe.document.body.appendChild(script);
-        }
-      }
-    }
+      const htmlContent = files.html;
+      const cssContent = files.css;
+      const jsContent = files.js;
 
-    // Écoute des changements dans l'éditeur
-    editor.on('change', () => {
-      updatePreview();
-    });
+      // Réinitialisation de l'iframe
+      preview.srcdoc = htmlContent;
+
+      preview.addEventListener('load', function() {
+        const doc = preview.contentDocument;
+
+        // Injection du CSS
+        const style = doc.createElement('style');
+        style.textContent = cssContent;
+        doc.head.appendChild(style);
+
+        // Injection du JavaScript
+        const script = doc.createElement('script');
+        script.textContent = jsContent;
+        doc.body.appendChild(script);
+      });
+    }
 
     // Sauvegarde de l'overlay
     function saveOverlay() {
-      const overlayData = {
-        html: defaultFiles.html,
-        css: defaultFiles.css,
-        js: defaultFiles.js
-      };
-      
-      // Sauvegarde dans le localStorage pour le moment
-      localStorage.setItem('current_overlay', JSON.stringify(overlayData));
-      
-      // TODO: Implémenter la sauvegarde sur le serveur
-      alert('Overlay enregistré !');
+      files[currentFile] = editor.getValue();
+      localStorage.setItem('current_overlay', JSON.stringify(files));
+      showToast('Overlay enregistré avec succès !', 'success');
     }
 
     // Publication de l'overlay
     function publishOverlay() {
-      // TODO: Implémenter la publication sur le marketplace
-      alert('Fonctionnalité de publication à venir !');
+      files[currentFile] = editor.getValue();
+      // TODO: Implémenter la logique de publication
+      showToast('Publication en cours de développement', 'error');
     }
 
-    // Vérification de l'authentification
+    // Système de notifications
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast ${type} show`;
+
+      setTimeout(() => {
+        toast.className = 'toast';
+      }, 3000);
+    }
+
+    // Écoute des changements dans l'éditeur
+    editor.on('change', () => {
+      files[currentFile] = editor.getValue();
+      updatePreview();
+    });
+
+    // Vérification de l'authentification au chargement
     document.addEventListener('DOMContentLoaded', () => {
       const userData = JSON.parse(localStorage.getItem('twitch_user'));
       if (!userData) {
-        window.location.href = './auth/auth.html';
-        return;
-      }
-
-      const userAvatar = document.getElementById('user-avatar');
-      const userName = document.getElementById('user-name');
-      
-      if (userAvatar && userName) {
-        userAvatar.src = userData.profile_image_url;
-        userName.textContent = userData.display_name;
+        window.location.href = 'login.html';
       }
     });
-
-    function logout() {
-      localStorage.removeItem('twitch_token');
-      localStorage.removeItem('twitch_expires_at');
-      localStorage.removeItem('twitch_user');
-      window.location.href = './auth/auth.html';
-    }
   </script>
 </body>
-</html> 
+</html>
