@@ -614,32 +614,24 @@
 
   <main class="main-content">
     <div class="file-explorer">
-      <div class="file-explorer-header">
-        <h2>Fichiers</h2>
-      </div>
-      <div class="file-list">
-        <div class="file-item" data-file="/src/overlays/ads/index.html">
-          <i class="mdi mdi-advertisement"></i>
-          Publicité - Code Créateur
+        <div class="file-explorer-header">
+          <h2>Fichiers</h2>
         </div>
-        <div class="file-item" data-file="/src/overlays/brb/index.html">
-          <i class="mdi mdi-clock-outline"></i>
-          BRB
-        </div>
-        <div class="file-item" data-file="/src/overlays/starting/index.html">
-          <i class="mdi mdi-play-circle-outline"></i>
-          Starting
-        </div>
-        <div class="file-item" data-file="/src/overlays/end/index.html">
-          <i class="mdi mdi-stop-circle-outline"></i>
-          End
-        </div>
-        <div class="file-item" data-file="/src/overlays/game-status/index.html">
-          <i class="mdi mdi-gamepad-variant"></i>
-          Game Status
+        <div class="file-list">
+          <div class="file-item active" data-tab="html">
+            <i class="mdi mdi-language-html5"></i>
+            index.html
+          </div>
+          <div class="file-item" data-tab="css">
+            <i class="mdi mdi-language-css3"></i>
+            style.css
+          </div>
+          <div class="file-item" data-tab="js">
+            <i class="mdi mdi-language-javascript"></i>
+            script.js
+          </div>
         </div>
       </div>
-    </div>
 
     <section class="editor-section">
       <div class="editor-tabs">
@@ -858,25 +850,13 @@
         document.getElementById('dialogOverlay').addEventListener('click', () => this.closeScriptDialog());
       }
 
-      async showFileContent(filePath) {
-        try {
-          const response = await fetch(filePath);
-          const content = await response.text();
-          
-          const scriptContent = document.getElementById('scriptContent');
-          scriptContent.textContent = content;
-          
-          // Mettre à jour la coloration syntaxique si Prism est disponible
-          if (window.Prism) {
-            Prism.highlightElement(scriptContent);
-          }
-          
-          document.getElementById('dialogOverlay').classList.add('show');
-          document.getElementById('scriptDialog').classList.add('show');
-        } catch (error) {
-          console.error('Erreur lors du chargement du fichier:', error);
-          this.showToast('Erreur lors du chargement du fichier');
-        }
+      editor_onChange(cm) {
+        // Sauvegarder les modifications dans l'objet files
+        this.files[this.currentTab] = cm.getValue();
+        
+        // Mettre à jour l'aperçu immédiatement
+        this.updatePreview();
+      }
       }
 
       closeScriptDialog() {
@@ -931,6 +911,7 @@
             "Ctrl-Space": "autocomplete",
             "Ctrl-/": "toggleComment",
             "Ctrl-F": "findPersistent",
+            "Ctrl-S": () => this.saveOverlay(),
             "Tab": function(cm) {
               if (cm.somethingSelected()) {
                 cm.indentSelection("add");
@@ -943,6 +924,9 @@
           foldGutter: true,
           gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
         });
+
+        // Ajouter l'écouteur d'événements pour les modifications
+        this.editor.on('change', (cm) => this.editor_onChange(cm));
         
         // Définir les thèmes disponibles
         this.themes = ['dracula', 'monokai', 'vscode-dark'];
