@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
+    "apo-overlays": "file:",
     "codemirror": "^5.65.2"
   },
   "devDependencies": {
