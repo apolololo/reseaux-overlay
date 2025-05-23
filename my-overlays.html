@@ -6,7 +6,8 @@
   <title>Mes Overlays - APO Overlays</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
   <style>
     :root {
       --primary: #9146FF;
@@ -18,13 +19,21 @@
       --text-primary: #efeff1;
       --text-secondary: #adadb8;
       --border-color: rgba(255, 255, 255, 0.1);
+      --background: #0e0e10;
+      --surface: #18181b;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
     body {
       margin: 0;
       padding: 0;
       font-family: 'Montserrat', sans-serif;
-      background: var(--bg-dark);
+      background: var(--background);
       color: var(--text-primary);
       min-height: 100vh;
     }
@@ -226,16 +235,15 @@
 
     .overlays-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 20px;
     }
 
     .overlay-card {
-      background: rgba(255, 255, 255, 0.03);
+      background: var(--surface);
       border-radius: 12px;
       overflow: hidden;
-      border: 1px solid var(--border-color);
-      transition: all 0.3s ease;
+      transition: all 0.2s;
     }
 
     .overlay-card:hover {
@@ -245,12 +253,17 @@
 
     .overlay-preview {
       width: 100%;
-      height: 160px;
-      background: rgba(0, 0, 0, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-secondary);
+      height: 169px; /* 16:9 ratio */
+      background: rgba(255, 255, 255, 0.05);
+      position: relative;
+    }
+
+    .overlay-preview iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      transform: scale(0.5);
+      transform-origin: top left;
     }
 
     .overlay-info {
@@ -258,96 +271,65 @@
     }
 
     .overlay-title {
-      color: var(--text-primary);
-      font-size: 1.2em;
-      font-weight: 700;
-      margin: 0 0 10px 0;
-    }
-
-    .overlay-status {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 15px;
-    }
-
-    .status-badge {
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.8em;
+      font-size: 18px;
       font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-primary);
     }
 
-    .status-private {
-      background: rgba(255, 107, 107, 0.1);
-      color: var(--accent);
-    }
-
-    .status-public {
-      background: rgba(0, 173, 181, 0.1);
-      color: var(--secondary);
+    .overlay-date {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
     }
 
     .overlay-actions {
       display: flex;
-      gap: 10px;
-      margin-top: 15px;
+      gap: 8px;
     }
 
-    .overlay-action-btn {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-color);
-      color: var(--text-primary);
-      padding: 8px 16px;
+    .action-button {
+      flex: 1;
+      padding: 8px;
+      border: none;
       border-radius: 6px;
       cursor: pointer;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 0.9em;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      flex: 1;
+      font-weight: 500;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
     }
 
-    .overlay-action-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .overlay-action-btn.primary {
+    .edit-button {
       background: var(--primary);
       color: white;
-      border: none;
     }
 
-    .overlay-action-btn.primary:hover {
-      background: var(--primary-dark);
+    .delete-button {
+      background: rgba(255, 82, 82, 0.1);
+      color: #ff5252;
+    }
+
+    .action-button:hover {
+      opacity: 0.9;
     }
 
     .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 60px 20px;
       text-align: center;
+      padding: 60px 20px;
       color: var(--text-secondary);
     }
 
-    .empty-state svg {
-      color: var(--primary);
-      margin-bottom: 20px;
-      opacity: 0.5;
-    }
-
-    .empty-state h3 {
+    .empty-state h2 {
+      font-size: 24px;
+      margin-bottom: 16px;
       color: var(--text-primary);
-      font-size: 1.5em;
-      margin: 0 0 10px 0;
     }
 
     .empty-state p {
-      margin: 0;
-      max-width: 400px;
-      line-height: 1.6;
+      margin-bottom: 24px;
     }
   </style>
 </head>
@@ -385,22 +367,13 @@
       <div class="my-overlays-header">
         <h2 class="my-overlays-title">Mes Overlays</h2>
         <a href="editor.html" class="create-overlay-btn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          Créer un Overlay
+          <i class="mdi mdi-plus"></i>
+          Nouvel Overlay
         </a>
       </div>
 
-      <div class="empty-state">
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-          <path d="M2 17l10 5 10-5"></path>
-          <path d="M2 12l10 5 10-5"></path>
-        </svg>
-        <h3>Vous n'avez pas encore d'overlay</h3>
-        <p>Créez votre premier overlay en cliquant sur le bouton "Créer un Overlay" ci-dessus.</p>
+      <div id="overlays-grid" class="overlays-grid">
+        <!-- Les overlays seront injectés ici dynamiquement -->
       </div>
     </div>
   </div>
@@ -423,6 +396,111 @@
       localStorage.removeItem('twitch_user');
       window.location.href = './auth/auth.html';
     }
+
+    class OverlayLibrary {
+      constructor() {
+        this.grid = document.getElementById('overlays-grid');
+        this.overlays = [];
+        this.init();
+      }
+
+      init() {
+        this.loadOverlays();
+        this.renderOverlays();
+      }
+
+      loadOverlays() {
+        this.overlays = JSON.parse(localStorage.getItem('my_overlays') || '[]');
+      }
+
+      renderOverlays() {
+        if (this.overlays.length === 0) {
+          this.showEmptyState();
+          return;
+        }
+
+        this.grid.innerHTML = '';
+        this.overlays.forEach(overlay => {
+          const card = this.createOverlayCard(overlay);
+          this.grid.appendChild(card);
+        });
+      }
+
+      createOverlayCard(overlay) {
+        const card = document.createElement('div');
+        card.className = 'overlay-card';
+        
+        const date = new Date(overlay.createdAt).toLocaleDateString('fr-FR', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+
+        card.innerHTML = `
+          <div class="overlay-preview">
+            <iframe srcdoc="
+              <!DOCTYPE html>
+              <html>
+                <head>
+                  <style>${overlay.files.css}</style>
+                </head>
+                <body>
+                  ${overlay.files.html}
+                </body>
+              </html>
+            "></iframe>
+          </div>
+          <div class="overlay-info">
+            <h3 class="overlay-title">${overlay.name}</h3>
+            <div class="overlay-date">Créé le ${date}</div>
+            <div class="overlay-actions">
+              <button class="action-button edit-button" onclick="library.editOverlay('${overlay.name}')">
+                <i class="mdi mdi-pencil"></i>
+                Modifier
+              </button>
+              <button class="action-button delete-button" onclick="library.deleteOverlay('${overlay.name}')">
+                <i class="mdi mdi-delete"></i>
+                Supprimer
+              </button>
+            </div>
+          </div>
+        `;
+
+        return card;
+      }
+
+      showEmptyState() {
+        this.grid.innerHTML = `
+          <div class="empty-state">
+            <h2>Aucun overlay</h2>
+            <p>Commencez par créer votre premier overlay !</p>
+            <a href="editor.html" class="create-overlay-btn">
+              <i class="mdi mdi-plus"></i>
+              Créer un overlay
+            </a>
+          </div>
+        `;
+      }
+
+      editOverlay(name) {
+        const overlay = this.overlays.find(o => o.name === name);
+        if (overlay) {
+          localStorage.setItem('current_overlay', JSON.stringify(overlay));
+          window.location.href = 'editor.html';
+        }
+      }
+
+      deleteOverlay(name) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer cet overlay ?')) {
+          this.overlays = this.overlays.filter(o => o.name !== name);
+          localStorage.setItem('my_overlays', JSON.stringify(this.overlays));
+          this.renderOverlays();
+        }
+      }
+    }
+
+    // Initialiser la bibliothèque
+    const library = new OverlayLibrary();
   </script>
 </body>
 </html> 
