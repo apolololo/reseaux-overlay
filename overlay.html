@@ -159,27 +159,24 @@
 
             init() {
                 const params = new URLSearchParams(window.location.search);
-                const overlayId = params.get('id');
+                const encodedData = params.get('data');
 
-                if (!overlayId) {
-                    this.showError("Aucun ID d'overlay spécifié");
+                if (!encodedData) {
+                    this.showError("Aucune donnée d'overlay spécifiée");
                     return;
                 }
 
-                this.loadOverlay(overlayId);
+                try {
+                    const overlayData = JSON.parse(atob(encodedData));
+                    this.loadOverlay(overlayData);
+                } catch (error) {
+                    console.error('Erreur lors du décodage des données:', error);
+                    this.showError("Erreur lors du chargement de l'overlay");
+                }
             }
 
-            loadOverlay(overlayId) {
+            loadOverlay(overlay) {
                 try {
-                    const overlayData = localStorage.getItem(`overlay_${overlayId}`);
-                    
-                    if (!overlayData) {
-                        this.showError("Overlay non trouvé");
-                        return;
-                    }
-
-                    const overlay = JSON.parse(overlayData);
-                    
                     // Injecter le CSS
                     const style = document.createElement('style');
                     style.textContent = overlay.files.css;
