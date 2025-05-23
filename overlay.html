@@ -159,20 +159,26 @@
 
             init() {
                 const params = new URLSearchParams(window.location.search);
-                const encodedData = params.get('data');
+                const overlayId = params.get('id');
 
-                if (!encodedData) {
-                    this.showError("Aucune donnée d'overlay spécifiée");
+                if (!overlayId) {
+                    this.showError("Aucun ID d'overlay spécifié");
                     return;
                 }
 
-                this.loadOverlay(encodedData);
+                this.loadOverlay(overlayId);
             }
 
-            loadOverlay(encodedData) {
+            loadOverlay(overlayId) {
                 try {
-                    // Décoder les données de l'overlay
-                    const overlay = JSON.parse(atob(encodedData));
+                    const overlayData = localStorage.getItem(`overlay_${overlayId}`);
+                    
+                    if (!overlayData) {
+                        this.showError("Overlay non trouvé");
+                        return;
+                    }
+
+                    const overlay = JSON.parse(overlayData);
                     
                     // Injecter le CSS
                     const style = document.createElement('style');
