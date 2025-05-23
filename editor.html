@@ -4,12 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Éditeur d'Overlay - APO Overlays</title>
-  
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css" rel="stylesheet">
-  
   <style>
     :root {
       --primary: #9146FF;
@@ -19,13 +17,7 @@
       --text: #efeff1;
       --text-secondary: #adadb8;
     }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Montserrat', sans-serif;
       background: var(--background);
@@ -34,26 +26,9 @@
       display: flex;
       flex-direction: column;
     }
-
-    .header {
-      background: var(--surface);
-      padding: 16px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .header h1 {
-      font-size: 24px;
-      font-weight: 600;
-    }
-
-    .header-actions {
-      display: flex;
-      gap: 12px;
-    }
-
+    .header { background: var(--surface); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+    .header h1 { font-size: 24px; font-weight: 600; }
+    .header-actions { display: flex; gap: 12px; }
     .button {
       background: var(--primary);
       color: white;
@@ -67,15 +42,8 @@
       align-items: center;
       gap: 8px;
     }
-
-    .button:hover {
-      opacity: 0.9;
-    }
-
-    .button.secondary {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
+    .button:hover { opacity: 0.9; }
+    .button.secondary { background: rgba(255, 255, 255, 0.1); }
     .main-content {
       flex: 1;
       display: grid;
@@ -84,211 +52,48 @@
       padding: 24px;
       height: calc(100vh - 73px);
     }
-
-    .file-explorer {
+    .file-explorer, .editor-section, .preview-section {
       background: var(--surface);
       border-radius: 12px;
       padding: 20px;
     }
-
-    .file-explorer-header {
-      margin-bottom: 20px;
-    }
-
-    .file-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .file-item {
-      padding: 8px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      color: var(--text-secondary);
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .file-item:hover {
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    .file-item.active {
-      background: var(--primary);
-      color: white;
-    }
-
-    .editor-section {
-      display: flex;
-      flex-direction: column;
-      background: var(--surface);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    .editor-tabs {
-      display: flex;
-      background: rgba(255, 255, 255, 0.05);
-      padding: 8px;
-      gap: 8px;
-    }
-
-    .editor-tab {
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-      color: var(--text-secondary);
-      transition: all 0.2s;
-    }
-
-    .editor-tab.active {
-      background: var(--primary);
-      color: white;
-    }
-
-    .editor-tab:hover:not(.active) {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .CodeMirror {
-      flex: 1;
-      height: 100% !important;
-      font-family: 'Fira Code', monospace;
-      font-size: 14px;
-    }
-
-    .preview-section {
-      background: var(--surface);
-      border-radius: 12px;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .preview-container {
-      flex: 1;
-      position: relative;
-      overflow: hidden;
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 8px;
-    }
-
-    .preview-frame {
-      width: 1920px;
-      height: 1080px;
-      transform: scale(0.5);
-      transform-origin: top left;
-      border: none;
-      background: transparent;
-    }
-
-    .overlay-name {
-      background: transparent;
-      border: none;
-      color: var(--text);
-      font-size: 24px;
-      font-weight: 600;
-      font-family: 'Montserrat', sans-serif;
-      width: 300px;
-      padding: 4px 8px;
-      border-radius: 4px;
-    }
-
-    .overlay-name:focus {
-      outline: none;
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .overlay-url {
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-secondary);
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .overlay-url:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--surface);
-      color: var(--text);
-      padding: 12px 24px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transform: translateY(100px);
-      opacity: 0;
-      transition: all 0.3s;
-    }
-
-    .toast.show {
-      transform: translateY(0);
-      opacity: 1;
-    }
+    .preview-container { flex: 1; overflow: hidden; background: rgba(0, 0, 0, 0.2); border-radius: 8px; }
+    .preview-frame { width: 100%; height: 360px; border: none; background: transparent; }
+    .editor-tab.active, .file-item.active { background: var(--primary); color: white; }
+    .CodeMirror { height: 100% !important; font-family: 'Fira Code', monospace; font-size: 14px; }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); color: var(--text); padding: 12px 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); transform: translateY(100px); opacity: 0; transition: all 0.3s; }
+    .toast.show { transform: translateY(0); opacity: 1; }
   </style>
 </head>
 <body>
   <header class="header">
     <input type="text" class="overlay-name" placeholder="Nom de l'overlay" id="overlayName">
     <div class="header-actions">
-      <div class="overlay-url" id="overlayUrl">
-        <i class="mdi mdi-link"></i>
-        <span>URL de l'overlay</span>
-      </div>
+      <button class="button secondary" id="exportBtn">
+        <i class="mdi mdi-download"></i> Exporter pour OBS
+      </button>
       <button class="button" id="saveBtn">
-        <i class="mdi mdi-content-save"></i>
-        Enregistrer
+        <i class="mdi mdi-content-save"></i> Enregistrer
       </button>
     </div>
   </header>
-
   <main class="main-content">
     <div class="file-explorer">
-      <div class="file-explorer-header">
-        <h2>Fichiers</h2>
-      </div>
+      <h2>Fichiers</h2>
       <div class="file-list">
-        <div class="file-item active" data-file="html">
-          <i class="mdi mdi-language-html5"></i>
-          index.html
-        </div>
-        <div class="file-item" data-file="css">
-          <i class="mdi mdi-language-css3"></i>
-          style.css
-        </div>
-        <div class="file-item" data-file="js">
-          <i class="mdi mdi-language-javascript"></i>
-          script.js
-        </div>
+        <div class="file-item active" data-file="html"><i class="mdi mdi-language-html5"></i> index.html</div>
+        <div class="file-item" data-file="css"><i class="mdi mdi-language-css3"></i> style.css</div>
+        <div class="file-item" data-file="js"><i class="mdi mdi-language-javascript"></i> script.js</div>
       </div>
     </div>
-
     <section class="editor-section">
       <div class="editor-tabs">
         <div class="editor-tab active" data-tab="html">HTML</div>
         <div class="editor-tab" data-tab="css">CSS</div>
         <div class="editor-tab" data-tab="js">JavaScript</div>
       </div>
-      <div id="editor"></div>
+      <div id="editor" style="flex: 1; height: 100%"></div>
     </section>
-
     <section class="preview-section">
       <h2>Aperçu</h2>
       <div class="preview-container">
@@ -296,245 +101,69 @@
       </div>
     </section>
   </main>
-
-  <div class="toast" id="toast">
-    <i class="mdi mdi-check-circle"></i>
-    <span>Overlay enregistré avec succès !</span>
-  </div>
-
+  <div class="toast" id="toast"><i class="mdi mdi-check-circle"></i><span>Overlay enregistré avec succès !</span></div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
-
   <script>
-    class OverlayEditor {
-      constructor() {
-        this.editor = null;
-        this.currentTab = 'html';
-        this.overlayName = '';
-        this.overlayId = '';
-        this.files = {
-          html: '',
-          css: '',
-          js: ''
-        };
-        this.init();
-      }
+    const editor = CodeMirror(document.getElementById('editor'), {
+      mode: 'htmlmixed',
+      theme: 'monokai',
+      lineNumbers: true
+    });
+    let files = { html: '', css: '', js: '' }, currentTab = 'html';
 
-      init() {
-        this.setupEditor();
-        this.setupEventListeners();
-        this.loadExistingOverlay() || this.createNewOverlay();
-      }
+    const updatePreview = () => {
+      document.getElementById('preview-frame').srcdoc = `<!DOCTYPE html><html><head><style>${files.css}</style></head><body>${files.html}<script>${files.js}<\/script></body></html>`;
+    };
 
-      setupEditor() {
-        this.editor = CodeMirror(document.getElementById('editor'), {
-          mode: 'htmlmixed',
-          theme: 'monokai',
-          lineNumbers: true,
-          autoCloseTags: true,
-          autoCloseBrackets: true,
-          matchBrackets: true,
-          indentUnit: 2,
-          tabSize: 2,
-          lineWrapping: true
-        });
-      }
+    document.querySelectorAll('.editor-tab, .file-item').forEach(el => {
+      el.addEventListener('click', () => {
+        document.querySelectorAll('.editor-tab, .file-item').forEach(e => e.classList.remove('active'));
+        el.classList.add('active');
+        const tab = el.dataset.file || el.dataset.tab;
+        files[currentTab] = editor.getValue();
+        currentTab = tab;
+        editor.setOption('mode', tab === 'html' ? 'htmlmixed' : tab === 'css' ? 'css' : 'javascript');
+        editor.setValue(files[tab]);
+      });
+    });
 
-      setupEventListeners() {
-        document.querySelectorAll('.editor-tab, .file-item').forEach(el => {
-          el.addEventListener('click', () => {
-            const fileType = el.dataset.file || el.dataset.tab;
-            this.switchTab(fileType);
-          });
-        });
+    editor.on('change', () => {
+      files[currentTab] = editor.getValue();
+      updatePreview();
+    });
 
-        document.getElementById('saveBtn').addEventListener('click', () => this.saveOverlay());
-        document.getElementById('overlayUrl').addEventListener('click', () => this.copyOverlayUrl());
-        document.getElementById('overlayName').addEventListener('input', (e) => {
-          this.overlayName = e.target.value;
-        });
+    document.getElementById('saveBtn').addEventListener('click', () => {
+      files[currentTab] = editor.getValue();
+      const name = document.getElementById('overlayName').value || 'overlay';
+      localStorage.setItem(`overlay_${name}`, JSON.stringify({ name, files }));
+      showToast('Overlay enregistré avec succès !');
+    });
 
-        this.editor.on('change', () => {
-          this.files[this.currentTab] = this.editor.getValue();
-          this.updatePreview();
-        });
-      }
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      files[currentTab] = editor.getValue();
+      const html = `<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><style>${files.css}</style></head><body>${files.html}<script>${files.js}<\/script></body></html>`;
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = (document.getElementById('overlayName').value || 'overlay') + '.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Fichier exporté pour OBS !');
+    });
 
-      loadExistingOverlay() {
-        const params = new URLSearchParams(window.location.search);
-        const overlayId = params.get('id');
-        
-        if (overlayId) {
-          const overlayData = localStorage.getItem(`overlay_${overlayId}`);
-          if (overlayData) {
-            const overlay = JSON.parse(overlayData);
-            this.overlayId = overlayId;
-            this.overlayName = overlay.name;
-            this.files = overlay.files;
-            
-            document.getElementById('overlayName').value = this.overlayName;
-            this.editor.setValue(this.files[this.currentTab]);
-            this.updateOverlayUrl();
-            this.updatePreview();
-            return true;
-          }
-        }
-        return false;
-      }
-
-      createNewOverlay() {
-        this.overlayId = this.generateOverlayId();
-        this.overlayName = 'Nouvel Overlay';
-        document.getElementById('overlayName').value = this.overlayName;
-        
-        this.files = {
-          html: `<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Mon Overlay</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="overlay">
-        <h1>Bienvenue !</h1>
-    </div>
-    <script src="script.js"><\/script>
-</body>
-</html>`,
-          css: `body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    background: transparent;
-}
-
-.overlay {
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-}
-
-h1 {
-    color: white;
-    font-size: 48px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-}`,
-          js: `// Votre code JavaScript ici
-console.log('Overlay chargé !');`
-        };
-
-        this.editor.setValue(this.files[this.currentTab]);
-        this.updateOverlayUrl();
-        this.updatePreview();
-      }
-
-      generateOverlayId() {
-        return 'overlay_' + Math.random().toString(36).substr(2, 9);
-      }
-
-      switchTab(tab) {
-        this.currentTab = tab;
-        
-        document.querySelectorAll('.editor-tab.active, .file-item.active').forEach(el => {
-          el.classList.remove('active');
-        });
-        document.querySelector(`.editor-tab[data-tab="${tab}"]`).classList.add('active');
-        document.querySelector(`.file-item[data-file="${tab}"]`).classList.add('active');
-        
-        this.editor.setOption('mode', tab === 'html' ? 'htmlmixed' : tab === 'css' ? 'css' : 'javascript');
-        this.editor.setValue(this.files[tab]);
-      }
-
-      updateOverlayUrl() {
-        const url = `${window.location.origin}/overlay.html?id=${this.overlayId}`;
-        document.getElementById('overlayUrl').querySelector('span').textContent = url;
-      }
-
-      copyOverlayUrl() {
-        const url = document.getElementById('overlayUrl').querySelector('span').textContent;
-        navigator.clipboard.writeText(url).then(() => {
-          this.showToast('URL copiée dans le presse-papier !');
-        });
-      }
-
-      updatePreview() {
-        const frame = document.getElementById('preview-frame');
-        const content = `
-          <!DOCTYPE html>
-          <html>
-          <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <style>
-                ${this.files.css}
-              </style>
-          </head>
-          <body>
-              ${this.files.html}
-              <script>${this.files.js}<\/script>
-          </body>
-          </html>
-        `;
-        frame.srcdoc = content;
-      }
-
-      saveOverlay() {
-        if (!this.overlayName) {
-          this.showToast('Veuillez donner un nom à votre overlay');
-          return;
-        }
-
-        const overlay = {
-          id: this.overlayId,
-          name: this.overlayName,
-          files: this.files,
-          createdAt: new Date().toISOString()
-        };
-
-        localStorage.setItem(`overlay_${this.overlayId}`, JSON.stringify(overlay));
-
-        const overlays = JSON.parse(localStorage.getItem('my_overlays') || '[]');
-        const existingIndex = overlays.findIndex(o => o.id === this.overlayId);
-        
-        if (existingIndex >= 0) {
-          overlays[existingIndex] = overlay;
-        } else {
-          overlays.push(overlay);
-        }
-
-        localStorage.setItem('my_overlays', JSON.stringify(overlays));
-        this.updateOverlayUrl();
-        this.showToast('Overlay enregistré avec succès !');
-
-        // Save individual files for OBS
-        this.saveOverlayFiles();
-      }
-
-      saveOverlayFiles() {
-        // Simulate saving files for OBS by storing them in localStorage
-        // In a real server environment, these would be saved as actual files
-        localStorage.setItem(`overlay_${this.overlayId}_html`, this.files.html);
-        localStorage.setItem(`overlay_${this.overlayId}_css`, this.files.css);
-        localStorage.setItem(`overlay_${this.overlayId}_js`, this.files.js);
-      }
-
-      showToast(message) {
-        const toast = document.getElementById('toast');
-        toast.querySelector('span').textContent = message;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3000);
-      }
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.querySelector('span').textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
     }
-
-    // Initialiser l'éditeur
-    const editor = new OverlayEditor();
   </script>
 </body>
 </html>
