@@ -138,18 +138,15 @@
 
   <script>
     function loginWithTwitch() {
-      const clientId = 'votre_client_id'; // À remplacer par votre Client ID Twitch
+      const clientId = 'z8q1w4g12yrql6cyb5zzwmhe1pnxyn';
       const redirectUri = 'https://apo-overlay.netlify.app/auth/callback.html';
       const scope = 'user:read:email';
       const state = Math.random().toString(36).substring(7);
       
-      // Sauvegarder l'état pour la vérification
       localStorage.setItem('twitch_auth_state', state);
       
-      // Construire l'URL d'authentification Twitch
       const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}`;
       
-      // Rediriger vers la page d'authentification Twitch
       window.location.href = authUrl;
     }
   </script>
