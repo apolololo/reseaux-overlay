@@ -4,20 +4,78 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Connexion - APO Overlays</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body {
+    :root {
+      --primary: #9146FF;
+      --primary-dark: #772ce8;
+      --secondary: #00ADB5;
+      --background: #0e0e10;
+      --surface: #18181b;
+      --text: #efeff1;
+      --text-secondary: #adadb8;
+    }
+
+    * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
       font-family: 'Montserrat', sans-serif;
-      background: #0e0e10;
-      color: #efeff1;
+      background: var(--background);
+      color: var(--text);
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
+    }
+
+    .auth-container {
+      background: var(--surface);
+      padding: 2rem;
+      border-radius: 12px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+    }
+
+    .auth-title {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: var(--primary);
+    }
+
+    .auth-description {
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .twitch-button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .twitch-button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .twitch-button img {
+      width: 24px;
+      height: 24px;
     }
 
     .auth-background {
@@ -40,7 +98,7 @@
     .auth-circle-1 {
       width: 300px;
       height: 300px;
-      background: #9146FF;
+      background: var(--primary);
       top: -100px;
       left: -100px;
       animation: float 8s ease-in-out infinite;
@@ -49,107 +107,15 @@
     .auth-circle-2 {
       width: 400px;
       height: 400px;
-      background: #00ADB5;
+      background: var(--secondary);
       bottom: -150px;
       right: -150px;
       animation: float 12s ease-in-out infinite;
     }
 
-    .auth-circle-3 {
-      width: 200px;
-      height: 200px;
-      background: #FF6B6B;
-      bottom: 50%;
-      left: 50%;
-      transform: translate(-50%, 50%);
-      animation: float 10s ease-in-out infinite;
-    }
-
     @keyframes float {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-20px); }
-    }
-
-    .login-container {
-      position: relative;
-      width: 100%;
-      max-width: 400px;
-      padding: 40px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      text-align: center;
-    }
-
-    .login-title {
-      font-size: 2.5em;
-      margin-bottom: 20px;
-      color: #9146FF;
-      font-weight: 900;
-    }
-
-    .login-subtitle {
-      margin-bottom: 30px;
-      color: #adadb8;
-      font-size: 1.1em;
-      line-height: 1.6;
-    }
-
-    .twitch-button {
-      background: #9146FF;
-      color: white;
-      border: none;
-      padding: 16px 32px;
-      border-radius: 12px;
-      font-size: 1.1em;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(145, 70, 255, 0.2);
-    }
-
-    .twitch-button:hover {
-      background: #7c3ad1;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(145, 70, 255, 0.3);
-    }
-
-    .twitch-button:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 8px rgba(145, 70, 255, 0.2);
-    }
-
-    .twitch-icon {
-      width: 24px;
-      height: 24px;
-    }
-
-    .features {
-      margin-top: 40px;
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-      text-align: left;
-    }
-
-    .feature {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: #adadb8;
-      font-size: 0.9em;
-    }
-
-    .feature-icon {
-      width: 20px;
-      height: 20px;
-      color: #9146FF;
     }
   </style>
 </head>
@@ -157,31 +123,33 @@
   <div class="auth-background">
     <div class="auth-gradient-circle auth-circle-1"></div>
     <div class="auth-gradient-circle auth-circle-2"></div>
-    <div class="auth-gradient-circle auth-circle-3"></div>
   </div>
 
-  <div class="login-container">
-    <h1 class="login-title">APO Overlays</h1>
-    <p class="login-subtitle">Connectez-vous avec votre compte Twitch</p>
+  <div class="auth-container">
+    <h1 class="auth-title">APO Overlays</h1>
+    <p class="auth-description">
+      Connectez-vous avec votre compte Twitch pour accéder à l'éditeur d'overlays et créer des designs personnalisés pour votre stream.
+    </p>
     <button class="twitch-button" onclick="loginWithTwitch()">
-      <svg class="twitch-icon" viewBox="0 0 24 24" fill="white">
-        <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/>
-      </svg>
+      <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3a5.svg" alt="Twitch">
       Se connecter avec Twitch
     </button>
   </div>
 
   <script>
     function loginWithTwitch() {
-      const clientId = 'z8q1w4g12yrql6cyb5zzwmhe1pnxyn';
+      const clientId = 'votre_client_id'; // À remplacer par votre Client ID Twitch
       const redirectUri = 'https://apo-overlay.netlify.app/auth/callback.html';
       const scope = 'user:read:email';
-      
       const state = Math.random().toString(36).substring(7);
+      
+      // Sauvegarder l'état pour la vérification
       localStorage.setItem('twitch_auth_state', state);
       
+      // Construire l'URL d'authentification Twitch
       const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}`;
       
+      // Rediriger vers la page d'authentification Twitch
       window.location.href = authUrl;
     }
   </script>

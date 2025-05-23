@@ -11,7 +11,9 @@ export default defineConfig({
         editor: 'editor.html',
         overlay: 'overlay.html',
         myOverlays: 'my-overlays.html',
-        marketplace: 'marketplace.html'
+        marketplace: 'marketplace.html',
+        auth: 'auth/auth.html',
+        callback: 'auth/callback.html'
       }
     }
   },
