@@ -100,9 +100,50 @@
                 try {
                     console.log("Tentative de chargement de l'overlay avec ID:", overlayId);
                     
-                    // Vérifier si l'overlay existe dans localStorage
+                    // Vérifier si des paramètres d'overlay sont présents dans l'URL
+                    const params = new URLSearchParams(window.location.search);
+                    const htmlContent = params.get('html');
+                    const cssContent = params.get('css');
+                    const jsContent = params.get('js');
+                    const overlayName = params.get('name') || 'Mon Overlay';
+                    
+                    // Si les paramètres sont présents dans l'URL, les utiliser directement
+                    if (htmlContent && cssContent) {
+                        console.log("Chargement de l'overlay depuis les paramètres d'URL");
+                        
+                        // Créer le document HTML avec le contenu des paramètres
+                        const content = `
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                                <meta charset="UTF-8">
+                                <title>${overlayName}</title>
+                                <style>
+                                    body {
+                                        margin: 0;
+                                        padding: 0;
+                                        overflow: hidden;
+                                        background: transparent;
+                                    }
+                                    ${decodeURIComponent(cssContent)}
+                                </style>
+                            </head>
+                            <body>
+                                ${decodeURIComponent(htmlContent)}
+                                <script>${jsContent ? decodeURIComponent(jsContent) : ''}<\/script>
+                            </body>
+                            </html>
+                        `;
+                        
+                        // Remplacer le contenu du document
+                        document.documentElement.innerHTML = content;
+                        console.log("Overlay chargé avec succès depuis les paramètres d'URL");
+                        return;
+                    }
+                    
+                    // Sinon, essayer de charger depuis localStorage
                     const overlayData = localStorage.getItem(`overlay_${overlayId}`);
-                    console.log("Données d'overlay trouvées:", overlayData ? "Oui" : "Non");
+                    console.log("Données d'overlay trouvées dans localStorage:", overlayData ? "Oui" : "Non");
                     
                     if (!overlayData) {
                         // Si l'overlay n'est pas trouvé, afficher un message d'erreur détaillé
@@ -115,7 +156,7 @@
                         }
                         console.log("Clés disponibles dans localStorage:", allKeys);
                         
-                        this.showError(`Overlay non trouvé (ID: ${overlayId})`);
+                        this.showError(`Overlay non trouvé (ID: ${overlayId}). Utilisez l'URL complète générée par l'éditeur.`);
                         return;
                     }
                     
@@ -130,7 +171,7 @@
                     }
 
                     // Créer le document HTML avec le contenu de l'overlay
-                    const htmlContent = `
+                    const content = `
                         <!DOCTYPE html>
                         <html>
                         <head>
@@ -154,8 +195,8 @@
                     `;
                     
                     // Remplacer le contenu du document
-                    document.documentElement.innerHTML = htmlContent;
-                    console.log("Overlay chargé avec succès");
+                    document.documentElement.innerHTML = content;
+                    console.log("Overlay chargé avec succès depuis localStorage");
                     
                 } catch (error) {
                     console.error('Erreur lors du chargement de l\'overlay:', error);

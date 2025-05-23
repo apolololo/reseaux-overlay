@@ -338,14 +338,7 @@
         <i class="mdi mdi-link"></i>
         <span>URL de l'overlay</span>
       </div>
-      <button class="button secondary" id="exportBtn">
-        <i class="mdi mdi-export"></i>
-        Exporter
-      </button>
-      <button class="button secondary" id="importBtn">
-        <i class="mdi mdi-import"></i>
-        Importer
-      </button>
+
       <button class="button secondary" id="helpBtn">
         <i class="mdi mdi-help-circle"></i>
         Aide
@@ -401,8 +394,7 @@
     <span>Overlay enregistré avec succès !</span>
   </div>
   
-  <!-- Input caché pour l'importation de fichiers -->
-  <input type="file" id="importFile" accept=".json" style="display: none;">
+
   
   <div class="help-modal" id="helpModal">
     <div class="help-content">
@@ -440,14 +432,13 @@
       
       <p><strong>Note importante :</strong> Assurez-vous que votre navigateur est ouvert et que vous êtes connecté à votre compte lorsque vous utilisez l'overlay dans OBS ou Streamlabs.</p>
       
-      <h3>Partage d'overlays entre navigateurs</h3>
-      <p>Pour utiliser votre overlay sur un autre ordinateur ou navigateur :</p>
+      <h3>Utilisation de l'URL dans différents navigateurs</h3>
+      <p>Pour utiliser votre overlay sur n'importe quel ordinateur ou navigateur :</p>
       <ol>
-        <li>Cliquez sur <strong>Exporter</strong> pour télécharger votre overlay sous forme de fichier JSON</li>
-        <li>Transférez ce fichier sur l'autre ordinateur</li>
-        <li>Dans l'éditeur, cliquez sur <strong>Importer</strong> et sélectionnez le fichier JSON</li>
-        <li>L'overlay sera chargé avec tous ses paramètres et son contenu</li>
-        <li>Utilisez l'URL générée dans OBS ou Streamlabs</li>
+        <li>Cliquez sur <strong>URL de l'overlay</strong> pour copier l'URL complète</li>
+        <li>Cette URL contient tout le code de votre overlay (HTML, CSS et JavaScript)</li>
+        <li>Vous pouvez utiliser cette URL directement dans OBS ou Streamlabs, même sur un autre ordinateur</li>
+        <li>L'overlay s'affichera exactement comme vous l'avez conçu</li>
       </ol>
     </div>
   </div>
@@ -474,9 +465,23 @@
       }
 
       init() {
+        console.log("Initialisation de l'éditeur d'overlay");
         this.setupEditor();
         this.setupEventListeners();
-        this.loadExistingOverlay() || this.createNewOverlay();
+        
+        // Essayer de charger un overlay existant ou en créer un nouveau
+        const loaded = this.loadExistingOverlay();
+        if (!loaded) {
+          console.log("Aucun overlay existant trouvé, création d'un nouveau");
+          this.createNewOverlay();
+        }
+        
+        // S'assurer que l'éditeur est correctement initialisé
+        setTimeout(() => {
+          console.log("Rafraîchissement de l'éditeur");
+          this.editor.refresh();
+          this.updatePreview();
+        }, 100);
       }
 
       setupEditor() {
@@ -507,10 +512,7 @@
           this.overlayName = e.target.value;
         });
         
-        // Gestionnaires d'événements pour l'exportation et l'importation
-        document.getElementById('exportBtn').addEventListener('click', () => this.exportOverlay());
-        document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
-        document.getElementById('importFile').addEventListener('change', (e) => this.importOverlay(e));
+        // Les gestionnaires d'événements pour l'exportation et l'importation ont été supprimés
         
         // Gestionnaires d'événements pour l'aide
         document.getElementById('helpBtn').addEventListener('click', () => this.showHelp());
@@ -529,93 +531,7 @@
         });
       }
       
-      exportOverlay() {
-        // Sauvegarder d'abord l'overlay
-        this.saveOverlay();
-        
-        // Créer un objet à exporter
-        const overlay = {
-          id: this.overlayId,
-          name: this.overlayName,
-          files: this.files,
-          createdAt: new Date().toISOString()
-        };
-        
-        // Convertir en JSON
-        const jsonData = JSON.stringify(overlay, null, 2);
-        
-        // Créer un blob et un lien de téléchargement
-        const blob = new Blob([jsonData], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        
-        // Créer un lien de téléchargement
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${this.overlayName.replace(/\s+/g, '_')}_overlay.json`;
-        document.body.appendChild(a);
-        a.click();
-        
-        // Nettoyer
-        setTimeout(() => {
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        }, 100);
-        
-        this.showToast('Overlay exporté avec succès !');
-      }
-      
-      importOverlay(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const overlay = JSON.parse(e.target.result);
-            
-            // Vérifier que le fichier a le bon format
-            if (!overlay.id || !overlay.name || !overlay.files) {
-              throw new Error('Format de fichier invalide');
-            }
-            
-            // Mettre à jour l'éditeur avec les données importées
-            this.overlayId = overlay.id;
-            this.overlayName = overlay.name;
-            this.files = overlay.files;
-            
-            // Mettre à jour l'interface
-            document.getElementById('overlayName').value = this.overlayName;
-            this.editor.setValue(this.files[this.currentTab]);
-            this.updateOverlayUrl();
-            this.updatePreview();
-            
-            // Sauvegarder dans localStorage
-            localStorage.setItem(`overlay_${this.overlayId}`, JSON.stringify(overlay));
-            
-            // Mettre à jour la liste des overlays
-            const overlays = JSON.parse(localStorage.getItem('my_overlays') || '[]');
-            const existingIndex = overlays.findIndex(o => o.id === this.overlayId);
-            
-            if (existingIndex >= 0) {
-              overlays[existingIndex] = overlay;
-            } else {
-              overlays.push(overlay);
-            }
-            
-            localStorage.setItem('my_overlays', JSON.stringify(overlays));
-            
-            this.showToast('Overlay importé avec succès !');
-          } catch (error) {
-            console.error('Erreur lors de l\'importation:', error);
-            this.showToast('Erreur lors de l\'importation: ' + error.message);
-          }
-        };
-        
-        reader.readAsText(file);
-        
-        // Réinitialiser l'input file pour permettre de réimporter le même fichier
-        event.target.value = '';
-      }
+      // Les fonctions d'exportation et d'importation ont été supprimées
       
       showHelp() {
         document.getElementById('helpModal').classList.add('show');
@@ -652,19 +568,11 @@
         this.overlayName = 'Nouvel Overlay';
         document.getElementById('overlayName').value = this.overlayName;
 
+        // Définir le contenu initial des fichiers
         this.files = {
-          html: `<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Mon Overlay</title>
-</head>
-<body>
-    <div class="overlay">
-        <h1>Bienvenue !</h1>
-    </div>
-</body>
-</html>`,
+          html: `<div class="overlay">
+    <h1>Bienvenue !</h1>
+</div>`,
           css: `body {
     margin: 0;
     padding: 0;
@@ -686,10 +594,28 @@ h1 {
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }`,
           js: `// Votre code JavaScript ici
-console.log('Overlay chargé !');`
+console.log('Overlay chargé !');
+
+// Exemple d'animation
+document.addEventListener('DOMContentLoaded', function() {
+    const title = document.querySelector('h1');
+    if (title) {
+        title.style.opacity = '0';
+        let opacity = 0;
+        const fadeIn = setInterval(function() {
+            opacity += 0.05;
+            title.style.opacity = opacity;
+            if (opacity >= 1) clearInterval(fadeIn);
+        }, 100);
+    }
+});`
         };
 
+        // Définir le contenu de l'éditeur avec le fichier actuel
+        console.log("Initialisation de l'éditeur avec le contenu HTML");
         this.editor.setValue(this.files[this.currentTab]);
+        
+        // Mettre à jour l'URL et l'aperçu
         this.updateOverlayUrl();
         this.updatePreview();
       }
@@ -736,13 +662,29 @@ console.log('Overlay chargé !');`
       }
 
       updateOverlayUrl() {
+        // Sauvegarder le contenu actuel
+        this.files[this.currentTab] = this.editor.getValue();
+        
         // Construire l'URL absolue en utilisant le chemin complet
         const currentPath = window.location.pathname;
         const basePath = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
-        const url = `${window.location.origin}${basePath}overlay.html?id=${this.overlayId}`;
         
-        document.getElementById('overlayUrl').querySelector('span').textContent = url;
-        console.log('URL de l\'overlay:', url); // Message de débogage
+        // Créer une URL avec les paramètres du contenu de l'overlay
+        const baseUrl = `${window.location.origin}${basePath}overlay.html`;
+        
+        // Créer l'URL avec les paramètres encodés
+        const url = new URL(baseUrl);
+        url.searchParams.append('id', this.overlayId);
+        url.searchParams.append('name', encodeURIComponent(this.overlayName));
+        url.searchParams.append('html', encodeURIComponent(this.files.html));
+        url.searchParams.append('css', encodeURIComponent(this.files.css));
+        url.searchParams.append('js', encodeURIComponent(this.files.js || ''));
+        
+        const finalUrl = url.toString();
+        
+        // Mettre à jour l'élément d'interface
+        document.getElementById('overlayUrl').querySelector('span').textContent = finalUrl;
+        console.log('URL de l\'overlay:', finalUrl); // Message de débogage
       }
 
       copyOverlayUrl() {
@@ -753,23 +695,43 @@ console.log('Overlay chargé !');`
       }
 
       updatePreview() {
+        console.log("Mise à jour de l'aperçu");
+        
+        // Sauvegarder le contenu actuel de l'éditeur
+        if (this.currentTab) {
+          this.files[this.currentTab] = this.editor.getValue();
+        }
+        
+        // Récupérer l'iframe
         const frame = document.getElementById('preview-frame');
-        const content =
-          `<!DOCTYPE html>
+        
+        // Créer le contenu HTML pour l'aperçu
+        const content = `
+          <!DOCTYPE html>
           <html>
           <head>
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
               <style>
-                ${this.files.css}
+                body {
+                  margin: 0;
+                  padding: 0;
+                  overflow: hidden;
+                  background: transparent;
+                }
+                ${this.files.css || ''}
               </style>
           </head>
           <body>
-              ${this.files.html}
-              <script>${this.files.js}<\/script>
+              ${this.files.html || ''}
+              <script>${this.files.js || ''}<\/script>
           </body>
           </html>`;
+          
+        // Mettre à jour l'iframe
         frame.srcdoc = content;
+        
+        console.log("Aperçu mis à jour");
       }
 
       saveOverlay() {
