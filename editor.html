@@ -832,9 +832,43 @@
         this.overlayName = '';
         this.overlayId = '';
         this.files = {
-          html: '',
-          css: '',
-          js: ''
+          html: `<div class="overlay">
+    <h1>Mon Overlay</h1>
+</div>`,
+          css: `body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+.overlay {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+}
+
+h1 {
+    color: white;
+    font-size: 48px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}`,
+          js: `// Votre code JavaScript ici
+console.log('Overlay chargé !');
+
+// Exemple d'animation du titre
+document.addEventListener('DOMContentLoaded', function() {
+    const title = document.querySelector('h1');
+    if (title) {
+        title.style.opacity = '0';
+        setTimeout(() => {
+            title.style.transition = 'opacity 1s ease-in-out';
+            title.style.opacity = '1';
+        }, 100);
+    }
+});`
         };
         this.init();
         this.initializeEventListeners();
@@ -897,7 +931,8 @@
       setupEditor() {
         // Configuration de l'éditeur avec des fonctionnalités avancées
         this.editor = CodeMirror(document.getElementById('editor'), {
-          mode: 'htmlmixed',
+          value: this.files[this.currentTab],
+          mode: this.getEditorMode(this.currentTab),
           theme: 'dracula',
           lineNumbers: true,
           autoCloseTags: true,
@@ -939,16 +974,6 @@
           el.addEventListener('click', () => {
             const fileType = el.dataset.file || el.dataset.tab;
             this.switchTab(fileType);
-            // Mettre à jour le contenu de l'éditeur avec le fichier sélectionné
-            this.editor.setValue(this.files[fileType] || '');
-            this.editor.setOption('mode', this.getEditorMode(fileType));
-            // Activer l'onglet correspondant
-            document.querySelectorAll('.editor-tab').forEach(tab => {
-              tab.classList.toggle('active', tab.dataset.tab === fileType);
-            });
-            document.querySelectorAll('.file-item').forEach(item => {
-              item.classList.toggle('active', item.dataset.tab === fileType);
-            });
           });
         });
 
