@@ -173,5 +173,15 @@
   <footer>
     <p>APO Overlays - Système d'overlays pour streamers</p>
   </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const userData = JSON.parse(localStorage.getItem('twitch_user'));
+      if (!userData) {
+        window.location.href = './auth/auth.html';
+        return;
+      }
+    });
+  </script>
 </body>
 </html>
