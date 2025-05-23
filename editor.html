@@ -454,6 +454,7 @@ console.log('Overlay chargé !');`
       updateOverlayUrl() {
         const url = `${window.location.origin}/overlay.html?id=${this.overlayId}`;
         document.getElementById('overlayUrl').querySelector('span').textContent = url;
+        console.log('URL de l\'overlay:', url); // Message de débogage
       }
 
       copyOverlayUrl() {
