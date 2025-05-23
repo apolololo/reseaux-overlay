@@ -141,29 +141,19 @@
       overflow: hidden;
     }
 
-    .editor-tabs {
+    .editor-file-info {
       display: flex;
       background: rgba(255, 255, 255, 0.05);
-      padding: 8px;
-      gap: 8px;
-    }
-
-    .editor-tab {
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
+      padding: 12px 16px;
       font-weight: 500;
-      color: var(--text-secondary);
-      transition: all 0.2s;
+      color: var(--text);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
-
-    .editor-tab.active {
-      background: var(--primary);
-      color: white;
-    }
-
-    .editor-tab:hover:not(.active) {
-      background: rgba(255, 255, 255, 0.1);
+    
+    #currentFileName {
+      font-family: 'Fira Code', monospace;
+      font-size: 14px;
+      color: var(--primary);
     }
 
     .CodeMirror {
@@ -504,15 +494,15 @@
         <h2>Fichiers</h2>
       </div>
       <div class="file-list">
-        <div class="file-item active" data-file="html">
+        <div class="file-item active" data-file="index.html">
           <i class="mdi mdi-language-html5"></i>
           index.html
         </div>
-        <div class="file-item" data-file="css">
+        <div class="file-item" data-file="style.css">
           <i class="mdi mdi-language-css3"></i>
           style.css
         </div>
-        <div class="file-item" data-file="js">
+        <div class="file-item" data-file="script.js">
           <i class="mdi mdi-language-javascript"></i>
           script.js
         </div>
@@ -520,10 +510,8 @@
     </div>
 
     <section class="editor-section">
-      <div class="editor-tabs">
-        <div class="editor-tab active" data-tab="html">HTML</div>
-        <div class="editor-tab" data-tab="css">CSS</div>
-        <div class="editor-tab" data-tab="js">JavaScript</div>
+      <div class="editor-file-info">
+        <span id="currentFileName">index.html</span>
       </div>
       <div class="editor-toolbar">
         <button id="indentBtn" title="Indenter le code">
@@ -695,13 +683,13 @@
     class OverlayEditor {
       constructor() {
         this.editor = null;
-        this.currentTab = 'html';
+        this.currentFile = 'index.html';
         this.overlayName = '';
         this.overlayId = '';
         this.files = {
-          html: '',
-          css: '',
-          js: ''
+          "index.html": '',
+          "style.css": '',
+          "script.js": ''
         };
         this.init();
       }
@@ -762,11 +750,11 @@
       }
 
       setupEventListeners() {
-        // Gestionnaires pour les onglets de fichiers
-        document.querySelectorAll('.editor-tab, .file-item').forEach(el => {
+        // Gestionnaires pour les fichiers
+        document.querySelectorAll('.file-item').forEach(el => {
           el.addEventListener('click', () => {
-            const fileType = el.dataset.file || el.dataset.tab;
-            this.switchTab(fileType);
+            const fileName = el.dataset.file;
+            this.switchFile(fileName);
           });
         });
 
@@ -798,7 +786,7 @@
         
         // Événement de changement de l'éditeur
         this.editor.on('change', () => {
-          this.files[this.currentTab] = this.editor.getValue();
+          this.files[this.currentFile] = this.editor.getValue();
           this.updatePreview();
         });
         
@@ -867,10 +855,38 @@
             const overlay = JSON.parse(overlayData);
             this.overlayId = overlayId;
             this.overlayName = overlay.name;
-            this.files = overlay.files;
+            
+            // Vérifier si les fichiers sont dans l'ancien format (html, css, js)
+            if (overlay.files.html !== undefined) {
+              // Convertir l'ancien format vers le nouveau format
+              this.files = {
+                "index.html": `<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${overlay.name}</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    ${overlay.files.html}
+    <script src="script.js"></script>
+</body>
+</html>`,
+                "style.css": overlay.files.css || '',
+                "script.js": overlay.files.js || ''
+              };
+            } else {
+              // Utiliser le nouveau format
+              this.files = overlay.files;
+            }
+            
+            // Définir le fichier actuel
+            this.currentFile = "index.html";
 
             document.getElementById('overlayName').value = this.overlayName;
-            this.editor.setValue(this.files[this.currentTab]);
+            document.getElementById('currentFileName').textContent = this.currentFile;
+            this.editor.setValue(this.files[this.currentFile]);
             this.updateOverlayUrl();
             this.updatePreview();
             return true;
@@ -886,13 +902,27 @@
 
         // Définir le contenu initial des fichiers
         this.files = {
-          html: `<div class="overlay">
-    <h1>Bienvenue !</h1>
-</div>`,
-          css: `body {
+          "index.html": `<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Overlay</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="overlay">
+        <h1>Bienvenue !</h1>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>`,
+          "style.css": `body {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
+    background: transparent;
 }
 
 .overlay {
@@ -901,7 +931,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: transparent;
 }
 
 h1 {
@@ -909,7 +938,7 @@ h1 {
     font-size: 48px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }`,
-          js: `// Votre code JavaScript ici
+          "script.js": `// Votre code JavaScript ici
 console.log('Overlay chargé !');
 
 // Exemple d'animation
@@ -926,10 +955,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });`
         };
+        
+        // Définir le fichier actuel
+        this.currentFile = "index.html";
 
         // Définir le contenu de l'éditeur avec le fichier actuel
         console.log("Initialisation de l'éditeur avec le contenu HTML");
-        this.editor.setValue(this.files[this.currentTab]);
+        this.editor.setValue(this.files[this.currentFile]);
         
         // Mettre à jour l'URL et l'aperçu
         this.updateOverlayUrl();
@@ -940,47 +972,43 @@ document.addEventListener('DOMContentLoaded', function() {
         return 'overlay_' + Math.random().toString(36).substr(2, 9);
       }
 
-      switchTab(tab) {
-        console.log("Changement d'onglet vers:", tab);
+      switchFile(fileName) {
+        console.log("Changement de fichier vers:", fileName);
         
-        // Sauvegarder le contenu de l'onglet actuel avant de changer
-        if (this.currentTab) {
-          this.files[this.currentTab] = this.editor.getValue();
+        // Sauvegarder le contenu du fichier actuel avant de changer
+        if (this.currentFile) {
+          this.files[this.currentFile] = this.editor.getValue();
         }
         
-        this.currentTab = tab;
+        this.currentFile = fileName;
 
-        // Mettre à jour les onglets actifs
-        document.querySelectorAll('.editor-tab.active, .file-item.active').forEach(el => {
+        // Mettre à jour les fichiers actifs
+        document.querySelectorAll('.file-item.active').forEach(el => {
           el.classList.remove('active');
         });
         
-        // Activer les nouveaux onglets
-        const editorTab = document.querySelector(`.editor-tab[data-tab="${tab}"]`);
-        const fileItem = document.querySelector(`.file-item[data-file="${tab}"]`);
-        
-        if (editorTab) editorTab.classList.add('active');
+        // Activer le nouveau fichier
+        const fileItem = document.querySelector(`.file-item[data-file="${fileName}"]`);
         if (fileItem) fileItem.classList.add('active');
+        
+        // Mettre à jour le nom du fichier affiché
+        document.getElementById('currentFileName').textContent = fileName;
 
         // Configurer l'éditeur en fonction du type de fichier
         let mode, mimeType, hints;
         
-        switch(tab) {
-          case 'html':
-            mode = 'htmlmixed';
-            mimeType = 'text/html';
-            hints = 'htmlhint';
-            break;
-          case 'css':
-            mode = 'css';
-            mimeType = 'text/css';
-            hints = 'csshint';
-            break;
-          case 'js':
-            mode = 'javascript';
-            mimeType = 'text/javascript';
-            hints = 'javascripthint';
-            break;
+        if (fileName.endsWith('.html')) {
+          mode = 'htmlmixed';
+          mimeType = 'text/html';
+          hints = 'htmlhint';
+        } else if (fileName.endsWith('.css')) {
+          mode = 'css';
+          mimeType = 'text/css';
+          hints = 'csshint';
+        } else if (fileName.endsWith('.js')) {
+          mode = 'javascript';
+          mimeType = 'text/javascript';
+          hints = 'javascripthint';
         }
         
         // Mettre à jour les options de l'éditeur
@@ -1001,7 +1029,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         
         // Ajouter des raccourcis spécifiques au mode
-        if (tab === 'html') {
+        if (fileName.endsWith('.html')) {
           extraKeys["Ctrl-E"] = (cm) => {
             // Entourer la sélection avec une balise
             if (cm.somethingSelected()) {
@@ -1014,8 +1042,8 @@ document.addEventListener('DOMContentLoaded', function() {
         this.editor.setOption('extraKeys', extraKeys);
         
         // Définir le contenu de l'éditeur
-        console.log(`Chargement du contenu ${tab}:`, this.files[tab]);
-        this.editor.setValue(this.files[tab] || '');
+        console.log(`Chargement du contenu de ${fileName}:`, this.files[fileName]);
+        this.editor.setValue(this.files[fileName] || '');
         
         // Forcer la mise à jour de l'éditeur et placer le curseur au début
         setTimeout(() => {
@@ -1027,7 +1055,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       updateOverlayUrl() {
         // Sauvegarder le contenu actuel
-        this.files[this.currentTab] = this.editor.getValue();
+        this.files[this.currentFile] = this.editor.getValue();
         
         // Construire l'URL absolue en utilisant le chemin complet
         const currentPath = window.location.pathname;
@@ -1040,9 +1068,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const url = new URL(baseUrl);
         url.searchParams.append('id', this.overlayId);
         url.searchParams.append('name', encodeURIComponent(this.overlayName));
-        url.searchParams.append('html', encodeURIComponent(this.files.html));
-        url.searchParams.append('css', encodeURIComponent(this.files.css));
-        url.searchParams.append('js', encodeURIComponent(this.files.js || ''));
+        url.searchParams.append('html', encodeURIComponent(this.files["index.html"]));
+        url.searchParams.append('css', encodeURIComponent(this.files["style.css"]));
+        url.searchParams.append('js', encodeURIComponent(this.files["script.js"] || ''));
         
         const finalUrl = url.toString();
         
@@ -1062,8 +1090,8 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("Mise à jour de l'aperçu");
         
         // Sauvegarder le contenu actuel de l'éditeur
-        if (this.currentTab) {
-          this.files[this.currentTab] = this.editor.getValue();
+        if (this.currentFile) {
+          this.files[this.currentFile] = this.editor.getValue();
         }
         
         // Récupérer l'iframe
@@ -1083,12 +1111,12 @@ document.addEventListener('DOMContentLoaded', function() {
                   overflow: hidden;
                   background: transparent;
                 }
-                ${this.files.css || ''}
+                ${this.files["style.css"] || ''}
               </style>
           </head>
           <body>
-              ${this.files.html || ''}
-              <script>${this.files.js || ''}<\/script>
+              ${this.extractBodyContent(this.files["index.html"]) || ''}
+              <script>${this.files["script.js"] || ''}<\/script>
           </body>
           </html>`;
           
@@ -1097,11 +1125,29 @@ document.addEventListener('DOMContentLoaded', function() {
         
         console.log("Aperçu mis à jour");
       }
+      
+      // Fonction pour extraire le contenu du body d'un fichier HTML
+      extractBodyContent(htmlContent) {
+        if (!htmlContent) return '';
+        
+        // Créer un parser HTML temporaire
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlContent, 'text/html');
+        
+        // Récupérer le contenu du body
+        const bodyContent = doc.body.innerHTML;
+        return bodyContent;
+      }
 
       saveOverlay() {
         if (!this.overlayName) {
           this.showToast('Veuillez donner un nom à votre overlay');
           return;
+        }
+        
+        // Sauvegarder le contenu actuel
+        if (this.currentFile) {
+          this.files[this.currentFile] = this.editor.getValue();
         }
 
         const overlay = {
