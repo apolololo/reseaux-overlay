@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 1920px;
+            height: 1080px;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .ad-container {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 20px 40px;
+            position: relative;
+        }
+
+        .neon-text {
+            color: #fff;
+            font-size: 48px;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-shadow: 
+                0 0 5px #fff,
+                0 0 10px #fff,
+                0 0 20px #9146FF,
+                0 0 40px #9146FF,
+                0 0 80px #9146FF;
+            animation: neon 1.5s ease-in-out infinite alternate;
+        }
+
+        .hashtag {
+            color: #9146FF;
+            font-size: 32px;
+            margin-left: 15px;
+            text-shadow: 
+                0 0 5px #9146FF,
+                0 0 10px #9146FF;
+        }
+
+        @keyframes neon {
+            from {
+                text-shadow: 
+                    0 0 5px #fff,
+                    0 0 10px #fff,
+                    0 0 20px #9146FF,
+                    0 0 40px #9146FF,
+                    0 0 80px #9146FF;
+            }
+            to {
+                text-shadow: 
+                    0 0 2px #fff,
+                    0 0 5px #fff,
+                    0 0 10px #9146FF,
+                    0 0 20px #9146FF,
+                    0 0 40px #9146FF;
+            }
+        }
+
+        .glow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 15px;
+            box-shadow: 
+                0 0 10px #9146FF,
+                0 0 20px #9146FF,
+                0 0 40px #9146FF;
+            opacity: 0.5;
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { opacity: 0.5; }
+            to { opacity: 0.8; }
+        }
+    </style>
+</head>
+<body>
+    <div class="ad-container">
+        <div class="glow"></div>
+        <span class="neon-text">CODE CREATEUR APO21</span>
+        <span class="hashtag">#AD</span>
+    </div>
+
+    <script>
+        // Animation d'entrée
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.querySelector('.ad-container');
+            container.style.opacity = '0';
+            container.style.transform = 'scale(0.8)';
+            container.style.transition = 'all 0.5s ease-out';
+
+            setTimeout(() => {
+                container.style.opacity = '1';
+                container.style.transform = 'scale(1)';
+            }, 100);
+
+            // Faire disparaître après 5 secondes
+            setTimeout(() => {
+                container.style.opacity = '0';
+                container.style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                    container.style.display = 'none';
+                }, 500);
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

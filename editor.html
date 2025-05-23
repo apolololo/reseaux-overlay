@@ -8,6 +8,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-markup.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-javascript.min.js"></script>
   
   <!-- CodeMirror Core CSS -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" rel="stylesheet">
@@ -147,6 +152,81 @@
 
     .file-item:hover {
       background: rgba(255, 255, 255, 0.05);
+    }
+
+    .script-dialog {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--surface);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      width: 80%;
+      max-height: 80vh;
+      display: none;
+    }
+
+    .script-dialog.show {
+      display: block;
+    }
+
+    .script-dialog-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .dialog-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .dialog-actions button {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 12px;
+      font-size: 14px;
+    }
+
+    .script-dialog-content {
+      max-height: calc(80vh - 100px);
+      overflow-y: auto;
+    }
+
+    .script-dialog pre {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 0;
+    }
+
+    .script-dialog code {
+      font-family: 'Fira Code', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .dialog-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      display: none;
+    }
+
+    .dialog-overlay.show {
+      display: block;
     }
 
     .file-item.active {
@@ -538,17 +618,25 @@
         <h2>Fichiers</h2>
       </div>
       <div class="file-list">
-        <div class="file-item active" data-file="html">
-          <i class="mdi mdi-language-html5"></i>
-          index.html
+        <div class="file-item" data-file="/src/overlays/ads/index.html">
+          <i class="mdi mdi-advertisement"></i>
+          Publicité - Code Créateur
         </div>
-        <div class="file-item" data-file="css">
-          <i class="mdi mdi-language-css3"></i>
-          style.css
+        <div class="file-item" data-file="/src/overlays/brb/index.html">
+          <i class="mdi mdi-clock-outline"></i>
+          BRB
         </div>
-        <div class="file-item" data-file="js">
-          <i class="mdi mdi-language-javascript"></i>
-          script.js
+        <div class="file-item" data-file="/src/overlays/starting/index.html">
+          <i class="mdi mdi-play-circle-outline"></i>
+          Starting
+        </div>
+        <div class="file-item" data-file="/src/overlays/end/index.html">
+          <i class="mdi mdi-stop-circle-outline"></i>
+          End
+        </div>
+        <div class="file-item" data-file="/src/overlays/game-status/index.html">
+          <i class="mdi mdi-gamepad-variant"></i>
+          Game Status
         </div>
       </div>
     </div>
@@ -601,6 +689,25 @@
   <div class="toast" id="toast">
     <i class="mdi mdi-check-circle"></i>
     <span>Overlay enregistré avec succès !</span>
+  </div>
+
+  <div class="dialog-overlay" id="dialogOverlay"></div>
+  <div class="script-dialog" id="scriptDialog">
+    <div class="script-dialog-header">
+      <h2>Contenu du fichier</h2>
+      <div class="dialog-actions">
+        <button class="button secondary" onclick="editor.copyScriptContent()">
+          <span class="mdi mdi-content-copy"></span>
+          Copier
+        </button>
+        <button class="button secondary" onclick="editor.closeScriptDialog()">
+          <span class="mdi mdi-close"></span>
+        </button>
+      </div>
+    </div>
+    <div class="script-dialog-content">
+      <pre><code id="scriptContent" class="language-html"></code></pre>
+    </div>
   </div>
   
 
@@ -738,6 +845,53 @@
           js: ''
         };
         this.init();
+        this.initializeEventListeners();
+      }
+
+      initializeEventListeners() {
+        // Ajouter des écouteurs d'événements pour les fichiers
+        document.querySelectorAll('.file-item').forEach(item => {
+          item.addEventListener('click', () => this.showFileContent(item.dataset.file));
+        });
+
+        // Fermer la boîte de dialogue en cliquant sur l'overlay
+        document.getElementById('dialogOverlay').addEventListener('click', () => this.closeScriptDialog());
+      }
+
+      async showFileContent(filePath) {
+        try {
+          const response = await fetch(filePath);
+          const content = await response.text();
+          
+          const scriptContent = document.getElementById('scriptContent');
+          scriptContent.textContent = content;
+          
+          // Mettre à jour la coloration syntaxique si Prism est disponible
+          if (window.Prism) {
+            Prism.highlightElement(scriptContent);
+          }
+          
+          document.getElementById('dialogOverlay').classList.add('show');
+          document.getElementById('scriptDialog').classList.add('show');
+        } catch (error) {
+          console.error('Erreur lors du chargement du fichier:', error);
+          this.showToast('Erreur lors du chargement du fichier');
+        }
+      }
+
+      closeScriptDialog() {
+        document.getElementById('dialogOverlay').classList.remove('show');
+        document.getElementById('scriptDialog').classList.remove('show');
+      }
+
+      copyScriptContent() {
+        const content = document.getElementById('scriptContent').textContent;
+        navigator.clipboard.writeText(content).then(() => {
+          this.showToast('Code copié dans le presse-papier !');
+        }).catch(err => {
+          console.error('Erreur lors de la copie:', err);
+          this.showToast('Erreur lors de la copie du code');
+        });
       }
 
       init() {
