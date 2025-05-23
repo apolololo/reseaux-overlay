@@ -396,17 +396,20 @@
 <head>
     <meta charset="UTF-8">
     <title>Mon Overlay</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="overlay">
         <h1>Bienvenue !</h1>
     </div>
+    <script src="script.js"><\/script>
 </body>
 </html>`,
           css: `body {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
+    background: transparent;
 }
 
 .overlay {
@@ -439,14 +442,12 @@ console.log('Overlay chargé !');`
       switchTab(tab) {
         this.currentTab = tab;
         
-        // Mettre à jour les onglets actifs
         document.querySelectorAll('.editor-tab.active, .file-item.active').forEach(el => {
           el.classList.remove('active');
         });
         document.querySelector(`.editor-tab[data-tab="${tab}"]`).classList.add('active');
         document.querySelector(`.file-item[data-file="${tab}"]`).classList.add('active');
         
-        // Changer le mode de l'éditeur
         this.editor.setOption('mode', tab === 'html' ? 'htmlmixed' : tab === 'css' ? 'css' : 'javascript');
         this.editor.setValue(this.files[tab]);
       }
@@ -511,6 +512,17 @@ console.log('Overlay chargé !');`
         localStorage.setItem('my_overlays', JSON.stringify(overlays));
         this.updateOverlayUrl();
         this.showToast('Overlay enregistré avec succès !');
+
+        // Save individual files for OBS
+        this.saveOverlayFiles();
+      }
+
+      saveOverlayFiles() {
+        // Simulate saving files for OBS by storing them in localStorage
+        // In a real server environment, these would be saved as actual files
+        localStorage.setItem(`overlay_${this.overlayId}_html`, this.files.html);
+        localStorage.setItem(`overlay_${this.overlayId}_css`, this.files.css);
+        localStorage.setItem(`overlay_${this.overlayId}_js`, this.files.js);
       }
 
       showToast(message) {
