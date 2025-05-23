@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Éditeur d'Overlay - APO Overlays</title>
-  
+
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css" rel="stylesheet">
-  
+
   <style>
     :root {
       --primary: #9146FF;
@@ -366,15 +366,15 @@
       loadExistingOverlay() {
         const params = new URLSearchParams(window.location.search);
         const overlayId = params.get('id');
-        
+
         if (overlayId) {
-          const overlayData = localStorage.getItem(overlay_${overlayId});
+          const overlayData = localStorage.getItem(`overlay_${overlayId}`);
           if (overlayData) {
             const overlay = JSON.parse(overlayData);
             this.overlayId = overlayId;
             this.overlayName = overlay.name;
             this.files = overlay.files;
-            
+
             document.getElementById('overlayName').value = this.overlayName;
             this.editor.setValue(this.files[this.currentTab]);
             this.updateOverlayUrl();
@@ -389,9 +389,9 @@
         this.overlayId = this.generateOverlayId();
         this.overlayName = 'Nouvel Overlay';
         document.getElementById('overlayName').value = this.overlayName;
-        
+
         this.files = {
-          html: <!DOCTYPE html>
+          html: `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -402,8 +402,8 @@
         <h1>Bienvenue !</h1>
     </div>
 </body>
-</html>,
-          css: body {
+</html>`,
+          css: `body {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
@@ -422,9 +422,9 @@ h1 {
     color: white;
     font-size: 48px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-},
-          js: // Votre code JavaScript ici
-console.log('Overlay chargé !');
+}`,
+          js: `// Votre code JavaScript ici
+console.log('Overlay chargé !');`
         };
 
         this.editor.setValue(this.files[this.currentTab]);
@@ -438,21 +438,21 @@ console.log('Overlay chargé !');
 
       switchTab(tab) {
         this.currentTab = tab;
-        
+
         // Mettre à jour les onglets actifs
         document.querySelectorAll('.editor-tab.active, .file-item.active').forEach(el => {
           el.classList.remove('active');
         });
-        document.querySelector(.editor-tab[data-tab="${tab}"]).classList.add('active');
-        document.querySelector(.file-item[data-file="${tab}"]).classList.add('active');
-        
+        document.querySelector(`.editor-tab[data-tab="${tab}"]`).classList.add('active');
+        document.querySelector(`.file-item[data-file="${tab}"]`).classList.add('active');
+
         // Changer le mode de l'éditeur
         this.editor.setOption('mode', tab === 'html' ? 'htmlmixed' : tab === 'css' ? 'css' : 'javascript');
         this.editor.setValue(this.files[tab]);
       }
 
       updateOverlayUrl() {
-        const url = ${window.location.origin}/overlay.html?id=${this.overlayId};
+        const url = `${window.location.origin}/overlay.html?id=${this.overlayId}`;
         document.getElementById('overlayUrl').querySelector('span').textContent = url;
       }
 
@@ -465,8 +465,8 @@ console.log('Overlay chargé !');
 
       updatePreview() {
         const frame = document.getElementById('preview-frame');
-        const content = 
-          <!DOCTYPE html>
+        const content =
+          `<!DOCTYPE html>
           <html>
           <head>
               <meta charset="UTF-8">
@@ -479,8 +479,7 @@ console.log('Overlay chargé !');
               ${this.files.html}
               <script>${this.files.js}<\/script>
           </body>
-          </html>
-        ;
+          </html>`;
         frame.srcdoc = content;
       }
 
@@ -497,11 +496,11 @@ console.log('Overlay chargé !');
           createdAt: new Date().toISOString()
         };
 
-        localStorage.setItem(overlay_${this.overlayId}, JSON.stringify(overlay));
+        localStorage.setItem(`overlay_${this.overlayId}`, JSON.stringify(overlay));
 
         const overlays = JSON.parse(localStorage.getItem('my_overlays') || '[]');
         const existingIndex = overlays.findIndex(o => o.id === this.overlayId);
-        
+
         if (existingIndex >= 0) {
           overlays[existingIndex] = overlay;
         } else {
