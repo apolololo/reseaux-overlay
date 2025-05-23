@@ -458,6 +458,9 @@ console.log('Overlay chargé !');`;
           createdAt: new Date().toISOString()
         };
 
+        // Sauvegarder l'overlay avec son ID unique
+        localStorage.setItem(`overlay_${this.overlayId}`, JSON.stringify(overlay));
+
         // Sauvegarder dans la liste des overlays
         const overlays = JSON.parse(localStorage.getItem('my_overlays') || '[]');
         const existingIndex = overlays.findIndex(o => o.id === this.overlayId);

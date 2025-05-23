@@ -169,29 +169,30 @@
                 this.loadOverlay(overlayId);
             }
 
-            async loadOverlay(overlayId) {
+            loadOverlay(overlayId) {
                 try {
-                    const overlay = localStorage.getItem(`overlay_${overlayId}`);
+                    // Charger l'overlay depuis le stockage local
+                    const overlayData = localStorage.getItem(`overlay_${overlayId}`);
                     
-                    if (!overlay) {
+                    if (!overlayData) {
                         this.showError("Overlay non trouvé");
                         return;
                     }
 
-                    const overlayData = JSON.parse(overlay);
+                    const overlay = JSON.parse(overlayData);
                     
                     // Injecter le CSS
                     const style = document.createElement('style');
-                    style.textContent = overlayData.css;
+                    style.textContent = overlay.files.css;
                     document.head.appendChild(style);
 
                     // Injecter le HTML
-                    this.container.innerHTML = overlayData.html;
+                    this.container.innerHTML = overlay.files.html;
 
                     // Exécuter le JavaScript
-                    if (overlayData.js) {
+                    if (overlay.files.js) {
                         const script = document.createElement('script');
-                        script.textContent = overlayData.js;
+                        script.textContent = overlay.files.js;
                         document.body.appendChild(script);
                     }
                 } catch (error) {
