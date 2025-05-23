@@ -31,7 +31,8 @@
             position: relative;
         }
         
-        /* Cadre de dimensions visible uniquement en mode développement */
+        /* Ces styles sont commentés pour ne pas afficher le cadre en production */
+        /*
         body::before {
             content: "";
             position: absolute;
@@ -57,6 +58,7 @@
             border-radius: 4px;
             z-index: 9999;
         }
+        */
 
         .error-message {
             position: fixed;
@@ -96,29 +98,53 @@
 
             loadOverlay(overlayId) {
                 try {
-                    // Charger depuis localStorage
+                    console.log("Tentative de chargement de l'overlay avec ID:", overlayId);
+                    
+                    // Vérifier si l'overlay existe dans localStorage
                     const overlayData = localStorage.getItem(`overlay_${overlayId}`);
+                    console.log("Données d'overlay trouvées:", overlayData ? "Oui" : "Non");
                     
                     if (!overlayData) {
-                        this.showError("Overlay non trouvé");
+                        // Si l'overlay n'est pas trouvé, afficher un message d'erreur détaillé
+                        console.error("Overlay non trouvé dans localStorage. ID recherché:", overlayId);
+                        
+                        // Lister tous les éléments du localStorage pour le débogage
+                        const allKeys = [];
+                        for (let i = 0; i < localStorage.length; i++) {
+                            allKeys.push(localStorage.key(i));
+                        }
+                        console.log("Clés disponibles dans localStorage:", allKeys);
+                        
+                        this.showError(`Overlay non trouvé (ID: ${overlayId})`);
                         return;
                     }
                     
+                    // Analyser les données JSON
                     const overlay = JSON.parse(overlayData);
+                    console.log("Overlay chargé:", overlay);
                     
                     if (!overlay || !overlay.files) {
+                        console.error("Format d'overlay invalide:", overlay);
                         this.showError("Format d'overlay invalide");
                         return;
                     }
 
-                    // Créer le document HTML
-                    document.documentElement.innerHTML = `
+                    // Créer le document HTML avec le contenu de l'overlay
+                    const htmlContent = `
                         <!DOCTYPE html>
                         <html>
                         <head>
                             <meta charset="UTF-8">
                             <title>${overlay.name}</title>
-                            <style>${overlay.files.css}</style>
+                            <style>
+                                body {
+                                    margin: 0;
+                                    padding: 0;
+                                    overflow: hidden;
+                                    background: transparent;
+                                }
+                                ${overlay.files.css}
+                            </style>
                         </head>
                         <body>
                             ${overlay.files.html}
@@ -126,9 +152,14 @@
                         </body>
                         </html>
                     `;
+                    
+                    // Remplacer le contenu du document
+                    document.documentElement.innerHTML = htmlContent;
+                    console.log("Overlay chargé avec succès");
+                    
                 } catch (error) {
                     console.error('Erreur lors du chargement de l\'overlay:', error);
-                    this.showError("Erreur lors du chargement de l'overlay");
+                    this.showError(`Erreur: ${error.message}`);
                 }
             }
 

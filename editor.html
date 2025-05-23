@@ -338,6 +338,14 @@
         <i class="mdi mdi-link"></i>
         <span>URL de l'overlay</span>
       </div>
+      <button class="button secondary" id="exportBtn">
+        <i class="mdi mdi-export"></i>
+        Exporter
+      </button>
+      <button class="button secondary" id="importBtn">
+        <i class="mdi mdi-import"></i>
+        Importer
+      </button>
       <button class="button secondary" id="helpBtn">
         <i class="mdi mdi-help-circle"></i>
         Aide
@@ -393,6 +401,9 @@
     <span>Overlay enregistré avec succès !</span>
   </div>
   
+  <!-- Input caché pour l'importation de fichiers -->
+  <input type="file" id="importFile" accept=".json" style="display: none;">
+  
   <div class="help-modal" id="helpModal">
     <div class="help-content">
       <h2>
@@ -428,6 +439,16 @@
       </ol>
       
       <p><strong>Note importante :</strong> Assurez-vous que votre navigateur est ouvert et que vous êtes connecté à votre compte lorsque vous utilisez l'overlay dans OBS ou Streamlabs.</p>
+      
+      <h3>Partage d'overlays entre navigateurs</h3>
+      <p>Pour utiliser votre overlay sur un autre ordinateur ou navigateur :</p>
+      <ol>
+        <li>Cliquez sur <strong>Exporter</strong> pour télécharger votre overlay sous forme de fichier JSON</li>
+        <li>Transférez ce fichier sur l'autre ordinateur</li>
+        <li>Dans l'éditeur, cliquez sur <strong>Importer</strong> et sélectionnez le fichier JSON</li>
+        <li>L'overlay sera chargé avec tous ses paramètres et son contenu</li>
+        <li>Utilisez l'URL générée dans OBS ou Streamlabs</li>
+      </ol>
     </div>
   </div>
 
@@ -486,6 +507,11 @@
           this.overlayName = e.target.value;
         });
         
+        // Gestionnaires d'événements pour l'exportation et l'importation
+        document.getElementById('exportBtn').addEventListener('click', () => this.exportOverlay());
+        document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+        document.getElementById('importFile').addEventListener('change', (e) => this.importOverlay(e));
+        
         // Gestionnaires d'événements pour l'aide
         document.getElementById('helpBtn').addEventListener('click', () => this.showHelp());
         document.getElementById('closeHelp').addEventListener('click', () => this.hideHelp());
@@ -501,6 +527,94 @@
           this.files[this.currentTab] = this.editor.getValue();
           this.updatePreview();
         });
+      }
+      
+      exportOverlay() {
+        // Sauvegarder d'abord l'overlay
+        this.saveOverlay();
+        
+        // Créer un objet à exporter
+        const overlay = {
+          id: this.overlayId,
+          name: this.overlayName,
+          files: this.files,
+          createdAt: new Date().toISOString()
+        };
+        
+        // Convertir en JSON
+        const jsonData = JSON.stringify(overlay, null, 2);
+        
+        // Créer un blob et un lien de téléchargement
+        const blob = new Blob([jsonData], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        // Créer un lien de téléchargement
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${this.overlayName.replace(/\s+/g, '_')}_overlay.json`;
+        document.body.appendChild(a);
+        a.click();
+        
+        // Nettoyer
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 100);
+        
+        this.showToast('Overlay exporté avec succès !');
+      }
+      
+      importOverlay(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const overlay = JSON.parse(e.target.result);
+            
+            // Vérifier que le fichier a le bon format
+            if (!overlay.id || !overlay.name || !overlay.files) {
+              throw new Error('Format de fichier invalide');
+            }
+            
+            // Mettre à jour l'éditeur avec les données importées
+            this.overlayId = overlay.id;
+            this.overlayName = overlay.name;
+            this.files = overlay.files;
+            
+            // Mettre à jour l'interface
+            document.getElementById('overlayName').value = this.overlayName;
+            this.editor.setValue(this.files[this.currentTab]);
+            this.updateOverlayUrl();
+            this.updatePreview();
+            
+            // Sauvegarder dans localStorage
+            localStorage.setItem(`overlay_${this.overlayId}`, JSON.stringify(overlay));
+            
+            // Mettre à jour la liste des overlays
+            const overlays = JSON.parse(localStorage.getItem('my_overlays') || '[]');
+            const existingIndex = overlays.findIndex(o => o.id === this.overlayId);
+            
+            if (existingIndex >= 0) {
+              overlays[existingIndex] = overlay;
+            } else {
+              overlays.push(overlay);
+            }
+            
+            localStorage.setItem('my_overlays', JSON.stringify(overlays));
+            
+            this.showToast('Overlay importé avec succès !');
+          } catch (error) {
+            console.error('Erreur lors de l\'importation:', error);
+            this.showToast('Erreur lors de l\'importation: ' + error.message);
+          }
+        };
+        
+        reader.readAsText(file);
+        
+        // Réinitialiser l'input file pour permettre de réimporter le même fichier
+        event.target.value = '';
       }
       
       showHelp() {
@@ -585,18 +699,40 @@ console.log('Overlay chargé !');`
       }
 
       switchTab(tab) {
+        console.log("Changement d'onglet vers:", tab);
+        console.log("Contenu actuel des fichiers:", this.files);
+        
+        // Sauvegarder le contenu de l'onglet actuel avant de changer
+        if (this.currentTab) {
+          this.files[this.currentTab] = this.editor.getValue();
+        }
+        
         this.currentTab = tab;
 
         // Mettre à jour les onglets actifs
         document.querySelectorAll('.editor-tab.active, .file-item.active').forEach(el => {
           el.classList.remove('active');
         });
-        document.querySelector(`.editor-tab[data-tab="${tab}"]`).classList.add('active');
-        document.querySelector(`.file-item[data-file="${tab}"]`).classList.add('active');
+        
+        // Activer les nouveaux onglets
+        const editorTab = document.querySelector(`.editor-tab[data-tab="${tab}"]`);
+        const fileItem = document.querySelector(`.file-item[data-file="${tab}"]`);
+        
+        if (editorTab) editorTab.classList.add('active');
+        if (fileItem) fileItem.classList.add('active');
 
         // Changer le mode de l'éditeur
-        this.editor.setOption('mode', tab === 'html' ? 'htmlmixed' : tab === 'css' ? 'css' : 'javascript');
-        this.editor.setValue(this.files[tab]);
+        const mode = tab === 'html' ? 'htmlmixed' : tab === 'css' ? 'css' : 'javascript';
+        this.editor.setOption('mode', mode);
+        
+        // Définir le contenu de l'éditeur
+        console.log(`Chargement du contenu ${tab}:`, this.files[tab]);
+        this.editor.setValue(this.files[tab] || '');
+        
+        // Forcer la mise à jour de l'éditeur
+        setTimeout(() => {
+          this.editor.refresh();
+        }, 10);
       }
 
       updateOverlayUrl() {
