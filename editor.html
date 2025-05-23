@@ -64,6 +64,27 @@
     .header-actions {
       display: flex;
       gap: 12px;
+      align-items: center;
+    }
+
+    .editor-controls {
+      display: flex;
+      gap: 8px;
+      margin-right: 16px;
+    }
+
+    .editor-controls select {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 6px 12px;
+      border-radius: 4px;
+      outline: none;
+    }
+
+    .editor-controls select option {
+      background: var(--surface);
+      color: var(--text);
     }
 
     .button {
@@ -482,20 +503,33 @@
   <header class="header">
     <input type="text" class="overlay-name" placeholder="Nom de l'overlay" id="overlayName">
     <div class="header-actions">
-      <div class="overlay-url" id="overlayUrl" title="Cliquez pour copier l'URL à utiliser dans OBS/Streamlabs">
-        <i class="mdi mdi-link"></i>
-        <span>URL de l'overlay</span>
-      </div>
+        <div class="editor-controls">
+          <select id="scriptSelect" onchange="editor.loadScript(this.value)">
+            <option value="">Sélectionner un script...</option>
+            <option value="brb">BRB</option>
+            <option value="starting">Starting</option>
+            <option value="end">End</option>
+            <option value="game-status">Game Status</option>
+          </select>
+          <button class="button secondary" onclick="editor.createNewScript()">
+            <span class="mdi mdi-plus"></span>
+            Nouveau Script
+          </button>
+        </div>
+        <div class="overlay-url" id="overlayUrl" title="Cliquez pour copier l'URL à utiliser dans OBS/Streamlabs">
+          <i class="mdi mdi-link"></i>
+          <span>URL de l'overlay</span>
+        </div>
 
-      <button class="button secondary" id="helpBtn">
-        <i class="mdi mdi-help-circle"></i>
-        Aide
-      </button>
-      <button class="button" id="saveBtn">
-        <i class="mdi mdi-content-save"></i>
-        Enregistrer
-      </button>
-    </div>
+        <button class="button secondary" id="helpBtn">
+          <i class="mdi mdi-help-circle"></i>
+          Aide
+        </button>
+        <button class="button" id="saveBtn">
+          <i class="mdi mdi-content-save"></i>
+          Enregistrer
+        </button>
+      </div>
   </header>
 
   <main class="main-content">
@@ -940,6 +974,60 @@ document.addEventListener('DOMContentLoaded', function() {
         return 'overlay_' + Math.random().toString(36).substr(2, 9);
       }
 
+      async loadScript(scriptName) {
+        if (!scriptName) return;
+        
+        try {
+          const response = await fetch(`/src/overlays/${scriptName}/script.js`);
+          const jsContent = await response.text();
+          
+          // Charger le HTML et CSS associés
+          const htmlResponse = await fetch(`/src/overlays/${scriptName}/index.html`);
+          const cssResponse = await fetch(`/src/overlays/${scriptName}/style.css`);
+          
+          const htmlContent = await htmlResponse.text();
+          const cssContent = await cssResponse.text();
+          
+          // Mettre à jour les fichiers
+          this.files = {
+            html: htmlContent,
+            css: cssContent,
+            js: jsContent
+          };
+          
+          // Mettre à jour l'éditeur avec le contenu JavaScript
+          if (this.currentTab === 'js') {
+            this.editor.setValue(jsContent);
+          } else {
+            this.switchTab('js');
+          }
+          
+          this.showToast(`Script ${scriptName} chargé avec succès !`);
+          this.updatePreview();
+          
+        } catch (error) {
+          console.error('Erreur lors du chargement du script:', error);
+          this.showToast('Erreur lors du chargement du script');
+        }
+      }
+      
+      createNewScript() {
+        const scriptName = prompt('Nom du nouveau script :');
+        if (!scriptName) return;
+        
+        // Initialiser un nouveau script avec un template de base
+        this.files = {
+          html: '<div class="overlay-container">\n  <h1>Nouvel Overlay</h1>\n</div>',
+          css: '.overlay-container {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  width: 100%;\n  height: 100%;\n}\n\nh1 {\n  color: white;\n  font-size: 32px;\n}',
+          js: '// Script pour ' + scriptName + '\ndocument.addEventListener(\'DOMContentLoaded\', () => {\n  console.log(\'Overlay ' + scriptName + ' initialisé\');\n});'
+        };
+        
+        // Mettre à jour l'éditeur
+        this.switchTab('js');
+        this.updatePreview();
+        this.showToast('Nouveau script créé !');
+      }
+
       switchTab(tab) {
         console.log("Changement d'onglet vers:", tab);
         
@@ -1098,33 +1186,48 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("Aperçu mis à jour");
       }
 
-      saveOverlay() {
-        if (!this.overlayName) {
-          this.showToast('Veuillez donner un nom à votre overlay');
+      async saveOverlay() {
+        const scriptName = document.getElementById('scriptSelect').value;
+        
+        if (!scriptName) {
+          this.showToast('Veuillez sélectionner un script à sauvegarder');
           return;
         }
 
-        const overlay = {
-          id: this.overlayId,
-          name: this.overlayName,
-          files: this.files,
-          createdAt: new Date().toISOString()
-        };
+        try {
+          // Sauvegarder les fichiers localement
+          const overlay = {
+            id: this.overlayId,
+            name: scriptName,
+            files: this.files,
+            createdAt: new Date().toISOString()
+          };
 
-        localStorage.setItem(`overlay_${this.overlayId}`, JSON.stringify(overlay));
+          localStorage.setItem(`overlay_${scriptName}`, JSON.stringify(overlay));
 
-        const overlays = JSON.parse(localStorage.getItem('my_overlays') || '[]');
-        const existingIndex = overlays.findIndex(o => o.id === this.overlayId);
+          // Envoyer une requête pour sauvegarder les fichiers sur le serveur
+          const formData = new FormData();
+          formData.append('scriptName', scriptName);
+          formData.append('html', this.files.html);
+          formData.append('css', this.files.css);
+          formData.append('js', this.files.js);
 
-        if (existingIndex >= 0) {
-          overlays[existingIndex] = overlay;
-        } else {
-          overlays.push(overlay);
+          const response = await fetch('/api/save-script', {
+            method: 'POST',
+            body: formData
+          });
+
+          if (!response.ok) {
+            throw new Error('Erreur lors de la sauvegarde');
+          }
+
+          this.updateOverlayUrl();
+          this.showToast('Script sauvegardé avec succès !');
+          
+        } catch (error) {
+          console.error('Erreur lors de la sauvegarde:', error);
+          this.showToast('Erreur lors de la sauvegarde du script');
         }
-
-        localStorage.setItem('my_overlays', JSON.stringify(overlays));
-        this.updateOverlayUrl();
-        this.showToast('Overlay enregistré avec succès !');
       }
 
       showToast(message) {
