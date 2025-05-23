@@ -406,7 +406,13 @@ console.log('Overlay chargé !');`;
       }
 
       updateOverlayUrl() {
-        const url = `${window.location.origin}/overlay.html?id=${this.overlayId}`;
+        const overlayData = {
+          id: this.overlayId,
+          name: this.overlayName,
+          files: this.files
+        };
+        const encodedData = btoa(JSON.stringify(overlayData));
+        const url = `${window.location.origin}/overlay.html?data=${encodedData}`;
         document.getElementById('overlayUrl').querySelector('span').textContent = url;
       }
 
