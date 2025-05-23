@@ -185,6 +185,32 @@
       transform-origin: top left;
       border: none;
       background: transparent;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .preview-dimensions {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 960px; /* 1920px scaled by 0.5 */
+      height: 540px; /* 1080px scaled by 0.5 */
+      border: 2px solid var(--primary);
+      pointer-events: none;
+      z-index: 2;
+      box-sizing: border-box;
+    }
+    
+    .preview-dimensions::after {
+      content: "1920 x 1080";
+      position: absolute;
+      top: -25px;
+      right: 0;
+      background: var(--primary);
+      color: white;
+      padding: 2px 8px;
+      font-size: 12px;
+      border-radius: 4px;
     }
 
     .overlay-name {
@@ -242,16 +268,80 @@
       transform: translateY(0);
       opacity: 1;
     }
+    
+    .help-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s;
+    }
+    
+    .help-modal.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .help-content {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+    
+    .help-content h2 {
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .help-content h3 {
+      margin: 16px 0 8px;
+      color: var(--primary);
+    }
+    
+    .help-content p, .help-content li {
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+    
+    .help-content ul {
+      padding-left: 24px;
+      margin-bottom: 16px;
+    }
+    
+    .close-help {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 24px;
+    }
   </style>
 </head>
 <body>
   <header class="header">
     <input type="text" class="overlay-name" placeholder="Nom de l'overlay" id="overlayName">
     <div class="header-actions">
-      <div class="overlay-url" id="overlayUrl">
+      <div class="overlay-url" id="overlayUrl" title="Cliquez pour copier l'URL à utiliser dans OBS/Streamlabs">
         <i class="mdi mdi-link"></i>
         <span>URL de l'overlay</span>
       </div>
+      <button class="button secondary" id="helpBtn">
+        <i class="mdi mdi-help-circle"></i>
+        Aide
+      </button>
       <button class="button" id="saveBtn">
         <i class="mdi mdi-content-save"></i>
         Enregistrer
@@ -293,6 +383,7 @@
       <h2>Aperçu</h2>
       <div class="preview-container">
         <iframe id="preview-frame" class="preview-frame"></iframe>
+        <div class="preview-dimensions"></div>
       </div>
     </section>
   </main>
@@ -300,6 +391,44 @@
   <div class="toast" id="toast">
     <i class="mdi mdi-check-circle"></i>
     <span>Overlay enregistré avec succès !</span>
+  </div>
+  
+  <div class="help-modal" id="helpModal">
+    <div class="help-content">
+      <h2>
+        Comment utiliser votre overlay
+        <button class="close-help" id="closeHelp"><i class="mdi mdi-close"></i></button>
+      </h2>
+      
+      <p>Votre overlay est conçu pour être utilisé avec des logiciels de streaming comme OBS Studio ou Streamlabs.</p>
+      
+      <h3>Dimensions</h3>
+      <p>L'overlay est conçu pour une résolution de <strong>1920 x 1080 pixels</strong>. Un cadre violet est affiché pour vous aider à visualiser les limites de l'overlay.</p>
+      
+      <h3>Utilisation dans OBS Studio</h3>
+      <ol>
+        <li>Dans OBS, cliquez sur le <strong>+</strong> dans la section "Sources"</li>
+        <li>Sélectionnez <strong>Source navigateur</strong></li>
+        <li>Créez une nouvelle source et nommez-la</li>
+        <li>Dans le champ URL, collez l'URL de votre overlay (cliquez sur "URL de l'overlay" pour la copier)</li>
+        <li>Définissez la largeur à <strong>1920</strong> et la hauteur à <strong>1080</strong></li>
+        <li>Cochez <strong>Arrière-plan transparent</strong></li>
+        <li>Cliquez sur OK pour ajouter l'overlay</li>
+      </ol>
+      
+      <h3>Utilisation dans Streamlabs</h3>
+      <ol>
+        <li>Dans Streamlabs, cliquez sur le <strong>+</strong> dans la section "Sources"</li>
+        <li>Sélectionnez <strong>Source navigateur</strong></li>
+        <li>Nommez votre source</li>
+        <li>Dans le champ URL, collez l'URL de votre overlay</li>
+        <li>Définissez la largeur à <strong>1920</strong> et la hauteur à <strong>1080</strong></li>
+        <li>Activez <strong>Arrière-plan transparent</strong></li>
+        <li>Cliquez sur "Ajouter source" pour terminer</li>
+      </ol>
+      
+      <p><strong>Note importante :</strong> Assurez-vous que votre navigateur est ouvert et que vous êtes connecté à votre compte lorsque vous utilisez l'overlay dans OBS ou Streamlabs.</p>
+    </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
@@ -356,11 +485,30 @@
         document.getElementById('overlayName').addEventListener('input', (e) => {
           this.overlayName = e.target.value;
         });
+        
+        // Gestionnaires d'événements pour l'aide
+        document.getElementById('helpBtn').addEventListener('click', () => this.showHelp());
+        document.getElementById('closeHelp').addEventListener('click', () => this.hideHelp());
+        
+        // Fermer l'aide en cliquant en dehors du contenu
+        document.getElementById('helpModal').addEventListener('click', (e) => {
+          if (e.target === document.getElementById('helpModal')) {
+            this.hideHelp();
+          }
+        });
 
         this.editor.on('change', () => {
           this.files[this.currentTab] = this.editor.getValue();
           this.updatePreview();
         });
+      }
+      
+      showHelp() {
+        document.getElementById('helpModal').classList.add('show');
+      }
+      
+      hideHelp() {
+        document.getElementById('helpModal').classList.remove('show');
       }
 
       loadExistingOverlay() {
@@ -452,7 +600,11 @@ console.log('Overlay chargé !');`
       }
 
       updateOverlayUrl() {
-        const url = `${window.location.origin}/overlay.html?id=${this.overlayId}`;
+        // Construire l'URL absolue en utilisant le chemin complet
+        const currentPath = window.location.pathname;
+        const basePath = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
+        const url = `${window.location.origin}${basePath}overlay.html?id=${this.overlayId}`;
+        
         document.getElementById('overlayUrl').querySelector('span').textContent = url;
         console.log('URL de l\'overlay:', url); // Message de débogage
       }

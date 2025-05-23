@@ -28,6 +28,34 @@
             width: 1920px;
             height: 1080px;
             overflow: hidden;
+            position: relative;
+        }
+        
+        /* Cadre de dimensions visible uniquement en mode développement */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px solid rgba(145, 70, 255, 0.5);
+            pointer-events: none;
+            z-index: 9999;
+            box-sizing: border-box;
+        }
+        
+        body::after {
+            content: "1920 x 1080";
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(145, 70, 255, 0.7);
+            color: white;
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 4px;
+            z-index: 9999;
         }
 
         .error-message {
@@ -47,16 +75,14 @@
 <body>
     <div id="overlay-container"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         class OverlayLoader {
             constructor() {
                 this.container = document.getElementById('overlay-container');
-                this.supabase = null;
                 this.init();
             }
 
-            async init() {
+            init() {
                 const params = new URLSearchParams(window.location.search);
                 const overlayId = params.get('id');
 
@@ -65,29 +91,23 @@
                     return;
                 }
 
-                // Initialiser Supabase
-                this.supabase = supabase.createClient(
-                    'https://uejmtvhqzadtxrqtowtm.supabase.co',
-                    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlam10dmhxemFkdHhycXRvd3RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDI5MjA1MzAsImV4cCI6MjAxODQ5NjUzMH0.GQyqnKwqZBBGhzdWM5EQnbqYVh_NcAQBMXYFLGtGLnE'
-                );
-
-                await this.loadOverlay(overlayId);
+                this.loadOverlay(overlayId);
             }
 
-            async loadOverlay(overlayId) {
+            loadOverlay(overlayId) {
                 try {
-                    const { data: overlay, error } = await this.supabase
-                        .from('overlays')
-                        .select('*')
-                        .eq('id', overlayId)
-                        .single();
-
-                    if (error) {
-                        throw error;
-                    }
-
-                    if (!overlay) {
+                    // Charger depuis localStorage
+                    const overlayData = localStorage.getItem(`overlay_${overlayId}`);
+                    
+                    if (!overlayData) {
                         this.showError("Overlay non trouvé");
+                        return;
+                    }
+                    
+                    const overlay = JSON.parse(overlayData);
+                    
+                    if (!overlay || !overlay.files) {
+                        this.showError("Format d'overlay invalide");
                         return;
                     }
 
@@ -98,11 +118,11 @@
                         <head>
                             <meta charset="UTF-8">
                             <title>${overlay.name}</title>
-                            <style>${overlay.css}</style>
+                            <style>${overlay.files.css}</style>
                         </head>
                         <body>
-                            ${overlay.html}
-                            <script>${overlay.js}<\/script>
+                            ${overlay.files.html}
+                            <script>${overlay.files.js}<\/script>
                         </body>
                         </html>
                     `;
