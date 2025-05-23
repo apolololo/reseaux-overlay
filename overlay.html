@@ -47,14 +47,16 @@
 <body>
     <div id="overlay-container"></div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         class OverlayLoader {
             constructor() {
                 this.container = document.getElementById('overlay-container');
+                this.supabase = null;
                 this.init();
             }
 
-            init() {
+            async init() {
                 const params = new URLSearchParams(window.location.search);
                 const overlayId = params.get('id');
 
@@ -63,32 +65,44 @@
                     return;
                 }
 
-                this.loadOverlay(overlayId);
+                // Initialiser Supabase
+                this.supabase = supabase.createClient(
+                    'https://uejmtvhqzadtxrqtowtm.supabase.co',
+                    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlam10dmhxemFkdHhycXRvd3RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDI5MjA1MzAsImV4cCI6MjAxODQ5NjUzMH0.GQyqnKwqZBBGhzdWM5EQnbqYVh_NcAQBMXYFLGtGLnE'
+                );
+
+                await this.loadOverlay(overlayId);
             }
 
-            loadOverlay(overlayId) {
+            async loadOverlay(overlayId) {
                 try {
-                    const overlayData = localStorage.getItem(`overlay_${overlayId}`);
-                    
-                    if (!overlayData) {
+                    const { data: overlay, error } = await this.supabase
+                        .from('overlays')
+                        .select('*')
+                        .eq('id', overlayId)
+                        .single();
+
+                    if (error) {
+                        throw error;
+                    }
+
+                    if (!overlay) {
                         this.showError("Overlay non trouvé");
                         return;
                     }
 
-                    const overlay = JSON.parse(overlayData);
-                    
-                    // Créer le document HTML de base
+                    // Créer le document HTML
                     document.documentElement.innerHTML = `
                         <!DOCTYPE html>
                         <html>
                         <head>
                             <meta charset="UTF-8">
                             <title>${overlay.name}</title>
-                            <style>${overlay.files.css}</style>
+                            <style>${overlay.css}</style>
                         </head>
                         <body>
-                            ${overlay.files.html}
-                            <script>${overlay.files.js}<\/script>
+                            ${overlay.html}
+                            <script>${overlay.js}<\/script>
                         </body>
                         </html>
                     `;
