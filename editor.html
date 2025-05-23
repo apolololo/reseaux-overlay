@@ -6,9 +6,21 @@
   <title>Éditeur d'Overlay - APO Overlays</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
+  
+  <!-- CodeMirror Core CSS -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" rel="stylesheet">
+  
+  <!-- Thèmes CodeMirror -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/vscode-dark.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css" rel="stylesheet">
+  
+  <!-- Addons CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldgutter.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/dialog/dialog.min.css" rel="stylesheet">
 
   <style>
     :root {
@@ -159,6 +171,127 @@
       height: 100% !important;
       font-family: 'Fira Code', monospace;
       font-size: 14px;
+      line-height: 1.5;
+    }
+    
+    /* Style VS Code-like */
+    .CodeMirror-gutters {
+      background-color: #1e1e1e;
+      border-right: 1px solid #333;
+    }
+    
+    .CodeMirror-linenumber {
+      color: #858585;
+    }
+    
+    .CodeMirror-cursor {
+      border-left: 2px solid #f8f8f0;
+    }
+    
+    /* Styles pour le pliage de code */
+    .CodeMirror-foldgutter {
+      width: 1.2em;
+    }
+    
+    .CodeMirror-foldgutter-open,
+    .CodeMirror-foldgutter-folded {
+      cursor: pointer;
+      color: #858585;
+    }
+    
+    .CodeMirror-foldgutter-open:after {
+      content: "▾";
+    }
+    
+    .CodeMirror-foldgutter-folded:after {
+      content: "▸";
+    }
+    
+    /* Style pour l'autocomplétion */
+    .CodeMirror-hints {
+      position: absolute;
+      z-index: 10;
+      overflow: hidden;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      border-radius: 3px;
+      max-height: 20em;
+      overflow-y: auto;
+      background: #1e1e1e;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+      border: 1px solid #333;
+    }
+    
+    .CodeMirror-hint {
+      margin: 0;
+      padding: 4px 8px;
+      white-space: pre;
+      color: #f8f8f2;
+      cursor: pointer;
+      font-family: 'Fira Code', monospace;
+    }
+    
+    li.CodeMirror-hint-active {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    /* Style pour la recherche */
+    .CodeMirror-dialog {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      z-index: 15;
+      padding: 8px;
+      background: #1e1e1e;
+      border-bottom: 1px solid #333;
+      color: #f8f8f2;
+    }
+    
+    .CodeMirror-dialog input {
+      background: #333;
+      color: #f8f8f2;
+      border: 1px solid #555;
+      padding: 4px 8px;
+      border-radius: 3px;
+      outline: none;
+      font-family: 'Fira Code', monospace;
+    }
+    
+    /* Barre d'outils de l'éditeur */
+    .editor-toolbar {
+      display: flex;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 4px 8px;
+      gap: 8px;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .editor-toolbar button {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+    }
+    
+    .editor-toolbar button:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .editor-toolbar .separator {
+      width: 1px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      margin: 0 4px;
     }
 
     .preview-section {
@@ -321,6 +454,21 @@
       margin-bottom: 16px;
     }
     
+    .help-content kbd {
+      display: inline-block;
+      padding: 3px 5px;
+      font-family: 'Fira Code', monospace;
+      font-size: 11px;
+      line-height: 10px;
+      color: #444;
+      vertical-align: middle;
+      background-color: #f7f7f7;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.2), inset 0 0 0 2px #fff;
+      margin: 0 2px;
+    }
+    
     .close-help {
       background: none;
       border: none;
@@ -376,6 +524,33 @@
         <div class="editor-tab active" data-tab="html">HTML</div>
         <div class="editor-tab" data-tab="css">CSS</div>
         <div class="editor-tab" data-tab="js">JavaScript</div>
+      </div>
+      <div class="editor-toolbar">
+        <button id="indentBtn" title="Indenter le code">
+          <i class="mdi mdi-format-indent-increase"></i>
+          Indenter
+        </button>
+        <button id="searchBtn" title="Rechercher (Ctrl+F)">
+          <i class="mdi mdi-magnify"></i>
+          Rechercher
+        </button>
+        <div class="separator"></div>
+        <button id="undoBtn" title="Annuler (Ctrl+Z)">
+          <i class="mdi mdi-undo"></i>
+        </button>
+        <button id="redoBtn" title="Rétablir (Ctrl+Y)">
+          <i class="mdi mdi-redo"></i>
+        </button>
+        <div class="separator"></div>
+        <button id="themeBtn" title="Changer de thème">
+          <i class="mdi mdi-theme-light-dark"></i>
+          Thème
+        </button>
+        <div class="separator"></div>
+        <button id="hintBtn" title="Afficher les suggestions (Ctrl+Space)">
+          <i class="mdi mdi-lightbulb-on"></i>
+          Suggestions
+        </button>
       </div>
       <div id="editor"></div>
     </section>
@@ -440,14 +615,81 @@
         <li>Vous pouvez utiliser cette URL directement dans OBS ou Streamlabs, même sur un autre ordinateur</li>
         <li>L'overlay s'affichera exactement comme vous l'avez conçu</li>
       </ol>
+      
+      <h3>Raccourcis clavier de l'éditeur</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+        <tr>
+          <th style="text-align: left; padding: 5px; border-bottom: 1px solid #333;">Raccourci</th>
+          <th style="text-align: left; padding: 5px; border-bottom: 1px solid #333;">Action</th>
+        </tr>
+        <tr>
+          <td style="padding: 5px; border-bottom: 1px solid #333;"><kbd>Ctrl</kbd> + <kbd>Space</kbd></td>
+          <td style="padding: 5px; border-bottom: 1px solid #333;">Afficher les suggestions</td>
+        </tr>
+        <tr>
+          <td style="padding: 5px; border-bottom: 1px solid #333;"><kbd>Ctrl</kbd> + <kbd>F</kbd></td>
+          <td style="padding: 5px; border-bottom: 1px solid #333;">Rechercher dans le code</td>
+        </tr>
+        <tr>
+          <td style="padding: 5px; border-bottom: 1px solid #333;"><kbd>Ctrl</kbd> + <kbd>/</kbd></td>
+          <td style="padding: 5px; border-bottom: 1px solid #333;">Commenter/Décommenter</td>
+        </tr>
+        <tr>
+          <td style="padding: 5px; border-bottom: 1px solid #333;"><kbd>Ctrl</kbd> + <kbd>Z</kbd></td>
+          <td style="padding: 5px; border-bottom: 1px solid #333;">Annuler</td>
+        </tr>
+        <tr>
+          <td style="padding: 5px; border-bottom: 1px solid #333;"><kbd>Ctrl</kbd> + <kbd>Y</kbd></td>
+          <td style="padding: 5px; border-bottom: 1px solid #333;">Rétablir</td>
+        </tr>
+        <tr>
+          <td style="padding: 5px; border-bottom: 1px solid #333;"><kbd>Ctrl</kbd> + <kbd>E</kbd></td>
+          <td style="padding: 5px; border-bottom: 1px solid #333;">Entourer la sélection avec une balise (HTML)</td>
+        </tr>
+        <tr>
+          <td style="padding: 5px;"><kbd>Tab</kbd></td>
+          <td style="padding: 5px;">Indenter</td>
+        </tr>
+      </table>
     </div>
   </div>
 
+  <!-- CodeMirror Core -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+  
+  <!-- Modes pour les langages -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
+  
+  <!-- Addons pour l'autocomplétion -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/html-hint.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/css-hint.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/javascript-hint.min.js"></script>
+  
+  <!-- Addons pour les parenthèses et balises -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closetag.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchbrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchtags.min.js"></script>
+  
+  <!-- Addons pour la recherche -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/search/search.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/search/searchcursor.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/search/jump-to-line.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/dialog/dialog.min.js"></script>
+  
+  <!-- Addons pour le pliage de code -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldgutter.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/brace-fold.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/xml-fold.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/comment-fold.min.js"></script>
+  
+  <!-- Addons pour la coloration des paires -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchbrackets.min.js"></script>
 
   <script>
     class OverlayEditor {
@@ -485,20 +727,42 @@
       }
 
       setupEditor() {
+        // Configuration de l'éditeur avec des fonctionnalités avancées
         this.editor = CodeMirror(document.getElementById('editor'), {
           mode: 'htmlmixed',
-          theme: 'monokai',
+          theme: 'dracula',
           lineNumbers: true,
           autoCloseTags: true,
           autoCloseBrackets: true,
           matchBrackets: true,
+          matchTags: {bothTags: true},
           indentUnit: 2,
           tabSize: 2,
-          lineWrapping: true
+          lineWrapping: true,
+          extraKeys: {
+            "Ctrl-Space": "autocomplete",
+            "Ctrl-/": "toggleComment",
+            "Ctrl-F": "findPersistent",
+            "Tab": function(cm) {
+              if (cm.somethingSelected()) {
+                cm.indentSelection("add");
+              } else {
+                cm.replaceSelection(cm.getOption("indentWithTabs") ? "\t" :
+                  " ".repeat(cm.getOption("indentUnit")));
+              }
+            }
+          },
+          foldGutter: true,
+          gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
         });
+        
+        // Définir les thèmes disponibles
+        this.themes = ['dracula', 'monokai', 'vscode-dark'];
+        this.currentThemeIndex = 0;
       }
 
       setupEventListeners() {
+        // Gestionnaires pour les onglets de fichiers
         document.querySelectorAll('.editor-tab, .file-item').forEach(el => {
           el.addEventListener('click', () => {
             const fileType = el.dataset.file || el.dataset.tab;
@@ -506,15 +770,14 @@
           });
         });
 
+        // Gestionnaires pour les actions principales
         document.getElementById('saveBtn').addEventListener('click', () => this.saveOverlay());
         document.getElementById('overlayUrl').addEventListener('click', () => this.copyOverlayUrl());
         document.getElementById('overlayName').addEventListener('input', (e) => {
           this.overlayName = e.target.value;
         });
         
-        // Les gestionnaires d'événements pour l'exportation et l'importation ont été supprimés
-        
-        // Gestionnaires d'événements pour l'aide
+        // Gestionnaires pour l'aide
         document.getElementById('helpBtn').addEventListener('click', () => this.showHelp());
         document.getElementById('closeHelp').addEventListener('click', () => this.hideHelp());
         
@@ -524,11 +787,64 @@
             this.hideHelp();
           }
         });
-
+        
+        // Gestionnaires pour la barre d'outils de l'éditeur
+        document.getElementById('indentBtn').addEventListener('click', () => this.indentCode());
+        document.getElementById('searchBtn').addEventListener('click', () => this.searchInCode());
+        document.getElementById('undoBtn').addEventListener('click', () => this.editor.undo());
+        document.getElementById('redoBtn').addEventListener('click', () => this.editor.redo());
+        document.getElementById('themeBtn').addEventListener('click', () => this.cycleTheme());
+        document.getElementById('hintBtn').addEventListener('click', () => this.showHints());
+        
+        // Événement de changement de l'éditeur
         this.editor.on('change', () => {
           this.files[this.currentTab] = this.editor.getValue();
           this.updatePreview();
         });
+        
+        // Activer l'autocomplétion automatique
+        this.editor.on('inputRead', (cm, change) => {
+          if (change.origin !== 'complete') {
+            const mode = this.currentTab;
+            if (mode === 'html' || mode === 'css' || mode === 'js') {
+              // Déclencher l'autocomplétion après un délai
+              clearTimeout(this.autocompleteTimer);
+              this.autocompleteTimer = setTimeout(() => {
+                if (change.text[0] === '.' || change.text[0] === '<' || change.text[0] === '#' || 
+                    change.text[0] === ':' || change.text[0] === '@' || change.text[0] === '$') {
+                  CodeMirror.commands.autocomplete(cm);
+                }
+              }, 150);
+            }
+          }
+        });
+      }
+      
+      // Méthodes pour les fonctionnalités de l'éditeur
+      indentCode() {
+        const editor = this.editor;
+        const totalLines = editor.lineCount();
+        editor.operation(() => {
+          for (let i = 0; i < totalLines; i++) {
+            editor.indentLine(i);
+          }
+        });
+        this.showToast('Code indenté');
+      }
+      
+      searchInCode() {
+        CodeMirror.commands.findPersistent(this.editor);
+      }
+      
+      cycleTheme() {
+        this.currentThemeIndex = (this.currentThemeIndex + 1) % this.themes.length;
+        const newTheme = this.themes[this.currentThemeIndex];
+        this.editor.setOption('theme', newTheme);
+        this.showToast(`Thème : ${newTheme}`);
+      }
+      
+      showHints() {
+        CodeMirror.commands.autocomplete(this.editor);
       }
       
       // Les fonctions d'exportation et d'importation ont été supprimées
@@ -626,7 +942,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
       switchTab(tab) {
         console.log("Changement d'onglet vers:", tab);
-        console.log("Contenu actuel des fichiers:", this.files);
         
         // Sauvegarder le contenu de l'onglet actuel avant de changer
         if (this.currentTab) {
@@ -647,17 +962,66 @@ document.addEventListener('DOMContentLoaded', function() {
         if (editorTab) editorTab.classList.add('active');
         if (fileItem) fileItem.classList.add('active');
 
-        // Changer le mode de l'éditeur
-        const mode = tab === 'html' ? 'htmlmixed' : tab === 'css' ? 'css' : 'javascript';
+        // Configurer l'éditeur en fonction du type de fichier
+        let mode, mimeType, hints;
+        
+        switch(tab) {
+          case 'html':
+            mode = 'htmlmixed';
+            mimeType = 'text/html';
+            hints = 'htmlhint';
+            break;
+          case 'css':
+            mode = 'css';
+            mimeType = 'text/css';
+            hints = 'csshint';
+            break;
+          case 'js':
+            mode = 'javascript';
+            mimeType = 'text/javascript';
+            hints = 'javascripthint';
+            break;
+        }
+        
+        // Mettre à jour les options de l'éditeur
         this.editor.setOption('mode', mode);
+        
+        // Configurer les raccourcis clavier spécifiques au mode
+        const extraKeys = {
+          "Ctrl-Space": "autocomplete",
+          "Ctrl-/": "toggleComment",
+          "Ctrl-F": "findPersistent",
+          "Tab": (cm) => {
+            if (cm.somethingSelected()) {
+              cm.indentSelection("add");
+            } else {
+              cm.replaceSelection(" ".repeat(cm.getOption("indentUnit")));
+            }
+          }
+        };
+        
+        // Ajouter des raccourcis spécifiques au mode
+        if (tab === 'html') {
+          extraKeys["Ctrl-E"] = (cm) => {
+            // Entourer la sélection avec une balise
+            if (cm.somethingSelected()) {
+              const selection = cm.getSelection();
+              cm.replaceSelection(`<div>${selection}</div>`);
+            }
+          };
+        }
+        
+        this.editor.setOption('extraKeys', extraKeys);
         
         // Définir le contenu de l'éditeur
         console.log(`Chargement du contenu ${tab}:`, this.files[tab]);
         this.editor.setValue(this.files[tab] || '');
         
-        // Forcer la mise à jour de l'éditeur
+        // Forcer la mise à jour de l'éditeur et placer le curseur au début
         setTimeout(() => {
           this.editor.refresh();
+          this.editor.setCursor(0, 0);
+          this.editor.focus();
         }, 10);
       }
 
