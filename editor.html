@@ -295,7 +295,7 @@
       init() {
         this.setupEditor();
         this.setupEventListeners();
-        this.loadOverlay();
+        this.createNewOverlay();
       }
 
       setupEditor() {
@@ -334,35 +334,14 @@
         });
       }
 
-      switchTab(tab) {
-        this.currentTab = tab;
-        document.querySelectorAll('.editor-tab').forEach(t => {
-          t.classList.toggle('active', t.dataset.tab === tab);
-        });
-
-        this.editor.setOption('mode', {
-          html: 'htmlmixed',
-          css: 'css',
-          js: 'javascript'
-        }[tab]);
-
-        this.editor.setValue(this.files[tab] || '');
-      }
-
-      loadOverlay() {
-        const savedOverlay = localStorage.getItem('current_overlay');
-        if (savedOverlay) {
-          const overlay = JSON.parse(savedOverlay);
-          this.overlayName = overlay.name;
-          this.overlayId = overlay.id || this.generateOverlayId();
-          this.files = overlay.files;
-          document.getElementById('overlayName').value = overlay.name;
-          this.updateOverlayUrl();
-          this.editor.setValue(this.files.html);
-        } else {
-          this.overlayId = this.generateOverlayId();
-          // Template par défaut
-          this.files.html = `<!DOCTYPE html>
+      createNewOverlay() {
+        this.overlayId = this.generateOverlayId();
+        this.overlayName = 'Nouvel Overlay';
+        document.getElementById('overlayName').value = this.overlayName;
+        
+        // Template par défaut
+        this.files = {
+          html: `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -373,8 +352,8 @@
         <h1>Bienvenue !</h1>
     </div>
 </body>
-</html>`;
-          this.files.css = `body {
+</html>`,
+          css: `body {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
@@ -393,12 +372,14 @@ h1 {
     color: white;
     font-size: 48px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-}`;
-          this.files.js = `// Votre code JavaScript ici
-console.log('Overlay chargé !');`;
-          this.editor.setValue(this.files.html);
-          this.updateOverlayUrl();
-        }
+}`,
+          js: `// Votre code JavaScript ici
+console.log('Overlay chargé !');`
+        };
+
+        this.editor.setValue(this.files.html);
+        this.updateOverlayUrl();
+        this.updatePreview();
       }
 
       generateOverlayId() {
@@ -472,7 +453,6 @@ console.log('Overlay chargé !');`;
         }
 
         localStorage.setItem('my_overlays', JSON.stringify(overlays));
-        localStorage.setItem('current_overlay', JSON.stringify(overlay));
         this.updateOverlayUrl();
         this.showToast('Overlay enregistré avec succès !');
       }
