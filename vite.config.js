@@ -1,25 +1,22 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: 'https://apo-overlay.netlify.app/',
+  base: '/',
   build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
     rollupOptions: {
       input: {
         main: 'index.html',
-        auth: 'auth/auth.html',
-        callback: 'auth/callback.html',
-        marketplace: 'marketplace.html',
+        editor: 'editor.html',
+        overlay: 'overlay.html',
         myOverlays: 'my-overlays.html',
-        editor: 'editor.html'
+        marketplace: 'marketplace.html'
       }
-    },
-    assetsDir: 'assets',
-    outDir: 'dist',
-    emptyOutDir: true,
-    copyPublicDir: true
+    }
   },
   server: {
-    port: 8080,
-    open: '/index.html'
+    port: 3000,
+    open: true
   }
 });

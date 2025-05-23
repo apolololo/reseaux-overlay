@@ -134,6 +134,9 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
     }
 
     .preview-header {
@@ -158,6 +161,10 @@
       flex: 1;
       border: none;
       background: white;
+      width: 1920px;
+      height: 1080px;
+      transform: scale(0.5);
+      transform-origin: top left;
     }
 
     .overlay-name {
@@ -412,7 +419,18 @@ console.log('Overlay chargé !');`;
           <!DOCTYPE html>
           <html>
           <head>
-              <style>${this.files.css}</style>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <style>
+                body {
+                  margin: 0;
+                  padding: 0;
+                  width: 1920px;
+                  height: 1080px;
+                  overflow: hidden;
+                }
+                ${this.files.css}
+              </style>
           </head>
           <body>
               ${this.files.html}
@@ -463,5 +481,4 @@ console.log('Overlay chargé !');`;
     const editor = new OverlayEditor();
   </script>
 </body>
-</html>
 </html>

@@ -1,17 +1,18 @@
 {
-  "name": "apo-overlay",
-  "private": true,
+  "name": "apo-overlays",
   "version": "1.0.0",
-  "type": "module",
+  "description": "Système d'overlays pour streamers",
+  "main": "index.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "codemirror": "^5.65.2"
+  },
   "devDependencies": {
     "vite": "^5.0.0"
-  },
-  "dependencies": {
-    "apo-overlay": "file:"
   }
 }

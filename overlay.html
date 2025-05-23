@@ -25,8 +25,8 @@
             font-family: 'Montserrat', sans-serif;
             background: transparent;
             color: var(--text);
-            width: 100vw;
-            height: 100vh;
+            width: 1920px;
+            height: 1080px;
             overflow: hidden;
         }
 
@@ -158,22 +158,32 @@
             }
 
             loadOverlay(overlayId) {
-                const overlays = JSON.parse(localStorage.getItem('my_overlays') || '[]');
-                const overlay = overlays.find(o => o.id === overlayId);
+                try {
+                    const overlays = JSON.parse(localStorage.getItem('my_overlays') || '[]');
+                    const overlay = overlays.find(o => o.id === overlayId);
 
-                if (!overlay) {
-                    this.showError('Overlay non trouvé');
-                    return;
+                    if (!overlay) {
+                        this.showError('Overlay non trouvé');
+                        return;
+                    }
+
+                    // Injecter le contenu de l'overlay
+                    const style = document.createElement('style');
+                    style.textContent = overlay.files.css;
+                    document.head.appendChild(style);
+
+                    // Injecter le HTML
+                    document.body.innerHTML = overlay.files.html;
+
+                    // Exécuter le JavaScript
+                    const script = document.createElement('script');
+                    script.textContent = overlay.files.js;
+                    document.body.appendChild(script);
+
+                } catch (error) {
+                    console.error('Erreur lors du chargement de l\'overlay:', error);
+                    this.showError('Erreur lors du chargement de l\'overlay');
                 }
-
-                // Injecter le contenu de l'overlay
-                document.head.innerHTML += `<style>${overlay.files.css}</style>`;
-                document.body.innerHTML = overlay.files.html;
-                
-                // Exécuter le JavaScript
-                const script = document.createElement('script');
-                script.textContent = overlay.files.js;
-                document.body.appendChild(script);
             }
 
             showError(message) {
@@ -184,6 +194,12 @@
                         padding: 20px;
                         font-family: Arial, sans-serif;
                         text-align: center;
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        border-radius: 8px;
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
                     ">
                         ${message}
                     </div>
