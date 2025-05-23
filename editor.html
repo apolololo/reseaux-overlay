@@ -5,16 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Éditeur d'Overlay - APO Overlays</title>
   
-  <!-- Fonts et CSS externes -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css" rel="stylesheet">
   
   <style>
-    /* Styles existants inchangés */
     :root {
       --primary: #9146FF;
       --secondary: #00ADB5;
@@ -83,10 +79,46 @@
     .main-content {
       flex: 1;
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 250px 1fr 1fr;
       gap: 24px;
       padding: 24px;
       height: calc(100vh - 73px);
+    }
+
+    .file-explorer {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .file-explorer-header {
+      margin-bottom: 20px;
+    }
+
+    .file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .file-item {
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .file-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .file-item.active {
+      background: var(--primary);
+      color: white;
     }
 
     .editor-section {
@@ -130,38 +162,20 @@
     }
 
     .preview-section {
-      flex: 1;
-      padding: 2rem;
       background: var(--surface);
+      border-radius: 12px;
+      padding: 20px;
       display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
+      flex-direction: column;
+      gap: 20px;
     }
 
     .preview-container {
-      width: 960px;
-      height: 540px;
+      flex: 1;
       position: relative;
       overflow: hidden;
-    }
-
-    .preview-header {
-      padding: 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .preview-header h2 {
-      font-size: 18px;
-      font-weight: 600;
-    }
-
-    .preview-actions {
-      display: flex;
-      gap: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
     }
 
     .preview-frame {
@@ -169,8 +183,8 @@
       height: 1080px;
       transform: scale(0.5);
       transform-origin: top left;
-      border: 1px solid var(--border-color);
-      background: var(--background);
+      border: none;
+      background: transparent;
     }
 
     .overlay-name {
@@ -205,10 +219,6 @@
 
     .overlay-url:hover {
       background: rgba(255, 255, 255, 0.1);
-    }
-
-    .overlay-url i {
-      color: var(--primary);
     }
 
     .toast {
@@ -250,6 +260,26 @@
   </header>
 
   <main class="main-content">
+    <div class="file-explorer">
+      <div class="file-explorer-header">
+        <h2>Fichiers</h2>
+      </div>
+      <div class="file-list">
+        <div class="file-item active" data-file="html">
+          <i class="mdi mdi-language-html5"></i>
+          index.html
+        </div>
+        <div class="file-item" data-file="css">
+          <i class="mdi mdi-language-css3"></i>
+          style.css
+        </div>
+        <div class="file-item" data-file="js">
+          <i class="mdi mdi-language-javascript"></i>
+          script.js
+        </div>
+      </div>
+    </div>
+
     <section class="editor-section">
       <div class="editor-tabs">
         <div class="editor-tab active" data-tab="html">HTML</div>
@@ -260,6 +290,7 @@
     </section>
 
     <section class="preview-section">
+      <h2>Aperçu</h2>
       <div class="preview-container">
         <iframe id="preview-frame" class="preview-frame"></iframe>
       </div>
@@ -271,7 +302,6 @@
     <span>Overlay enregistré avec succès !</span>
   </div>
 
-  <!-- Scripts CodeMirror -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
@@ -314,13 +344,15 @@
       }
 
       setupEventListeners() {
-        document.querySelectorAll('.editor-tab').forEach(tab => {
-          tab.addEventListener('click', () => this.switchTab(tab.dataset.tab));
+        document.querySelectorAll('.editor-tab, .file-item').forEach(el => {
+          el.addEventListener('click', () => {
+            const fileType = el.dataset.file || el.dataset.tab;
+            this.switchTab(fileType);
+          });
         });
 
         document.getElementById('saveBtn').addEventListener('click', () => this.saveOverlay());
         document.getElementById('overlayUrl').addEventListener('click', () => this.copyOverlayUrl());
-
         document.getElementById('overlayName').addEventListener('input', (e) => {
           this.overlayName = e.target.value;
         });
@@ -344,7 +376,7 @@
             this.files = overlay.files;
             
             document.getElementById('overlayName').value = this.overlayName;
-            this.editor.setValue(this.files.html);
+            this.editor.setValue(this.files[this.currentTab]);
             this.updateOverlayUrl();
             this.updatePreview();
             return true;
@@ -364,13 +396,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Mon Overlay</title>
-    <style id="overlay-css"></style>
 </head>
 <body>
     <div class="overlay">
         <h1>Bienvenue !</h1>
     </div>
-    <script id="overlay-js"></script>
 </body>
 </html>`,
           css: `body {
@@ -397,7 +427,7 @@ h1 {
 console.log('Overlay chargé !');`
         };
 
-        this.editor.setValue(this.files.html);
+        this.editor.setValue(this.files[this.currentTab]);
         this.updateOverlayUrl();
         this.updatePreview();
       }
@@ -408,9 +438,15 @@ console.log('Overlay chargé !');`
 
       switchTab(tab) {
         this.currentTab = tab;
-        document.querySelector('.editor-tab.active').classList.remove('active');
-        document.querySelector(`.editor-tab[data-tab="${tab}"]`).classList.add('active');
         
+        // Mettre à jour les onglets actifs
+        document.querySelectorAll('.editor-tab.active, .file-item.active').forEach(el => {
+          el.classList.remove('active');
+        });
+        document.querySelector(`.editor-tab[data-tab="${tab}"]`).classList.add('active');
+        document.querySelector(`.file-item[data-file="${tab}"]`).classList.add('active');
+        
+        // Changer le mode de l'éditeur
         this.editor.setOption('mode', tab === 'html' ? 'htmlmixed' : tab === 'css' ? 'css' : 'javascript');
         this.editor.setValue(this.files[tab]);
       }
@@ -429,33 +465,23 @@ console.log('Overlay chargé !');`
 
       updatePreview() {
         const frame = document.getElementById('preview-frame');
-        const doc = frame.contentDocument || frame.contentWindow.document;
-        
-        // Mise à jour du contenu en fonction de l'onglet actif
-        if (this.currentTab === 'html') {
-          doc.open();
-          doc.write(this.files.html);
-          doc.close();
-          
-          // Réinjecter CSS et JS
-          const styleElement = doc.getElementById('overlay-css');
-          if (styleElement) styleElement.textContent = this.files.css;
-          
-          const scriptElement = doc.getElementById('overlay-js');
-          if (scriptElement) scriptElement.textContent = this.files.js;
-        } else if (this.currentTab === 'css') {
-          const styleElement = doc.getElementById('overlay-css');
-          if (styleElement) styleElement.textContent = this.files.css;
-        } else if (this.currentTab === 'js') {
-          const scriptElement = doc.getElementById('overlay-js');
-          if (scriptElement) {
-            scriptElement.textContent = this.files.js;
-            // Réexécuter le script
-            const newScript = doc.createElement('script');
-            newScript.textContent = this.files.js;
-            scriptElement.parentNode.replaceChild(newScript, scriptElement);
-          }
-        }
+        const content = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <style>
+                ${this.files.css}
+              </style>
+          </head>
+          <body>
+              ${this.files.html}
+              <script>${this.files.js}<\/script>
+          </body>
+          </html>
+        `;
+        frame.srcdoc = content;
       }
 
       saveOverlay() {
