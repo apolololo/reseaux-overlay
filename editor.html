@@ -9,31 +9,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css" rel="stylesheet">
-  
-  <!-- Scripts CodeMirror -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchbrackets.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
   
   <style>
     :root {
-      --primary: #6366f1;
-      --primary-dark: #4f46e5;
-      --secondary: #64748b;
-      --background: #0f172a;
-      --surface: #1e293b;
-      --surface-light: #334155;
-      --text-primary: #f8fafc;
-      --text-secondary: #cbd5e1;
-      --error: #ef4444;
-      --success: #22c55e;
-      --border-color: #475569;
+      --primary: #9146FF;
+      --secondary: #00ADB5;
+      --background: #0e0e10;
+      --surface: #18181b;
+      --text: #efeff1;
+      --text-secondary: #adadb8;
     }
 
     * {
@@ -45,420 +30,391 @@
     body {
       font-family: 'Montserrat', sans-serif;
       background: var(--background);
-      color: var(--text-primary);
+      color: var(--text);
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .container {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      padding: 20px;
-      gap: 20px;
-      max-width: 1920px;
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px;
-      background: var(--surface);
-      border-radius: 12px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 40px;
-    }
-
-    .header h1 {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .main-nav {
-      display: flex;
-      gap: 20px;
-    }
-
-    .nav-link {
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.3s ease;
-    }
-
-    .nav-link:hover {
-      color: var(--text-primary);
     }
 
     .editor-container {
-      display: flex;
-      gap: 20px;
-      flex: 1;
+      display: grid;
+      grid-template-columns: 250px 1fr 300px;
+      height: 100vh;
     }
 
+    /* Sidebar Styles */
     .sidebar {
-      width: 250px;
       background: var(--surface);
-      border-radius: 12px;
+      padding: 20px;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-header {
+      margin-bottom: 20px;
+    }
+
+    .sidebar-title {
+      font-size: 1.2em;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .element-list {
+      list-style: none;
+    }
+
+    .element-item {
+      padding: 10px;
+      margin: 5px 0;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .element-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Canvas Styles */
+    .canvas-container {
       padding: 20px;
       display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .file-explorer {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .file-item {
-      display: flex;
+      justify-content: center;
       align-items: center;
-      gap: 10px;
-      padding: 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.3s ease;
+      background: var(--background);
+    }
+
+    .canvas {
+      width: 1920px;
+      height: 1080px;
+      background: var(--surface);
+      position: relative;
+      transform-origin: top left;
+      transform: scale(0.5);
+    }
+
+    /* Properties Panel */
+    .properties-panel {
+      background: var(--surface);
+      padding: 20px;
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .property-group {
+      margin-bottom: 20px;
+    }
+
+    .property-title {
+      font-size: 1em;
+      font-weight: 600;
+      margin-bottom: 10px;
       color: var(--text-secondary);
     }
 
-    .file-item:hover,
-    .file-item.active {
-      background: var(--surface-light);
-      color: var(--text-primary);
-    }
-
-    .file-icon {
-      width: 20px;
-      height: 20px;
-    }
-
-    .main-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .editor-wrapper {
-      flex: 1;
-      background: var(--surface);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    .CodeMirror {
-      height: 100% !important;
-      font-family: 'Fira Code', monospace;
-      font-size: 14px;
-    }
-
-    .preview-container {
-      height: 400px;
-      background: var(--surface);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    .preview-iframe {
+    .property-input {
       width: 100%;
-      height: 100%;
-      border: none;
-      background: white;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      color: var(--text);
+      margin-bottom: 8px;
     }
 
-    .actions {
-      display: flex;
-      gap: 10px;
-    }
-
-    .action-btn {
-      padding: 12px 24px;
-      border-radius: 8px;
-      border: none;
+    .button {
       background: var(--primary);
       color: white;
-      font-weight: 600;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
       cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      font-weight: 600;
+      transition: all 0.2s;
     }
 
-    .action-btn:hover {
-      background: var(--primary-dark);
-      transform: translateY(-2px);
+    .button:hover {
+      opacity: 0.9;
     }
 
-    .action-btn:active {
-      transform: translateY(0);
-    }
-
-    .action-btn.secondary {
-      background: transparent;
-      border: 1px solid var(--border-color);
-      color: var(--text-primary);
-    }
-
-    .action-btn.secondary:hover {
-      background: var(--surface-light);
-    }
-
-    .toast {
+    .toolbar {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
-      padding: 12px 24px;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--surface);
+      padding: 10px;
       border-radius: 8px;
-      color: white;
-      font-weight: 500;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.3s ease;
-    }
-
-    .toast.success {
-      background: var(--success);
-    }
-
-    .toast.error {
-      background: var(--error);
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0);
+      display: flex;
+      gap: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header class="header">
-      <div class="header-left">
-        <h1>Éditeur d'Overlay</h1>
-        <nav class="main-nav">
-          <a href="index.html" class="nav-link">Dashboard</a>
-          <a href="marketplace.html" class="nav-link">Marketplace</a>
-          <a href="my-overlays.html" class="nav-link">Mes Overlays</a>
-        </nav>
+  <div class="editor-container">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h2 class="sidebar-title">Éléments</h2>
       </div>
-      <div class="actions">
-        <button class="action-btn secondary" onclick="saveOverlay()">
-          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
-          </svg>
-          Enregistrer
-        </button>
-        <button class="action-btn" onclick="publishOverlay()">
-          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-          </svg>
-          Publier
-        </button>
+      <ul class="element-list">
+        <li class="element-item" data-type="text">Texte</li>
+        <li class="element-item" data-type="image">Image</li>
+        <li class="element-item" data-type="shape">Forme</li>
+        <li class="element-item" data-type="alert">Alerte</li>
+        <li class="element-item" data-type="chat">Chat</li>
+      </ul>
+    </div>
+
+    <div class="canvas-container">
+      <div class="toolbar">
+        <button class="button" id="saveBtn">Sauvegarder</button>
+        <button class="button" id="previewBtn">Prévisualiser</button>
+        <button class="button" id="exportBtn">Exporter</button>
       </div>
-    </header>
+      <div class="canvas" id="canvas"></div>
+    </div>
 
-    <div class="editor-container">
-      <aside class="sidebar">
-        <div class="file-explorer">
-          <div class="file-item" onclick="switchFile('html')" data-file="html">
-            <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
-            index.html
-          </div>
-          <div class="file-item" onclick="switchFile('css')" data-file="css">
-            <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-            </svg>
-            style.css
-          </div>
-          <div class="file-item" onclick="switchFile('js')" data-file="js">
-            <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-            </svg>
-            script.js
-          </div>
-        </div>
-      </aside>
-
-      <main class="main-content">
-        <div class="editor-wrapper" id="editor"></div>
-        <div class="preview-container">
-          <iframe id="preview" class="preview-iframe" sandbox="allow-scripts"></iframe>
-        </div>
-      </main>
+    <div class="properties-panel">
+      <div class="property-group">
+        <h3 class="property-title">Propriétés</h3>
+        <input type="text" class="property-input" id="elementName" placeholder="Nom de l'élément">
+        <input type="number" class="property-input" id="elementX" placeholder="Position X">
+        <input type="number" class="property-input" id="elementY" placeholder="Position Y">
+        <input type="number" class="property-input" id="elementWidth" placeholder="Largeur">
+        <input type="number" class="property-input" id="elementHeight" placeholder="Hauteur">
+      </div>
+      <div class="property-group">
+        <h3 class="property-title">Style</h3>
+        <input type="color" class="property-input" id="elementColor">
+        <input type="number" class="property-input" id="elementOpacity" placeholder="Opacité">
+        <input type="number" class="property-input" id="elementRotation" placeholder="Rotation">
+      </div>
     </div>
   </div>
-
-  <div id="toast" class="toast"></div>
 
   <script>
-    // Configuration de l'éditeur CodeMirror
-    const editor = CodeMirror(document.getElementById('editor'), {
-      mode: 'htmlmixed',
-      theme: 'dracula',
-      lineNumbers: true,
-      autoCloseBrackets: true,
-      matchBrackets: true,
-      indentUnit: 2,
-      tabSize: 2,
-      lineWrapping: true,
-      extraKeys: {
-        'Ctrl-S': function(cm) {
-          saveOverlay();
+    class OverlayEditor {
+      constructor() {
+        this.canvas = document.getElementById('canvas');
+        this.selectedElement = null;
+        this.elements = [];
+        this.init();
+      }
+
+      init() {
+        this.setupEventListeners();
+        this.createDefaultOverlay();
+      }
+
+      setupEventListeners() {
+        // Gestion des éléments
+        document.querySelectorAll('.element-item').forEach(item => {
+          item.addEventListener('click', () => this.addElement(item.dataset.type));
+        });
+
+        // Gestion des propriétés
+        document.querySelectorAll('.property-input').forEach(input => {
+          input.addEventListener('change', () => this.updateElementProperties());
+        });
+
+        // Boutons de la barre d'outils
+        document.getElementById('saveBtn').addEventListener('click', () => this.saveOverlay());
+        document.getElementById('previewBtn').addEventListener('click', () => this.previewOverlay());
+        document.getElementById('exportBtn').addEventListener('click', () => this.exportOverlay());
+      }
+
+      createDefaultOverlay() {
+        // Création d'un overlay par défaut
+        const defaultElements = [
+          {
+            type: 'text',
+            content: 'Bienvenue sur mon stream !',
+            x: 100,
+            y: 100,
+            width: 300,
+            height: 50,
+            color: '#ffffff',
+            fontSize: 24
+          },
+          {
+            type: 'chat',
+            x: 20,
+            y: 20,
+            width: 300,
+            height: 500
+          }
+        ];
+
+        defaultElements.forEach(element => this.addElement(element.type, element));
+      }
+
+      addElement(type, properties = {}) {
+        const element = document.createElement('div');
+        element.className = `overlay-element ${type}`;
+        element.style.position = 'absolute';
+        
+        // Propriétés par défaut
+        const defaultProps = {
+          x: 100,
+          y: 100,
+          width: 200,
+          height: 100,
+          color: '#ffffff',
+          opacity: 1,
+          rotation: 0
+        };
+
+        // Appliquer les propriétés
+        Object.assign(element.style, {
+          left: `${properties.x || defaultProps.x}px`,
+          top: `${properties.y || defaultProps.y}px`,
+          width: `${properties.width || defaultProps.width}px`,
+          height: `${properties.height || defaultProps.height}px`,
+          color: properties.color || defaultProps.color,
+          opacity: properties.opacity || defaultProps.opacity,
+          transform: `rotate(${properties.rotation || defaultProps.rotation}deg)`
+        });
+
+        // Contenu spécifique selon le type
+        switch(type) {
+          case 'text':
+            element.contentEditable = true;
+            element.textContent = properties.content || 'Nouveau texte';
+            break;
+          case 'image':
+            element.style.backgroundImage = `url(${properties.src || 'placeholder.png'})`;
+            element.style.backgroundSize = 'cover';
+            break;
+          case 'chat':
+            element.innerHTML = '<div class="chat-container"></div>';
+            break;
         }
+
+        // Ajouter l'élément au canvas
+        this.canvas.appendChild(element);
+        this.elements.push(element);
+
+        // Sélectionner le nouvel élément
+        this.selectElement(element);
       }
-    });
 
-    // Contenu par défaut des fichiers
-    const defaultFiles = {
-      html: `<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mon Overlay</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="overlay">
-    <h1>Mon Overlay</h1>
-    <div id="content">
-      <!-- Votre contenu ici -->
-    </div>
-  </div>
-  <script src="script.js"></script>
-</body>
-</html>`,
-      css: `/* Styles de votre overlay */
-.overlay {
-  font-family: 'Montserrat', sans-serif;
-  color: white;
-  padding: 20px;
-}
+      selectElement(element) {
+        if (this.selectedElement) {
+          this.selectedElement.classList.remove('selected');
+        }
+        this.selectedElement = element;
+        element.classList.add('selected');
+        this.updatePropertiesPanel(element);
+      }
 
-h1 {
-  font-size: 24px;
-  margin-bottom: 20px;
-}
+      updatePropertiesPanel(element) {
+        const style = window.getComputedStyle(element);
+        document.getElementById('elementName').value = element.dataset.name || '';
+        document.getElementById('elementX').value = parseInt(style.left);
+        document.getElementById('elementY').value = parseInt(style.top);
+        document.getElementById('elementWidth').value = parseInt(style.width);
+        document.getElementById('elementHeight').value = parseInt(style.height);
+        document.getElementById('elementColor').value = this.rgbToHex(style.color);
+        document.getElementById('elementOpacity').value = parseFloat(style.opacity);
+        document.getElementById('elementRotation').value = this.getRotationDegrees(element);
+      }
 
-#content {
-  background: rgba(0, 0, 0, 0.5);
-  padding: 15px;
-  border-radius: 8px;
-}`,
-      js: `// Logique de votre overlay
-document.addEventListener('DOMContentLoaded', () => {
-  // Votre code ici
-  console.log('Overlay chargé !');
-});
-`
-    };
+      updateElementProperties() {
+        if (!this.selectedElement) return;
 
-    let currentFile = 'html';
-    let files = JSON.parse(localStorage.getItem('current_overlay')) || defaultFiles;
+        const x = document.getElementById('elementX').value;
+        const y = document.getElementById('elementY').value;
+        const width = document.getElementById('elementWidth').value;
+        const height = document.getElementById('elementHeight').value;
+        const color = document.getElementById('elementColor').value;
+        const opacity = document.getElementById('elementOpacity').value;
+        const rotation = document.getElementById('elementRotation').value;
 
-    // Initialisation de l'éditeur
-    editor.setValue(files[currentFile]);
-    updateFileHighlight();
-    updatePreview();
+        Object.assign(this.selectedElement.style, {
+          left: `${x}px`,
+          top: `${y}px`,
+          width: `${width}px`,
+          height: `${height}px`,
+          color: color,
+          opacity: opacity,
+          transform: `rotate(${rotation}deg)`
+        });
+      }
 
-    // Gestion des fichiers
-    function switchFile(fileType) {
-      currentFile = fileType;
-      files[currentFile] = editor.getValue();
-      
-      editor.setOption('mode', {
-        'html': 'htmlmixed',
-        'css': 'css',
-        'js': 'javascript'
-      }[fileType]);
-      
-      editor.setValue(files[fileType]);
-      updateFileHighlight();
+      saveOverlay() {
+        const overlayData = {
+          elements: this.elements.map(element => ({
+            type: element.className.split(' ')[1],
+            style: element.style.cssText,
+            content: element.textContent
+          }))
+        };
+
+        localStorage.setItem('currentOverlay', JSON.stringify(overlayData));
+        alert('Overlay sauvegardé !');
+      }
+
+      previewOverlay() {
+        const previewWindow = window.open('', '_blank');
+        previewWindow.document.write(`
+          <html>
+            <head>
+              <style>
+                body { margin: 0; overflow: hidden; }
+                .preview-container {
+                  width: 1920px;
+                  height: 1080px;
+                  position: relative;
+                  transform-origin: top left;
+                  transform: scale(0.5);
+                }
+              </style>
+            </head>
+            <body>
+              <div class="preview-container">
+                ${this.canvas.innerHTML}
+              </div>
+            </body>
+          </html>
+        `);
+      }
+
+      exportOverlay() {
+        const overlayData = {
+          elements: this.elements.map(element => ({
+            type: element.className.split(' ')[1],
+            style: element.style.cssText,
+            content: element.textContent
+          }))
+        };
+
+        const blob = new Blob([JSON.stringify(overlayData)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'overlay.json';
+        a.click();
+      }
+
+      // Utilitaires
+      rgbToHex(rgb) {
+        const rgbMatch = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+        if (!rgbMatch) return '#ffffff';
+        return '#' + rgbMatch.slice(1).map(n => parseInt(n).toString(16).padStart(2, '0')).join('');
+      }
+
+      getRotationDegrees(element) {
+        const transform = window.getComputedStyle(element).transform;
+        if (transform === 'none') return 0;
+        const values = transform.split('(')[1].split(')')[0].split(',');
+        const a = parseFloat(values[0]);
+        const b = parseFloat(values[1]);
+        return Math.round(Math.atan2(b, a) * (180/Math.PI));
+      }
     }
 
-    function updateFileHighlight() {
-      document.querySelectorAll('.file-item').forEach(item => {
-        item.classList.toggle('active', item.dataset.file === currentFile);
-      });
-    }
-
-    // Mise à jour de la prévisualisation
-    function updatePreview() {
-      const preview = document.getElementById('preview');
-      const htmlContent = files.html;
-      const cssContent = files.css;
-      const jsContent = files.js;
-
-      // Réinitialisation de l'iframe
-      preview.srcdoc = htmlContent;
-
-      preview.addEventListener('load', function() {
-        const doc = preview.contentDocument;
-
-        // Injection du CSS
-        const style = doc.createElement('style');
-        style.textContent = cssContent;
-        doc.head.appendChild(style);
-
-        // Injection du JavaScript
-        const script = doc.createElement('script');
-        script.textContent = jsContent;
-        doc.body.appendChild(script);
-      });
-    }
-
-    // Sauvegarde de l'overlay
-    function saveOverlay() {
-      files[currentFile] = editor.getValue();
-      localStorage.setItem('current_overlay', JSON.stringify(files));
-      showToast('Overlay enregistré avec succès !', 'success');
-    }
-
-    // Publication de l'overlay
-    function publishOverlay() {
-      files[currentFile] = editor.getValue();
-      // TODO: Implémenter la logique de publication
-      showToast('Publication en cours de développement', 'error');
-    }
-
-    // Système de notifications
-    function showToast(message, type = 'success') {
-      const toast = document.getElementById('toast');
-      toast.textContent = message;
-      toast.className = `toast ${type} show`;
-
-      setTimeout(() => {
-        toast.className = 'toast';
-      }, 3000);
-    }
-
-    // Écoute des changements dans l'éditeur
-    editor.on('change', () => {
-      files[currentFile] = editor.getValue();
-      updatePreview();
-    });
-
-    // Vérification de l'authentification au chargement
+    // Initialiser l'éditeur
     document.addEventListener('DOMContentLoaded', () => {
-      const userData = JSON.parse(localStorage.getItem('twitch_user'));
-      if (!userData) {
-        window.location.href = 'login.html';
-      }
+      window.editor = new OverlayEditor();
     });
   </script>
 </body>
