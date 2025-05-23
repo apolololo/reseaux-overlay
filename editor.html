@@ -14,6 +14,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css" rel="stylesheet">
   
   <style>
+    /* Styles existants inchangés */
     :root {
       --primary: #9146FF;
       --secondary: #00ADB5;
@@ -139,8 +140,8 @@
     }
 
     .preview-container {
-      width: 960px; /* 1920 * 0.5 */
-      height: 540px; /* 1080 * 0.5 */
+      width: 960px;
+      height: 540px;
       position: relative;
       overflow: hidden;
     }
@@ -295,7 +296,7 @@
       init() {
         this.setupEditor();
         this.setupEventListeners();
-        this.createNewOverlay();
+        this.loadExistingOverlay() || this.createNewOverlay();
       }
 
       setupEditor() {
@@ -313,25 +314,43 @@
       }
 
       setupEventListeners() {
-        // Gestion des onglets
         document.querySelectorAll('.editor-tab').forEach(tab => {
           tab.addEventListener('click', () => this.switchTab(tab.dataset.tab));
         });
 
-        // Boutons d'action
         document.getElementById('saveBtn').addEventListener('click', () => this.saveOverlay());
         document.getElementById('overlayUrl').addEventListener('click', () => this.copyOverlayUrl());
 
-        // Nom de l'overlay
         document.getElementById('overlayName').addEventListener('input', (e) => {
           this.overlayName = e.target.value;
         });
 
-        // Auto-save
         this.editor.on('change', () => {
           this.files[this.currentTab] = this.editor.getValue();
           this.updatePreview();
         });
+      }
+
+      loadExistingOverlay() {
+        const params = new URLSearchParams(window.location.search);
+        const overlayId = params.get('id');
+        
+        if (overlayId) {
+          const overlayData = localStorage.getItem(`overlay_${overlayId}`);
+          if (overlayData) {
+            const overlay = JSON.parse(overlayData);
+            this.overlayId = overlayId;
+            this.overlayName = overlay.name;
+            this.files = overlay.files;
+            
+            document.getElementById('overlayName').value = this.overlayName;
+            this.editor.setValue(this.files.html);
+            this.updateOverlayUrl();
+            this.updatePreview();
+            return true;
+          }
+        }
+        return false;
       }
 
       createNewOverlay() {
@@ -339,18 +358,19 @@
         this.overlayName = 'Nouvel Overlay';
         document.getElementById('overlayName').value = this.overlayName;
         
-        // Template par défaut
         this.files = {
           html: `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>Mon Overlay</title>
+    <style id="overlay-css"></style>
 </head>
 <body>
     <div class="overlay">
         <h1>Bienvenue !</h1>
     </div>
+    <script id="overlay-js"></script>
 </body>
 </html>`,
           css: `body {
@@ -386,6 +406,15 @@ console.log('Overlay chargé !');`
         return 'overlay_' + Math.random().toString(36).substr(2, 9);
       }
 
+      switchTab(tab) {
+        this.currentTab = tab;
+        document.querySelector('.editor-tab.active').classList.remove('active');
+        document.querySelector(`.editor-tab[data-tab="${tab}"]`).classList.add('active');
+        
+        this.editor.setOption('mode', tab === 'html' ? 'htmlmixed' : tab === 'css' ? 'css' : 'javascript');
+        this.editor.setValue(this.files[tab]);
+      }
+
       updateOverlayUrl() {
         const url = `${window.location.origin}/overlay.html?id=${this.overlayId}`;
         document.getElementById('overlayUrl').querySelector('span').textContent = url;
@@ -400,30 +429,33 @@ console.log('Overlay chargé !');`
 
       updatePreview() {
         const frame = document.getElementById('preview-frame');
-        const content = `
-          <!DOCTYPE html>
-          <html>
-          <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <style>
-                body {
-                  margin: 0;
-                  padding: 0;
-                  width: 1920px;
-                  height: 1080px;
-                  overflow: hidden;
-                }
-                ${this.files.css}
-              </style>
-          </head>
-          <body>
-              ${this.files.html}
-              <script>${this.files.js}<\/script>
-          </body>
-          </html>
-        `;
-        frame.srcdoc = content;
+        const doc = frame.contentDocument || frame.contentWindow.document;
+        
+        // Mise à jour du contenu en fonction de l'onglet actif
+        if (this.currentTab === 'html') {
+          doc.open();
+          doc.write(this.files.html);
+          doc.close();
+          
+          // Réinjecter CSS et JS
+          const styleElement = doc.getElementById('overlay-css');
+          if (styleElement) styleElement.textContent = this.files.css;
+          
+          const scriptElement = doc.getElementById('overlay-js');
+          if (scriptElement) scriptElement.textContent = this.files.js;
+        } else if (this.currentTab === 'css') {
+          const styleElement = doc.getElementById('overlay-css');
+          if (styleElement) styleElement.textContent = this.files.css;
+        } else if (this.currentTab === 'js') {
+          const scriptElement = doc.getElementById('overlay-js');
+          if (scriptElement) {
+            scriptElement.textContent = this.files.js;
+            // Réexécuter le script
+            const newScript = doc.createElement('script');
+            newScript.textContent = this.files.js;
+            scriptElement.parentNode.replaceChild(newScript, scriptElement);
+          }
+        }
       }
 
       saveOverlay() {
@@ -439,10 +471,8 @@ console.log('Overlay chargé !');`
           createdAt: new Date().toISOString()
         };
 
-        // Sauvegarder l'overlay avec son ID unique
         localStorage.setItem(`overlay_${this.overlayId}`, JSON.stringify(overlay));
 
-        // Sauvegarder dans la liste des overlays
         const overlays = JSON.parse(localStorage.getItem('my_overlays') || '[]');
         const existingIndex = overlays.findIndex(o => o.id === this.overlayId);
         

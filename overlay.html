@@ -30,12 +30,6 @@
             overflow: hidden;
         }
 
-        .overlay-container {
-            width: 1920px;
-            height: 1080px;
-            position: relative;
-        }
-
         .error-message {
             position: fixed;
             top: 50%;
@@ -47,103 +41,6 @@
             border-radius: 8px;
             text-align: center;
             font-family: Arial, sans-serif;
-        }
-
-        /* Styles des éléments */
-        .overlay-element {
-            position: absolute;
-            transition: all 0.3s ease;
-        }
-
-        .overlay-element.text {
-            font-size: 24px;
-            line-height: 1.4;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .overlay-element.image {
-            background-size: cover;
-            background-position: center;
-        }
-
-        .overlay-element.shape {
-            background: var(--primary);
-            border-radius: 8px;
-        }
-
-        .overlay-element.alert {
-            background: rgba(255, 82, 82, 0.9);
-            padding: 15px;
-            border-radius: 8px;
-            font-weight: 600;
-            text-align: center;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .overlay-element.chat {
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 8px;
-            padding: 10px;
-            overflow: hidden;
-        }
-
-        .chat-container {
-            height: 100%;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .chat-message {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-
-        .chat-username {
-            color: var(--primary);
-            font-weight: 600;
-            margin-right: 8px;
-        }
-
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(-100%); }
-            to { transform: translateX(0); }
-        }
-
-        /* Styles pour les événements */
-        .event-container {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            width: 300px;
-        }
-
-        .event-item {
-            background: rgba(0, 0, 0, 0.8);
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            animation: slideIn 0.3s ease;
-        }
-
-        .event-title {
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: var(--primary);
-        }
-
-        .event-message {
-            font-size: 14px;
-            color: var(--text-secondary);
         }
     </style>
 </head>
@@ -180,20 +77,21 @@
 
                     const overlay = JSON.parse(overlayData);
                     
-                    // Injecter le CSS
-                    const style = document.createElement('style');
-                    style.textContent = overlay.files.css;
-                    document.head.appendChild(style);
-
-                    // Injecter le HTML
-                    this.container.innerHTML = overlay.files.html;
-
-                    // Exécuter le JavaScript
-                    if (overlay.files.js) {
-                        const script = document.createElement('script');
-                        script.textContent = overlay.files.js;
-                        document.body.appendChild(script);
-                    }
+                    // Créer le document HTML de base
+                    document.documentElement.innerHTML = `
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <meta charset="UTF-8">
+                            <title>${overlay.name}</title>
+                            <style>${overlay.files.css}</style>
+                        </head>
+                        <body>
+                            ${overlay.files.html}
+                            <script>${overlay.files.js}<\/script>
+                        </body>
+                        </html>
+                    `;
                 } catch (error) {
                     console.error('Erreur lors du chargement de l\'overlay:', error);
                     this.showError("Erreur lors du chargement de l'overlay");
