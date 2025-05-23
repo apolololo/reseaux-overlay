@@ -939,6 +939,16 @@
           el.addEventListener('click', () => {
             const fileType = el.dataset.file || el.dataset.tab;
             this.switchTab(fileType);
+            // Mettre à jour le contenu de l'éditeur avec le fichier sélectionné
+            this.editor.setValue(this.files[fileType] || '');
+            this.editor.setOption('mode', this.getEditorMode(fileType));
+            // Activer l'onglet correspondant
+            document.querySelectorAll('.editor-tab').forEach(tab => {
+              tab.classList.toggle('active', tab.dataset.tab === fileType);
+            });
+            document.querySelectorAll('.file-item').forEach(item => {
+              item.classList.toggle('active', item.dataset.tab === fileType);
+            });
           });
         });
 
@@ -1019,7 +1029,27 @@
         CodeMirror.commands.autocomplete(this.editor);
       }
       
-      // Les fonctions d'exportation et d'importation ont été supprimées
+      // Méthode pour changer d'onglet
+      switchTab(tab) {
+        this.currentTab = tab;
+        // Sauvegarder le contenu actuel
+        this.files[this.currentTab] = this.editor.getValue();
+        // Mettre à jour le mode de l'éditeur
+        this.editor.setOption('mode', this.getEditorMode(tab));
+        // Mettre à jour le contenu de l'éditeur
+        this.editor.setValue(this.files[tab] || '');
+        this.updatePreview();
+      }
+
+      // Méthode pour obtenir le mode de l'éditeur en fonction du type de fichier
+      getEditorMode(fileType) {
+        const modes = {
+          'html': 'htmlmixed',
+          'css': 'css',
+          'js': 'javascript'
+        };
+        return modes[fileType] || 'text/plain';
+      }
       
       showHelp() {
         document.getElementById('helpModal').classList.add('show');
