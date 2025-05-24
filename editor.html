@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -433,26 +432,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
       init() {
         console.log("Initialisation de l'éditeur d'overlay");
-        this.setupEditor();
-        this.setupEventListeners();
         
-        // Essayer de charger un overlay existant ou en créer un nouveau
-        const loaded = this.loadExistingOverlay();
-        if (!loaded) {
-          console.log("Aucun overlay existant trouvé, création d'un nouveau");
-          this.createNewOverlay();
+        // Attendre que le DOM soit entièrement chargé
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => {
+            this.setupEditor();
+            this.setupEventListeners();
+            this.loadOverlayData();
+          });
+        } else {
+          this.setupEditor();
+          this.setupEventListeners();
+          this.loadOverlayData();
         }
-        
-        // S'assurer que l'éditeur est correctement initialisé
-        setTimeout(() => {
-          console.log("Rafraîchissement de l'éditeur");
-          this.editor.refresh();
-          this.updatePreview();
-        }, 100);
       }
 
       setupEditor() {
-        this.editor = CodeMirror(document.getElementById('editor'), {
+        console.log("Configuration de l'éditeur CodeMirror");
+        
+        const editorElement = document.getElementById('editor');
+        if (!editorElement) {
+          console.error("Element editor non trouvé");
+          return;
+        }
+
+        this.editor = CodeMirror(editorElement, {
           value: this.files[this.currentTab],
           mode: this.getEditorMode(this.currentTab),
           theme: 'dracula',
@@ -482,25 +486,69 @@ document.addEventListener('DOMContentLoaded', function() {
           gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
         });
 
+        console.log("CodeMirror initialisé avec succès");
+
         // Ajouter l'écouteur d'événements pour les modifications
         this.editor.on('change', (cm) => this.onEditorChange(cm));
+
+        // Forcer le rafraîchissement
+        setTimeout(() => {
+          this.editor.refresh();
+          console.log("Éditeur rafraîchi");
+        }, 100);
       }
 
       setupEventListeners() {
+        console.log("Configuration des écouteurs d'événements");
+        
         // Gestionnaires pour les onglets de fichiers
         document.querySelectorAll('.editor-tab, .file-item').forEach(el => {
           el.addEventListener('click', () => {
             const fileType = el.dataset.tab;
-            this.switchTab(fileType);
+            if (fileType) {
+              console.log("Changement d'onglet vers:", fileType);
+              this.switchTab(fileType);
+            }
           });
         });
 
         // Gestionnaires pour les actions principales
-        document.getElementById('saveBtn').addEventListener('click', () => this.saveOverlay());
-        document.getElementById('overlayUrl').addEventListener('click', () => this.copyOverlayUrl());
-        document.getElementById('overlayName').addEventListener('input', (e) => {
-          this.overlayName = e.target.value;
-        });
+        const saveBtn = document.getElementById('saveBtn');
+        if (saveBtn) {
+          saveBtn.addEventListener('click', () => this.saveOverlay());
+        }
+
+        const overlayUrl = document.getElementById('overlayUrl');
+        if (overlayUrl) {
+          overlayUrl.addEventListener('click', () => this.copyOverlayUrl());
+        }
+
+        const overlayName = document.getElementById('overlayName');
+        if (overlayName) {
+          overlayName.addEventListener('input', (e) => {
+            this.overlayName = e.target.value;
+          });
+        }
+      }
+
+      loadOverlayData() {
+        console.log("Chargement des données de l'overlay");
+        
+        // Essayer de charger un overlay existant ou en créer un nouveau
+        const loaded = this.loadExistingOverlay();
+        if (!loaded) {
+          console.log("Aucun overlay existant trouvé, création d'un nouveau");
+          this.createNewOverlay();
+        }
+        
+        // S'assurer que l'éditeur est correctement initialisé
+        setTimeout(() => {
+          if (this.editor) {
+            console.log("Rafraîchissement final de l'éditeur");
+            this.editor.refresh();
+            this.updatePreview();
+          }
+        }, 200);
       }
 
       onEditorChange(cm) {
@@ -524,7 +572,9 @@ document.addEventListener('DOMContentLoaded', function() {
             this.files = overlay.files;
 
             document.getElementById('overlayName').value = this.overlayName;
-            this.editor.setValue(this.files[this.currentTab]);
+            if (this.editor) {
+              this.editor.setValue(this.files[this.currentTab]);
+            }
             this.updateOverlayUrl();
             this.updatePreview();
             return true;
@@ -540,7 +590,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Définir le contenu de l'éditeur avec le fichier actuel
         console.log("Initialisation de l'éditeur avec le contenu HTML");
-        this.editor.setValue(this.files[this.currentTab]);
+        if (this.editor) {
+          this.editor.setValue(this.files[this.currentTab]);
+        }
         
         // Mettre à jour l'URL et l'aperçu
         this.updateOverlayUrl();
@@ -553,6 +605,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
       switchTab(tab) {
         console.log("Changement d'onglet vers:", tab);
+        
+        if (!this.editor) {
+          console.error("Éditeur non initialisé");
+          return;
+        }
         
         // Sauvegarder le contenu de l'onglet actuel avant de changer
         if (this.currentTab) {
@@ -720,7 +777,8 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
 
-    // Initialiser l'éditeur
+    // Initialiser l'éditeur quand la page est chargée
+    console.log("Démarrage de l'éditeur d'overlay");
     const editor = new OverlayEditor();
   </script>
 </body>
