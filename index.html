@@ -176,5 +176,56 @@
   </footer>
 
   <script src="src/templates/default/script.js"></script>
+  <script>
+      // Vérification de l'authentification au chargement de la page
+      document.addEventListener('DOMContentLoaded', function() {
+          // Vérifier si l'utilisateur est connecté
+          const isLoggedIn = localStorage.getItem('user_logged_in');
+          const userToken = localStorage.getItem('user_token');
+          const currentPath = window.location.pathname;
+          
+          console.log('Vérification de l\'authentification:', {
+              isLoggedIn: isLoggedIn,
+              hasToken: !!userToken,
+              currentPath: currentPath
+          });
+          
+          // Si l'utilisateur n'est pas connecté et n'est pas déjà sur la page de connexion
+          if (!isLoggedIn && !userToken && !currentPath.includes('login.html')) {
+              console.log('Utilisateur non connecté, redirection vers login.html');
+              // Rediriger vers la page de connexion
+              window.location.href = 'login.html';
+              return;
+          }
+          
+          // Si l'utilisateur est connecté, afficher le contenu normalement
+          if (isLoggedIn || userToken) {
+              console.log('Utilisateur connecté, affichage du dashboard');
+              document.body.style.display = 'block';
+          }
+      });
+      
+      // Fonction pour déconnecter l'utilisateur
+      function logout() {
+          localStorage.removeItem('user_logged_in');
+          localStorage.removeItem('user_token');
+          localStorage.removeItem('user_data');
+          window.location.href = 'login.html';
+      }
+      
+      // Ajouter un bouton de déconnexion si l'utilisateur est connecté
+      if (localStorage.getItem('user_logged_in') || localStorage.getItem('user_token')) {
+          const header = document.querySelector('.container h1');
+          if (header) {
+              const logoutBtn = document.createElement('button');
+              logoutBtn.textContent = 'Déconnexion';
+              logoutBtn.className = 'btn btn-secondary';
+              logoutBtn.style.marginLeft = '20px';
+              logoutBtn.style.fontSize = '14px';
+              logoutBtn.onclick = logout;
+              header.appendChild(logoutBtn);
+          }
+      }
+  </script>
 </body>
 </html>

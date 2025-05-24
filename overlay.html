@@ -89,13 +89,17 @@
                             <html>
                             <head>
                                 <meta charset="UTF-8">
+                                <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0">
                                 <title>${overlayName}</title>
                                 <style>
-                                    body {
+                                    html, body {
                                         margin: 0;
                                         padding: 0;
+                                        width: 1920px;
+                                        height: 1080px;
                                         overflow: hidden;
                                         background: transparent;
+                                        transform-origin: top left;
                                     }
                                     ${decodeURIComponent(cssContent)}
                                 </style>
@@ -114,12 +118,25 @@
                     }
                     
                     // Sinon, essayer de charger depuis localStorage
-                    const overlayData = localStorage.getItem(`overlay_${overlayId}`);
+                    let overlayData = localStorage.getItem(`overlay_${overlayId}`);
                     console.log("Données d'overlay trouvées dans localStorage:", overlayData ? "Oui" : "Non");
                     
+                    // Si pas trouvé avec le format actuel, essayer l'ancien format
                     if (!overlayData) {
-                        console.error("Overlay non trouvé dans localStorage. ID recherché:", overlayId);
-                        this.showError(`Overlay non trouvé (ID: ${overlayId}). Utilisez l'URL complète générée par l'éditeur.`);
+                        // Essayer de trouver dans la liste des overlays
+                        const myOverlays = JSON.parse(localStorage.getItem('my_overlays') || '[]');
+                        const foundOverlay = myOverlays.find(o => o.id === overlayId);
+                        
+                        if (foundOverlay) {
+                            // Récupérer les données complètes
+                            overlayData = localStorage.getItem(`overlay_${overlayId}`);
+                        }
+                    }
+                    
+                    if (!overlayData) {
+                        console.error("Overlay non trouvé. ID recherché:", overlayId);
+                        console.log("IDs disponibles:", Object.keys(localStorage).filter(key => key.startsWith('overlay_')));
+                        this.showError(`Overlay non trouvé (ID: ${overlayId}). Vérifiez que l'overlay a été sauvegardé correctement.`);
                         return;
                     }
                     
@@ -139,20 +156,30 @@
                         <html>
                         <head>
                             <meta charset="UTF-8">
+                            <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0">
                             <title>${overlay.name}</title>
                             <style>
-                                body {
+                                html, body {
                                     margin: 0;
                                     padding: 0;
+                                    width: 1920px;
+                                    height: 1080px;
                                     overflow: hidden;
                                     background: transparent;
+                                    transform-origin: top left;
                                 }
-                                ${overlay.files.css}
+                                ${overlay.files.css || ''}
                             </style>
                         </head>
                         <body>
-                            ${overlay.files.html}
-                            <script>${overlay.files.js}<\/script>
+                            ${overlay.files.html || ''}
+                            <script>
+                                try {
+                                    ${overlay.files.js || ''}
+                                } catch(e) {
+                                    console.error('Erreur dans le script overlay:', e);
+                                }
+                            <\/script>
                         </body>
                         </html>
                     `;

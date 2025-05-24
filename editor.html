@@ -684,6 +684,13 @@
 
         async saveOverlay() {
           try {
+            // Vérifier que nous avons un ID d'overlay valide
+            if (!this.overlayId) {
+              console.error('Aucun ID d\'overlay défini');
+              this.showToast('Erreur: Aucun ID d\'overlay défini');
+              return;
+            }
+
             // Sauvegarder le contenu actuel de tous les onglets
             if (this.editor) {
               this.files[this.currentTab] = this.editor.getValue();
@@ -705,8 +712,12 @@
               updatedAt: new Date().toISOString()
             };
 
+            console.log('Sauvegarde de l\'overlay:', overlay);
+
             // Sauvegarder dans localStorage pour l'éditeur
-            localStorage.setItem(`overlay_${this.overlayId}`, JSON.stringify(overlay));
+            const saveKey = `overlay_${this.overlayId}`;
+            localStorage.setItem(saveKey, JSON.stringify(overlay));
+            console.log('Données sauvegardées avec la clé:', saveKey);
             
             // Sauvegarder dans la liste des overlays
             let myOverlays = JSON.parse(localStorage.getItem('my_overlays') || '[]');
@@ -722,24 +733,33 @@
             if (existingIndex !== -1) {
               // Mettre à jour l'overlay existant
               myOverlays[existingIndex] = overlayListItem;
+              console.log('Overlay existant mis à jour dans la liste');
             } else {
               // Ajouter un nouvel overlay
               myOverlays.push(overlayListItem);
+              console.log('Nouvel overlay ajouté à la liste');
             }
             
             // Sauvegarder la liste mise à jour
             localStorage.setItem('my_overlays', JSON.stringify(myOverlays));
+            console.log('Liste des overlays mise à jour:', myOverlays);
             
             // Mettre à jour l'URL pour refléter l'ID actuel
             const newUrl = `${window.location.pathname}?id=${this.overlayId}`;
             window.history.replaceState({}, '', newUrl);
             
+            // Mettre à jour le titre de la page
+            document.title = `Éditeur d'Overlay - ${this.overlayName}`;
+            
             this.showToast('Overlay sauvegardé avec succès !');
             console.log('Overlay sauvegardé:', overlay);
             
+            // Forcer la mise à jour de la prévisualisation
+            this.updatePreview();
+            
           } catch (error) {
             console.error('Erreur lors de la sauvegarde:', error);
-            this.showToast('Erreur lors de la sauvegarde de l\'overlay');
+            this.showToast('Erreur lors de la sauvegarde de l\'overlay: ' + error.message);
           }
         }
 
