@@ -847,3 +847,16 @@ setInterval(changeColor, 3000);`
   </script>
 </body>
 </html>
+
+  <script>
+    function loadFileContent(filePath) {
+      fetch(filePath)
+        .then(response => response.text())
+        .then(data => {
+          document.getElementById('editor').value = data;
+        })
+        .catch(error => console.error('Error loading file:', error));
+    }
+  </script>
+</body>
+</html>
