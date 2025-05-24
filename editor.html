@@ -451,100 +451,77 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/comment-fold.min.js"></script>
 
   <script>
-    let fileEditor;
+    let editor;
+    let currentTab = 'html';
     let currentFile = '';
+    let fileEditor;
 
     const files = {
-      'index.html': `<div class="overlay">
-    <h1>Mon Overlay Personnalisé</h1>
-    <p>Modifiez ce code pour créer votre overlay !</p>
-</div>`,
+      'index.html': `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mon Overlay</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="overlay">
+    <h1>Bienvenue sur mon Overlay</h1>
+    <p>Ceci est un exemple d'overlay personnalisé.</p>
+    <button id="changeColorBtn">Changer la couleur</button>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>`,
       'style.css': `body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Arial', sans-serif;
-    background: transparent;
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
 .overlay {
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    text-align: center;
+  text-align: center;
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 h1 {
-    font-size: 48px;
-    margin-bottom: 20px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    animation: fadeIn 2s ease-in-out;
+  color: #333;
 }
 
-p {
-    font-size: 24px;
-    opacity: 0.8;
-    animation: slideUp 2s ease-in-out;
+button {
+  background-color: #9146FF;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 0.8; transform: translateY(0); }
+button:hover {
+  background-color: #7a36d4;
 }`,
-      'script.js': `// Code JavaScript pour votre overlay
-console.log('Overlay personnalisé chargé !');
+      'script.js': `console.log('Overlay chargé');
 
-// Animation du titre au chargement
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM chargé, initialisation des animations...');
+  const button = document.getElementById('changeColorBtn');
+  const title = document.querySelector('h1');
 
-    const title = document.querySelector('h1');
-    const subtitle = document.querySelector('p');
-
-    if (title) {
-        title.style.opacity = '0';
-        title.style.transform = 'translateY(-30px)';
-
-        setTimeout(() => {
-            title.style.transition = 'all 1s ease-out';
-            title.style.opacity = '1';
-            title.style.transform = 'translateY(0)';
-        }, 500);
-    }
-
-    if (subtitle) {
-        subtitle.style.opacity = '0';
-        subtitle.style.transform = 'translateY(30px)';
-
-        setTimeout(() => {
-            subtitle.style.transition = 'all 1s ease-out';
-            subtitle.style.opacity = '0.8';
-            subtitle.style.transform = 'translateY(0)';
-        }, 1000);
-    }
-});
-
-// Fonction d'exemple pour changer la couleur du titre
-function changeColor() {
-    const title = document.querySelector('h1');
-    if (title) {
-        const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b'];
-        const randomColor = colors[Math.floor(Math.random() * colors.length)];
-        title.style.color = randomColor;
-    }
-}
-
-// Changer la couleur toutes les 3 secondes
-setInterval(changeColor, 3000);`
+  button.addEventListener('click', function() {
+    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b'];
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    title.style.color = randomColor;
+  });
+});`
     };
 
     function openFileModal(filename) {
@@ -552,6 +529,10 @@ setInterval(changeColor, 3000);`
       document.getElementById('modalTitle').textContent = filename;
       document.getElementById('fileContent').value = files[filename];
       document.getElementById('fileModal').style.display = 'block';
+
+      if (fileEditor) {
+        fileEditor.setValue(files[filename]);
+      }
     }
 
     function closeFileModal() {
@@ -559,7 +540,7 @@ setInterval(changeColor, 3000);`
     }
 
     function saveFileContent() {
-      const content = document.getElementById('fileContent').value;
+      const content = fileEditor.getValue();
       files[currentFile] = content;
       closeFileModal();
       updatePreview();
@@ -584,7 +565,41 @@ setInterval(changeColor, 3000);`
       frame.srcdoc = content;
     }
 
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.editor-tab.active, .file-item.active').forEach(el => {
+        el.classList.remove('active');
+      });
+
+      document.querySelector(`.editor-tab[data-tab="${tab}"]`).classList.add('active');
+      document.querySelector(`.file-item[data-tab="${tab}"]`).classList.add('active');
+
+      editor.setOption('mode', getEditorMode(tab));
+      editor.setValue(files[tab] || '');
+    }
+
+    function getEditorMode(fileType) {
+      const modes = {
+        'html': 'htmlmixed',
+        'css': 'css',
+        'js': 'javascript'
+      };
+      return modes[fileType] || 'text/plain';
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
+      editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
+        mode: 'htmlmixed',
+        theme: 'dracula',
+        lineNumbers: true,
+        extraKeys: {
+          "Ctrl-S": function() {
+            files[currentTab] = editor.getValue();
+            updatePreview();
+          }
+        }
+      });
+
       fileEditor = CodeMirror.fromTextArea(document.getElementById('fileContent'), {
         mode: 'htmlmixed',
         theme: 'dracula',
@@ -595,6 +610,21 @@ setInterval(changeColor, 3000);`
           }
         }
       });
+
+      editor.on('change', () => {
+        files[currentTab] = editor.getValue();
+      });
+
+      document.querySelectorAll('.editor-tab, .file-item').forEach(el => {
+        el.addEventListener('click', () => {
+          const fileType = el.dataset.tab;
+          if (fileType) {
+            switchTab(fileType);
+          }
+        });
+      });
+
+      updatePreview();
     });
   </script>
 </body>
