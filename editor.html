@@ -175,6 +175,38 @@
             height: 100%;
             border: none;
             background: #000;
+            /* Aspect ratio 16:9 pour 1920x1080 */
+            aspect-ratio: 16/9;
+        }
+
+        .preview-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            /* Forcer la taille 1920x1080 avec scaling */
+        }
+
+        .preview-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            padding: 10px;
+        }
+
+        .preview-wrapper {
+            width: 100%;
+            max-width: 1920px;
+            aspect-ratio: 16/9;
+            position: relative;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         .toast {
@@ -272,8 +304,12 @@
             </div>
 
             <div class="preview-panel">
-                <div class="panel-header">Aperçu en Temps Réel</div>
-                <iframe id="preview" class="preview-iframe"></iframe>
+                <div class="panel-header">Aperçu en Temps Réel (1920x1080)</div>
+                <div class="preview-container">
+                    <div class="preview-wrapper">
+                        <iframe id="preview" class="preview-iframe"></iframe>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -518,7 +554,10 @@
         }
 
         generateOverlayId() {
-          return 'overlay_' + Math.random().toString(36).substr(2, 9);
+          // Générer un ID unique basé sur timestamp + random
+          const timestamp = Date.now().toString(36);
+          const random = Math.random().toString(36).substr(2, 9);
+          return `overlay_${timestamp}_${random}`;
         }
 
         switchTab(tab) {
@@ -606,17 +645,22 @@
           const iframe = document.getElementById('preview');
           if (!iframe) return;
           
-          // Créer le contenu HTML complet
+          // Créer le contenu HTML complet avec résolution 1920x1080
           const fullHtml = `
             <!DOCTYPE html>
             <html>
             <head>
               <meta charset="UTF-8">
+              <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0">
               <style>
-                body {
+                html, body {
                   margin: 0;
                   padding: 0;
+                  width: 1920px;
+                  height: 1080px;
                   background: transparent;
+                  overflow: hidden;
+                  transform-origin: top left;
                 }
                 ${this.files.css || ''}
               </style>
@@ -640,17 +684,25 @@
 
         async saveOverlay() {
           try {
-            // Sauvegarder le contenu actuel
+            // Sauvegarder le contenu actuel de tous les onglets
             if (this.editor) {
               this.files[this.currentTab] = this.editor.getValue();
             }
             
-            // Créer l'objet overlay
+            // S'assurer que tous les fichiers sont sauvegardés
+            const allFiles = {
+              html: this.files.html || '',
+              css: this.files.css || '',
+              js: this.files.js || ''
+            };
+            
+            // Créer l'objet overlay avec toutes les données
             const overlay = {
               id: this.overlayId,
-              name: this.overlayName,
-              files: this.files,
-              createdAt: new Date().toISOString()
+              name: this.overlayName || 'Mon Overlay',
+              files: allFiles,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
             };
 
             // Sauvegarder dans localStorage pour l'éditeur
@@ -660,16 +712,27 @@
             let myOverlays = JSON.parse(localStorage.getItem('my_overlays') || '[]');
             const existingIndex = myOverlays.findIndex(o => o.id === this.overlayId);
             
+            const overlayListItem = {
+              id: this.overlayId,
+              name: this.overlayName || 'Mon Overlay',
+              createdAt: overlay.createdAt,
+              updatedAt: overlay.updatedAt
+            };
+            
             if (existingIndex !== -1) {
               // Mettre à jour l'overlay existant
-              myOverlays[existingIndex] = overlay;
+              myOverlays[existingIndex] = overlayListItem;
             } else {
               // Ajouter un nouvel overlay
-              myOverlays.push(overlay);
+              myOverlays.push(overlayListItem);
             }
             
             // Sauvegarder la liste mise à jour
             localStorage.setItem('my_overlays', JSON.stringify(myOverlays));
+            
+            // Mettre à jour l'URL pour refléter l'ID actuel
+            const newUrl = `${window.location.pathname}?id=${this.overlayId}`;
+            window.history.replaceState({}, '', newUrl);
             
             this.showToast('Overlay sauvegardé avec succès !');
             console.log('Overlay sauvegardé:', overlay);
