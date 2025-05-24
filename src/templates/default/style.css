@@ -1,0 +1,29 @@
+/* Styles de base pour l'overlay */
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+#overlay-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.overlay-element {
+    position: absolute;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Exemple de style pour le titre */
+.overlay-element h1 {
+    font-size: 24px;
+    margin: 0;
+    padding: 10px;
+} 
