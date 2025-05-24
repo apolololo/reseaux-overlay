@@ -379,6 +379,66 @@
         this.overlayName = '';
         this.overlayId = '';
         this.files = {
+          html: '',
+          css: '',
+          js: ''
+        };
+        this.init();
+      }
+
+      async init() {
+        console.log("Initialisation de l'éditeur d'overlay");
+        
+        // Charger les fichiers du template par défaut
+        await this.loadDefaultTemplate();
+        
+        // Attendre que le DOM et CodeMirror soient chargés
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => this.setupEditor(), 100);
+            this.setupEventListeners();
+            this.loadOverlayData();
+          });
+        } else {
+          setTimeout(() => this.setupEditor(), 100);
+          this.setupEventListeners();
+          this.loadOverlayData();
+        }
+      }
+
+      async loadDefaultTemplate() {
+        console.log("Chargement des fichiers du template par défaut");
+        
+        try {
+          // Charger le fichier HTML du template
+          const htmlResponse = await fetch('src/templates/default/index.html');
+          if (htmlResponse.ok) {
+            this.files.html = await htmlResponse.text();
+          }
+
+          // Charger le fichier CSS du template
+          const cssResponse = await fetch('src/templates/default/style.css');
+          if (cssResponse.ok) {
+            this.files.css = await cssResponse.text();
+          }
+
+          // Charger le fichier JS du template
+          const jsResponse = await fetch('src/templates/default/script.js');
+          if (jsResponse.ok) {
+            this.files.js = await jsResponse.text();
+          }
+
+          console.log("Fichiers du template chargés avec succès");
+        } catch (error) {
+          console.error("Erreur lors du chargement des fichiers du template:", error);
+          // Fallback vers le contenu par défaut si les fichiers ne peuvent pas être chargés
+          this.setFallbackContent();
+        }
+      }
+
+      setFallbackContent() {
+        console.log("Utilisation du contenu de fallback");
+        this.files = {
           html: `<div class="overlay">
     <h1>Mon Overlay Personnalisé</h1>
     <p>Modifiez ce code pour créer votre overlay !</p>
@@ -470,24 +530,6 @@ function changeColor() {
 // Changer la couleur toutes les 3 secondes
 setInterval(changeColor, 3000);`
         };
-        this.init();
-      }
-
-      init() {
-        console.log("Initialisation de l'éditeur d'overlay");
-        
-        // Attendre que le DOM et CodeMirror soient chargés
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => this.setupEditor(), 100);
-            this.setupEventListeners();
-            this.loadOverlayData();
-          });
-        } else {
-          setTimeout(() => this.setupEditor(), 100);
-          this.setupEventListeners();
-          this.loadOverlayData();
-        }
       }
 
       setupEditor() {
