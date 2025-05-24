@@ -13,7 +13,7 @@ export default defineConfig({
         editor: resolve(__dirname, 'editor.html'),
         overlay: resolve(__dirname, 'overlay.html'),
         login: resolve(__dirname, 'login.html'),
-        navigation: resolve(__dirname, 'navigation.js'),
+        navigation: resolve(__dirname, 'src/components/navigation.js'),
         'my-overlays': resolve(__dirname, 'my-overlays.html'),
         marketplace: resolve(__dirname, 'marketplace.html'),
         'overlay-1': resolve(__dirname, 'overlay-1.html'),
