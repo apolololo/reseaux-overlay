@@ -1,3 +1,4 @@
+
 import { defineConfig } from 'vite';
 
 export default defineConfig({
@@ -13,12 +14,16 @@ export default defineConfig({
         myOverlays: 'my-overlays.html',
         marketplace: 'marketplace.html',
         auth: 'auth/auth.html',
-        callback: 'auth/callback.html'
+        callback: 'auth/callback.html',
+        brbOverlay: 'src/overlays/brb/overlay.html',
+        endOverlay: 'src/overlays/end/overlay.html',
+        startingOverlay: 'src/overlays/starting/overlay.html',
+        gameStatusOverlay: 'src/overlays/game-status/overlay.html'
       }
     }
   },
   server: {
-    port: 3000,
+    port: 8080,
     open: true
   }
 });

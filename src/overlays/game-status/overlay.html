@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Status Overlay</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 1920px;
+            height: 1080px;
+            background: transparent;
+            font-family: Arial, sans-serif;
+        }
+        
+        .game-status {
+            position: absolute;
+            top: 50px;
+            right: 50px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .game-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .game-info {
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-status">
+        <div class="game-title">Jeu en cours</div>
+        <div class="game-info">Niveau 1</div>
+    </div>
+</body>
+</html>

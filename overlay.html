@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -30,35 +31,6 @@
             overflow: hidden;
             position: relative;
         }
-        
-        /* Ces styles sont commentés pour ne pas afficher le cadre en production */
-        /*
-        body::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border: 2px solid rgba(145, 70, 255, 0.5);
-            pointer-events: none;
-            z-index: 9999;
-            box-sizing: border-box;
-        }
-        
-        body::after {
-            content: "1920 x 1080";
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(145, 70, 255, 0.7);
-            color: white;
-            padding: 4px 8px;
-            font-size: 12px;
-            border-radius: 4px;
-            z-index: 9999;
-        }
-        */
 
         .error-message {
             position: fixed;
@@ -146,16 +118,7 @@
                     console.log("Données d'overlay trouvées dans localStorage:", overlayData ? "Oui" : "Non");
                     
                     if (!overlayData) {
-                        // Si l'overlay n'est pas trouvé, afficher un message d'erreur détaillé
                         console.error("Overlay non trouvé dans localStorage. ID recherché:", overlayId);
-                        
-                        // Lister tous les éléments du localStorage pour le débogage
-                        const allKeys = [];
-                        for (let i = 0; i < localStorage.length; i++) {
-                            allKeys.push(localStorage.key(i));
-                        }
-                        console.log("Clés disponibles dans localStorage:", allKeys);
-                        
                         this.showError(`Overlay non trouvé (ID: ${overlayId}). Utilisez l'URL complète générée par l'éditeur.`);
                         return;
                     }
