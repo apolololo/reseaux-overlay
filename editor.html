@@ -321,9 +321,6 @@
         <div class="editor-tab" data-tab="js">JavaScript</div>
       </div>
       <div id="editor"></div>
-      <textarea id="html-editor" style="display: none;"></textarea>
-      <textarea id="css-editor" style="display: none;"></textarea>
-      <textarea id="js-editor" style="display: none;"></textarea>
     </section>
 
     <section class="preview-section">
@@ -377,89 +374,101 @@
   <script>
     class OverlayEditor {
       constructor() {
-        this.editors = {
-          html: null,
-          css: null,
-          js: null
-        };
+        this.editor = null;
         this.currentTab = 'html';
         this.overlayName = '';
         this.overlayId = '';
         this.files = {
-          html: `<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Overlay</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div id="overlay-container">
-        <!-- Votre contenu d'overlay ici -->
-        <div class="overlay-element">
-            <h1>Mon Overlay</h1>
-        </div>
-    </div>
-    <script src="script.js"></script>
-</body>
-</html>`,
-          css: `/* Styles de base pour l'overlay */
-body {
+          html: `<div class="overlay">
+    <h1>Mon Overlay Personnalisé</h1>
+    <p>Modifiez ce code pour créer votre overlay !</p>
+</div>`,
+          css: `body {
     margin: 0;
     padding: 0;
-    overflow: hidden;
-    font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
+    background: transparent;
 }
 
-#overlay-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-}
-
-.overlay-element {
-    position: absolute;
+.overlay {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
+    text-align: center;
+}
+
+h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    animation: fadeIn 2s ease-in-out;
 }
 
-/* Exemple de style pour le titre */
-.overlay-element h1 {
+p {
     font-size: 24px;
-    margin: 0;
-    padding: 10px;
+    opacity: 0.8;
+    animation: slideUp 2s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 0.8; transform: translateY(0); }
 }`,
-          js: `// Configuration de base pour l'overlay
-const config = {
-    // Ajoutez vos variables de configuration ici
-    title: "Mon Overlay",
-    position: { x: 20, y: 20 }
-};
+          js: `// Code JavaScript pour votre overlay
+console.log('Overlay personnalisé chargé !');
 
-// Fonction d'initialisation
-function initOverlay() {
-    // Code d'initialisation ici
-    console.log("Overlay initialisé");
+// Animation du titre au chargement
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM chargé, initialisation des animations...');
+    
+    const title = document.querySelector('h1');
+    const subtitle = document.querySelector('p');
+    
+    if (title) {
+        title.style.opacity = '0';
+        title.style.transform = 'translateY(-30px)';
+        
+        setTimeout(() => {
+            title.style.transition = 'all 1s ease-out';
+            title.style.opacity = '1';
+            title.style.transform = 'translateY(0)';
+        }, 500);
+    }
+    
+    if (subtitle) {
+        subtitle.style.opacity = '0';
+        subtitle.style.transform = 'translateY(30px)';
+        
+        setTimeout(() => {
+            subtitle.style.transition = 'all 1s ease-out';
+            subtitle.style.opacity = '0.8';
+            subtitle.style.transform = 'translateY(0)';
+        }, 1000);
+    }
+});
+
+// Fonction d'exemple pour changer la couleur du titre
+function changeColor() {
+    const title = document.querySelector('h1');
+    if (title) {
+        const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        title.style.color = randomColor;
+    }
 }
 
-// Fonction pour mettre à jour l'overlay
-function updateOverlay() {
-    // Code de mise à jour ici
-}
-
-// Initialisation au chargement
-document.addEventListener('DOMContentLoaded', initOverlay);
-
-// Exemple de fonction pour ajouter des éléments dynamiques
-function addElement(type, content) {
-    const element = document.createElement(type);
-    element.textContent = content;
-    document.getElementById('overlay-container').appendChild(element);
-}`
+// Changer la couleur toutes les 3 secondes
+setInterval(changeColor, 3000);`
         };
         this.init();
       }
@@ -470,24 +479,37 @@ function addElement(type, content) {
         // Attendre que le DOM et CodeMirror soient chargés
         if (document.readyState === 'loading') {
           document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => this.setupEditors(), 100);
+            setTimeout(() => this.setupEditor(), 100);
             this.setupEventListeners();
             this.loadOverlayData();
           });
         } else {
-          setTimeout(() => this.setupEditors(), 100);
+          setTimeout(() => this.setupEditor(), 100);
           this.setupEventListeners();
           this.loadOverlayData();
         }
       }
 
-      setupEditors() {
-        console.log("Configuration des éditeurs CodeMirror");
+      setupEditor() {
+        console.log("Configuration de l'éditeur CodeMirror");
         
-        // Configuration pour chaque éditeur
-        const editorConfig = {
-          html: {
-            mode: 'htmlmixed',
+        const editorElement = document.getElementById('editor');
+        if (!editorElement) {
+          console.error("Element editor non trouvé");
+          return;
+        }
+
+        // Vérifier que CodeMirror est disponible
+        if (typeof CodeMirror === 'undefined') {
+          console.error("CodeMirror n'est pas chargé");
+          setTimeout(() => this.setupEditor(), 500);
+          return;
+        }
+
+        try {
+          this.editor = CodeMirror(editorElement, {
+            value: this.files[this.currentTab],
+            mode: this.getEditorMode(this.currentTab),
             theme: 'dracula',
             lineNumbers: true,
             autoCloseTags: true,
@@ -496,84 +518,75 @@ function addElement(type, content) {
             matchTags: {bothTags: true},
             indentUnit: 2,
             tabSize: 2,
-            lineWrapping: true
-          },
-          css: {
-            mode: 'css',
-            theme: 'dracula',
-            lineNumbers: true,
-            autoCloseBrackets: true,
-            matchBrackets: true,
-            indentUnit: 2,
-            tabSize: 2,
-            lineWrapping: true
-          },
-          js: {
-            mode: 'javascript',
-            theme: 'dracula',
-            lineNumbers: true,
-            autoCloseBrackets: true,
-            matchBrackets: true,
-            indentUnit: 2,
-            tabSize: 2,
-            lineWrapping: true
-          }
-        };
+            lineWrapping: true,
+            extraKeys: {
+              "Ctrl-Space": "autocomplete",
+              "Ctrl-/": "toggleComment",
+              "Ctrl-F": "findPersistent",
+              "Ctrl-S": () => {
+                this.saveOverlay();
+                return false;
+              },
+              "Tab": function(cm) {
+                if (cm.somethingSelected()) {
+                  cm.indentSelection("add");
+                } else {
+                  cm.replaceSelection("  ");
+                }
+              }
+            },
+            foldGutter: true,
+            gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+          });
 
-        // Initialiser chaque éditeur
-        ['html', 'css', 'js'].forEach(type => {
-          const textarea = document.getElementById(`${type}-editor`);
-          if (textarea) {
-            this.editors[type] = CodeMirror.fromTextArea(textarea, {
-              ...editorConfig[type],
-              value: this.files[type]
-            });
-            
-            // Ajouter l'écouteur d'événements pour les modifications
-            this.editors[type].on('change', () => {
-              this.files[type] = this.editors[type].getValue();
-              this.updatePreview();
-            });
-          }
-        });
+          console.log("CodeMirror initialisé avec succès");
 
-        // Afficher l'éditeur HTML par défaut
-        this.showEditor('html');
-      }
+          // Ajouter l'écouteur d'événements pour les modifications
+          this.editor.on('change', (cm) => this.onEditorChange(cm));
 
-      showEditor(type) {
-        // Cacher tous les éditeurs
-        Object.keys(this.editors).forEach(key => {
-          if (this.editors[key]) {
-            this.editors[key].getWrapperElement().style.display = 'none';
-          }
-        });
+          // Forcer le rafraîchissement
+          setTimeout(() => {
+            this.editor.refresh();
+            this.editor.focus();
+            console.log("Éditeur rafraîchi et focalisé");
+          }, 100);
 
-        // Afficher l'éditeur sélectionné
-        if (this.editors[type]) {
-          this.editors[type].getWrapperElement().style.display = 'block';
-          this.editors[type].refresh();
-          this.currentTab = type;
+        } catch (error) {
+          console.error("Erreur lors de l'initialisation de CodeMirror:", error);
         }
       }
 
-      switchTab(tab) {
-        console.log("Changement d'onglet vers:", tab);
+      setupEventListeners() {
+        console.log("Configuration des écouteurs d'événements");
         
-        // Mettre à jour les onglets actifs
-        document.querySelectorAll('.editor-tab.active, .file-item.active').forEach(el => {
-          el.classList.remove('active');
+        // Gestionnaires pour les onglets de fichiers
+        document.querySelectorAll('.editor-tab, .file-item').forEach(el => {
+          el.addEventListener('click', () => {
+            const fileType = el.dataset.tab;
+            if (fileType) {
+              console.log("Changement d'onglet vers:", fileType);
+              this.switchTab(fileType);
+            }
+          });
         });
-        
-        // Activer les nouveaux onglets
-        const editorTab = document.querySelector(`.editor-tab[data-tab="${tab}"]`);
-        const fileItem = document.querySelector(`.file-item[data-tab="${tab}"]`);
-        
-        if (editorTab) editorTab.classList.add('active');
-        if (fileItem) fileItem.classList.add('active');
 
-        // Afficher l'éditeur correspondant
-        this.showEditor(tab);
+        // Gestionnaires pour les actions principales
+        const saveBtn = document.getElementById('saveBtn');
+        if (saveBtn) {
+          saveBtn.addEventListener('click', () => this.saveOverlay());
+        }
+
+        const copyUrlBtn = document.getElementById('copyUrlBtn');
+        if (copyUrlBtn) {
+          copyUrlBtn.addEventListener('click', () => this.copyOverlayUrl());
+        }
+
+        const overlayName = document.getElementById('overlayName');
+        if (overlayName) {
+          overlayName.addEventListener('input', (e) => {
+            this.overlayName = e.target.value;
+          });
+        }
       }
 
       loadOverlayData() {
@@ -588,12 +601,20 @@ function addElement(type, content) {
         
         // S'assurer que l'éditeur est correctement initialisé
         setTimeout(() => {
-          if (this.editors['html']) {
+          if (this.editor) {
             console.log("Rafraîchissement final de l'éditeur");
-            this.editors['html'].refresh();
+            this.editor.refresh();
             this.updatePreview();
           }
         }, 300);
+      }
+
+      onEditorChange(cm) {
+        // Sauvegarder les modifications dans l'objet files
+        this.files[this.currentTab] = cm.getValue();
+        
+        // Mettre à jour l'aperçu immédiatement
+        this.updatePreview();
       }
 
       loadExistingOverlay() {
@@ -609,8 +630,8 @@ function addElement(type, content) {
             this.files = overlay.files;
 
             document.getElementById('overlayName').value = this.overlayName;
-            if (this.editors['html']) {
-              this.editors['html'].setValue(this.files['html']);
+            if (this.editor) {
+              this.editor.setValue(this.files[this.currentTab]);
             }
             this.updatePreview();
             return true;
@@ -626,8 +647,8 @@ function addElement(type, content) {
 
         // Définir le contenu de l'éditeur avec le fichier actuel
         console.log("Initialisation de l'éditeur avec le contenu HTML");
-        if (this.editors['html']) {
-          this.editors['html'].setValue(this.files['html']);
+        if (this.editor) {
+          this.editor.setValue(this.files[this.currentTab]);
         }
         
         // Mettre à jour l'aperçu
@@ -638,10 +659,61 @@ function addElement(type, content) {
         return 'overlay_' + Math.random().toString(36).substr(2, 9);
       }
 
+      switchTab(tab) {
+        console.log("Changement d'onglet vers:", tab);
+        
+        if (!this.editor) {
+          console.error("Éditeur non initialisé");
+          return;
+        }
+        
+        // Sauvegarder le contenu de l'onglet actuel avant de changer
+        if (this.currentTab) {
+          this.files[this.currentTab] = this.editor.getValue();
+        }
+        
+        this.currentTab = tab;
+
+        // Mettre à jour les onglets actifs
+        document.querySelectorAll('.editor-tab.active, .file-item.active').forEach(el => {
+          el.classList.remove('active');
+        });
+        
+        // Activer les nouveaux onglets
+        const editorTab = document.querySelector(`.editor-tab[data-tab="${tab}"]`);
+        const fileItem = document.querySelector(`.file-item[data-tab="${tab}"]`);
+        
+        if (editorTab) editorTab.classList.add('active');
+        if (fileItem) fileItem.classList.add('active');
+
+        // Configurer l'éditeur en fonction du type de fichier
+        this.editor.setOption('mode', this.getEditorMode(tab));
+        
+        // Définir le contenu de l'éditeur
+        console.log(`Chargement du contenu ${tab}`);
+        this.editor.setValue(this.files[tab] || '');
+        
+        // Forcer la mise à jour de l'éditeur
+        setTimeout(() => {
+          this.editor.refresh();
+          this.editor.setCursor(0, 0);
+          this.editor.focus();
+        }, 10);
+      }
+
+      getEditorMode(fileType) {
+        const modes = {
+          'html': 'htmlmixed',
+          'css': 'css',
+          'js': 'javascript'
+        };
+        return modes[fileType] || 'text/plain';
+      }
+
       generateOverlayUrl() {
         // Sauvegarder le contenu actuel
-        if (this.editors['html']) {
-          this.files['html'] = this.editors['html'].getValue();
+        if (this.editor) {
+          this.files[this.currentTab] = this.editor.getValue();
         }
         
         // Construire l'URL absolue
@@ -653,9 +725,9 @@ function addElement(type, content) {
         const url = new URL(baseUrl);
         url.searchParams.append('id', this.overlayId);
         url.searchParams.append('name', encodeURIComponent(this.overlayName));
-        url.searchParams.append('html', encodeURIComponent(this.files['html']));
-        url.searchParams.append('css', encodeURIComponent(this.files['css'] || ''));
-        url.searchParams.append('js', encodeURIComponent(this.files['js'] || ''));
+        url.searchParams.append('html', encodeURIComponent(this.files.html));
+        url.searchParams.append('css', encodeURIComponent(this.files.css));
+        url.searchParams.append('js', encodeURIComponent(this.files.js || ''));
         
         return url.toString();
       }
@@ -674,8 +746,8 @@ function addElement(type, content) {
         console.log("Mise à jour de l'aperçu");
         
         // Sauvegarder le contenu actuel de l'éditeur
-        if (this.currentTab && this.editors[this.currentTab]) {
-          this.files[this.currentTab] = this.editors[this.currentTab].getValue();
+        if (this.currentTab && this.editor) {
+          this.files[this.currentTab] = this.editor.getValue();
         }
         
         // Récupérer l'iframe
@@ -695,14 +767,14 @@ function addElement(type, content) {
                   overflow: hidden;
                   background: transparent;
                 }
-                ${this.files['css'] || ''}
+                ${this.files.css || ''}
               </style>
           </head>
           <body>
-              ${this.files['html'] || ''}
+              ${this.files.html || ''}
               <script>
                 try {
-                  ${this.files['js'] || ''}
+                  ${this.files.js || ''}
                 } catch(e) {
                   console.error('Erreur dans le script:', e);
                 }
@@ -719,8 +791,8 @@ function addElement(type, content) {
       async saveOverlay() {
         try {
           // Sauvegarder le contenu actuel de l'éditeur
-          if (this.editors['html']) {
-            this.files['html'] = this.editors['html'].getValue();
+          if (this.editor) {
+            this.files[this.currentTab] = this.editor.getValue();
           }
           
           // Créer l'objet overlay
