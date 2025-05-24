@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -81,23 +82,6 @@
 
     .overlay-name:focus {
       outline: none;
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .overlay-url {
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-secondary);
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .overlay-url:hover {
       background: rgba(255, 255, 255, 0.1);
     }
 
@@ -201,12 +185,22 @@
       background: rgba(255, 255, 255, 0.1);
     }
 
-    .CodeMirror {
+    #editor {
       flex: 1;
+      height: 100%;
+      min-height: 400px;
+    }
+
+    .CodeMirror {
       height: 100% !important;
       font-family: 'Fira Code', monospace;
       font-size: 14px;
       line-height: 1.5;
+      background: #1e1e1e !important;
+    }
+
+    .CodeMirror-scroll {
+      height: 100% !important;
     }
 
     .preview-section {
@@ -288,10 +282,10 @@
   <header class="header">
     <input type="text" class="overlay-name" placeholder="Nom de l'overlay" id="overlayName">
     <div class="header-actions">
-        <div class="overlay-url" id="overlayUrl" title="Cliquez pour copier l'URL à utiliser dans OBS/Streamlabs">
+        <button class="button secondary" id="copyUrlBtn">
           <i class="mdi mdi-link"></i>
-          <span>URL de l'overlay</span>
-        </div>
+          Copier URL
+        </button>
 
         <button class="button" id="saveBtn">
           <i class="mdi mdi-content-save"></i>
@@ -377,9 +371,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/brace-fold.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/xml-fold.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/comment-fold.min.js"></script>
-  
-  <!-- Addons pour la coloration des paires -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchbrackets.min.js"></script>
 
   <script>
     class OverlayEditor {
@@ -390,42 +381,95 @@
         this.overlayId = '';
         this.files = {
           html: `<div class="overlay">
-    <h1>Mon Overlay</h1>
+    <h1>Mon Overlay Personnalisé</h1>
+    <p>Modifiez ce code pour créer votre overlay !</p>
 </div>`,
           css: `body {
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
+    background: transparent;
 }
 
 .overlay {
     width: 100vw;
     height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: transparent;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-align: center;
 }
 
 h1 {
-    color: white;
     font-size: 48px;
+    margin-bottom: 20px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-}`,
-          js: `// Votre code JavaScript ici
-console.log('Overlay chargé !');
+    animation: fadeIn 2s ease-in-out;
+}
 
-// Exemple d'animation du titre
+p {
+    font-size: 24px;
+    opacity: 0.8;
+    animation: slideUp 2s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 0.8; transform: translateY(0); }
+}`,
+          js: `// Code JavaScript pour votre overlay
+console.log('Overlay personnalisé chargé !');
+
+// Animation du titre au chargement
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM chargé, initialisation des animations...');
+    
     const title = document.querySelector('h1');
+    const subtitle = document.querySelector('p');
+    
     if (title) {
         title.style.opacity = '0';
+        title.style.transform = 'translateY(-30px)';
+        
         setTimeout(() => {
-            title.style.transition = 'opacity 1s ease-in-out';
+            title.style.transition = 'all 1s ease-out';
             title.style.opacity = '1';
-        }, 100);
+            title.style.transform = 'translateY(0)';
+        }, 500);
     }
-});`
+    
+    if (subtitle) {
+        subtitle.style.opacity = '0';
+        subtitle.style.transform = 'translateY(30px)';
+        
+        setTimeout(() => {
+            subtitle.style.transition = 'all 1s ease-out';
+            subtitle.style.opacity = '0.8';
+            subtitle.style.transform = 'translateY(0)';
+        }, 1000);
+    }
+});
+
+// Fonction d'exemple pour changer la couleur du titre
+function changeColor() {
+    const title = document.querySelector('h1');
+    if (title) {
+        const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        title.style.color = randomColor;
+    }
+}
+
+// Changer la couleur toutes les 3 secondes
+setInterval(changeColor, 3000);`
         };
         this.init();
       }
@@ -433,15 +477,15 @@ document.addEventListener('DOMContentLoaded', function() {
       init() {
         console.log("Initialisation de l'éditeur d'overlay");
         
-        // Attendre que le DOM soit entièrement chargé
+        // Attendre que le DOM et CodeMirror soient chargés
         if (document.readyState === 'loading') {
           document.addEventListener('DOMContentLoaded', () => {
-            this.setupEditor();
+            setTimeout(() => this.setupEditor(), 100);
             this.setupEventListeners();
             this.loadOverlayData();
           });
         } else {
-          this.setupEditor();
+          setTimeout(() => this.setupEditor(), 100);
           this.setupEventListeners();
           this.loadOverlayData();
         }
@@ -456,46 +500,61 @@ document.addEventListener('DOMContentLoaded', function() {
           return;
         }
 
-        this.editor = CodeMirror(editorElement, {
-          value: this.files[this.currentTab],
-          mode: this.getEditorMode(this.currentTab),
-          theme: 'dracula',
-          lineNumbers: true,
-          autoCloseTags: true,
-          autoCloseBrackets: true,
-          matchBrackets: true,
-          matchTags: {bothTags: true},
-          indentUnit: 2,
-          tabSize: 2,
-          lineWrapping: true,
-          extraKeys: {
-            "Ctrl-Space": "autocomplete",
-            "Ctrl-/": "toggleComment",
-            "Ctrl-F": "findPersistent",
-            "Ctrl-S": () => this.saveOverlay(),
-            "Tab": function(cm) {
-              if (cm.somethingSelected()) {
-                cm.indentSelection("add");
-              } else {
-                cm.replaceSelection(cm.getOption("indentWithTabs") ? "\t" :
-                  " ".repeat(cm.getOption("indentUnit")));
+        // Vérifier que CodeMirror est disponible
+        if (typeof CodeMirror === 'undefined') {
+          console.error("CodeMirror n'est pas chargé");
+          setTimeout(() => this.setupEditor(), 500);
+          return;
+        }
+
+        try {
+          this.editor = CodeMirror(editorElement, {
+            value: this.files[this.currentTab],
+            mode: this.getEditorMode(this.currentTab),
+            theme: 'dracula',
+            lineNumbers: true,
+            autoCloseTags: true,
+            autoCloseBrackets: true,
+            matchBrackets: true,
+            matchTags: {bothTags: true},
+            indentUnit: 2,
+            tabSize: 2,
+            lineWrapping: true,
+            extraKeys: {
+              "Ctrl-Space": "autocomplete",
+              "Ctrl-/": "toggleComment",
+              "Ctrl-F": "findPersistent",
+              "Ctrl-S": () => {
+                this.saveOverlay();
+                return false;
+              },
+              "Tab": function(cm) {
+                if (cm.somethingSelected()) {
+                  cm.indentSelection("add");
+                } else {
+                  cm.replaceSelection("  ");
+                }
               }
-            }
-          },
-          foldGutter: true,
-          gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
-        });
+            },
+            foldGutter: true,
+            gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+          });
 
-        console.log("CodeMirror initialisé avec succès");
+          console.log("CodeMirror initialisé avec succès");
 
-        // Ajouter l'écouteur d'événements pour les modifications
-        this.editor.on('change', (cm) => this.onEditorChange(cm));
+          // Ajouter l'écouteur d'événements pour les modifications
+          this.editor.on('change', (cm) => this.onEditorChange(cm));
 
-        // Forcer le rafraîchissement
-        setTimeout(() => {
-          this.editor.refresh();
-          console.log("Éditeur rafraîchi");
-        }, 100);
+          // Forcer le rafraîchissement
+          setTimeout(() => {
+            this.editor.refresh();
+            this.editor.focus();
+            console.log("Éditeur rafraîchi et focalisé");
+          }, 100);
+
+        } catch (error) {
+          console.error("Erreur lors de l'initialisation de CodeMirror:", error);
+        }
       }
 
       setupEventListeners() {
@@ -518,9 +577,9 @@ document.addEventListener('DOMContentLoaded', function() {
           saveBtn.addEventListener('click', () => this.saveOverlay());
         }
 
-        const overlayUrl = document.getElementById('overlayUrl');
-        if (overlayUrl) {
-          overlayUrl.addEventListener('click', () => this.copyOverlayUrl());
+        const copyUrlBtn = document.getElementById('copyUrlBtn');
+        if (copyUrlBtn) {
+          copyUrlBtn.addEventListener('click', () => this.copyOverlayUrl());
         }
 
         const overlayName = document.getElementById('overlayName');
@@ -548,7 +607,7 @@ document.addEventListener('DOMContentLoaded', function() {
             this.editor.refresh();
             this.updatePreview();
           }
-        }, 200);
+        }, 300);
       }
 
       onEditorChange(cm) {
@@ -575,7 +634,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (this.editor) {
               this.editor.setValue(this.files[this.currentTab]);
             }
-            this.updateOverlayUrl();
             this.updatePreview();
             return true;
           }
@@ -585,7 +643,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       createNewOverlay() {
         this.overlayId = this.generateOverlayId();
-        this.overlayName = 'Nouvel Overlay';
+        this.overlayName = 'Mon Nouvel Overlay';
         document.getElementById('overlayName').value = this.overlayName;
 
         // Définir le contenu de l'éditeur avec le fichier actuel
@@ -594,8 +652,7 @@ document.addEventListener('DOMContentLoaded', function() {
           this.editor.setValue(this.files[this.currentTab]);
         }
         
-        // Mettre à jour l'URL et l'aperçu
-        this.updateOverlayUrl();
+        // Mettre à jour l'aperçu
         this.updatePreview();
       }
 
@@ -634,7 +691,7 @@ document.addEventListener('DOMContentLoaded', function() {
         this.editor.setOption('mode', this.getEditorMode(tab));
         
         // Définir le contenu de l'éditeur
-        console.log(`Chargement du contenu ${tab}:`, this.files[tab]);
+        console.log(`Chargement du contenu ${tab}`);
         this.editor.setValue(this.files[tab] || '');
         
         // Forcer la mise à jour de l'éditeur
@@ -654,15 +711,15 @@ document.addEventListener('DOMContentLoaded', function() {
         return modes[fileType] || 'text/plain';
       }
 
-      updateOverlayUrl() {
+      generateOverlayUrl() {
         // Sauvegarder le contenu actuel
-        this.files[this.currentTab] = this.editor.getValue();
+        if (this.editor) {
+          this.files[this.currentTab] = this.editor.getValue();
+        }
         
-        // Construire l'URL absolue en utilisant le chemin complet
+        // Construire l'URL absolue
         const currentPath = window.location.pathname;
         const basePath = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
-        
-        // Créer une URL avec les paramètres du contenu de l'overlay
         const baseUrl = `${window.location.origin}${basePath}overlay.html`;
         
         // Créer l'URL avec les paramètres encodés
@@ -673,17 +730,16 @@ document.addEventListener('DOMContentLoaded', function() {
         url.searchParams.append('css', encodeURIComponent(this.files.css));
         url.searchParams.append('js', encodeURIComponent(this.files.js || ''));
         
-        const finalUrl = url.toString();
-        
-        // Mettre à jour l'élément d'interface
-        document.getElementById('overlayUrl').querySelector('span').textContent = finalUrl;
-        console.log('URL de l\'overlay:', finalUrl);
+        return url.toString();
       }
 
       copyOverlayUrl() {
-        const url = document.getElementById('overlayUrl').querySelector('span').textContent;
+        const url = this.generateOverlayUrl();
         navigator.clipboard.writeText(url).then(() => {
           this.showToast('URL copiée dans le presse-papier !');
+          console.log('URL copiée:', url);
+        }).catch(() => {
+          this.showToast('Erreur lors de la copie de l\'URL');
         });
       }
 
@@ -691,7 +747,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("Mise à jour de l'aperçu");
         
         // Sauvegarder le contenu actuel de l'éditeur
-        if (this.currentTab) {
+        if (this.currentTab && this.editor) {
           this.files[this.currentTab] = this.editor.getValue();
         }
         
@@ -717,7 +773,13 @@ document.addEventListener('DOMContentLoaded', function() {
           </head>
           <body>
               ${this.files.html || ''}
-              <script>${this.files.js || ''}<\/script>
+              <script>
+                try {
+                  ${this.files.js || ''}
+                } catch(e) {
+                  console.error('Erreur dans le script:', e);
+                }
+              <\/script>
           </body>
           </html>`;
           
@@ -730,7 +792,9 @@ document.addEventListener('DOMContentLoaded', function() {
       async saveOverlay() {
         try {
           // Sauvegarder le contenu actuel de l'éditeur
-          this.files[this.currentTab] = this.editor.getValue();
+          if (this.editor) {
+            this.files[this.currentTab] = this.editor.getValue();
+          }
           
           // Créer l'objet overlay
           const overlay = {
@@ -760,8 +824,8 @@ document.addEventListener('DOMContentLoaded', function() {
           // Sauvegarder la liste mise à jour
           localStorage.setItem('my_overlays', JSON.stringify(myOverlays));
 
-          this.updateOverlayUrl();
           this.showToast('Overlay sauvegardé avec succès !');
+          console.log('Overlay sauvegardé:', overlay);
           
         } catch (error) {
           console.error('Erreur lors de la sauvegarde:', error);
