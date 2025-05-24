@@ -1,777 +1,627 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Éditeur d'Overlay - APO Overlays</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Éditeur d'Overlay - Réseaux Overlay</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldgutter.css">
+    <link rel="stylesheet" href="src/templates/default/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
-  
-  <!-- CodeMirror Core CSS -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" rel="stylesheet">
-  
-  <!-- Thèmes CodeMirror -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/vscode-dark.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css" rel="stylesheet">
-  
-  <!-- Addons CSS -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldgutter.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/dialog/dialog.min.css" rel="stylesheet">
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
 
-  <link rel="stylesheet" href="src/templates/default/style.css">
-  <style>
-    :root {
-      --primary: #9146FF;
-      --secondary: #00ADB5;
-      --background: #0e0e10;
-      --surface: #18181b;
-      --text: #efeff1;
-      --text-secondary: #adadb8;
-    }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
 
-    body {
-      font-family: 'Montserrat', sans-serif;
-      background: var(--background);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+        .header h1 {
+            color: #4a5568;
+            margin-bottom: 10px;
+            font-size: 2rem;
+            font-weight: 700;
+        }
 
-    .header {
-      background: var(--surface);
-      padding: 16px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
 
-    .header h1 {
-      font-size: 24px;
-      font-weight: 600;
-    }
+        .overlay-name {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
 
-    .header-actions {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
+        .overlay-name:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
 
-    .overlay-name {
-      background: transparent;
-      border: none;
-      color: var(--text);
-      font-size: 24px;
-      font-weight: 600;
-      font-family: 'Montserrat', sans-serif;
-      width: 300px;
-      padding: 4px 8px;
-      border-radius: 4px;
-    }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-    .overlay-name:focus {
-      outline: none;
-      background: rgba(255, 255, 255, 0.1);
-    }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
 
-    .button {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-      transition: all 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
 
-    .button:hover {
-      opacity: 0.9;
-    }
+        .btn-secondary {
+            background: #f7fafc;
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
+        }
 
-    .button.secondary {
-      background: rgba(255, 255, 255, 0.1);
-    }
+        .btn-secondary:hover {
+            background: #edf2f7;
+            border-color: #cbd5e0;
+        }
 
-    .main-content {
-      flex: 1;
-      display: grid;
-      grid-template-columns: 250px 1fr 1fr;
-      gap: 24px;
-      padding: 24px;
-      height: calc(100vh - 73px);
-    }
+        .editor-container {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            min-height: 0;
+        }
 
-    .file-explorer {
-      background: var(--surface);
-      border-radius: 12px;
-      padding: 20px;
-    }
+        .editor-panel, .preview-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+        }
 
-    .file-explorer-header {
-      margin-bottom: 20px;
-    }
+        .panel-header {
+            background: #f7fafc;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 600;
+            color: #4a5568;
+        }
 
-    .file-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+        .file-tabs {
+            display: flex;
+            background: #edf2f7;
+            border-bottom: 1px solid #e2e8f0;
+        }
 
-    .file-item {
-      padding: 8px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      color: var(--text-secondary);
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+        .file-tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: #718096;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
 
-    .file-item:hover {
-      background: rgba(255, 255, 255, 0.05);
-    }
+        .file-tab:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #4a5568;
+        }
 
-    .file-item.active {
-      background: var(--primary);
-      color: white;
-    }
+        .file-tab.active {
+            background: white;
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
 
-    .editor-section {
-      display: flex;
-      flex-direction: column;
-      background: var(--surface);
-      border-radius: 12px;
-      overflow: hidden;
-    }
+        .editor-content {
+            flex: 1;
+            position: relative;
+        }
 
-    .editor-tabs {
-      display: flex;
-      background: rgba(255, 255, 255, 0.05);
-      padding: 8px;
-      gap: 8px;
-    }
+        .CodeMirror {
+            height: 100% !important;
+            font-size: 14px;
+            line-height: 1.5;
+        }
 
-    .editor-tab {
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-      color: var(--text-secondary);
-      transition: all 0.2s;
-    }
+        .preview-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #000;
+        }
 
-    .editor-tab.active {
-      background: var(--primary);
-      color: white;
-    }
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
 
-    .editor-tab:hover:not(.active) {
-      background: rgba(255, 255, 255, 0.1);
-    }
+        .toast.show {
+            transform: translateX(0);
+        }
 
-    #editor {
-      flex: 1;
-      height: 100%;
-      min-height: 400px;
-    }
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            color: #718096;
+            font-size: 18px;
+        }
 
-    .CodeMirror {
-      height: 100% !important;
-      font-family: 'Fira Code', monospace;
-      font-size: 14px;
-      line-height: 1.5;
-      background: #1e1e1e !important;
-    }
+        @media (max-width: 768px) {
+            .editor-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr 1fr;
+            }
+            
+            .header-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .overlay-name {
+                min-width: auto;
+            }
+        }
 
-    .CodeMirror-scroll {
-      height: 100% !important;
-    }
+        .file-list {
+            background: #f7fafc;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 10px;
+        }
 
-    .preview-section {
-      background: var(--surface);
-      border-radius: 12px;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
+        .file-item {
+            padding: 8px 12px;
+            margin: 2px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #4a5568;
+            font-size: 14px;
+        }
 
-    .preview-container {
-      flex: 1;
-      position: relative;
-      overflow: hidden;
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 8px;
-    }
+        .file-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
 
-    .preview-frame {
-      width: 1920px;
-      height: 1080px;
-      transform: scale(0.5);
-      transform-origin: top left;
-      border: none;
-      background: transparent;
-      position: relative;
-      z-index: 1;
-    }
-    
-    .preview-dimensions {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 960px;
-      height: 540px;
-      border: 2px solid var(--primary);
-      pointer-events: none;
-      z-index: 2;
-      box-sizing: border-box;
-    }
-    
-    .preview-dimensions::after {
-      content: "1920 x 1080";
-      position: absolute;
-      top: -25px;
-      right: 0;
-      background: var(--primary);
-      color: white;
-      padding: 2px 8px;
-      font-size: 12px;
-      border-radius: 4px;
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--surface);
-      color: var(--text);
-      padding: 12px 24px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transform: translateY(100px);
-      opacity: 0;
-      transition: all 0.3s;
-    }
-
-    .toast.show {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  </style>
+        .file-item.active {
+            background: #667eea;
+            color: white;
+        }
+    </style>
 </head>
 <body>
-  <header class="header">
-    <input type="text" class="overlay-name" placeholder="Nom de l'overlay" id="overlayName">
-    <div class="header-actions">
-        <button class="button secondary" id="copyUrlBtn">
-          <i class="mdi mdi-link"></i>
-          Copier URL
-        </button>
-
-        <button class="button" id="saveBtn">
-          <i class="mdi mdi-content-save"></i>
-          Enregistrer
-        </button>
-      </div>
-  </header>
-
-  <main class="main-content">
-    <div class="file-explorer">
-        <div class="file-explorer-header">
-          <h2>Fichiers</h2>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Éditeur d'Overlay</h1>
+            <div class="header-controls">
+                <input type="text" id="overlayName" class="overlay-name" placeholder="Nom de votre overlay..." value="Mon Overlay">
+                <button id="saveBtn" class="btn btn-primary">💾 Sauvegarder</button>
+                <button id="copyUrlBtn" class="btn btn-secondary">🔗 Copier l'URL</button>
+                <a href="index.html" class="btn btn-secondary">🏠 Accueil</a>
+            </div>
         </div>
-        <div class="file-list">
-          <div class="file-item active" data-tab="html">
-            <i class="mdi mdi-language-html5"></i>
-            index.html
-          </div>
-          <div class="file-item" data-tab="css">
-            <i class="mdi mdi-language-css3"></i>
-            style.css
-          </div>
-          <div class="file-item" data-tab="js">
-            <i class="mdi mdi-language-javascript"></i>
-            script.js
-          </div>
+
+        <div class="editor-container">
+            <div class="editor-panel">
+                <div class="panel-header">Éditeur de Code</div>
+                <div class="file-tabs">
+                    <button class="file-tab active" data-file="html">📄 index.html</button>
+                    <button class="file-tab" data-file="css">🎨 style.css</button>
+                    <button class="file-tab" data-file="js">⚡ script.js</button>
+                </div>
+                <div class="editor-content">
+                    <div id="editor"></div>
+                </div>
+            </div>
+
+            <div class="preview-panel">
+                <div class="panel-header">Aperçu en Temps Réel</div>
+                <iframe id="preview" class="preview-iframe"></iframe>
+            </div>
         </div>
-      </div>
+    </div>
 
-    <section class="editor-section">
-      <div class="editor-tabs">
-        <div class="editor-tab active" data-tab="html">HTML</div>
-        <div class="editor-tab" data-tab="css">CSS</div>
-        <div class="editor-tab" data-tab="js">JavaScript</div>
-      </div>
-      <div id="editor"></div>
-    </section>
+    <div id="toast" class="toast"></div>
 
-    <section class="preview-section">
-      <h2>Aperçu</h2>
-      <div class="preview-container">
-        <iframe id="preview-frame" class="preview-frame"></iframe>
-        <div class="preview-dimensions"></div>
-      </div>
-    </section>
-  </main>
+    <!-- Scripts CodeMirror -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closetag.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldgutter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/xml-fold.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/brace-fold.min.js"></script>
+    <script src="src/templates/default/script.js"></script>
 
-  <div class="toast" id="toast">
-    <i class="mdi mdi-check-circle"></i>
-    <span>Overlay enregistré avec succès !</span>
-  </div>
+    <script>
+      class OverlayEditor {
+        constructor() {
+          this.currentTab = 'html';
+          this.editor = null;
+          this.overlayName = 'Mon Overlay';
+          this.overlayId = '';
+          this.files = {
+            html: '',
+            css: '',
+            js: ''
+          };
+          
+          this.init();
+        }
 
-  <!-- CodeMirror Core -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
-  
-  <!-- Modes pour les langages -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
-  
-  <!-- Addons pour l'autocomplétion -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/html-hint.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/css-hint.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/javascript-hint.min.js"></script>
-  
-  <!-- Addons pour les parenthèses et balises -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closetag.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchbrackets.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchtags.min.js"></script>
-  
-  <!-- Addons pour la recherche -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/search/search.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/search/searchcursor.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/search/jump-to-line.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/dialog/dialog.min.js"></script>
-  
-  <!-- Addons pour le pliage de code -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldcode.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldgutter.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/brace-fold.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/xml-fold.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/comment-fold.min.js"></script>
+        async loadDefaultFiles() {
+          try {
+            // Charger index.html
+            const htmlResponse = await fetch('src/templates/default/index.html');
+            if (htmlResponse.ok) {
+              this.files.html = await htmlResponse.text();
+            }
+            
+            // Charger style.css
+            const cssResponse = await fetch('src/templates/default/style.css');
+            if (cssResponse.ok) {
+              this.files.css = await cssResponse.text();
+            }
+            
+            // Charger script.js
+            const jsResponse = await fetch('src/templates/default/script.js');
+            if (jsResponse.ok) {
+              this.files.js = await jsResponse.text();
+            }
+            
+            // Mettre à jour l'éditeur avec le contenu chargé
+            if (this.editor) {
+              this.editor.setValue(this.files[this.currentTab] || '');
+              this.updatePreview();
+            }
+            
+          } catch (error) {
+            console.error('Erreur lors du chargement des fichiers par défaut:', error);
+          }
+        }
 
-  <script>
-    class OverlayEditor {
-      constructor() {
-        this.editor = null;
-        this.currentTab = 'html';
-        this.overlayName = '';
-        this.overlayId = '';
-        this.files = {
-          html: `<div class="overlay">
-    <h1>Mon Overlay Personnalisé</h1>
-    <p>Modifiez ce code pour créer votre overlay !</p>
-</div>`,
-          css: `body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Arial', sans-serif;
-    background: transparent;
-}
-
-.overlay {
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    text-align: center;
-}
-
-h1 {
-    font-size: 48px;
-    margin-bottom: 20px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    animation: fadeIn 2s ease-in-out;
-}
-
-p {
-    font-size: 24px;
-    opacity: 0.8;
-    animation: slideUp 2s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 0.8; transform: translateY(0); }
-}`,
-          js: `// Code JavaScript pour votre overlay
-console.log('Overlay personnalisé chargé !');
-
-// Animation du titre au chargement
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM chargé, initialisation des animations...');
-    
-    const title = document.querySelector('h1');
-    const subtitle = document.querySelector('p');
-    
-    if (title) {
-        title.style.opacity = '0';
-        title.style.transform = 'translateY(-30px)';
-        
-        setTimeout(() => {
-            title.style.transition = 'all 1s ease-out';
-            title.style.opacity = '1';
-            title.style.transform = 'translateY(0)';
-        }, 500);
-    }
-    
-    if (subtitle) {
-        subtitle.style.opacity = '0';
-        subtitle.style.transform = 'translateY(30px)';
-        
-        setTimeout(() => {
-            subtitle.style.transition = 'all 1s ease-out';
-            subtitle.style.opacity = '0.8';
-            subtitle.style.transform = 'translateY(0)';
-        }, 1000);
-    }
-});
-
-// Fonction d'exemple pour changer la couleur du titre
-function changeColor() {
-    const title = document.querySelector('h1');
-    if (title) {
-        const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b'];
-        const randomColor = colors[Math.floor(Math.random() * colors.length)];
-        title.style.color = randomColor;
-    }
-}
-
-// Changer la couleur toutes les 3 secondes
-setInterval(changeColor, 3000);`
-        };
-        this.init();
-      }
-
-      init() {
-        console.log("Initialisation de l'éditeur d'overlay");
-        
-        // Attendre que le DOM et CodeMirror soient chargés
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => this.setupEditor(), 100);
-            this.setupEventListeners();
-            this.loadOverlayData();
+        init() {
+          console.log("Initialisation de l'éditeur d'overlay");
+          
+          // Charger les fichiers par défaut d'abord
+          this.loadDefaultFiles().then(() => {
+            if (document.readyState === 'loading') {
+              document.addEventListener('DOMContentLoaded', () => {
+                this.setupEditor();
+                this.setupEventListeners();
+                this.loadOverlayData();
+              });
+            } else {
+              setTimeout(() => this.setupEditor(), 100);
+              this.setupEventListeners();
+              this.loadOverlayData();
+            }
           });
-        } else {
-          setTimeout(() => this.setupEditor(), 100);
-          this.setupEventListeners();
-          this.loadOverlayData();
-        }
-      }
-
-      setupEditor() {
-        console.log("Configuration de l'éditeur CodeMirror");
-        
-        const editorElement = document.getElementById('editor');
-        if (!editorElement) {
-          console.error("Element editor non trouvé");
-          return;
         }
 
-        // Vérifier que CodeMirror est disponible
-        if (typeof CodeMirror === 'undefined') {
-          console.error("CodeMirror n'est pas chargé");
-          setTimeout(() => this.setupEditor(), 500);
-          return;
-        }
+        setupEditor() {
+          const editorElement = document.getElementById('editor');
+          if (!editorElement) {
+            console.error("Élément editor non trouvé");
+            return;
+          }
 
-        try {
-          this.editor = CodeMirror(editorElement, {
-            value: this.files[this.currentTab],
-            mode: this.getEditorMode(this.currentTab),
-            theme: 'dracula',
-            lineNumbers: true,
-            autoCloseTags: true,
-            autoCloseBrackets: true,
-            matchBrackets: true,
-            matchTags: {bothTags: true},
-            indentUnit: 2,
-            tabSize: 2,
-            lineWrapping: true,
-            extraKeys: {
-              "Ctrl-Space": "autocomplete",
-              "Ctrl-/": "toggleComment",
-              "Ctrl-F": "findPersistent",
-              "Ctrl-S": () => {
-                this.saveOverlay();
-                return false;
-              },
-              "Tab": function(cm) {
-                if (cm.somethingSelected()) {
-                  cm.indentSelection("add");
-                } else {
-                  cm.replaceSelection("  ");
+          // Vérifier que CodeMirror est disponible
+          if (typeof CodeMirror === 'undefined') {
+            console.error("CodeMirror n'est pas chargé");
+            return;
+          }
+
+          try {
+            this.editor = CodeMirror(editorElement, {
+              value: this.files[this.currentTab],
+              mode: this.getEditorMode(this.currentTab),
+              theme: 'monokai',
+              lineNumbers: true,
+              autoCloseTags: true,
+              autoCloseBrackets: true,
+              indentUnit: 2,
+              tabSize: 2,
+              lineWrapping: true,
+              extraKeys: {
+                "Ctrl-S": () => {
+                  this.saveOverlay();
+                  return false;
+                },
+                "Tab": function(cm) {
+                  if (cm.somethingSelected()) {
+                    cm.indentSelection("add");
+                  } else {
+                    cm.replaceSelection("  ");
+                  }
                 }
+              },
+              foldGutter: true,
+              gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+            });
+
+            console.log("CodeMirror initialisé avec succès");
+
+            // Événement de changement
+            this.editor.on('change', () => {
+              this.updatePreview();
+            });
+
+            setTimeout(() => {
+              this.editor.refresh();
+              this.editor.focus();
+              console.log("Éditeur rafraîchi et focalisé");
+            }, 100);
+
+          } catch (error) {
+            console.error("Erreur lors de l'initialisation de CodeMirror:", error);
+          }
+        }
+
+        setupEventListeners() {
+          // Gestionnaires pour les onglets de fichiers
+          document.querySelectorAll('.file-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+              const fileType = e.target.dataset.file;
+              if (fileType) {
+                this.switchTab(fileType);
               }
-            },
-            foldGutter: true,
-            gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+            });
           });
 
-          console.log("CodeMirror initialisé avec succès");
+          // Gestionnaires pour les actions principales
+          const saveBtn = document.getElementById('saveBtn');
+          if (saveBtn) {
+            saveBtn.addEventListener('click', () => this.saveOverlay());
+          }
 
-          // Ajouter l'écouteur d'événements pour les modifications
-          this.editor.on('change', (cm) => this.onEditorChange(cm));
+          const copyUrlBtn = document.getElementById('copyUrlBtn');
+          if (copyUrlBtn) {
+            copyUrlBtn.addEventListener('click', () => this.copyOverlayUrl());
+          }
 
-          // Forcer le rafraîchissement
+          const overlayName = document.getElementById('overlayName');
+          if (overlayName) {
+            overlayName.addEventListener('input', (e) => {
+              this.overlayName = e.target.value;
+            });
+          }
+        }
+
+        loadOverlayData() {
+          // Vérifier s'il y a un overlay à charger depuis l'URL
+          if (!this.loadExistingOverlay()) {
+            this.createNewOverlay();
+          }
+          
+          // S'assurer que l'éditeur est correctement initialisé
+          setTimeout(() => {
+            if (this.editor) {
+              this.editor.setValue(this.files[this.currentTab] || '');
+              this.updatePreview();
+            }
+          }, 300);
+        }
+
+        getEditorMode(fileType) {
+          const modes = {
+            'html': 'htmlmixed',
+            'css': 'css',
+            'js': 'javascript'
+          };
+          return modes[fileType] || 'text/plain';
+        }
+
+        loadExistingOverlay() {
+          const params = new URLSearchParams(window.location.search);
+          const overlayId = params.get('id');
+          
+          if (overlayId) {
+            const savedOverlay = localStorage.getItem(`overlay_${overlayId}`);
+            if (savedOverlay) {
+              try {
+                const overlay = JSON.parse(savedOverlay);
+                this.overlayId = overlayId;
+                this.overlayName = overlay.name || 'Mon Overlay';
+                this.files = overlay.files || this.files;
+                
+                document.getElementById('overlayName').value = this.overlayName;
+                
+                if (this.editor) {
+                  this.editor.setValue(this.files[this.currentTab]);
+                }
+                this.updatePreview();
+                return true;
+              } catch (error) {
+                console.error('Erreur lors du chargement de l\'overlay:', error);
+              }
+            }
+          }
+          return false;
+        }
+
+        createNewOverlay() {
+          this.overlayId = this.generateOverlayId();
+          
+          // Charger les fichiers par défaut si pas encore fait
+          if (!this.files.html && !this.files.css && !this.files.js) {
+            this.loadDefaultFiles();
+          }
+          
+          if (this.editor) {
+            this.editor.setValue(this.files[this.currentTab]);
+          }
+          
+          // Mettre à jour l'aperçu
+          this.updatePreview();
+        }
+
+        generateOverlayId() {
+          return 'overlay_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        switchTab(tab) {
+          console.log("Changement d'onglet vers:", tab);
+          
+          if (!this.editor) {
+            console.error("Éditeur non initialisé");
+            return;
+          }
+          
+          // Sauvegarder le contenu de l'onglet actuel avant de changer
+          if (this.editor) {
+            this.files[this.currentTab] = this.editor.getValue();
+          }
+          
+          this.currentTab = tab;
+          
+          // Mettre à jour l'interface
+          document.querySelectorAll('.editor-tab.active, .file-item.active').forEach(el => {
+            el.classList.remove('active');
+          });
+          
+          // Activer les nouveaux onglets
+          document.querySelectorAll(`[data-file="${tab}"]`).forEach(el => {
+            el.classList.add('active');
+          });
+          
+          // Changer le mode et le contenu de l'éditeur
+          this.editor.setOption('mode', this.getEditorMode(tab));
+          this.editor.setValue(this.files[tab] || '');
+          
+          // Rafraîchir l'éditeur
           setTimeout(() => {
             this.editor.refresh();
+            this.editor.setCursor(0, 0);
             this.editor.focus();
-            console.log("Éditeur rafraîchi et focalisé");
-          }, 100);
-
-        } catch (error) {
-          console.error("Erreur lors de l'initialisation de CodeMirror:", error);
-        }
-      }
-
-      setupEventListeners() {
-        console.log("Configuration des écouteurs d'événements");
-        
-        // Gestionnaires pour les onglets de fichiers
-        document.querySelectorAll('.editor-tab, .file-item').forEach(el => {
-          el.addEventListener('click', () => {
-            const fileType = el.dataset.tab;
-            if (fileType) {
-              console.log("Changement d'onglet vers:", fileType);
-              this.switchTab(fileType);
-            }
-          });
-        });
-
-        // Gestionnaires pour les actions principales
-        const saveBtn = document.getElementById('saveBtn');
-        if (saveBtn) {
-          saveBtn.addEventListener('click', () => this.saveOverlay());
+          }, 10);
         }
 
-        const copyUrlBtn = document.getElementById('copyUrlBtn');
-        if (copyUrlBtn) {
-          copyUrlBtn.addEventListener('click', () => this.copyOverlayUrl());
+        getEditorMode(fileType) {
+          const modes = {
+            'html': 'htmlmixed',
+            'css': 'css',
+            'js': 'javascript'
+          };
+          return modes[fileType] || 'text/plain';
         }
 
-        const overlayName = document.getElementById('overlayName');
-        if (overlayName) {
-          overlayName.addEventListener('input', (e) => {
-            this.overlayName = e.target.value;
-          });
-        }
-      }
-
-      loadOverlayData() {
-        console.log("Chargement des données de l'overlay");
-        
-        // Essayer de charger un overlay existant ou en créer un nouveau
-        const loaded = this.loadExistingOverlay();
-        if (!loaded) {
-          console.log("Aucun overlay existant trouvé, création d'un nouveau");
-          this.createNewOverlay();
-        }
-        
-        // S'assurer que l'éditeur est correctement initialisé
-        setTimeout(() => {
+        generateOverlayUrl() {
+          // Sauvegarder le contenu actuel
           if (this.editor) {
-            console.log("Rafraîchissement final de l'éditeur");
-            this.editor.refresh();
-            this.updatePreview();
+            this.files[this.currentTab] = this.editor.getValue();
           }
-        }, 300);
-      }
+          
+          // Construire l'URL absolue
+          const baseUrl = window.location.origin + window.location.pathname.replace('editor.html', '');
+          const overlayUrl = `${baseUrl}overlay.html?id=${this.overlayId}`;
+          
+          // Mettre à jour l'URL de la page actuelle
+          const newUrl = `${window.location.pathname}?id=${this.overlayId}`;
+          window.history.replaceState({}, '', newUrl);
+          
+          return overlayUrl;
+        }
 
-      onEditorChange(cm) {
-        // Sauvegarder les modifications dans l'objet files
-        this.files[this.currentTab] = cm.getValue();
-        
-        // Mettre à jour l'aperçu immédiatement
-        this.updatePreview();
-      }
+        copyOverlayUrl() {
+          const url = this.generateOverlayUrl();
+          navigator.clipboard.writeText(url).then(() => {
+            this.showToast('URL copiée dans le presse-papier !');
+            console.log('URL copiée:', url);
+          }).catch(() => {
+            this.showToast('Erreur lors de la copie de l\'URL');
+          });
+        }
 
-      loadExistingOverlay() {
-        const params = new URLSearchParams(window.location.search);
-        const overlayId = params.get('id');
-
-        if (overlayId) {
-          const overlayData = localStorage.getItem(`overlay_${overlayId}`);
-          if (overlayData) {
-            const overlay = JSON.parse(overlayData);
-            this.overlayId = overlayId;
-            this.overlayName = overlay.name;
-            this.files = overlay.files;
-
-            document.getElementById('overlayName').value = this.overlayName;
-            if (this.editor) {
-              this.editor.setValue(this.files[this.currentTab]);
-            }
-            this.updatePreview();
-            return true;
+        updatePreview() {
+          console.log("Mise à jour de l'aperçu");
+          
+          // Sauvegarder le contenu actuel
+          if (this.editor) {
+            this.files[this.currentTab] = this.editor.getValue();
           }
-        }
-        return false;
-      }
-
-      createNewOverlay() {
-        this.overlayId = this.generateOverlayId();
-        this.overlayName = 'Mon Nouvel Overlay';
-        document.getElementById('overlayName').value = this.overlayName;
-
-        // Définir le contenu de l'éditeur avec le fichier actuel
-        console.log("Initialisation de l'éditeur avec le contenu HTML");
-        if (this.editor) {
-          this.editor.setValue(this.files[this.currentTab]);
-        }
-        
-        // Mettre à jour l'aperçu
-        this.updatePreview();
-      }
-
-      generateOverlayId() {
-        return 'overlay_' + Math.random().toString(36).substr(2, 9);
-      }
-
-      switchTab(tab) {
-        console.log("Changement d'onglet vers:", tab);
-        
-        if (!this.editor) {
-          console.error("Éditeur non initialisé");
-          return;
-        }
-        
-        // Sauvegarder le contenu de l'onglet actuel avant de changer
-        if (this.currentTab) {
-          this.files[this.currentTab] = this.editor.getValue();
-        }
-        
-        this.currentTab = tab;
-
-        // Mettre à jour les onglets actifs
-        document.querySelectorAll('.editor-tab.active, .file-item.active').forEach(el => {
-          el.classList.remove('active');
-        });
-        
-        // Activer les nouveaux onglets
-        const editorTab = document.querySelector(`.editor-tab[data-tab="${tab}"]`);
-        const fileItem = document.querySelector(`.file-item[data-tab="${tab}"]`);
-        
-        if (editorTab) editorTab.classList.add('active');
-        if (fileItem) fileItem.classList.add('active');
-
-        // Configurer l'éditeur en fonction du type de fichier
-        this.editor.setOption('mode', this.getEditorMode(tab));
-        
-        // Définir le contenu de l'éditeur
-        console.log(`Chargement du contenu ${tab}`);
-        this.editor.setValue(this.files[tab] || '');
-        
-        // Forcer la mise à jour de l'éditeur
-        setTimeout(() => {
-          this.editor.refresh();
-          this.editor.setCursor(0, 0);
-          this.editor.focus();
-        }, 10);
-      }
-
-      getEditorMode(fileType) {
-        const modes = {
-          'html': 'htmlmixed',
-          'css': 'css',
-          'js': 'javascript'
-        };
-        return modes[fileType] || 'text/plain';
-      }
-
-      generateOverlayUrl() {
-        // Sauvegarder le contenu actuel
-        if (this.editor) {
-          this.files[this.currentTab] = this.editor.getValue();
-        }
-        
-        // Construire l'URL absolue
-        const currentPath = window.location.pathname;
-        const basePath = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
-        const baseUrl = `${window.location.origin}${basePath}overlay.html`;
-        
-        // Créer l'URL avec les paramètres encodés
-        const url = new URL(baseUrl);
-        url.searchParams.append('id', this.overlayId);
-        url.searchParams.append('name', encodeURIComponent(this.overlayName));
-        url.searchParams.append('html', encodeURIComponent(this.files.html));
-        url.searchParams.append('css', encodeURIComponent(this.files.css));
-        url.searchParams.append('js', encodeURIComponent(this.files.js || ''));
-        
-        return url.toString();
-      }
-
-      copyOverlayUrl() {
-        const url = this.generateOverlayUrl();
-        navigator.clipboard.writeText(url).then(() => {
-          this.showToast('URL copiée dans le presse-papier !');
-          console.log('URL copiée:', url);
-        }).catch(() => {
-          this.showToast('Erreur lors de la copie de l\'URL');
-        });
-      }
-
-      updatePreview() {
-        console.log("Mise à jour de l'aperçu");
-        
-        // Sauvegarder le contenu actuel de l'éditeur
-        if (this.currentTab && this.editor) {
-          this.files[this.currentTab] = this.editor.getValue();
-        }
-        
-        // Récupérer l'iframe
-        const frame = document.getElementById('preview-frame');
-        
-        // Créer le contenu HTML pour l'aperçu
-        const content = `
-          <!DOCTYPE html>
-          <html>
-          <head>
+          
+          // Récupérer l'iframe
+          const iframe = document.getElementById('preview');
+          if (!iframe) return;
+          
+          // Créer le contenu HTML complet
+          const fullHtml = `
+            <!DOCTYPE html>
+            <html>
+            <head>
               <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
               <style>
                 body {
                   margin: 0;
                   padding: 0;
-                  overflow: hidden;
                   background: transparent;
                 }
                 ${this.files.css || ''}
               </style>
-          </head>
-          <body>
+            </head>
+            <body>
               ${this.files.html || ''}
               <script>
                 try {
@@ -780,88 +630,83 @@ setInterval(changeColor, 3000);`
                   console.error('Erreur dans le script:', e);
                 }
               <\/script>
-          </body>
-          </html>`;
+            </body>
+            </html>
+          `;
           
-        // Mettre à jour l'iframe
-        frame.srcdoc = content;
-        
-        console.log("Aperçu mis à jour");
-      }
+          // Mettre à jour l'iframe
+          iframe.srcdoc = fullHtml;
+        }
 
-      async saveOverlay() {
-        try {
-          // Sauvegarder le contenu actuel de l'éditeur
-          if (this.editor) {
-            this.files[this.currentTab] = this.editor.getValue();
+        async saveOverlay() {
+          try {
+            // Sauvegarder le contenu actuel
+            if (this.editor) {
+              this.files[this.currentTab] = this.editor.getValue();
+            }
+            
+            // Créer l'objet overlay
+            const overlay = {
+              id: this.overlayId,
+              name: this.overlayName,
+              files: this.files,
+              createdAt: new Date().toISOString()
+            };
+
+            // Sauvegarder dans localStorage pour l'éditeur
+            localStorage.setItem(`overlay_${this.overlayId}`, JSON.stringify(overlay));
+            
+            // Sauvegarder dans la liste des overlays
+            let myOverlays = JSON.parse(localStorage.getItem('my_overlays') || '[]');
+            const existingIndex = myOverlays.findIndex(o => o.id === this.overlayId);
+            
+            if (existingIndex !== -1) {
+              // Mettre à jour l'overlay existant
+              myOverlays[existingIndex] = overlay;
+            } else {
+              // Ajouter un nouvel overlay
+              myOverlays.push(overlay);
+            }
+            
+            // Sauvegarder la liste mise à jour
+            localStorage.setItem('my_overlays', JSON.stringify(myOverlays));
+            
+            this.showToast('Overlay sauvegardé avec succès !');
+            console.log('Overlay sauvegardé:', overlay);
+            
+          } catch (error) {
+            console.error('Erreur lors de la sauvegarde:', error);
+            this.showToast('Erreur lors de la sauvegarde de l\'overlay');
           }
-          
-          // Créer l'objet overlay
-          const overlay = {
-            id: this.overlayId,
-            name: this.overlayName || 'Overlay sans nom',
-            files: this.files,
-            createdAt: new Date().toISOString()
-          };
+        }
 
-          // Sauvegarder dans localStorage pour l'éditeur
-          localStorage.setItem(`overlay_${this.overlayId}`, JSON.stringify(overlay));
-
-          // Sauvegarder dans la bibliothèque d'overlays
-          let myOverlays = JSON.parse(localStorage.getItem('my_overlays') || '[]');
-          
-          // Vérifier si l'overlay existe déjà
-          const existingIndex = myOverlays.findIndex(o => o.id === this.overlayId);
-          
-          if (existingIndex >= 0) {
-            // Mettre à jour l'overlay existant
-            myOverlays[existingIndex] = overlay;
-          } else {
-            // Ajouter un nouvel overlay
-            myOverlays.push(overlay);
-          }
-          
-          // Sauvegarder la liste mise à jour
-          localStorage.setItem('my_overlays', JSON.stringify(myOverlays));
-
-          this.showToast('Overlay sauvegardé avec succès !');
-          console.log('Overlay sauvegardé:', overlay);
-          
-        } catch (error) {
-          console.error('Erreur lors de la sauvegarde:', error);
-          this.showToast('Erreur lors de la sauvegarde de l\'overlay');
+        showToast(message) {
+          const toast = document.getElementById('toast');
+          toast.textContent = message;
+          toast.classList.add('show');
+          setTimeout(() => toast.classList.remove('show'), 3000);
         }
       }
 
-      showToast(message) {
-        const toast = document.getElementById('toast');
-        toast.querySelector('span').textContent = message;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3000);
+      // Initialiser l'éditeur
+      document.addEventListener('DOMContentLoaded', () => {
+        new OverlayEditor();
+      });
+
+      // Fonctions pour charger et sauvegarder le contenu des fichiers
+      function loadFileContent(filePath) {
+        fetch(filePath)
+          .then(response => response.text())
+          .then(data => {
+            document.getElementById('editor').value = data;
+          })
+          .catch(error => console.error('Error loading file:', error));
       }
-    }
 
-    // Initialiser l'éditeur quand la page est chargée
-    console.log("Démarrage de l'éditeur d'overlay");
-    const editor = new OverlayEditor();
-  </script>
-</body>
-</html>
-
-  <script>
-    function loadFileContent(filePath) {
-      fetch(filePath)
-        .then(response => response.text())
-        .then(data => {
-          document.getElementById('editor').value = data;
-        })
-        .catch(error => console.error('Error loading file:', error));
-    }
-
-    function saveFileContent(filePath, content) {
-      // Implement file saving logic here
-      console.log('Saving file:', filePath);
-    }
-  </script>
+      function saveFileContent(filePath) {
+        console.log('Saving file:', filePath);
+        // Ici vous pouvez implémenter la logique de sauvegarde
+      }
+    </script>
 </body>
 </html>
