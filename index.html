@@ -6,6 +6,7 @@
   <title>APO Overlays - Accueil</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="src/templates/default/style.css">
   <style>
     :root {
       --primary: #9147ff;
@@ -174,14 +175,6 @@
     <p>APO Overlays - Système d'overlays pour streamers</p>
   </footer>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const userData = JSON.parse(localStorage.getItem('twitch_user'));
-      if (!userData) {
-        window.location.href = './auth/auth.html';
-        return;
-      }
-    });
-  </script>
+  <script src="src/templates/default/script.js"></script>
 </body>
 </html>
