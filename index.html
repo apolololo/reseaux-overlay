@@ -1,183 +1,489 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>APO Overlays - Accueil</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link rel="stylesheet" href="src/templates/default/style.css">
-  <style>
-    :root {
-      --primary: #9147ff;
-      --primary-dark: #772ce8;
-      --secondary: #0e84ff;
-      --background: #0e0e10;
-      --surface: #18181b;
-      --text: #efeff1;
-      --text-secondary: #adadb8;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APO Overlays - Redirection</title>
+    <meta http-equiv="refresh" content="0;url=/auth/auth.html">
+</head>
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary-color: #8b5cf6;
+            --background-color: #0f0f23;
+            --surface-color: #1a1a2e;
+            --text-color: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+        }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--background);
-      color: var(--text);
-      line-height: 1.6;
-    }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--background-color) 0%, #16213e 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem;
-    }
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: 100vh;
+        }
 
-    header {
-      text-align: center;
-      margin-bottom: 4rem;
-    }
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
 
-    h1 {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      background: linear-gradient(45deg, var(--primary), var(--secondary));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
+        .dashboard-header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
 
-    .subtitle {
-      color: var(--text-secondary);
-      font-size: 1.2rem;
-    }
+        .dashboard-header p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+        }
 
-    .features {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2rem;
-      margin-bottom: 4rem;
-    }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
 
-    .feature-card {
-      background: var(--surface);
-      padding: 2rem;
-      border-radius: 12px;
-      transition: transform 0.3s ease;
-    }
+        .dashboard-card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
 
-    .feature-card:hover {
-      transform: translateY(-5px);
-    }
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
 
-    .feature-icon {
-      font-size: 2.5rem;
-      color: var(--primary);
-      margin-bottom: 1rem;
-    }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.1);
+        }
 
-    .feature-title {
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-    }
+        .dashboard-card:hover::before {
+            transform: scaleX(1);
+        }
 
-    .feature-description {
-      color: var(--text-secondary);
-    }
+        .dashboard-card h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-    .cta-buttons {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      margin-top: 2rem;
-    }
+        .dashboard-card h3 i {
+            color: var(--primary-color);
+        }
 
-    .button {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      font-weight: 500;
-      text-decoration: none;
-      transition: all 0.3s ease;
-    }
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
 
-    .button-primary {
-      background: var(--primary);
-      color: white;
-    }
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
 
-    .button-primary:hover {
-      background: var(--primary-dark);
-    }
+        .action-btn.primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+        }
 
-    .button-secondary {
-      background: var(--surface);
-      color: var(--text);
-    }
+        .action-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+        }
 
-    .button-secondary:hover {
-      background: #2a2a2d;
-    }
+        .action-btn.secondary {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
 
-    footer {
-      text-align: center;
-      margin-top: 4rem;
-      padding: 2rem;
-      color: var(--text-secondary);
-    }
-  </style>
+        .action-btn.secondary:hover {
+            background: rgba(139, 92, 246, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .action-btn.tertiary {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        .action-btn.tertiary:hover {
+            background: rgba(16, 185, 129, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 0.75rem;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .recent-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .recent-overlay-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 0.5rem;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .recent-overlay-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .overlay-name {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .overlay-date {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 2rem;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 0.5rem;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .feature-item i {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            margin-top: 0.2rem;
+        }
+
+        .feature-item strong {
+            color: var(--text-color);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .feature-item p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 1rem;
+            }
+
+            .dashboard-header h1 {
+                font-size: 2.5rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                gap: 0.75rem;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>APO Overlays</h1>
-      <p class="subtitle">Créez des overlays personnalisés pour votre stream</p>
-    </header>
-
-    <div class="features">
-      <div class="feature-card">
-        <span class="material-icons feature-icon">edit</span>
-        <h3 class="feature-title">Éditeur Intégré</h3>
-        <p class="feature-description">Modifiez votre overlay en temps réel avec notre éditeur de code avancé.</p>
-      </div>
-
-      <div class="feature-card">
-        <span class="material-icons feature-icon">preview</span>
-        <h3 class="feature-title">Prévisualisation Instantanée</h3>
-        <p class="feature-description">Voyez vos modifications en direct pendant que vous codez.</p>
-      </div>
-
-      <div class="feature-card">
-        <span class="material-icons feature-icon">save</span>
-        <h3 class="feature-title">Sauvegarde Automatique</h3>
-        <p class="feature-description">Vos overlays sont sauvegardés automatiquement dans votre bibliothèque.</p>
-      </div>
+    <nav id="main-navigation"></nav>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>Tableau de Bord</h1>
+            <p>Gérez vos overlays et créez du contenu pour votre stream</p>
+        </div>
+        
+        <div class="dashboard-grid">
+            <div class="dashboard-card quick-actions">
+                <h3><i class="fas fa-bolt"></i> Actions Rapides</h3>
+                <div class="action-buttons">
+                    <a href="editor.html" class="action-btn primary">
+                        <i class="fas fa-plus"></i>
+                        <span>Créer un Overlay</span>
+                    </a>
+                    <a href="my-overlays.html" class="action-btn secondary">
+                        <i class="fas fa-folder"></i>
+                        <span>Mes Overlays</span>
+                    </a>
+                    <a href="marketplace.html" class="action-btn tertiary">
+                        <i class="fas fa-store"></i>
+                        <span>Marketplace</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="dashboard-card stats">
+                <h3><i class="fas fa-chart-bar"></i> Statistiques</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number" id="overlayCount">0</div>
+                        <div class="stat-label">Overlays Créés</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="lastActivity">-</div>
+                        <div class="stat-label">Dernière Activité</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-card recent-overlays">
+                <h3><i class="fas fa-history"></i> Overlays Récents</h3>
+                <div id="recentOverlaysList" class="recent-list">
+                    <p class="empty-state">Aucun overlay créé pour le moment</p>
+                </div>
+            </div>
+            
+            <div class="dashboard-card features">
+                <h3><i class="fas fa-star"></i> Fonctionnalités</h3>
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <i class="fas fa-edit"></i>
+                        <div>
+                            <strong>Éditeur Intégré</strong>
+                            <p>Modifiez votre overlay en temps réel</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-eye"></i>
+                        <div>
+                            <strong>Prévisualisation Live</strong>
+                            <p>Voyez vos modifications instantanément</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-save"></i>
+                        <div>
+                            <strong>Sauvegarde Auto</strong>
+                            <p>Vos overlays sont sauvegardés automatiquement</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="cta-buttons">
-      <a href="editor.html" class="button button-primary">
-        <span class="material-icons">add</span>
-        Créer un Overlay
-      </a>
-      <a href="my-overlays.html" class="button button-secondary">
-        <span class="material-icons">folder</span>
-        Mes Overlays
-      </a>
-    </div>
-  </div>
 
   <footer>
-    <p>APO Overlays - Système d'overlays pour streamers</p>
+    <p>&copy; 2024 APO Overlays - Système d'overlays pour streamers</p>
   </footer>
 
   <script src="src/templates/default/script.js"></script>
+  <script src="navigation.js"></script>
   <script>
-      // Vérification de l'authentification au chargement de la page
+      // Dashboard functionality
+      class Dashboard {
+          constructor() {
+              this.init();
+          }
+          
+          init() {
+              this.loadStats();
+              this.loadRecentOverlays();
+          }
+          
+          loadStats() {
+              const overlays = JSON.parse(localStorage.getItem('overlays') || '{}');
+              const overlayCount = Object.keys(overlays).length;
+              
+              document.getElementById('overlayCount').textContent = overlayCount;
+              
+              // Get last activity
+              const lastActivity = this.getLastActivity(overlays);
+              document.getElementById('lastActivity').textContent = lastActivity;
+          }
+          
+          getLastActivity(overlays) {
+              const overlayKeys = Object.keys(overlays);
+              if (overlayKeys.length === 0) return 'Jamais';
+              
+              let lastDate = null;
+              overlayKeys.forEach(key => {
+                  const overlay = overlays[key];
+                  if (overlay.lastModified) {
+                      const date = new Date(overlay.lastModified);
+                      if (!lastDate || date > lastDate) {
+                          lastDate = date;
+                      }
+                  }
+              });
+              
+              if (!lastDate) return 'Inconnue';
+              
+              const now = new Date();
+              const diffTime = Math.abs(now - lastDate);
+              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+              
+              if (diffDays === 1) return 'Aujourd\'hui';
+              if (diffDays === 2) return 'Hier';
+              if (diffDays <= 7) return `Il y a ${diffDays} jours`;
+              
+              return lastDate.toLocaleDateString('fr-FR');
+          }
+          
+          loadRecentOverlays() {
+              const overlays = JSON.parse(localStorage.getItem('overlays') || '{}');
+              const overlayKeys = Object.keys(overlays);
+              const recentList = document.getElementById('recentOverlaysList');
+              
+              if (overlayKeys.length === 0) {
+                  recentList.innerHTML = '<p class="empty-state">Aucun overlay créé pour le moment</p>';
+                  return;
+              }
+              
+              // Sort by last modified date
+              const sortedOverlays = overlayKeys
+                  .map(key => ({ id: key, ...overlays[key] }))
+                  .sort((a, b) => {
+                      const dateA = new Date(a.lastModified || 0);
+                      const dateB = new Date(b.lastModified || 0);
+                      return dateB - dateA;
+                  })
+                  .slice(0, 5); // Show only 5 most recent
+              
+              recentList.innerHTML = sortedOverlays.map(overlay => `
+                  <div class="recent-overlay-item" onclick="editOverlay('${overlay.id}')">
+                      <div>
+                          <div class="overlay-name">${overlay.name || overlay.id}</div>
+                          <div class="overlay-date">${this.formatDate(overlay.lastModified)}</div>
+                      </div>
+                      <i class="fas fa-chevron-right"></i>
+                  </div>
+              `).join('');
+          }
+          
+          formatDate(dateString) {
+              if (!dateString) return 'Date inconnue';
+              const date = new Date(dateString);
+              return date.toLocaleDateString('fr-FR', {
+                  day: 'numeric',
+                  month: 'short',
+                  hour: '2-digit',
+                  minute: '2-digit'
+              });
+          }
+      }
+      
+      function editOverlay(overlayId) {
+          window.location.href = `editor.html?id=${overlayId}`;
+      }
+      
+      // Fonction pour déconnecter l'utilisateur
+      function logout() {
+          localStorage.removeItem('user_logged_in');
+          localStorage.removeItem('user_token');
+          localStorage.removeItem('user_data');
+          window.location.href = 'auth/auth.html';
+      }
+      
       document.addEventListener('DOMContentLoaded', function() {
           // Vérifier si l'utilisateur est connecté
           const isLoggedIn = localStorage.getItem('user_logged_in');
@@ -191,10 +497,10 @@
           });
           
           // Si l'utilisateur n'est pas connecté et n'est pas déjà sur la page de connexion
-          if (!isLoggedIn && !userToken && !currentPath.includes('login.html')) {
-              console.log('Utilisateur non connecté, redirection vers login.html');
-              // Rediriger vers la page de connexion
-              window.location.href = 'login.html';
+          if (!isLoggedIn && !userToken && !currentPath.includes('auth.html')) {
+              console.log('Utilisateur non connecté, redirection vers auth/auth.html');
+              // Rediriger vers la page de connexion Twitch
+              window.location.href = 'auth/auth.html';
               return;
           }
           
@@ -202,30 +508,10 @@
           if (isLoggedIn || userToken) {
               console.log('Utilisateur connecté, affichage du dashboard');
               document.body.style.display = 'block';
+              // Initialize dashboard
+              new Dashboard();
           }
       });
-      
-      // Fonction pour déconnecter l'utilisateur
-      function logout() {
-          localStorage.removeItem('user_logged_in');
-          localStorage.removeItem('user_token');
-          localStorage.removeItem('user_data');
-          window.location.href = 'login.html';
-      }
-      
-      // Ajouter un bouton de déconnexion si l'utilisateur est connecté
-      if (localStorage.getItem('user_logged_in') || localStorage.getItem('user_token')) {
-          const header = document.querySelector('.container h1');
-          if (header) {
-              const logoutBtn = document.createElement('button');
-              logoutBtn.textContent = 'Déconnexion';
-              logoutBtn.className = 'btn btn-secondary';
-              logoutBtn.style.marginLeft = '20px';
-              logoutBtn.style.fontSize = '14px';
-              logoutBtn.onclick = logout;
-              header.appendChild(logoutBtn);
-          }
-      }
   </script>
 </body>
 </html>

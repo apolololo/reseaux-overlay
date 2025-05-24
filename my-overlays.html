@@ -334,11 +334,69 @@
   </style>
 </head>
 <body>
+    <nav id="main-navigation"></nav>
   <div class="auth-background">
     <div class="auth-gradient-circle auth-circle-1"></div>
     <div class="auth-gradient-circle auth-circle-2"></div>
     <div class="auth-gradient-circle auth-circle-3"></div>
   </div>
+
+  <nav class="main-nav" style="
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 1rem 2rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    ">
+        <div class="nav-brand" style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">
+            <i class="fas fa-layer-group"></i> APO Overlays
+        </div>
+        <div class="nav-links" style="display: flex; gap: 1.5rem; align-items: center;">
+            <a href="my-overlays.html" class="nav-link" style="
+                color: var(--text-color);
+                text-decoration: none;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem 1rem;
+                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.1);
+            ">
+                <i class="fas fa-folder"></i> Mes Overlays
+            </a>
+            <a href="marketplace.html" class="nav-link" style="
+                color: var(--text-color);
+                text-decoration: none;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem 1rem;
+                border-radius: 8px;
+                transition: all 0.3s ease;
+            ">
+                <i class="fas fa-store"></i> Marketplace
+            </a>
+            <button onclick="logout()" class="nav-link" style="
+                color: var(--text-color);
+                background: none;
+                border: none;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem 1rem;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            ">
+                <i class="fas fa-sign-out-alt"></i> Déconnexion
+            </button>
+        </div>
+    </nav>
 
   <div class="container">
     <div class="header">
@@ -515,8 +573,8 @@
         
         // Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
         if (!isLoggedIn && !userToken) {
-            console.log('Utilisateur non connecté, redirection vers login.html');
-            window.location.href = 'login.html';
+            console.log('Utilisateur non connecté, redirection vers auth/auth.html');
+            window.location.href = 'auth/auth.html';
             return;
         }
         
@@ -618,5 +676,6 @@
         }
     }
   </script>
+    <script src="navigation.js"></script>
 </body>
 </html>
