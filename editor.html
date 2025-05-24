@@ -8,12 +8,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
-
+  
   <!-- CodeMirror Core CSS -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" rel="stylesheet">
+  
+  <!-- Thèmes CodeMirror -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/vscode-dark.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css" rel="stylesheet">
+  
+  <!-- Addons CSS -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldgutter.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/dialog/dialog.min.css" rel="stylesheet">
@@ -225,7 +229,7 @@
       position: relative;
       z-index: 1;
     }
-
+    
     .preview-dimensions {
       position: absolute;
       top: 0;
@@ -237,7 +241,7 @@
       z-index: 2;
       box-sizing: border-box;
     }
-
+    
     .preview-dimensions::after {
       content: "1920 x 1080";
       position: absolute;
@@ -271,69 +275,6 @@
       transform: translateY(0);
       opacity: 1;
     }
-
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-    }
-
-    .modal-content {
-      background-color: var(--surface);
-      margin: 10% auto;
-      padding: 20px;
-      border-radius: 8px;
-      width: 80%;
-      max-width: 800px;
-      height: 600px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .modal-header h2 {
-      margin: 0;
-    }
-
-    .modal-body {
-      flex: 1;
-      overflow: auto;
-    }
-
-    .modal-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .modal-footer button {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .modal-footer button:first-child {
-      background-color: rgba(255, 255, 255, 0.1);
-      color: var(--text);
-    }
-
-    .modal-footer button:last-child {
-      background-color: var(--primary);
-      color: white;
-    }
   </style>
 </head>
 <body>
@@ -358,15 +299,15 @@
           <h2>Fichiers</h2>
         </div>
         <div class="file-list">
-          <div class="file-item active" data-tab="html" onclick="openFileModal('index.html')">
+          <div class="file-item active" data-tab="html">
             <i class="mdi mdi-language-html5"></i>
             index.html
           </div>
-          <div class="file-item" data-tab="css" onclick="openFileModal('style.css')">
+          <div class="file-item" data-tab="css">
             <i class="mdi mdi-language-css3"></i>
             style.css
           </div>
-          <div class="file-item" data-tab="js" onclick="openFileModal('script.js')">
+          <div class="file-item" data-tab="js">
             <i class="mdi mdi-language-javascript"></i>
             script.js
           </div>
@@ -396,49 +337,33 @@
     <span>Overlay enregistré avec succès !</span>
   </div>
 
-  <div id="fileModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 id="modalTitle">Nom du fichier</h2>
-        <span class="close" onclick="closeFileModal()">&times;</span>
-      </div>
-      <div class="modal-body">
-        <textarea id="fileContent" class="file-content"></textarea>
-      </div>
-      <div class="modal-footer">
-        <button onclick="closeFileModal()">Annuler</button>
-        <button onclick="saveFileContent()">Enregistrer</button>
-      </div>
-    </div>
-  </div>
-
   <!-- CodeMirror Core -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
-
+  
   <!-- Modes pour les langages -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
-
+  
   <!-- Addons pour l'autocomplétion -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/html-hint.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/css-hint.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/javascript-hint.min.js"></script>
-
+  
   <!-- Addons pour les parenthèses et balises -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closetag.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchbrackets.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchtags.min.js"></script>
-
+  
   <!-- Addons pour la recherche -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/search/search.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/search/searchcursor.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/search/jump-to-line.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/dialog/dialog.min.js"></script>
-
+  
   <!-- Addons pour le pliage de code -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldgutter.min.js"></script>
@@ -447,311 +372,477 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/comment-fold.min.js"></script>
 
   <script>
-    let editor;
-    let currentTab = 'html';
-    let currentFile = '';
-
-    // Fichiers séparés avec contenu par défaut
-    const files = {
-      'index.html': '',
-      'style.css': '',
-      'script.js': ''
-    };
-
-    // Charger les fichiers template au démarrage
-    async function loadTemplateFiles() {
-      try {
-        // Charger le fichier HTML template
-        const htmlResponse = await fetch('./src/templates/default/index.html');
-        if (htmlResponse.ok) {
-          files['index.html'] = await htmlResponse.text();
-        } else {
-          // Contenu par défaut si le fichier n'existe pas
-          files['index.html'] = `<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Overlay</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div id="overlay-container">
-        <div class="overlay-element">
-            <h1>Mon Overlay</h1>
-        </div>
-    </div>
-    <script src="script.js"></script>
-</body>
-</html>`;
-        }
-
-        // Charger le fichier CSS template
-        const cssResponse = await fetch('./src/templates/default/style.css');
-        if (cssResponse.ok) {
-          files['style.css'] = await cssResponse.text();
-        } else {
-          files['style.css'] = `/* Styles de base pour l'overlay */
-body {
+    class OverlayEditor {
+      constructor() {
+        this.editor = null;
+        this.currentTab = 'html';
+        this.overlayName = '';
+        this.overlayId = '';
+        this.files = {
+          html: `<div class="overlay">
+    <h1>Mon Overlay Personnalisé</h1>
+    <p>Modifiez ce code pour créer votre overlay !</p>
+</div>`,
+          css: `body {
     margin: 0;
     padding: 0;
-    overflow: hidden;
-    font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
+    background: transparent;
 }
 
-#overlay-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-}
-
-.overlay-element {
-    position: absolute;
+.overlay {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
+    text-align: center;
+}
+
+h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    animation: fadeIn 2s ease-in-out;
 }
 
-.overlay-element h1 {
+p {
     font-size: 24px;
-    margin: 0;
-    padding: 10px;
-}`;
-        }
-
-        // Charger le fichier JS template
-        const jsResponse = await fetch('./src/templates/default/script.js');
-        if (jsResponse.ok) {
-          files['script.js'] = await jsResponse.text();
-        } else {
-          files['script.js'] = `// Configuration de base pour l'overlay
-const config = {
-    title: "Mon Overlay",
-    position: { x: 20, y: 20 }
-};
-
-// Fonction d'initialisation
-function initOverlay() {
-    console.log("Overlay initialisé");
+    opacity: 0.8;
+    animation: slideUp 2s ease-in-out;
 }
 
-// Fonction pour mettre à jour l'overlay
-function updateOverlay() {
-    // Code de mise à jour ici
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-// Initialisation au chargement
-document.addEventListener('DOMContentLoaded', initOverlay);`;
-        }
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 0.8; transform: translateY(0); }
+}`,
+          js: `// Code JavaScript pour votre overlay
+console.log('Overlay personnalisé chargé !');
 
-        console.log('Fichiers template chargés:', files);
+// Animation du titre au chargement
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM chargé, initialisation des animations...');
+    
+    const title = document.querySelector('h1');
+    const subtitle = document.querySelector('p');
+    
+    if (title) {
+        title.style.opacity = '0';
+        title.style.transform = 'translateY(-30px)';
         
-        // Mettre à jour l'éditeur avec le contenu HTML par défaut
-        if (editor) {
-          editor.setValue(files['index.html']);
-        }
+        setTimeout(() => {
+            title.style.transition = 'all 1s ease-out';
+            title.style.opacity = '1';
+            title.style.transform = 'translateY(0)';
+        }, 500);
+    }
+    
+    if (subtitle) {
+        subtitle.style.opacity = '0';
+        subtitle.style.transform = 'translateY(30px)';
         
-        // Mettre à jour la prévisualisation
-        updatePreview();
-        
-      } catch (error) {
-        console.error('Erreur lors du chargement des fichiers template:', error);
-      }
+        setTimeout(() => {
+            subtitle.style.transition = 'all 1s ease-out';
+            subtitle.style.opacity = '0.8';
+            subtitle.style.transform = 'translateY(0)';
+        }, 1000);
     }
+});
 
-    function initEditor() {
-      const editorElement = document.getElementById('editor');
-      
-      editor = CodeMirror(editorElement, {
-        value: files[currentTab === 'html' ? 'index.html' : currentTab === 'css' ? 'style.css' : 'script.js'],
-        mode: currentTab === 'html' ? 'htmlmixed' : currentTab === 'css' ? 'css' : 'javascript',
-        theme: 'dracula',
-        lineNumbers: true,
-        autoCloseBrackets: true,
-        autoCloseTags: true,
-        matchBrackets: true,
-        matchTags: true,
-        foldGutter: true,
-        gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
-        extraKeys: {
-          "Ctrl-Space": "autocomplete",
-          "Ctrl-S": function() {
-            saveCurrentFile();
-          },
-          "Ctrl-F": "findPersistent"
-        }
-      });
-
-      // Écouter les changements dans l'éditeur
-      editor.on('change', function() {
-        saveCurrentFile();
-        updatePreview();
-      });
-
-      console.log('Éditeur CodeMirror initialisé');
+// Fonction d'exemple pour changer la couleur du titre
+function changeColor() {
+    const title = document.querySelector('h1');
+    if (title) {
+        const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        title.style.color = randomColor;
     }
+}
 
-    function saveCurrentFile() {
-      const fileName = currentTab === 'html' ? 'index.html' : currentTab === 'css' ? 'style.css' : 'script.js';
-      files[fileName] = editor.getValue();
-      console.log(`Fichier ${fileName} sauvegardé:`, files[fileName].substring(0, 100) + '...');
-    }
-
-    function switchTab(tab) {
-      // Sauvegarder le contenu actuel
-      saveCurrentFile();
-      
-      // Changer l'onglet actuel
-      currentTab = tab;
-      
-      // Mettre à jour l'interface des onglets
-      document.querySelectorAll('.editor-tab').forEach(tabEl => {
-        tabEl.classList.remove('active');
-      });
-      document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
-
-      // Mettre à jour l'éditeur
-      const fileName = tab === 'html' ? 'index.html' : tab === 'css' ? 'style.css' : 'script.js';
-      const mode = tab === 'html' ? 'htmlmixed' : tab === 'css' ? 'css' : 'javascript';
-      
-      editor.setValue(files[fileName]);
-      editor.setOption('mode', mode);
-      
-      console.log(`Basculé vers l'onglet ${tab}, fichier: ${fileName}`);
-    }
-
-    function updatePreview() {
-      const frame = document.getElementById('preview-frame');
-      
-      const htmlContent = files['index.html'];
-      const cssContent = files['style.css'];
-      const jsContent = files['script.js'];
-      
-      // Créer le document final en utilisant un tableau pour éviter les problèmes de parsing
-      const docParts = [];
-      
-      // Ajouter les parties du document une par une
-      docParts.push('<!DOCTYPE html>');
-      docParts.push(String.fromCharCode(60) + 'html' + String.fromCharCode(62)); // <html>
-      docParts.push(String.fromCharCode(60) + 'head' + String.fromCharCode(62)); // <head>
-      docParts.push(String.fromCharCode(60) + 'meta charset="UTF-8"' + String.fromCharCode(62));
-      docParts.push(String.fromCharCode(60) + 'meta name="viewport" content="width=device-width, initial-scale=1.0"' + String.fromCharCode(62));
-      docParts.push(String.fromCharCode(60) + 'style' + String.fromCharCode(62));
-      docParts.push(cssContent);
-      docParts.push(String.fromCharCode(60) + '/style' + String.fromCharCode(62)); // </style>
-      docParts.push(String.fromCharCode(60) + '/head' + String.fromCharCode(62)); // </head>
-      docParts.push(String.fromCharCode(60) + 'body' + String.fromCharCode(62)); // <body>
-      
-      // Nettoyer le contenu HTML pour supprimer les références aux scripts externes
-      let cleanHtml = htmlContent;
-      if (htmlContent.includes('script.js')) {
-        // Utiliser une approche simple basée sur des mots-clés
-        const lines = htmlContent.split('\n');
-        const filteredLines = lines.filter(line => {
-          return !(line.includes('script') && line.includes('src') && line.includes('script.js'));
-        });
-        cleanHtml = filteredLines.join('\n');
-      }
-      
-      docParts.push(cleanHtml);
-      docParts.push(String.fromCharCode(60) + 'script' + String.fromCharCode(62)); // <script>
-      docParts.push(jsContent);
-      docParts.push(String.fromCharCode(60) + '/script' + String.fromCharCode(62)); // </script>
-      docParts.push(String.fromCharCode(60) + '/body' + String.fromCharCode(62)); // </body>
-      docParts.push(String.fromCharCode(60) + '/html' + String.fromCharCode(62)); // </html>
-      
-      const fullContent = docParts.join('\n');
-      
-      frame.srcdoc = fullContent;
-      console.log('Prévisualisation mise à jour');
-    }
-
-    function openFileModal(filename) {
-      currentFile = filename;
-      document.getElementById('modalTitle').textContent = filename;
-      document.getElementById('fileContent').value = files[filename];
-      document.getElementById('fileModal').style.display = 'block';
-    }
-
-    function closeFileModal() {
-      document.getElementById('fileModal').style.display = 'none';
-    }
-
-    function saveFileContent() {
-      const content = document.getElementById('fileContent').value;
-      files[currentFile] = content;
-      closeFileModal();
-      
-      // Mettre à jour l'éditeur si c'est le fichier actuellement ouvert
-      const currentFileName = currentTab === 'html' ? 'index.html' : currentTab === 'css' ? 'style.css' : 'script.js';
-      if (currentFile === currentFileName) {
-        editor.setValue(content);
-      }
-      
-      updatePreview();
-    }
-
-    // Gestionnaires d'événements pour les onglets
-    document.addEventListener('DOMContentLoaded', function() {
-      // Initialiser l'éditeur
-      initEditor();
-      
-      // Charger les fichiers template
-      loadTemplateFiles();
-      
-      // Ajouter les gestionnaires d'événements pour les onglets
-      document.querySelectorAll('.editor-tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-          switchTab(this.getAttribute('data-tab'));
-        });
-      });
-
-      // Gestionnaire pour le bouton de sauvegarde
-      document.getElementById('saveBtn').addEventListener('click', function() {
-        saveCurrentFile();
-        showToast('Overlay sauvegardé avec succès !');
-      });
-
-      // Gestionnaire pour le bouton de copie d'URL
-      document.getElementById('copyUrlBtn').addEventListener('click', function() {
-        const overlayName = document.getElementById('overlayName').value || 'Mon Overlay';
-        const overlayId = Date.now().toString();
-        
-        // Sauvegarder dans localStorage
-        const overlayData = {
-          name: overlayName,
-          files: {
-            html: files['index.html'],
-            css: files['style.css'],
-            js: files['script.js']
-          },
-          createdAt: new Date().toISOString()
+// Changer la couleur toutes les 3 secondes
+setInterval(changeColor, 3000);`
         };
-        
-        localStorage.setItem(`overlay_${overlayId}`, JSON.stringify(overlayData));
-        
-        // Générer l'URL
-        const baseUrl = window.location.origin;
-        const overlayUrl = `${baseUrl}/overlay.html?id=${overlayId}`;
-        
-        // Copier dans le presse-papiers
-        navigator.clipboard.writeText(overlayUrl).then(() => {
-          showToast('URL copiée dans le presse-papiers !');
-        });
-      });
-    });
+        this.init();
+      }
 
-    function showToast(message) {
-      const toast = document.getElementById('toast');
-      toast.querySelector('span').textContent = message;
-      toast.classList.add('show');
-      
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 3000);
+      init() {
+        console.log("Initialisation de l'éditeur d'overlay");
+        
+        // Attendre que le DOM et CodeMirror soient chargés
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => this.setupEditor(), 100);
+            this.setupEventListeners();
+            this.loadOverlayData();
+          });
+        } else {
+          setTimeout(() => this.setupEditor(), 100);
+          this.setupEventListeners();
+          this.loadOverlayData();
+        }
+      }
+
+      setupEditor() {
+        console.log("Configuration de l'éditeur CodeMirror");
+        
+        const editorElement = document.getElementById('editor');
+        if (!editorElement) {
+          console.error("Element editor non trouvé");
+          return;
+        }
+
+        // Vérifier que CodeMirror est disponible
+        if (typeof CodeMirror === 'undefined') {
+          console.error("CodeMirror n'est pas chargé");
+          setTimeout(() => this.setupEditor(), 500);
+          return;
+        }
+
+        try {
+          this.editor = CodeMirror(editorElement, {
+            value: this.files[this.currentTab],
+            mode: this.getEditorMode(this.currentTab),
+            theme: 'dracula',
+            lineNumbers: true,
+            autoCloseTags: true,
+            autoCloseBrackets: true,
+            matchBrackets: true,
+            matchTags: {bothTags: true},
+            indentUnit: 2,
+            tabSize: 2,
+            lineWrapping: true,
+            extraKeys: {
+              "Ctrl-Space": "autocomplete",
+              "Ctrl-/": "toggleComment",
+              "Ctrl-F": "findPersistent",
+              "Ctrl-S": () => {
+                this.saveOverlay();
+                return false;
+              },
+              "Tab": function(cm) {
+                if (cm.somethingSelected()) {
+                  cm.indentSelection("add");
+                } else {
+                  cm.replaceSelection("  ");
+                }
+              }
+            },
+            foldGutter: true,
+            gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+          });
+
+          console.log("CodeMirror initialisé avec succès");
+
+          // Ajouter l'écouteur d'événements pour les modifications
+          this.editor.on('change', (cm) => this.onEditorChange(cm));
+
+          // Forcer le rafraîchissement
+          setTimeout(() => {
+            this.editor.refresh();
+            this.editor.focus();
+            console.log("Éditeur rafraîchi et focalisé");
+          }, 100);
+
+        } catch (error) {
+          console.error("Erreur lors de l'initialisation de CodeMirror:", error);
+        }
+      }
+
+      setupEventListeners() {
+        console.log("Configuration des écouteurs d'événements");
+        
+        // Gestionnaires pour les onglets de fichiers
+        document.querySelectorAll('.editor-tab, .file-item').forEach(el => {
+          el.addEventListener('click', () => {
+            const fileType = el.dataset.tab;
+            if (fileType) {
+              console.log("Changement d'onglet vers:", fileType);
+              this.switchTab(fileType);
+            }
+          });
+        });
+
+        // Gestionnaires pour les actions principales
+        const saveBtn = document.getElementById('saveBtn');
+        if (saveBtn) {
+          saveBtn.addEventListener('click', () => this.saveOverlay());
+        }
+
+        const copyUrlBtn = document.getElementById('copyUrlBtn');
+        if (copyUrlBtn) {
+          copyUrlBtn.addEventListener('click', () => this.copyOverlayUrl());
+        }
+
+        const overlayName = document.getElementById('overlayName');
+        if (overlayName) {
+          overlayName.addEventListener('input', (e) => {
+            this.overlayName = e.target.value;
+          });
+        }
+      }
+
+      loadOverlayData() {
+        console.log("Chargement des données de l'overlay");
+        
+        // Essayer de charger un overlay existant ou en créer un nouveau
+        const loaded = this.loadExistingOverlay();
+        if (!loaded) {
+          console.log("Aucun overlay existant trouvé, création d'un nouveau");
+          this.createNewOverlay();
+        }
+        
+        // S'assurer que l'éditeur est correctement initialisé
+        setTimeout(() => {
+          if (this.editor) {
+            console.log("Rafraîchissement final de l'éditeur");
+            this.editor.refresh();
+            this.updatePreview();
+          }
+        }, 300);
+      }
+
+      onEditorChange(cm) {
+        // Sauvegarder les modifications dans l'objet files
+        this.files[this.currentTab] = cm.getValue();
+        
+        // Mettre à jour l'aperçu immédiatement
+        this.updatePreview();
+      }
+
+      loadExistingOverlay() {
+        const params = new URLSearchParams(window.location.search);
+        const overlayId = params.get('id');
+
+        if (overlayId) {
+          const overlayData = localStorage.getItem(`overlay_${overlayId}`);
+          if (overlayData) {
+            const overlay = JSON.parse(overlayData);
+            this.overlayId = overlayId;
+            this.overlayName = overlay.name;
+            this.files = overlay.files;
+
+            document.getElementById('overlayName').value = this.overlayName;
+            if (this.editor) {
+              this.editor.setValue(this.files[this.currentTab]);
+            }
+            this.updatePreview();
+            return true;
+          }
+        }
+        return false;
+      }
+
+      createNewOverlay() {
+        this.overlayId = this.generateOverlayId();
+        this.overlayName = 'Mon Nouvel Overlay';
+        document.getElementById('overlayName').value = this.overlayName;
+
+        // Définir le contenu de l'éditeur avec le fichier actuel
+        console.log("Initialisation de l'éditeur avec le contenu HTML");
+        if (this.editor) {
+          this.editor.setValue(this.files[this.currentTab]);
+        }
+        
+        // Mettre à jour l'aperçu
+        this.updatePreview();
+      }
+
+      generateOverlayId() {
+        return 'overlay_' + Math.random().toString(36).substr(2, 9);
+      }
+
+      switchTab(tab) {
+        console.log("Changement d'onglet vers:", tab);
+        
+        if (!this.editor) {
+          console.error("Éditeur non initialisé");
+          return;
+        }
+        
+        // Sauvegarder le contenu de l'onglet actuel avant de changer
+        if (this.currentTab) {
+          this.files[this.currentTab] = this.editor.getValue();
+        }
+        
+        this.currentTab = tab;
+
+        // Mettre à jour les onglets actifs
+        document.querySelectorAll('.editor-tab.active, .file-item.active').forEach(el => {
+          el.classList.remove('active');
+        });
+        
+        // Activer les nouveaux onglets
+        const editorTab = document.querySelector(`.editor-tab[data-tab="${tab}"]`);
+        const fileItem = document.querySelector(`.file-item[data-tab="${tab}"]`);
+        
+        if (editorTab) editorTab.classList.add('active');
+        if (fileItem) fileItem.classList.add('active');
+
+        // Configurer l'éditeur en fonction du type de fichier
+        this.editor.setOption('mode', this.getEditorMode(tab));
+        
+        // Définir le contenu de l'éditeur
+        console.log(`Chargement du contenu ${tab}`);
+        this.editor.setValue(this.files[tab] || '');
+        
+        // Forcer la mise à jour de l'éditeur
+        setTimeout(() => {
+          this.editor.refresh();
+          this.editor.setCursor(0, 0);
+          this.editor.focus();
+        }, 10);
+      }
+
+      getEditorMode(fileType) {
+        const modes = {
+          'html': 'htmlmixed',
+          'css': 'css',
+          'js': 'javascript'
+        };
+        return modes[fileType] || 'text/plain';
+      }
+
+      generateOverlayUrl() {
+        // Sauvegarder le contenu actuel
+        if (this.editor) {
+          this.files[this.currentTab] = this.editor.getValue();
+        }
+        
+        // Construire l'URL absolue
+        const currentPath = window.location.pathname;
+        const basePath = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
+        const baseUrl = `${window.location.origin}${basePath}overlay.html`;
+        
+        // Créer l'URL avec les paramètres encodés
+        const url = new URL(baseUrl);
+        url.searchParams.append('id', this.overlayId);
+        url.searchParams.append('name', encodeURIComponent(this.overlayName));
+        url.searchParams.append('html', encodeURIComponent(this.files.html));
+        url.searchParams.append('css', encodeURIComponent(this.files.css));
+        url.searchParams.append('js', encodeURIComponent(this.files.js || ''));
+        
+        return url.toString();
+      }
+
+      copyOverlayUrl() {
+        const url = this.generateOverlayUrl();
+        navigator.clipboard.writeText(url).then(() => {
+          this.showToast('URL copiée dans le presse-papier !');
+          console.log('URL copiée:', url);
+        }).catch(() => {
+          this.showToast('Erreur lors de la copie de l\'URL');
+        });
+      }
+
+      updatePreview() {
+        console.log("Mise à jour de l'aperçu");
+        
+        // Sauvegarder le contenu actuel de l'éditeur
+        if (this.currentTab && this.editor) {
+          this.files[this.currentTab] = this.editor.getValue();
+        }
+        
+        // Récupérer l'iframe
+        const frame = document.getElementById('preview-frame');
+        
+        // Créer le contenu HTML pour l'aperçu
+        const content = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <style>
+                body {
+                  margin: 0;
+                  padding: 0;
+                  overflow: hidden;
+                  background: transparent;
+                }
+                ${this.files.css || ''}
+              </style>
+          </head>
+          <body>
+              ${this.files.html || ''}
+              <script>
+                try {
+                  ${this.files.js || ''}
+                } catch(e) {
+                  console.error('Erreur dans le script:', e);
+                }
+              <\/script>
+          </body>
+          </html>`;
+          
+        // Mettre à jour l'iframe
+        frame.srcdoc = content;
+        
+        console.log("Aperçu mis à jour");
+      }
+
+      async saveOverlay() {
+        try {
+          // Sauvegarder le contenu actuel de l'éditeur
+          if (this.editor) {
+            this.files[this.currentTab] = this.editor.getValue();
+          }
+          
+          // Créer l'objet overlay
+          const overlay = {
+            id: this.overlayId,
+            name: this.overlayName || 'Overlay sans nom',
+            files: this.files,
+            createdAt: new Date().toISOString()
+          };
+
+          // Sauvegarder dans localStorage pour l'éditeur
+          localStorage.setItem(`overlay_${this.overlayId}`, JSON.stringify(overlay));
+
+          // Sauvegarder dans la bibliothèque d'overlays
+          let myOverlays = JSON.parse(localStorage.getItem('my_overlays') || '[]');
+          
+          // Vérifier si l'overlay existe déjà
+          const existingIndex = myOverlays.findIndex(o => o.id === this.overlayId);
+          
+          if (existingIndex >= 0) {
+            // Mettre à jour l'overlay existant
+            myOverlays[existingIndex] = overlay;
+          } else {
+            // Ajouter un nouvel overlay
+            myOverlays.push(overlay);
+          }
+          
+          // Sauvegarder la liste mise à jour
+          localStorage.setItem('my_overlays', JSON.stringify(myOverlays));
+
+          this.showToast('Overlay sauvegardé avec succès !');
+          console.log('Overlay sauvegardé:', overlay);
+          
+        } catch (error) {
+          console.error('Erreur lors de la sauvegarde:', error);
+          this.showToast('Erreur lors de la sauvegarde de l\'overlay');
+        }
+      }
+
+      showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.querySelector('span').textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+      }
     }
+
+    // Initialiser l'éditeur quand la page est chargée
+    console.log("Démarrage de l'éditeur d'overlay");
+    const editor = new OverlayEditor();
   </script>
 </body>
 </html>
