@@ -9,6 +9,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: 'index.html',
+        login: 'login.html',
         editor: 'editor.html',
         overlay: 'overlay.html',
         myOverlays: 'my-overlays.html',
