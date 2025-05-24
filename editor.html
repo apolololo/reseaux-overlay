@@ -625,74 +625,44 @@ document.addEventListener('DOMContentLoaded', initOverlay);`;
     function updatePreview() {
       const frame = document.getElementById('preview-frame');
       
-      // Éviter les problèmes de parsing en utilisant une approche différente
       const htmlContent = files['index.html'];
       const cssContent = files['style.css'];
       const jsContent = files['script.js'];
       
-      // Créer les éléments de base
-      const doctype = '<!DOCTYPE html>';
-      const htmlOpen = '<html>';
-      const headOpen = '<head>';
-      const metaCharset = '<meta charset="UTF-8">';
-      const metaViewport = '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
-      const styleOpen = '<style>';
-      const styleClose = '</style>';
-      const headClose = '</head>';
-      const bodyOpen = '<body>';
-      const scriptOpen = '<script>';
-      const scriptClose = '</script>';
-      const bodyClose = '</body>';
-      const htmlClose = '</html>';
+      // Créer le document final en utilisant un tableau pour éviter les problèmes de parsing
+      const docParts = [];
       
-      // Nettoyer le contenu HTML des références au script externe
+      // Ajouter les parties du document une par une
+      docParts.push('<!DOCTYPE html>');
+      docParts.push(String.fromCharCode(60) + 'html' + String.fromCharCode(62)); // <html>
+      docParts.push(String.fromCharCode(60) + 'head' + String.fromCharCode(62)); // <head>
+      docParts.push(String.fromCharCode(60) + 'meta charset="UTF-8"' + String.fromCharCode(62));
+      docParts.push(String.fromCharCode(60) + 'meta name="viewport" content="width=device-width, initial-scale=1.0"' + String.fromCharCode(62));
+      docParts.push(String.fromCharCode(60) + 'style' + String.fromCharCode(62));
+      docParts.push(cssContent);
+      docParts.push(String.fromCharCode(60) + '/style' + String.fromCharCode(62)); // </style>
+      docParts.push(String.fromCharCode(60) + '/head' + String.fromCharCode(62)); // </head>
+      docParts.push(String.fromCharCode(60) + 'body' + String.fromCharCode(62)); // <body>
+      
+      // Nettoyer le contenu HTML pour supprimer les références aux scripts externes
       let cleanHtml = htmlContent;
       if (htmlContent.includes('script.js')) {
-        // Utiliser split et join pour éviter les regex avec des balises HTML
-        const scriptStart = '<script';
-        const scriptEnd = '</script>';
-        let tempHtml = cleanHtml;
-        
-        // Chercher et supprimer les références aux scripts externes
-        let startIndex = tempHtml.indexOf(scriptStart);
-        while (startIndex !== -1) {
-          const endIndex = tempHtml.indexOf(scriptEnd, startIndex);
-          if (endIndex !== -1) {
-            const scriptTag = tempHtml.substring(startIndex, endIndex + scriptEnd.length);
-            if (scriptTag.includes('script.js')) {
-              tempHtml = tempHtml.substring(0, startIndex) + tempHtml.substring(endIndex + scriptEnd.length);
-            } else {
-              startIndex = tempHtml.indexOf(scriptStart, endIndex);
-            }
-          } else {
-            break;
-          }
-          startIndex = tempHtml.indexOf(scriptStart, startIndex);
-        }
-        cleanHtml = tempHtml;
+        // Utiliser une approche simple basée sur des mots-clés
+        const lines = htmlContent.split('\n');
+        const filteredLines = lines.filter(line => {
+          return !(line.includes('script') && line.includes('src') && line.includes('script.js'));
+        });
+        cleanHtml = filteredLines.join('\n');
       }
       
-      // Construire le document final
-      const parts = [
-        doctype,
-        htmlOpen,
-        headOpen,
-        metaCharset,
-        metaViewport,
-        styleOpen,
-        cssContent,
-        styleClose,
-        headClose,
-        bodyOpen,
-        cleanHtml,
-        scriptOpen,
-        jsContent,
-        scriptClose,
-        bodyClose,
-        htmlClose
-      ];
+      docParts.push(cleanHtml);
+      docParts.push(String.fromCharCode(60) + 'script' + String.fromCharCode(62)); // <script>
+      docParts.push(jsContent);
+      docParts.push(String.fromCharCode(60) + '/script' + String.fromCharCode(62)); // </script>
+      docParts.push(String.fromCharCode(60) + '/body' + String.fromCharCode(62)); // </body>
+      docParts.push(String.fromCharCode(60) + '/html' + String.fromCharCode(62)); // </html>
       
-      const fullContent = parts.join('\n');
+      const fullContent = docParts.join('\n');
       
       frame.srcdoc = fullContent;
       console.log('Prévisualisation mise à jour');
