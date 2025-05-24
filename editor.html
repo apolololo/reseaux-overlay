@@ -672,15 +672,36 @@ document.addEventListener('DOMContentLoaded', function() {
 
       async saveOverlay() {
         try {
-          // Sauvegarder les fichiers localement
+          // Sauvegarder le contenu actuel de l'éditeur
+          this.files[this.currentTab] = this.editor.getValue();
+          
+          // Créer l'objet overlay
           const overlay = {
             id: this.overlayId,
-            name: this.overlayName,
+            name: this.overlayName || 'Overlay sans nom',
             files: this.files,
             createdAt: new Date().toISOString()
           };
 
+          // Sauvegarder dans localStorage pour l'éditeur
           localStorage.setItem(`overlay_${this.overlayId}`, JSON.stringify(overlay));
+
+          // Sauvegarder dans la bibliothèque d'overlays
+          let myOverlays = JSON.parse(localStorage.getItem('my_overlays') || '[]');
+          
+          // Vérifier si l'overlay existe déjà
+          const existingIndex = myOverlays.findIndex(o => o.id === this.overlayId);
+          
+          if (existingIndex >= 0) {
+            // Mettre à jour l'overlay existant
+            myOverlays[existingIndex] = overlay;
+          } else {
+            // Ajouter un nouvel overlay
+            myOverlays.push(overlay);
+          }
+          
+          // Sauvegarder la liste mise à jour
+          localStorage.setItem('my_overlays', JSON.stringify(myOverlays));
 
           this.updateOverlayUrl();
           this.showToast('Overlay sauvegardé avec succès !');
