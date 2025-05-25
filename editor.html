@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -7,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldgutter.css">
-    <link rel="stylesheet" href="src/templates/default/style.css">
     <style>
         * {
             margin: 0;
@@ -329,9 +329,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldgutter.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/xml-fold.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/brace-fold.min.js"></script>
-    <script src="src/templates/default/script.js"></script>
 
-    <script>
+    <script type="module">
       class OverlayEditor {
         constructor() {
           this.currentTab = 'html';
@@ -347,54 +346,151 @@
           this.init();
         }
 
-        async loadDefaultFiles() {
-          try {
-            // Charger index.html
-            const htmlResponse = await fetch('src/templates/default/index.html');
-            if (htmlResponse.ok) {
-              this.files.html = await htmlResponse.text();
-            }
-            
-            // Charger style.css
-            const cssResponse = await fetch('src/templates/default/style.css');
-            if (cssResponse.ok) {
-              this.files.css = await cssResponse.text();
-            }
-            
-            // Charger script.js
-            const jsResponse = await fetch('src/templates/default/script.js');
-            if (jsResponse.ok) {
-              this.files.js = await jsResponse.text();
-            }
-            
-            // Mettre à jour l'éditeur avec le contenu chargé
-            if (this.editor) {
-              this.editor.setValue(this.files[this.currentTab] || '');
-              this.updatePreview();
-            }
-            
-          } catch (error) {
-            console.error('Erreur lors du chargement des fichiers par défaut:', error);
-          }
+        getDefaultFiles() {
+          return {
+            html: `<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Overlay</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            background: transparent;
+            width: 1920px;
+            height: 1080px;
+        }
+
+        #overlay-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .overlay-element {
+            position: absolute;
+            top: 50px;
+            left: 50px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            pointer-events: auto;
+        }
+
+        .overlay-element h1 {
+            font-size: 48px;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div id="overlay-container">
+        <div class="overlay-element">
+            <h1>Mon Overlay</h1>
+            <p>Bienvenue dans votre overlay personnalisé !</p>
+        </div>
+    </div>
+</body>
+</html>`,
+            css: `/* Styles de base pour l'overlay */
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: 'Arial', sans-serif;
+    background: transparent;
+    width: 1920px;
+    height: 1080px;
+}
+
+#overlay-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.overlay-element {
+    position: absolute;
+    top: 50px;
+    left: 50px;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    pointer-events: auto;
+}
+
+.overlay-element h1 {
+    font-size: 48px;
+    margin: 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 1s ease-in;
+}
+
+.overlay-element p {
+    font-size: 24px;
+    margin: 10px 0;
+    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 5px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}`,
+            js: `// Configuration de base pour l'overlay
+const config = {
+    title: "Mon Overlay",
+    position: { x: 50, y: 50 },
+    colors: {
+        primary: "#667eea",
+        secondary: "#764ba2",
+        text: "#ffffff"
+    }
+};
+
+// Fonction d'initialisation
+function initOverlay() {
+    console.log("Overlay initialisé avec succès");
+    
+    // Ajouter une animation d'entrée
+    const overlayElement = document.querySelector('.overlay-element');
+    if (overlayElement) {
+        overlayElement.style.animation = 'fadeIn 1s ease-in';
+    }
+}
+
+// Initialisation au chargement
+document.addEventListener('DOMContentLoaded', initOverlay);`
+          };
         }
 
         init() {
           console.log("Initialisation de l'éditeur d'overlay");
           
-          // Charger les fichiers par défaut d'abord
-          this.loadDefaultFiles().then(() => {
-            if (document.readyState === 'loading') {
-              document.addEventListener('DOMContentLoaded', () => {
-                this.setupEditor();
-                this.setupEventListeners();
-                this.loadOverlayData();
-              });
-            } else {
-              setTimeout(() => this.setupEditor(), 100);
-              this.setupEventListeners();
-              this.loadOverlayData();
-            }
-          });
+          // Charger les fichiers par défaut
+          this.files = this.getDefaultFiles();
+          
+          setTimeout(() => {
+            this.setupEditor();
+            this.setupEventListeners();
+            this.loadOverlayData();
+          }, 100);
         }
 
         setupEditor() {
@@ -501,15 +597,6 @@
           }, 300);
         }
 
-        getEditorMode(fileType) {
-          const modes = {
-            'html': 'htmlmixed',
-            'css': 'css',
-            'js': 'javascript'
-          };
-          return modes[fileType] || 'text/plain';
-        }
-
         loadExistingOverlay() {
           const params = new URLSearchParams(window.location.search);
           const overlayId = params.get('id');
@@ -541,16 +628,10 @@
         createNewOverlay() {
           this.overlayId = this.generateOverlayId();
           
-          // Charger les fichiers par défaut si pas encore fait
-          if (!this.files.html && !this.files.css && !this.files.js) {
-            this.loadDefaultFiles();
-          }
-          
           if (this.editor) {
             this.editor.setValue(this.files[this.currentTab]);
           }
           
-          // Mettre à jour l'aperçu
           this.updatePreview();
         }
 
@@ -776,22 +857,6 @@
       document.addEventListener('DOMContentLoaded', () => {
         new OverlayEditor();
       });
-
-      // Fonctions pour charger et sauvegarder le contenu des fichiers
-      function loadFileContent(filePath) {
-        fetch(filePath)
-          .then(response => response.text())
-          .then(data => {
-            document.getElementById('editor').value = data;
-          })
-          .catch(error => console.error('Error loading file:', error));
-      }
-
-      function saveFileContent(filePath) {
-        console.log('Saving file:', filePath);
-        // Ici vous pouvez implémenter la logique de sauvegarde
-      }
     </script>
-    <script src="navigation.js"></script>
 </body>
 </html>
