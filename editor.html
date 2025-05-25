@@ -336,10 +336,12 @@
       document.addEventListener('DOMContentLoaded', function() {
         const isLoggedIn = localStorage.getItem('user_logged_in');
         const userToken = localStorage.getItem('user_token');
+        const twitchUser = localStorage.getItem('twitch_user');
         
         console.log('Vérification de l\'authentification sur l\'éditeur:', {
           isLoggedIn: isLoggedIn,
-          hasToken: !!userToken
+          hasToken: !!userToken,
+          hasTwitchUser: !!twitchUser
         });
         
         // Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
@@ -348,6 +350,12 @@
           window.location.href = '/auth/auth.html';
           return;
         }
+        
+        // Charger le composant de navigation
+        const script = document.createElement('script');
+        script.src = '/src/components/navigation.js';
+        script.type = 'text/javascript';
+        document.head.appendChild(script);
         
         // Initialiser l'éditeur seulement si l'utilisateur est connecté
         new OverlayEditor();
@@ -358,14 +366,27 @@
           this.currentTab = 'html';
           this.editor = null;
           this.overlayName = 'Mon Overlay';
-          this.overlayId = '';
+          this.overlayId = this.generateId();
           this.files = {
             html: '',
             css: '',
             js: ''
           };
           
+          // Vérifier si un ID d'overlay est spécifié dans l'URL
+          const params = new URLSearchParams(window.location.search);
+          const editId = params.get('id');
+          
+          if (editId) {
+            this.overlayId = editId;
+            console.log('Édition de l\'overlay existant:', editId);
+          }
+          
           this.init();
+        }
+        
+        generateId() {
+          return 'overlay_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
         }
 
         getDefaultFiles() {

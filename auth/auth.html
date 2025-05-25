@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Connexion - APO Overlays</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
     :root {
       --primary: #9146FF;
@@ -39,6 +40,7 @@
       text-align: center;
       max-width: 400px;
       width: 90%;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     }
 
     .auth-title {
@@ -53,7 +55,13 @@
       line-height: 1.6;
     }
 
-    .twitch-button {
+    .auth-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .auth-button {
       background: var(--primary);
       color: white;
       border: none;
@@ -64,18 +72,29 @@
       cursor: pointer;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 0.5rem;
       transition: all 0.3s ease;
+      text-decoration: none;
     }
 
-    .twitch-button:hover {
+    .auth-button:hover {
       background: var(--primary-dark);
       transform: translateY(-2px);
     }
 
-    .twitch-button img {
-      width: 24px;
-      height: 24px;
+    .auth-button i {
+      font-size: 1.2rem;
+    }
+
+    .auth-button.demo {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .auth-button.demo:hover {
+      background: rgba(255, 255, 255, 0.2);
     }
 
     .auth-background {
@@ -128,18 +147,31 @@
   <div class="auth-container">
     <h1 class="auth-title">APO Overlays</h1>
     <p class="auth-description">
-      Connectez-vous avec votre compte Twitch pour accéder à l'éditeur d'overlays et créer des designs personnalisés pour votre stream.
+      Connectez-vous pour accéder à l'éditeur d'overlays et créer des designs personnalisés pour votre stream.
     </p>
-    <button class="twitch-button" onclick="loginWithTwitch()">
-      <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3a5.svg" alt="Twitch">
-      Se connecter avec Twitch
-    </button>
+    <div class="auth-buttons">
+      <button class="auth-button" onclick="loginWithTwitch()">
+        <i class="fab fa-twitch"></i>
+        Se connecter avec Twitch
+      </button>
+      <button class="auth-button demo" onclick="loginDemo()">
+        <i class="fas fa-user-check"></i>
+        Mode Démo (sans compte)
+      </button>
+    </div>
   </div>
 
   <script>
+    // Vérifier si l'utilisateur est déjà connecté
+    document.addEventListener('DOMContentLoaded', function() {
+      if (localStorage.getItem('user_logged_in') || localStorage.getItem('user_token')) {
+        window.location.href = '/index.html';
+      }
+    });
+
     function loginWithTwitch() {
       const clientId = 'z8q1w4g12yrql6cyb5zzwmhe1pnxyn';
-      const redirectUri = 'https://apo-overlay.netlify.app/auth/callback.html';
+      const redirectUri = window.location.origin + '/auth/callback.html';
       const scope = 'user:read:email';
       const state = Math.random().toString(36).substring(7);
       
@@ -149,6 +181,26 @@
       
       window.location.href = authUrl;
     }
+
+    function loginDemo() {
+      // Créer un utilisateur de démo
+      const demoUser = {
+        id: 'demo_' + Math.random().toString(36).substring(2, 9),
+        display_name: 'Utilisateur Démo',
+        email: 'demo@example.com',
+        profile_image_url: 'https://static-cdn.jtvnw.net/user-default-pictures-uv/75305d54-c7cc-40d1-bb9c-91fbe85943c7-profile_image-300x300.png',
+        created_at: new Date().toISOString()
+      };
+
+      // Sauvegarder les données de connexion
+      localStorage.setItem('user_logged_in', 'true');
+      localStorage.setItem('user_token', 'demo_token_' + Math.random().toString(36).substring(2, 9));
+      localStorage.setItem('user_data', JSON.stringify(demoUser));
+      localStorage.setItem('twitch_user', JSON.stringify(demoUser));
+
+      // Rediriger vers la page d'accueil
+      window.location.href = '/index.html';
+    }
   </script>
 </body>
-</html> 
+</html>
