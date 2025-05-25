@@ -64,7 +64,7 @@ class Navigation {
                                 </div>
                             </div>
                         ` : `
-                            <a href="auth/auth.html" class="btn btn-primary">
+                            <a href="/auth/auth.html" class="btn btn-primary">
                                 <i class="fas fa-sign-in-alt"></i>
                                 Se connecter
                             </a>
@@ -254,7 +254,7 @@ class Navigation {
             localStorage.removeItem('user_logged_in');
             localStorage.removeItem('user_token');
             localStorage.removeItem('user_data');
-            window.location.href = 'auth/auth.html';
+            window.location.href = '/auth/auth.html';
         };
     }
 }

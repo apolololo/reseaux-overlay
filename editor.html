@@ -345,7 +345,7 @@
         // Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
         if (!isLoggedIn && !userToken) {
           console.log('Utilisateur non connecté, redirection vers auth/auth.html');
-          window.location.href = 'auth/auth.html';
+          window.location.href = '/auth/auth.html';
           return;
         }
         
