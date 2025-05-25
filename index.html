@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -5,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>APO Overlays - Redirection</title>
     <meta http-equiv="refresh" content="0;url=/auth/auth.html">
-</head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
             --primary-color: #6366f1;
@@ -372,146 +373,151 @@
         </div>
     </div>
 
-  <footer>
-    <p>&copy; 2024 APO Overlays - Système d'overlays pour streamers</p>
-  </footer>
+    <footer>
+        <p>&copy; 2024 APO Overlays - Système d'overlays pour streamers</p>
+    </footer>
 
-  <script src="src/templates/default/script.js"></script>
-  <script src="navigation.js"></script>
-  <script>
-      // Dashboard functionality
-      class Dashboard {
-          constructor() {
-              this.init();
-          }
-          
-          init() {
-              this.loadStats();
-              this.loadRecentOverlays();
-          }
-          
-          loadStats() {
-              const overlays = JSON.parse(localStorage.getItem('overlays') || '{}');
-              const overlayCount = Object.keys(overlays).length;
-              
-              document.getElementById('overlayCount').textContent = overlayCount;
-              
-              // Get last activity
-              const lastActivity = this.getLastActivity(overlays);
-              document.getElementById('lastActivity').textContent = lastActivity;
-          }
-          
-          getLastActivity(overlays) {
-              const overlayKeys = Object.keys(overlays);
-              if (overlayKeys.length === 0) return 'Jamais';
-              
-              let lastDate = null;
-              overlayKeys.forEach(key => {
-                  const overlay = overlays[key];
-                  if (overlay.lastModified) {
-                      const date = new Date(overlay.lastModified);
-                      if (!lastDate || date > lastDate) {
-                          lastDate = date;
-                      }
-                  }
-              });
-              
-              if (!lastDate) return 'Inconnue';
-              
-              const now = new Date();
-              const diffTime = Math.abs(now - lastDate);
-              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-              
-              if (diffDays === 1) return 'Aujourd\'hui';
-              if (diffDays === 2) return 'Hier';
-              if (diffDays <= 7) return `Il y a ${diffDays} jours`;
-              
-              return lastDate.toLocaleDateString('fr-FR');
-          }
-          
-          loadRecentOverlays() {
-              const overlays = JSON.parse(localStorage.getItem('overlays') || '{}');
-              const overlayKeys = Object.keys(overlays);
-              const recentList = document.getElementById('recentOverlaysList');
-              
-              if (overlayKeys.length === 0) {
-                  recentList.innerHTML = '<p class="empty-state">Aucun overlay créé pour le moment</p>';
-                  return;
-              }
-              
-              // Sort by last modified date
-              const sortedOverlays = overlayKeys
-                  .map(key => ({ id: key, ...overlays[key] }))
-                  .sort((a, b) => {
-                      const dateA = new Date(a.lastModified || 0);
-                      const dateB = new Date(b.lastModified || 0);
-                      return dateB - dateA;
-                  })
-                  .slice(0, 5); // Show only 5 most recent
-              
-              recentList.innerHTML = sortedOverlays.map(overlay => `
-                  <div class="recent-overlay-item" onclick="editOverlay('${overlay.id}')">
-                      <div>
-                          <div class="overlay-name">${overlay.name || overlay.id}</div>
-                          <div class="overlay-date">${this.formatDate(overlay.lastModified)}</div>
-                      </div>
-                      <i class="fas fa-chevron-right"></i>
-                  </div>
-              `).join('');
-          }
-          
-          formatDate(dateString) {
-              if (!dateString) return 'Date inconnue';
-              const date = new Date(dateString);
-              return date.toLocaleDateString('fr-FR', {
-                  day: 'numeric',
-                  month: 'short',
-                  hour: '2-digit',
-                  minute: '2-digit'
-              });
-          }
-      }
-      
-      function editOverlay(overlayId) {
-          window.location.href = `editor.html?id=${overlayId}`;
-      }
-      
-      // Fonction pour déconnecter l'utilisateur
-      function logout() {
-          localStorage.removeItem('user_logged_in');
-          localStorage.removeItem('user_token');
-          localStorage.removeItem('user_data');
-          window.location.href = 'auth/auth.html';
-      }
-      
-      document.addEventListener('DOMContentLoaded', function() {
-          // Vérifier si l'utilisateur est connecté
-          const isLoggedIn = localStorage.getItem('user_logged_in');
-          const userToken = localStorage.getItem('user_token');
-          const currentPath = window.location.pathname;
-          
-          console.log('Vérification de l\'authentification:', {
-              isLoggedIn: isLoggedIn,
-              hasToken: !!userToken,
-              currentPath: currentPath
-          });
-          
-          // Si l'utilisateur n'est pas connecté et n'est pas déjà sur la page de connexion
-          if (!isLoggedIn && !userToken && !currentPath.includes('auth.html')) {
-              console.log('Utilisateur non connecté, redirection vers auth/auth.html');
-              // Rediriger vers la page de connexion Twitch
-              window.location.href = 'auth/auth.html';
-              return;
-          }
-          
-          // Si l'utilisateur est connecté, afficher le contenu normalement
-          if (isLoggedIn || userToken) {
-              console.log('Utilisateur connecté, affichage du dashboard');
-              document.body.style.display = 'block';
-              // Initialize dashboard
-              new Dashboard();
-          }
-      });
-  </script>
+    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+    <script src="src/templates/default/script.js" type="module"></script>
+    <script src="src/components/navigation.js" type="module"></script>
+    <script type="module">
+        // Dashboard functionality
+        class Dashboard {
+            constructor() {
+                this.init();
+            }
+            
+            init() {
+                this.loadStats();
+                this.loadRecentOverlays();
+            }
+            
+            loadStats() {
+                const overlays = JSON.parse(localStorage.getItem('overlays') || '{}');
+                const overlayCount = Object.keys(overlays).length;
+                
+                document.getElementById('overlayCount').textContent = overlayCount;
+                
+                // Get last activity
+                const lastActivity = this.getLastActivity(overlays);
+                document.getElementById('lastActivity').textContent = lastActivity;
+            }
+            
+            getLastActivity(overlays) {
+                const overlayKeys = Object.keys(overlays);
+                if (overlayKeys.length === 0) return 'Jamais';
+                
+                let lastDate = null;
+                overlayKeys.forEach(key => {
+                    const overlay = overlays[key];
+                    if (overlay.lastModified) {
+                        const date = new Date(overlay.lastModified);
+                        if (!lastDate || date > lastDate) {
+                            lastDate = date;
+                        }
+                    }
+                });
+                
+                if (!lastDate) return 'Inconnue';
+                
+                const now = new Date();
+                const diffTime = Math.abs(now - lastDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays === 1) return 'Aujourd\'hui';
+                if (diffDays === 2) return 'Hier';
+                if (diffDays <= 7) return `Il y a ${diffDays} jours`;
+                
+                return lastDate.toLocaleDateString('fr-FR');
+            }
+            
+            loadRecentOverlays() {
+                const overlays = JSON.parse(localStorage.getItem('overlays') || '{}');
+                const overlayKeys = Object.keys(overlays);
+                const recentList = document.getElementById('recentOverlaysList');
+                
+                if (overlayKeys.length === 0) {
+                    recentList.innerHTML = '<p class="empty-state">Aucun overlay créé pour le moment</p>';
+                    return;
+                }
+                
+                // Sort by last modified date
+                const sortedOverlays = overlayKeys
+                    .map(key => ({ id: key, ...overlays[key] }))
+                    .sort((a, b) => {
+                        const dateA = new Date(a.lastModified || 0);
+                        const dateB = new Date(b.lastModified || 0);
+                        return dateB - dateA;
+                    })
+                    .slice(0, 5); // Show only 5 most recent
+                
+                recentList.innerHTML = sortedOverlays.map(overlay => `
+                    <div class="recent-overlay-item" onclick="editOverlay('${overlay.id}')">
+                        <div>
+                            <div class="overlay-name">${overlay.name || overlay.id}</div>
+                            <div class="overlay-date">${this.formatDate(overlay.lastModified)}</div>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                `).join('');
+            }
+            
+            formatDate(dateString) {
+                if (!dateString) return 'Date inconnue';
+                const date = new Date(dateString);
+                return date.toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+        }
+        
+        function editOverlay(overlayId) {
+            window.location.href = `editor.html?id=${overlayId}`;
+        }
+        
+        // Fonction pour déconnecter l'utilisateur
+        function logout() {
+            localStorage.removeItem('user_logged_in');
+            localStorage.removeItem('user_token');
+            localStorage.removeItem('user_data');
+            window.location.href = 'auth/auth.html';
+        }
+        
+        // Make functions global
+        window.editOverlay = editOverlay;
+        window.logout = logout;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Vérifier si l'utilisateur est connecté
+            const isLoggedIn = localStorage.getItem('user_logged_in');
+            const userToken = localStorage.getItem('user_token');
+            const currentPath = window.location.pathname;
+            
+            console.log('Vérification de l\'authentification:', {
+                isLoggedIn: isLoggedIn,
+                hasToken: !!userToken,
+                currentPath: currentPath
+            });
+            
+            // Si l'utilisateur n'est pas connecté et n'est pas déjà sur la page de connexion
+            if (!isLoggedIn && !userToken && !currentPath.includes('auth.html')) {
+                console.log('Utilisateur non connecté, redirection vers auth/auth.html');
+                // Rediriger vers la page de connexion Twitch
+                window.location.href = 'auth/auth.html';
+                return;
+            }
+            
+            // Si l'utilisateur est connecté, afficher le contenu normalement
+            if (isLoggedIn || userToken) {
+                console.log('Utilisateur connecté, affichage du dashboard');
+                document.body.style.display = 'block';
+                // Initialize dashboard
+                new Dashboard();
+            }
+        });
+    </script>
 </body>
 </html>

@@ -10,9 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.0",
-    "apo-overlays": "file:",
-    "codemirror": "^5.65.2"
+    "@codemirror/lang-javascript": "^6.2.4",
+    "@codemirror/state": "^6.5.2",
+    "@supabase/supabase-js": "^2.39.0"
   },
   "devDependencies": {
     "vite": "^5.0.0"
