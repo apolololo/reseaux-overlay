@@ -656,6 +656,27 @@
         });
     }
     
+    function openOverlay(overlayId) {
+        // Récupérer les données de l'overlay depuis localStorage
+        const overlayData = JSON.parse(localStorage.getItem(`overlay_${overlayId}`) || '{}');
+        
+        if (overlayData.files) {
+            // Construire l'URL avec les paramètres d'overlay encodés
+            const baseUrl = window.location.origin + window.location.pathname.replace('my-overlays.html', '');
+            const htmlContent = encodeURIComponent(overlayData.files.html || '');
+            const cssContent = encodeURIComponent(overlayData.files.css || '');
+            const jsContent = encodeURIComponent(overlayData.files.js || '');
+            const overlayName = encodeURIComponent(overlayData.name || 'Mon Overlay');
+            
+            const overlayUrl = `${baseUrl}overlay.html?id=${overlayId}&html=${htmlContent}&css=${cssContent}&js=${jsContent}&name=${overlayName}`;
+            window.open(overlayUrl, '_blank');
+        } else {
+            // Fallback vers l'ancienne méthode si les données ne sont pas disponibles
+            const overlayUrl = `${window.location.origin}/overlay.html?id=${overlayId}`;
+            window.open(overlayUrl, '_blank');
+        }
+    }
+    
     function deleteOverlay(overlayId) {
         if (confirm('Êtes-vous sûr de vouloir supprimer cet overlay ?')) {
             try {

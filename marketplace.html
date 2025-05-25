@@ -367,17 +367,46 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const userData = JSON.parse(localStorage.getItem('twitch_user'));
-      if (!userData) {
+      // Vérifier l'authentification avec le système unifié
+      const isLoggedIn = localStorage.getItem('user_logged_in');
+      const userToken = localStorage.getItem('user_token');
+      
+      console.log('Vérification de l\'authentification sur marketplace:', {
+        isLoggedIn: isLoggedIn,
+        hasToken: !!userToken
+      });
+      
+      // Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
+      if (!isLoggedIn && !userToken) {
+        console.log('Utilisateur non connecté, redirection vers auth/auth.html');
         window.location.href = './auth/auth.html';
         return;
       }
-
-      document.getElementById('user-avatar').src = userData.profile_image_url;
-      document.getElementById('user-name').textContent = userData.display_name;
+      
+      // Essayer de récupérer les données utilisateur depuis différentes sources
+      let userData = JSON.parse(localStorage.getItem('user_data') || 'null');
+      if (!userData) {
+        userData = JSON.parse(localStorage.getItem('twitch_user') || 'null');
+      }
+      
+      if (userData) {
+        const avatarElement = document.getElementById('user-avatar');
+        const nameElement = document.getElementById('user-name');
+        
+        if (avatarElement && userData.profile_image_url) {
+          avatarElement.src = userData.profile_image_url;
+        }
+        if (nameElement && userData.display_name) {
+          nameElement.textContent = userData.display_name;
+        }
+      }
     });
 
     function logout() {
+      // Nettoyer toutes les données d'authentification
+      localStorage.removeItem('user_logged_in');
+      localStorage.removeItem('user_token');
+      localStorage.removeItem('user_data');
       localStorage.removeItem('twitch_token');
       localStorage.removeItem('twitch_expires_at');
       localStorage.removeItem('twitch_user');

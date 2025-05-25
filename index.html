@@ -475,6 +475,22 @@
         
         // Initialize dashboard when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
+            // Vérifier l'authentification avant d'initialiser le dashboard
+            const isLoggedIn = localStorage.getItem('user_logged_in');
+            const userToken = localStorage.getItem('user_token');
+            
+            console.log('Vérification de l\'authentification sur le dashboard:', {
+                isLoggedIn: isLoggedIn,
+                hasToken: !!userToken
+            });
+            
+            // Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
+            if (!isLoggedIn && !userToken) {
+                console.log('Utilisateur non connecté, redirection vers auth/auth.html');
+                window.location.href = 'auth/auth.html';
+                return;
+            }
+            
             console.log('Dashboard initializing...');
             new Dashboard();
         });

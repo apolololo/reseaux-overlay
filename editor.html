@@ -287,6 +287,7 @@
                 <input type="text" id="overlayName" class="overlay-name" placeholder="Nom de votre overlay..." value="Mon Overlay">
                 <button id="saveBtn" class="btn btn-primary">💾 Sauvegarder</button>
                 <button id="copyUrlBtn" class="btn btn-secondary">🔗 Copier l'URL</button>
+                <button id="openOverlayBtn" class="btn btn-secondary">🚀 Ouvrir l'Overlay</button>
                 <a href="index.html" class="btn btn-secondary">🏠 Accueil</a>
             </div>
         </div>
@@ -331,6 +332,27 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/brace-fold.min.js"></script>
 
     <script type="module">
+      // Vérification de l'authentification avant d'initialiser l'éditeur
+      document.addEventListener('DOMContentLoaded', function() {
+        const isLoggedIn = localStorage.getItem('user_logged_in');
+        const userToken = localStorage.getItem('user_token');
+        
+        console.log('Vérification de l\'authentification sur l\'éditeur:', {
+          isLoggedIn: isLoggedIn,
+          hasToken: !!userToken
+        });
+        
+        // Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
+        if (!isLoggedIn && !userToken) {
+          console.log('Utilisateur non connecté, redirection vers auth/auth.html');
+          window.location.href = 'auth/auth.html';
+          return;
+        }
+        
+        // Initialiser l'éditeur seulement si l'utilisateur est connecté
+        new OverlayEditor();
+      });
+
       class OverlayEditor {
         constructor() {
           this.currentTab = 'html';
@@ -574,6 +596,11 @@ document.addEventListener('DOMContentLoaded', initOverlay);`
             copyUrlBtn.addEventListener('click', () => this.copyOverlayUrl());
           }
 
+          const openOverlayBtn = document.getElementById('openOverlayBtn');
+          if (openOverlayBtn) {
+            openOverlayBtn.addEventListener('click', () => this.openOverlayInNewTab());
+          }
+
           const overlayName = document.getElementById('overlayName');
           if (overlayName) {
             overlayName.addEventListener('input', (e) => {
@@ -713,6 +740,26 @@ document.addEventListener('DOMContentLoaded', initOverlay);`
           }).catch(() => {
             this.showToast('Erreur lors de la copie de l\'URL');
           });
+        }
+
+        openOverlayInNewTab() {
+          // Sauvegarder le contenu actuel
+          if (this.editor) {
+            this.files[this.currentTab] = this.editor.getValue();
+          }
+          
+          // Construire l'URL avec les paramètres d'overlay encodés
+          const baseUrl = window.location.origin + window.location.pathname.replace('editor.html', '');
+          const htmlContent = encodeURIComponent(this.files.html || '');
+          const cssContent = encodeURIComponent(this.files.css || '');
+          const jsContent = encodeURIComponent(this.files.js || '');
+          const overlayName = encodeURIComponent(this.overlayName || 'Mon Overlay');
+          
+          const overlayUrl = `${baseUrl}overlay.html?id=${this.overlayId}&html=${htmlContent}&css=${cssContent}&js=${jsContent}&name=${overlayName}`;
+          
+          // Ouvrir dans un nouvel onglet
+          window.open(overlayUrl, '_blank');
+          this.showToast('Overlay ouvert dans un nouvel onglet !');
         }
 
         updatePreview() {
@@ -858,5 +905,6 @@ document.addEventListener('DOMContentLoaded', initOverlay);`
         new OverlayEditor();
       });
     </script>
+    <script src="src/components/navigation.js"></script>
 </body>
 </html>
