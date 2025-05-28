@@ -341,9 +341,9 @@
         </div>
         <div class="obs-actions">
           <button class="btn-primary btn-small" onclick="updateObsUrl()">Synchroniser OBS</button>
-          <span class="help-text">Cliquez pour mettre à jour l'URL avec les dernières valeurs</span>
+          <span class="help-text">L'URL reste toujours la même. Cliquez pour synchroniser le widget OBS avec les dernières valeurs.</span>
         </div>
-        <p class="mt-2"><small>Note: Cette URL contient tous vos paramètres de configuration actuels. Utilisez le bouton "Synchroniser OBS" pour mettre à jour le widget sans avoir à copier-coller l'URL à nouveau.</small></p>
+        <p class="mt-2"><small>Note: L'URL OBS ne change jamais. Toutes les modifications sont synchronisées automatiquement via le site.</small></p>
       </div>
 
       <div class="buttons">
@@ -557,26 +557,8 @@
 
     // Mettre à jour l'aperçu
     function updatePreview() {
-      const goal = document.getElementById('goal').value;
-      const title = document.getElementById('title').value;
-      const style = document.getElementById('style').value;
-      const bgColor = document.getElementById('bg-color').value;
-      const textColor = document.getElementById('text-color').value;
-      const progressColor = document.getElementById('progress-color').value;
-      const currentFollowers = localStorage.getItem('current_followers_count') || '0';
-      const progress = Math.min(100, Math.round((parseInt(currentFollowers) / goal) * 100));
-      
-      const preview = document.getElementById('preview-widget');
-      preview.textContent = `${title}: ${currentFollowers}/${goal} (${progress}%)`;
-      preview.style.backgroundColor = bgColor;
-      preview.style.color = textColor;
-      
-      // Générer l'URL pour OBS avec un timestamp pour éviter la mise en cache
       const baseUrl = window.location.href.split('?')[0].replace('config.html', 'overlay.html');
-      const timestamp = Date.now(); // Ajouter un timestamp pour forcer le rafraîchissement
-      const obsUrl = `${baseUrl}?obs=true&goal=${goal}&title=${encodeURIComponent(title)}&style=${style}&bgColor=${encodeURIComponent(bgColor)}&textColor=${encodeURIComponent(textColor)}&progressColor=${encodeURIComponent(progressColor)}&current=${currentFollowers}&t=${timestamp}`;
-      
-      // Mettre à jour le champ d'URL OBS
+      const obsUrl = `${baseUrl}?obs=true`;
       const obsUrlInput = document.getElementById('obs-url-input');
       if (obsUrlInput) {
         obsUrlInput.value = obsUrl;
@@ -677,8 +659,6 @@
       const textColor = document.getElementById('text-color').value;
       const progressColor = document.getElementById('progress-color').value;
       const currentFollowers = document.getElementById('current-followers').textContent;
-      
-      // Sauvegarder la configuration dans localStorage pour assurer la synchronisation
       const config = {
         goal: parseInt(goal),
         title: title,
@@ -687,37 +667,10 @@
         textColor: textColor,
         progressColor: progressColor
       };
-      
       localStorage.setItem('followers_goal_config', JSON.stringify(config));
       localStorage.setItem('current_followers_count', currentFollowers);
-      
-      // Mettre à jour l'aperçu pour générer une nouvelle URL avec timestamp
       updatePreview();
-      
-      // Récupérer l'URL générée
-      const obsUrl = document.getElementById('obs-url-input').value;
-      
-      // Créer un iframe temporaire pour charger l'URL (cela force OBS à recharger le widget)
-      const tempFrame = document.createElement('iframe');
-      tempFrame.style.width = '1px';
-      tempFrame.style.height = '1px';
-      tempFrame.style.position = 'absolute';
-      tempFrame.style.left = '-9999px';
-      tempFrame.src = obsUrl;
-      
-      document.body.appendChild(tempFrame);
-      
-      // Supprimer l'iframe après le chargement
-      tempFrame.onload = function() {
-        setTimeout(() => {
-          document.body.removeChild(tempFrame);
-        }, 1000);
-      };
-      
-      // Afficher une notification
       showNotification('Widget OBS synchronisé');
-      
-      // Déclencher un événement personnalisé pour notifier les autres instances
       const syncEvent = new CustomEvent('follower-goal-sync', { 
         detail: { 
           config: config,
