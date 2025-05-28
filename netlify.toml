@@ -1,6 +1,17 @@
 [build]
   publish = "."
 
+# Fichiers spécifiques à la racine
+[[redirects]]
+  from = "/followers-goal.html"
+  to = "/followers-goal.html"
+  status = 200
+
+[[redirects]]
+  from = "/test-widget.html"
+  to = "/test-widget.html"
+  status = 200
+
 # Ne pas rediriger les fichiers d'overlay
 [[redirects]]
   from = "/src/overlays/*"
@@ -12,4 +23,4 @@
   from = "/*"
   to = "/index.html"
   status = 200
-  conditions = {Path = {exclude = ["/src/overlays/**"]}}
+  conditions = {Path = {exclude = ["/followers-goal.html", "/test-widget.html", "/src/overlays/**"]}}

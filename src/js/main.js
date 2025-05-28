@@ -178,8 +178,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const currentFollowers = parseInt(followerCount);
       const defaultGoal = Math.ceil(currentFollowers * 1.2);
       
-      // Pour la copie d'URL, toujours utiliser overlay.html (pas preview.html)
-      overlayUrl.searchParams.set('overlay', 'followers-goal');
+      // Utiliser directement le fichier followers-goal.html à la racine
+      overlayUrl = new URL('./followers-goal.html', PRODUCTION_URL);
       
       // Ajouter les paramètres nécessaires pour l'overlay followers goal
       overlayUrl.searchParams.set('userId', userData.id || '');
