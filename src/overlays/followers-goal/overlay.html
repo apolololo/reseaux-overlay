@@ -316,17 +316,53 @@
         // Récupérer les followers immédiatement
         this.fetchFollowersCount();
         
-        // En mode normal (non-OBS), mettre en place le polling pour les mises à jour
-        if (!isObs) {
-          console.log('Mode normal: mise en place du polling pour les mises à jour');
-          
-          // Puis toutes les 30 secondes
-          setInterval(() => {
+        // Intervalle de mise à jour plus court pour une meilleure réactivité
+        const updateInterval = isObs ? 3000 : 5000; // 3 secondes en mode OBS, 5 secondes en mode normal
+        
+        // Mettre en place le polling pour les mises à jour des followers
+        setInterval(() => {
+          // En mode OBS, vérifier si l'URL a changé
+          if (isObs) {
+            const newUrlParams = new URLSearchParams(window.location.search);
+            const newCurrent = newUrlParams.get('current');
+            
+            if (newCurrent && parseInt(newCurrent) !== this.currentFollowers) {
+              console.log('Mise à jour des followers depuis l\'URL:', newCurrent);
+              this.currentFollowers = parseInt(newCurrent);
+              this.updateDisplay();
+            }
+          } else {
+            // En mode normal, récupérer les followers via l'API
             this.fetchFollowersCount();
-          }, 30000);
-          
-          // Vérifier les changements de configuration toutes les 5 secondes
-          setInterval(() => {
+          }
+        }, updateInterval);
+        
+        // Vérifier les changements de configuration toutes les 2 secondes pour plus de réactivité
+        setInterval(() => {
+          // En mode OBS, vérifier si les paramètres d'URL ont changé
+          if (isObs) {
+            const newUrlParams = new URLSearchParams(window.location.search);
+            const newGoal = newUrlParams.get('goal');
+            const newTitle = newUrlParams.get('title');
+            const newStyle = newUrlParams.get('style');
+            const newBgColor = newUrlParams.get('bgColor');
+            const newTextColor = newUrlParams.get('textColor');
+            const newProgressColor = newUrlParams.get('progressColor');
+            
+            // Vérifier si un des paramètres a changé
+            if ((newGoal && parseInt(newGoal) !== this.goalFollowers) ||
+                (newTitle && newTitle !== this.config?.title) ||
+                (newStyle && newStyle !== this.config?.style) ||
+                (newBgColor && decodeURIComponent(newBgColor) !== this.config?.bgColor) ||
+                (newTextColor && decodeURIComponent(newTextColor) !== this.config?.textColor) ||
+                (newProgressColor && decodeURIComponent(newProgressColor) !== this.config?.progressColor)) {
+              
+              console.log('Paramètres d\'URL modifiés, rechargement...');
+              this.loadSettings();
+              this.updateDisplay();
+            }
+          } else {
+            // En mode normal, vérifier les changements dans localStorage
             const configStr = localStorage.getItem('followers_goal_config');
             if (configStr) {
               try {
@@ -338,15 +374,16 @@
                   console.log('Configuration modifiée, rechargement des paramètres');
                   this.config = newConfig;
                   this.loadSettings();
+                  this.updateDisplay();
                 }
               } catch (e) {
                 console.error('Erreur lors de la vérification de la configuration:', e);
               }
             }
-          }, 5000);
-        } else {
-          console.log('Mode OBS: pas de polling, utilisation des paramètres d\'URL uniquement');
-        }
+          }
+        }, 2000);
+        
+        console.log(`Mode ${isObs ? 'OBS' : 'normal'}: polling configuré avec intervalle de ${updateInterval}ms`);
       }
     }
 
