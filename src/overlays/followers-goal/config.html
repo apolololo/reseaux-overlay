@@ -259,7 +259,7 @@
   </div>
 
   <script>
-    // Configuration en temps réel avec synchronisation immédiate
+    // Configuration en temps réel avec synchronisation améliorée
     let configSyncInterval;
     let broadcastChannel;
     
@@ -298,18 +298,27 @@
       updatePreview();
     }
     
-    // Fonction pour diffuser les changements de configuration IMMÉDIATEMENT
+    // Fonction pour diffuser les changements de configuration avec timestamp forcé
     function broadcastConfigUpdate() {
       const config = JSON.parse(localStorage.getItem('followers_goal_config') || '{}');
       const currentFollowers = localStorage.getItem('current_followers_count') || '0';
       const timestamp = Date.now();
       
-      // Mettre à jour le timestamp AVANT de diffuser
+      console.log('=== SAUVEGARDE DE LA CONFIGURATION ===');
+      console.log('Configuration:', config);
+      console.log('Timestamp:', timestamp);
+      
+      // Sauvegarder avec timestamp AVANT de diffuser
       localStorage.setItem('followers_goal_config_timestamp', timestamp.toString());
       
-      console.log('Diffusion de la configuration:', config);
+      // Créer un événement de changement forcé pour localStorage
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'followers_goal_config_timestamp',
+        newValue: timestamp.toString(),
+        storageArea: localStorage
+      }));
       
-      // Utiliser BroadcastChannel pour synchroniser entre onglets IMMÉDIATEMENT
+      // Utiliser BroadcastChannel pour synchroniser entre onglets
       if (broadcastChannel) {
         try {
           broadcastChannel.postMessage({
@@ -317,12 +326,25 @@
             config: config,
             currentFollowers: currentFollowers,
             timestamp: timestamp,
-            force: true // Forcer la mise à jour
+            force: true
           });
           console.log('Configuration diffusée via BroadcastChannel');
         } catch (e) {
           console.error('Erreur lors de la diffusion:', e);
         }
+      }
+      
+      // Alternative: utiliser postMessage pour tous les iframes
+      try {
+        window.parent.postMessage({
+          type: 'followers_goal_config_update',
+          config: config,
+          currentFollowers: currentFollowers,
+          timestamp: timestamp
+        }, '*');
+        console.log('Configuration diffusée via postMessage');
+      } catch (e) {
+        console.log('postMessage non disponible ou bloqué');
       }
     }
 
@@ -355,11 +377,12 @@
       
       const newValue = Math.max(0, currentFollowers + amount);
       localStorage.setItem('current_followers_count', newValue.toString());
+      localStorage.setItem('current_followers_timestamp', Date.now().toString());
       
       await updateCurrentInfo();
       updatePreview();
       
-      // Diffuser le changement IMMÉDIATEMENT
+      // Diffuser le changement
       broadcastConfigUpdate();
     }
 
@@ -388,7 +411,7 @@
       }
     }
 
-    // Sauvegarder la configuration avec diffusion immédiate
+    // Sauvegarder la configuration avec diffusion immédiate et timestamp forcé
     document.getElementById('config-form').addEventListener('submit', function(e) {
       e.preventDefault();
       
@@ -401,11 +424,16 @@
         progressColor: document.getElementById('progress-color').value
       };
       
-      console.log('Sauvegarde de la configuration:', config);
+      console.log('=== DÉBUT SAUVEGARDE ===');
+      console.log('Nouvelle configuration:', config);
+      
+      // Sauvegarder la configuration
       localStorage.setItem('followers_goal_config', JSON.stringify(config));
       
-      // Diffuser le changement IMMÉDIATEMENT après sauvegarde
-      broadcastConfigUpdate();
+      // Diffuser le changement IMMÉDIATEMENT avec timestamp unique
+      setTimeout(() => {
+        broadcastConfigUpdate();
+      }, 100);
       
       alert('Configuration sauvegardée avec succès!');
       
@@ -414,12 +442,10 @@
       }, 1000);
     });
 
-    // Mettre à jour l'aperçu en temps réel et diffuser les changements pendant la saisie
+    // Mettre à jour l'aperçu en temps réel
     document.querySelectorAll('input, select').forEach(element => {
       element.addEventListener('input', () => {
         updatePreview();
-        // Optionnel: diffuser en temps réel pendant la saisie (peut être trop fréquent)
-        // broadcastConfigUpdate();
       });
     });
 
