@@ -45,6 +45,40 @@
         this.goalFollowers = 1000;
         this.init();
       }
+      
+      applyStyles(config) {
+        if (!config) return;
+        
+        console.log('Application des styles:', config);
+        
+        // Appliquer le titre personnalisé
+        if (config.title) {
+          const titleEl = document.querySelector('.goal-title');
+          if (titleEl) titleEl.textContent = config.title;
+        }
+        
+        // Appliquer les couleurs
+        const container = document.querySelector('.followers-goal-container');
+        if (container && config.bgColor) {
+          container.style.background = config.bgColor;
+        }
+        
+        if (config.textColor) {
+          document.body.style.color = config.textColor;
+        }
+        
+        if (config.progressColor) {
+          const progressFill = document.getElementById('progress-fill');
+          if (progressFill) {
+            progressFill.style.background = config.progressColor;
+          }
+        }
+        
+        // Appliquer le style d'affichage
+        if (config.style) {
+          document.body.className = ''; // Réinitialiser les classes
+          document.body.classList.add(`style-${config.style}`);
+        }
 
       init() {
         this.loadSettings();
@@ -58,8 +92,26 @@
         const goal = urlParams.get('goal');
         const current = urlParams.get('current');
         
+        // Charger la configuration complète depuis localStorage
+        const configStr = localStorage.getItem('followers_goal_config');
+        let config = {};
+        
+        if (configStr) {
+          try {
+            config = JSON.parse(configStr);
+            console.log('Configuration chargée:', config);
+          } catch (e) {
+            console.error('Erreur lors du chargement de la configuration:', e);
+          }
+        } else {
+          console.log('Aucune configuration trouvée dans localStorage');
+        }
+        
+        // Priorité aux paramètres d'URL, puis config, puis valeurs par défaut
         if (goal) {
           this.goalFollowers = parseInt(goal);
+        } else if (config.goal) {
+          this.goalFollowers = config.goal;
         } else {
           const savedGoal = localStorage.getItem('followers_goal');
           if (savedGoal) {
@@ -70,6 +122,9 @@
         if (current) {
           this.currentFollowers = parseInt(current);
         }
+        
+        // Appliquer les styles de la configuration
+        this.applyStyles(config);
       }
 
       async fetchFollowersCount() {
@@ -79,14 +134,22 @@
           
           if (!token || !userData) {
             console.error('Token ou données utilisateur manquants');
+            // Utiliser les données en cache si disponibles
+            const savedFollowers = localStorage.getItem('current_followers_count');
+            if (savedFollowers) {
+              this.currentFollowers = parseInt(savedFollowers);
+              console.log('Utilisation du nombre de followers en cache:', this.currentFollowers);
+              this.updateDisplay();
+            }
             return;
           }
 
           const user = JSON.parse(userData);
           const broadcasterId = user.id;
 
+          console.log('Récupération des followers pour l\'ID:', broadcasterId);
+
           // Utiliser l'API Twitch pour récupérer le nombre de followers
-          // Selon la documentation actuelle, nous devons utiliser l'endpoint /channels/followers
           const response = await fetch(`https://api.twitch.tv/helix/channels/followers?broadcaster_id=${broadcasterId}`, {
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -98,35 +161,65 @@
             const data = await response.json();
             console.log('Données de followers récupérées:', data);
             
-            // L'API actuelle renvoie un champ 'total' qui contient le nombre total de followers
-            if (data && data.total !== undefined) {
-              // Utiliser le nombre réel de followers
+            // Vérifier la structure de la réponse pour s'adapter aux changements d'API
+            if (data && typeof data.total === 'number') {
+              // Format actuel de l'API: { total: X, data: [...], pagination: {...} }
               this.currentFollowers = data.total;
-              localStorage.setItem('current_followers_count', this.currentFollowers.toString());
-              console.log('Nombre de followers mis à jour:', this.currentFollowers);
-            } else if (data && data.data && data.pagination) {
+              console.log('Nombre de followers depuis total:', this.currentFollowers);
+            } else if (data && data.data && Array.isArray(data.data)) {
               // Si l'API a changé et ne renvoie plus le total directement
-              // Nous pouvons essayer de compter les followers dans la réponse paginée
-              this.currentFollowers = data.data.length;
-              localStorage.setItem('current_followers_count', this.currentFollowers.toString());
-              console.log('Nombre de followers estimé à partir des données:', this.currentFollowers);
+              if (data.data.length > 0 && data.data[0].follower_count !== undefined) {
+                // Nouveau format possible: { data: [{ follower_count: X }] }
+                this.currentFollowers = data.data[0].follower_count;
+                console.log('Nombre de followers depuis follower_count:', this.currentFollowers);
+              } else {
+                // Compter les followers dans la réponse paginée (moins précis)
+                this.currentFollowers = data.data.length;
+                console.log('Nombre de followers estimé depuis la longueur des données:', this.currentFollowers);
+              }
             } else {
               // Fallback si l'API ne renvoie pas les données attendues
               const savedFollowers = localStorage.getItem('current_followers_count');
               if (savedFollowers) {
                 this.currentFollowers = parseInt(savedFollowers);
+                console.log('Utilisation du nombre de followers de secours (cache):', this.currentFollowers);
               } else {
                 this.currentFollowers = 0;
-                localStorage.setItem('current_followers_count', '0');
+                console.log('Aucune donnée de followers disponible, utilisation de 0');
               }
-              console.log('Utilisation du nombre de followers de secours:', this.currentFollowers);
             }
+            
+            // Sauvegarder et mettre à jour l'affichage
+            localStorage.setItem('current_followers_count', this.currentFollowers.toString());
             this.updateDisplay();
           } else {
-            console.error('Erreur lors de la récupération des informations utilisateur:', response.status);
+            console.error('Erreur lors de la récupération des followers:', response.status, response.statusText);
+            // Essayer d'extraire plus d'informations sur l'erreur
+            try {
+              const errorData = await response.json();
+              console.error('Détails de l\'erreur:', errorData);
+            } catch (e) {
+              console.error('Impossible de lire les détails de l\'erreur');
+            }
+            
+            // Utiliser les données en cache
+            const savedFollowers = localStorage.getItem('current_followers_count');
+            if (savedFollowers) {
+              this.currentFollowers = parseInt(savedFollowers);
+              console.log('Utilisation du nombre de followers en cache après erreur:', this.currentFollowers);
+              this.updateDisplay();
+            }
           }
         } catch (error) {
           console.error('Erreur lors de la récupération des followers:', error);
+          
+          // Utiliser les données en cache en cas d'erreur
+          const savedFollowers = localStorage.getItem('current_followers_count');
+          if (savedFollowers) {
+            this.currentFollowers = parseInt(savedFollowers);
+            console.log('Utilisation du nombre de followers en cache après exception:', this.currentFollowers);
+            this.updateDisplay();
+          }
         }
       }
 
@@ -170,6 +263,9 @@
             container.classList.remove('goal-reached');
           }
         }
+        
+        // Sauvegarder le nombre actuel de followers pour la persistance
+        localStorage.setItem('current_followers_count', this.currentFollowers.toString());
       }
 
       startPolling() {
@@ -180,6 +276,23 @@
         setInterval(() => {
           this.fetchFollowersCount();
         }, 30000);
+        
+        // Vérifier les changements de configuration toutes les 5 secondes
+        this.lastConfigStr = localStorage.getItem('followers_goal_config') || '';
+        
+        setInterval(() => {
+          const currentConfigStr = localStorage.getItem('followers_goal_config') || '';
+          
+          // Si la configuration a changé
+          if (currentConfigStr !== this.lastConfigStr) {
+            console.log('Configuration modifiée, rechargement des paramètres...');
+            this.lastConfigStr = currentConfigStr;
+            
+            // Recharger les paramètres
+            this.loadSettings();
+            this.updateDisplay();
+          }
+        }, 5000);
       }
     }
 
