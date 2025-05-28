@@ -490,9 +490,7 @@
       });
       
       // Vérifier périodiquement les changements dans localStorage
-      // Cela permet de synchroniser même si les événements ne sont pas reçus
-      // (par exemple, si les instances sont dans des fenêtres ou navigateurs différents)
-      setInterval(checkForLocalStorageChanges, 1000); // Vérification plus fréquente (1 seconde)
+      setInterval(checkForLocalStorageChanges, 1000);
       
       // Vérifier également lors de la visibilité de la page
       document.addEventListener('visibilitychange', () => {
@@ -504,6 +502,15 @@
       
       // Vérifier immédiatement au chargement
       checkForLocalStorageChanges();
+      
+      // Ajout d'un intervalle qui appelle fetchFollowersCount toutes les 2 secondes sur le site (hors mode OBS)
+      const urlParams = new URLSearchParams(window.location.search);
+      const isObs = urlParams.get('obs') === 'true';
+      if (!isObs) {
+        setInterval(() => {
+          followersGoalInstance.fetchFollowersCount();
+        }, 2000);
+      }
     });
   </script>
 </body>
