@@ -168,87 +168,6 @@
       padding: 8px 15px;
       font-size: 14px;
     }
-    
-    .notification {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background-color: #4caf50;
-      color: white;
-      padding: 12px 20px;
-      border-radius: 4px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-      z-index: 1000;
-      opacity: 0;
-      transform: translateY(-20px);
-      transition: opacity 0.3s, transform 0.3s;
-    }
-    
-    .obs-url-container {
-      background: #e8f5e9;
-      border: 1px solid #4caf50;
-      border-radius: 8px;
-      padding: 15px;
-      margin: 20px 0;
-    }
-    
-    .obs-actions {
-      margin-top: 10px;
-      display: flex;
-      align-items: center;
-    }
-    
-    .obs-actions button {
-      background-color: #4caf50;
-      color: white;
-      border: none;
-      padding: 8px 15px;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    
-    .obs-actions button:hover {
-      background-color: #388e3c;
-    }
-    
-    .help-text {
-      margin-left: 10px;
-      font-size: 12px;
-      color: #666;
-    }
-    
-    .obs-url-container h3 {
-      color: #2e7d32;
-      margin-bottom: 10px;
-    }
-    
-    .url-box {
-      display: flex;
-      margin-top: 10px;
-    }
-    
-    .url-box input {
-      flex: 1;
-      padding: 8px 12px;
-      border: 1px solid #ddd;
-      border-radius: 4px 0 0 4px;
-      font-size: 14px;
-    }
-    
-    .url-box button {
-      padding: 8px 15px;
-      background-color: #17a2b8;
-      color: white;
-      border: none;
-      border-radius: 0 4px 4px 0;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    
-    .url-box button:hover {
-      background-color: #138496;
-    }
   </style>
 </head>
 <body>
@@ -331,20 +250,6 @@
           Objectif Followers: 850/1000 (85%)
         </div>
       </div>
-      
-      <div class="obs-url-container">
-        <h3>📋 URL pour OBS</h3>
-        <p>Copiez cette URL et utilisez-la comme source de navigateur dans OBS :</p>
-        <div class="url-box">
-          <input type="text" id="obs-url-input" readonly>
-          <button class="btn-secondary btn-small" onclick="copyObsUrl()">Copier</button>
-        </div>
-        <div class="obs-actions">
-          <button class="btn-primary btn-small" onclick="updateObsUrl()">Synchroniser OBS</button>
-          <span class="help-text">L'URL reste toujours la même. Cliquez pour synchroniser le widget OBS avec les dernières valeurs.</span>
-        </div>
-        <p class="mt-2"><small>Note: L'URL OBS ne change jamais. Toutes les modifications sont synchronisées automatiquement via le site.</small></p>
-      </div>
 
       <div class="buttons">
         <button type="button" class="btn-secondary" onclick="resetConfig()">Réinitialiser</button>
@@ -377,9 +282,10 @@
       }
       
       // Mettre à jour les informations actuelles (fonction asynchrone)
-      await updateCurrentInfo();
-      // Mettre à jour l'aperçu une fois les informations actualisées
-      updatePreview();
+      updateCurrentInfo().then(() => {
+        // Mettre à jour l'aperçu une fois les informations actualisées
+        updatePreview();
+      });
     }
     
     async function fetchCurrentFollowers() {
@@ -513,56 +419,21 @@
       // Mettre à jour l'affichage
       await updateCurrentInfo();
       updatePreview();
-      
-      // Récupérer la configuration actuelle pour la synchronisation
-      const config = JSON.parse(localStorage.getItem('followers_goal_config') || '{}');
-      
-      // Déclencher l'événement de synchronisation pour mettre à jour toutes les instances ouvertes
-      const syncEvent = new CustomEvent('follower-goal-sync', { 
-        detail: { 
-          config: config,
-          currentFollowers: newValue.toString() 
-        } 
-      });
-      window.dispatchEvent(syncEvent);
-      
-      // Notification de mise à jour
-      showNotification('Nombre de followers mis à jour et synchronisé');
-    }
-    
-    // Afficher une notification temporaire
-    function showNotification(message) {
-      const notification = document.createElement('div');
-      notification.className = 'notification';
-      notification.textContent = message;
-      document.body.appendChild(notification);
-      
-      // Animation d'entrée
-      setTimeout(() => {
-        notification.style.opacity = '1';
-        notification.style.transform = 'translateY(0)';
-      }, 10);
-      
-      // Disparition après 3 secondes
-      setTimeout(() => {
-        notification.style.opacity = '0';
-        notification.style.transform = 'translateY(-20px)';
-        
-        // Supprimer l'élément après la fin de l'animation
-        setTimeout(() => {
-          document.body.removeChild(notification);
-        }, 500);
-      }, 3000);
     }
 
     // Mettre à jour l'aperçu
     function updatePreview() {
-      const baseUrl = window.location.href.split('?')[0].replace('config.html', 'overlay.html');
-      const obsUrl = `${baseUrl}?obs=true`;
-      const obsUrlInput = document.getElementById('obs-url-input');
-      if (obsUrlInput) {
-        obsUrlInput.value = obsUrl;
-      }
+      const goal = document.getElementById('goal').value;
+      const title = document.getElementById('title').value;
+      const bgColor = document.getElementById('bg-color').value;
+      const textColor = document.getElementById('text-color').value;
+      const currentFollowers = localStorage.getItem('current_followers_count') || '0';
+      const progress = Math.min(100, Math.round((parseInt(currentFollowers) / goal) * 100));
+      
+      const preview = document.getElementById('preview-widget');
+      preview.textContent = `${title}: ${currentFollowers}/${goal} (${progress}%)`;
+      preview.style.backgroundColor = bgColor;
+      preview.style.color = textColor;
     }
 
     // Réinitialiser la configuration
@@ -587,98 +458,18 @@
       };
       
       localStorage.setItem('followers_goal_config', JSON.stringify(config));
-      localStorage.setItem('followers_goal', config.goal);
+      alert('Configuration sauvegardée avec succès!');
       
-      // Sauvegarder également le nombre actuel de followers pour assurer la cohérence
-      const currentFollowers = document.getElementById('current-followers').textContent;
-      if (currentFollowers && !isNaN(parseInt(currentFollowers))) {
-        localStorage.setItem('current_followers_count', currentFollowers);
-      }
-      
-      // Mettre à jour l'URL OBS après la sauvegarde
-      updatePreview();
-      
-      // Déclencher l'événement de synchronisation pour mettre à jour toutes les instances ouvertes
-      const syncEvent = new CustomEvent('follower-goal-sync', { 
-        detail: { 
-          config: config,
-          currentFollowers: currentFollowers 
-        } 
-      });
-      window.dispatchEvent(syncEvent);
-      
-      // Afficher un message de confirmation
-      const saveBtn = document.querySelector('button[type="submit"]');
-      const originalText = saveBtn.textContent;
-      saveBtn.textContent = 'Sauvegardé ✓';
-      saveBtn.style.backgroundColor = '#4caf50';
-      
-      // Afficher une notification
-      showNotification('Configuration sauvegardée et synchronisée');
-      
+      // Fermer la fenêtre après un court délai
       setTimeout(() => {
-        saveBtn.textContent = originalText;
-        saveBtn.style.backgroundColor = '';
-        // Ne pas fermer automatiquement la fenêtre pour permettre d'autres modifications
-        // window.close();
-      }, 2000);
+        window.close();
+      }, 1000);
     });
 
     // Mettre à jour l'aperçu en temps réel
     document.querySelectorAll('input, select').forEach(element => {
       element.addEventListener('input', updatePreview);
     });
-    
-    // Fonction pour copier l'URL OBS dans le presse-papier
-    function copyObsUrl() {
-      const urlInput = document.getElementById('obs-url-input');
-      if (urlInput) {
-        urlInput.select();
-        document.execCommand('copy');
-        
-        // Feedback visuel
-        const button = document.querySelector('.url-box button');
-        const originalText = button.textContent;
-        button.textContent = 'Copié ✓';
-        button.style.backgroundColor = '#4caf50';
-        
-        setTimeout(() => {
-          button.textContent = originalText;
-          button.style.backgroundColor = '';
-        }, 2000);
-      }
-    }
-    
-    // Fonction pour mettre à jour l'URL OBS et forcer une synchronisation
-    function updateObsUrl() {
-      // Récupérer les valeurs actuelles
-      const goal = document.getElementById('goal').value;
-      const title = document.getElementById('title').value;
-      const style = document.getElementById('style').value;
-      const bgColor = document.getElementById('bg-color').value;
-      const textColor = document.getElementById('text-color').value;
-      const progressColor = document.getElementById('progress-color').value;
-      const currentFollowers = document.getElementById('current-followers').textContent;
-      const config = {
-        goal: parseInt(goal),
-        title: title,
-        style: style,
-        bgColor: bgColor,
-        textColor: textColor,
-        progressColor: progressColor
-      };
-      localStorage.setItem('followers_goal_config', JSON.stringify(config));
-      localStorage.setItem('current_followers_count', currentFollowers);
-      updatePreview();
-      showNotification('Widget OBS synchronisé');
-      const syncEvent = new CustomEvent('follower-goal-sync', { 
-        detail: { 
-          config: config,
-          currentFollowers: currentFollowers 
-        } 
-      });
-      window.dispatchEvent(syncEvent);
-    }
 
     // Charger la configuration au démarrage
     document.addEventListener('DOMContentLoaded', () => {
