@@ -178,13 +178,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const currentFollowers = parseInt(followerCount);
       const defaultGoal = Math.ceil(currentFollowers * 1.2);
       
+      // Pour la copie d'URL, toujours utiliser overlay.html (pas preview.html)
+      overlayUrl.searchParams.set('overlay', 'followers-goal');
+      
       // Ajouter les paramètres nécessaires pour l'overlay followers goal
       overlayUrl.searchParams.set('userId', userData.id || '');
       overlayUrl.searchParams.set('token', token || '');
       overlayUrl.searchParams.set('goal', defaultGoal.toString());
       overlayUrl.searchParams.set('refreshInterval', '60'); // 60 secondes par défaut
       overlayUrl.searchParams.set('showLatest', 'true');
-      overlayUrl.searchParams.set('overlay', 'followers-goal');
       
       console.log("URL de l'overlay followers goal (copie):", overlayUrl.toString());
       console.log("Paramètres followers goal (copie):", {

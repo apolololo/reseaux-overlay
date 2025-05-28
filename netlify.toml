@@ -1,7 +1,15 @@
 [build]
   publish = "."
 
+# Ne pas rediriger les fichiers d'overlay
+[[redirects]]
+  from = "/src/overlays/*"
+  to = "/src/overlays/:splat"
+  status = 200
+
+# Redirection par défaut pour les autres routes
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  conditions = {Path = {exclude = ["/src/overlays/**"]}}
