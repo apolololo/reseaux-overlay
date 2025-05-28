@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuration - Followers Goal</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+      font-size: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #555;
+    }
+
+    input[type="number"], input[type="text"], select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+
+    input[type="number"]:focus, input[type="text"]:focus, select:focus {
+      outline: none;
+      border-color: #9146FF;
+    }
+
+    input[type="color"] {
+      width: 60px;
+      height: 40px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .color-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .preview {
+      background: #f8f9fa;
+      border: 2px dashed #dee2e6;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .preview-widget {
+      display: inline-block;
+      padding: 15px 25px;
+      border-radius: 10px;
+      font-weight: bold;
+      min-width: 200px;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 30px;
+    }
+
+    button {
+      flex: 1;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #9146FF 0%, #00D4AA 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(145, 70, 255, 0.3);
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+
+    .current-info {
+      background: #e3f2fd;
+      border: 1px solid #2196f3;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    .current-info h3 {
+      color: #1976d2;
+      margin-bottom: 10px;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+
+    .manual-controls {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    .manual-controls h3 {
+      color: #856404;
+      margin-bottom: 10px;
+    }
+
+    .manual-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .btn-small {
+      padding: 8px 15px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎯 Configuration Followers Goal</h1>
+    
+    <div class="current-info">
+      <h3>📊 Informations actuelles</h3>
+      <div class="info-item">
+        <span>Followers actuels:</span>
+        <span id="current-followers">-</span>
+      </div>
+      <div class="info-item">
+        <span>Objectif:</span>
+        <span id="current-goal">-</span>
+      </div>
+      <div class="info-item">
+        <span>Progression:</span>
+        <span id="current-progress">-</span>
+      </div>
+    </div>
+
+    <div class="manual-controls">
+      <h3>🔧 Contrôles manuels (pour test)</h3>
+      <p>Ajustez manuellement le nombre de followers pour tester l'overlay:</p>
+      <div class="manual-buttons">
+        <button class="btn-secondary btn-small" onclick="adjustFollowers(-1)">-1</button>
+        <button class="btn-secondary btn-small" onclick="adjustFollowers(-10)">-10</button>
+        <button class="btn-secondary btn-small" onclick="adjustFollowers(1)">+1</button>
+        <button class="btn-secondary btn-small" onclick="adjustFollowers(10)">+10</button>
+      </div>
+    </div>
+
+    <form id="config-form">
+      <div class="form-group">
+        <label for="goal">🎯 Objectif de followers:</label>
+        <input type="number" id="goal" min="1" max="100000" value="1000" required>
+      </div>
+
+      <div class="form-group">
+        <label for="title">📝 Titre personnalisé:</label>
+        <input type="text" id="title" value="Objectif Followers" maxlength="50">
+      </div>
+
+      <div class="form-group">
+        <label for="style">🎨 Style d'affichage:</label>
+        <select id="style">
+          <option value="modern">Moderne</option>
+          <option value="classic">Classique</option>
+          <option value="minimal">Minimal</option>
+          <option value="neon">Néon</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>🌈 Couleurs:</label>
+        <div class="color-group">
+          <label for="bg-color">Arrière-plan:</label>
+          <input type="color" id="bg-color" value="#9146FF">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="color-group">
+          <label for="text-color">Texte:</label>
+          <input type="color" id="text-color" value="#FFFFFF">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="color-group">
+          <label for="progress-color">Barre de progression:</label>
+          <input type="color" id="progress-color" value="#00D4AA">
+        </div>
+      </div>
+
+      <div class="preview">
+        <h3>👀 Aperçu</h3>
+        <div id="preview-widget" class="preview-widget">
+          Objectif Followers: 850/1000 (85%)
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button type="button" class="btn-secondary" onclick="resetConfig()">Réinitialiser</button>
+        <button type="submit" class="btn-primary">Sauvegarder</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // Charger la configuration existante
+    function loadConfig() {
+      const config = JSON.parse(localStorage.getItem('followers_goal_config') || '{}');
+      
+      document.getElementById('goal').value = config.goal || 1000;
+      document.getElementById('title').value = config.title || 'Objectif Followers';
+      document.getElementById('style').value = config.style || 'modern';
+      document.getElementById('bg-color').value = config.bgColor || '#9146FF';
+      document.getElementById('text-color').value = config.textColor || '#FFFFFF';
+      document.getElementById('progress-color').value = config.progressColor || '#00D4AA';
+      
+      updateCurrentInfo();
+      updatePreview();
+    }
+
+    // Mettre à jour les informations actuelles
+    function updateCurrentInfo() {
+      const currentFollowers = localStorage.getItem('current_followers_count') || '0';
+      const config = JSON.parse(localStorage.getItem('followers_goal_config') || '{}');
+      const goal = config.goal || 1000;
+      const progress = Math.min(100, Math.round((parseInt(currentFollowers) / goal) * 100));
+      
+      document.getElementById('current-followers').textContent = currentFollowers;
+      document.getElementById('current-goal').textContent = goal;
+      document.getElementById('current-progress').textContent = progress + '%';
+    }
+
+    // Ajuster manuellement les followers
+    function adjustFollowers(amount) {
+      const current = parseInt(localStorage.getItem('current_followers_count') || '0');
+      const newValue = Math.max(0, current + amount);
+      localStorage.setItem('current_followers_count', newValue.toString());
+      updateCurrentInfo();
+      updatePreview();
+    }
+
+    // Mettre à jour l'aperçu
+    function updatePreview() {
+      const goal = document.getElementById('goal').value;
+      const title = document.getElementById('title').value;
+      const bgColor = document.getElementById('bg-color').value;
+      const textColor = document.getElementById('text-color').value;
+      const currentFollowers = localStorage.getItem('current_followers_count') || '0';
+      const progress = Math.min(100, Math.round((parseInt(currentFollowers) / goal) * 100));
+      
+      const preview = document.getElementById('preview-widget');
+      preview.textContent = `${title}: ${currentFollowers}/${goal} (${progress}%)`;
+      preview.style.backgroundColor = bgColor;
+      preview.style.color = textColor;
+    }
+
+    // Réinitialiser la configuration
+    function resetConfig() {
+      if (confirm('Êtes-vous sûr de vouloir réinitialiser la configuration ?')) {
+        localStorage.removeItem('followers_goal_config');
+        loadConfig();
+      }
+    }
+
+    // Sauvegarder la configuration
+    document.getElementById('config-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const config = {
+        goal: parseInt(document.getElementById('goal').value),
+        title: document.getElementById('title').value,
+        style: document.getElementById('style').value,
+        bgColor: document.getElementById('bg-color').value,
+        textColor: document.getElementById('text-color').value,
+        progressColor: document.getElementById('progress-color').value
+      };
+      
+      localStorage.setItem('followers_goal_config', JSON.stringify(config));
+      alert('Configuration sauvegardée avec succès!');
+      
+      // Fermer la fenêtre après un court délai
+      setTimeout(() => {
+        window.close();
+      }, 1000);
+    });
+
+    // Mettre à jour l'aperçu en temps réel
+    document.querySelectorAll('input, select').forEach(element => {
+      element.addEventListener('input', updatePreview);
+    });
+
+    // Charger la configuration au démarrage
+    loadConfig();
+  </script>
+</body>
+</html>

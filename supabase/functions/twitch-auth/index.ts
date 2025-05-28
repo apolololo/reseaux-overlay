@@ -209,7 +209,6 @@ serve(async (req) => {
         ...tokenData,
         user: userInfo,
         followerCount: followerCount.total,
-        followerData: followerCount,
         subscriberCount: subscriberData.total,
         subscriberPoints: subscriberData.points
       }),

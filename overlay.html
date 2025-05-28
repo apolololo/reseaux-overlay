@@ -45,72 +45,9 @@
   
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      console.log("Chargement de l'overlay principal");
-      
       const params = new URLSearchParams(window.location.search);
       const token = params.get('token');
-      const overlayType = params.get('overlay');
       
-      console.log("Type d'overlay:", overlayType);
-      console.log("Paramètres URL:", Object.fromEntries(params.entries()));
-      
-      // Gestion spéciale pour l'overlay followers goal
-      if (overlayType === 'followers-goal') {
-        console.log("Initialisation de l'overlay followers goal");
-        
-        const userId = params.get('userId');
-        const authToken = params.get('token');
-        const goal = params.get('goal');
-        
-        console.log("userId:", userId);
-        console.log("authToken présent:", !!authToken);
-        console.log("goal:", goal);
-        
-        if (!userId || !authToken) {
-          showError("Paramètres manquants", "L'overlay Followers Goal nécessite un ID utilisateur et un token d'authentification.");
-          console.error("Paramètres manquants pour l'overlay followers goal");
-          return;
-        }
-        
-        try {
-          // Construire l'URL de l'overlay followers goal
-          const overlayUrl = new URL('./src/overlays/followers-goal/overlay.html', window.location.origin);
-          
-          // Transférer tous les paramètres pertinents
-          params.forEach((value, key) => {
-            if (key !== 'overlay') { // Ne pas transférer le type d'overlay
-              overlayUrl.searchParams.set(key, value);
-            }
-          });
-          
-          console.log("URL de l'overlay followers goal:", overlayUrl.toString());
-          
-          // Créer un iframe pour charger l'overlay
-          const iframe = document.createElement('iframe');
-          iframe.src = overlayUrl.toString();
-          iframe.style.border = 'none';
-          iframe.style.width = '100%';
-          iframe.style.height = '100%';
-          iframe.style.position = 'absolute';
-          iframe.style.top = '0';
-          iframe.style.left = '0';
-          
-          // Ajouter un gestionnaire d'erreur pour l'iframe
-          iframe.onerror = (error) => {
-            console.error("Erreur de chargement de l'iframe:", error);
-            showError("Erreur de chargement", "Impossible de charger l'overlay followers goal. Vérifiez la console pour plus de détails.");
-          };
-          
-          document.getElementById('overlay-container').appendChild(iframe);
-          console.log("Iframe ajouté au DOM");
-        } catch (error) {
-          console.error("Erreur lors de la création de l'overlay followers goal:", error);
-          showError("Erreur technique", `Une erreur s'est produite lors de la création de l'overlay: ${error.message}`);
-        }
-        return;
-      }
-      
-      // Gestion standard pour les autres overlays
       if (!token) {
         showError("Token d'overlay manquant", "Veuillez utiliser un lien valide généré depuis l'application APO Overlays.");
         return;
