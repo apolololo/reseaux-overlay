@@ -88,34 +88,29 @@
       }
 
       loadSettings() {
-        // Charger les paramètres depuis l'URL ou localStorage
+        // Récupérer les paramètres d'URL ou utiliser les valeurs par défaut
         const urlParams = new URLSearchParams(window.location.search);
         const isObs = urlParams.get('obs') === 'true';
         
-        // Configuration par défaut
         let config = {
           goal: 1000,
-          title: 'Objectif Followers',
-          style: 'modern',
-          bgColor: '#9146FF',
-          textColor: '#FFFFFF',
-          progressColor: '#00D4AA'
+          title: 'Objectif followers',
+          style: 'default',
+          bgColor: '#333333',
+          textColor: '#ffffff',
+          progressColor: '#9147ff'
         };
         
-        // Si nous sommes dans OBS, priorité aux paramètres d'URL
         if (isObs) {
-          console.log('Mode OBS détecté, utilisation des paramètres d\'URL');
-          
-          // Récupérer tous les paramètres depuis l'URL
+          // Mode OBS: priorité aux paramètres d'URL
           const goal = urlParams.get('goal');
-          const current = urlParams.get('current');
           const title = urlParams.get('title');
           const style = urlParams.get('style');
           const bgColor = urlParams.get('bgColor');
           const textColor = urlParams.get('textColor');
           const progressColor = urlParams.get('progressColor');
+          const current = urlParams.get('current');
           
-          // Mettre à jour la configuration avec les paramètres d'URL
           if (goal) config.goal = parseInt(goal);
           if (title) config.title = title;
           if (style) config.style = style;
@@ -150,42 +145,46 @@
             } catch (e) {
               console.error('Erreur lors du chargement de la configuration:', e);
             }
-          } else {
-            console.log('Aucune configuration trouvée dans localStorage, utilisation des valeurs par défaut');
           }
           
-          // Priorité aux paramètres d'URL
+          // Vérifier s'il y a des paramètres d'URL qui doivent remplacer les valeurs de localStorage
           const goal = urlParams.get('goal');
+          const title = urlParams.get('title');
+          const style = urlParams.get('style');
+          const bgColor = urlParams.get('bgColor');
+          const textColor = urlParams.get('textColor');
+          const progressColor = urlParams.get('progressColor');
           const current = urlParams.get('current');
           
-          if (goal) {
-            this.goalFollowers = parseInt(goal);
-          } else {
-            this.goalFollowers = config.goal;
-          }
+          if (goal) config.goal = parseInt(goal);
+          if (title) config.title = title;
+          if (style) config.style = style;
+          if (bgColor) config.bgColor = decodeURIComponent(bgColor);
+          if (textColor) config.textColor = decodeURIComponent(textColor);
+          if (progressColor) config.progressColor = decodeURIComponent(progressColor);
           
+          // Mettre à jour les followers actuels
           if (current) {
             this.currentFollowers = parseInt(current);
+            localStorage.setItem('current_followers_count', this.currentFollowers.toString());
           } else {
-            // Charger le nombre de followers depuis localStorage
+            // Si pas de paramètre current dans l'URL, vérifier dans localStorage
             const storedFollowers = localStorage.getItem('current_followers_count');
             if (storedFollowers) {
               this.currentFollowers = parseInt(storedFollowers);
             }
           }
+          
+          // Sauvegarder la configuration mise à jour
+          localStorage.setItem('followers_goal_config', JSON.stringify(config));
         }
         
-        // Définir l'objectif
-        this.goalFollowers = config.goal || 1000;
-        
-        // Sauvegarder la configuration actuelle
+        // Sauvegarder la configuration actuelle pour référence
         this.config = config;
         
-        // Appliquer les styles de la configuration
+        // Appliquer les paramètres
+        this.goalFollowers = config.goal;
         this.applyStyles(config);
-        
-        console.log('Configuration appliquée:', config);
-        console.log('Objectif:', this.goalFollowers, 'Followers actuels:', this.currentFollowers);
       }
 
       async fetchFollowersCount() {
@@ -332,7 +331,7 @@
         this.fetchFollowersCount();
         
         // Intervalle de mise à jour plus court pour une meilleure réactivité
-        const updateInterval = isObs ? 3000 : 5000; // 3 secondes en mode OBS, 5 secondes en mode normal
+        const updateInterval = isObs ? 2000 : 5000; // 2 secondes en mode OBS, 5 secondes en mode normal
         
         // Mettre en place le polling pour les mises à jour des followers
         setInterval(() => {
@@ -356,8 +355,15 @@
               this.updateDisplay();
             }
           } else {
-            // En mode normal, récupérer les followers via l'API
-            this.fetchFollowersCount();
+            // En mode normal, vérifier d'abord localStorage pour les mises à jour rapides
+            if (storedFollowers && parseInt(storedFollowers) !== this.currentFollowers) {
+              console.log('Mise à jour des followers depuis localStorage:', storedFollowers);
+              this.currentFollowers = parseInt(storedFollowers);
+              this.updateDisplay();
+            } else {
+              // Sinon, récupérer les followers via l'API
+              this.fetchFollowersCount();
+            }
           }
         }, updateInterval);
         
@@ -486,7 +492,7 @@
       // Vérifier périodiquement les changements dans localStorage
       // Cela permet de synchroniser même si les événements ne sont pas reçus
       // (par exemple, si les instances sont dans des fenêtres ou navigateurs différents)
-      setInterval(checkForLocalStorageChanges, 2000);
+      setInterval(checkForLocalStorageChanges, 1000); // Vérification plus fréquente (1 seconde)
       
       // Vérifier également lors de la visibilité de la page
       document.addEventListener('visibilitychange', () => {
@@ -495,6 +501,9 @@
           checkForLocalStorageChanges();
         }
       });
+      
+      // Vérifier immédiatement au chargement
+      checkForLocalStorageChanges();
     });
   </script>
 </body>
