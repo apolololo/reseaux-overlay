@@ -18,7 +18,8 @@ export default defineConfig({
         end: resolve(__dirname, 'src/overlays/end/overlay.html'),
         gameStatus: resolve(__dirname, 'src/overlays/game-status/overlay.html'),
         mapInfo: resolve(__dirname, 'src/overlays/maps/overlay.html'),
-        followersGoal: resolve(__dirname, 'src/overlays/followers-goal/overlay.html')
+        followersGoal: resolve(__dirname, 'src/overlays/followers-goal/overlay.html'),
+        followersGoalConfig: resolve(__dirname, 'src/overlays/followers-goal/config.html')
       },
     },
     assetsDir: 'assets',

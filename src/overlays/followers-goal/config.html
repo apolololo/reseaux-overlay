@@ -260,7 +260,7 @@
 
   <script>
     // Charger la configuration existante
-    function loadConfig() {
+    async function loadConfig() {
       const config = JSON.parse(localStorage.getItem('followers_goal_config') || '{}');
       
       document.getElementById('goal').value = config.goal || 1000;
@@ -270,13 +270,77 @@
       document.getElementById('text-color').value = config.textColor || '#FFFFFF';
       document.getElementById('progress-color').value = config.progressColor || '#00D4AA';
       
-      updateCurrentInfo();
-      updatePreview();
+      // Tenter de récupérer le nombre réel de followers depuis l'API Twitch
+      let currentFollowers = await fetchCurrentFollowers();
+      
+      // Si la récupération a échoué, utiliser la valeur en cache
+      if (currentFollowers === null) {
+        currentFollowers = localStorage.getItem('current_followers_count') || '0';
+      } else {
+        // Mettre à jour le cache avec la nouvelle valeur
+        localStorage.setItem('current_followers_count', currentFollowers.toString());
+      }
+      
+      // Mettre à jour les informations actuelles (fonction asynchrone)
+      updateCurrentInfo().then(() => {
+        // Mettre à jour l'aperçu une fois les informations actualisées
+        updatePreview();
+      });
+    }
+    
+    async function fetchCurrentFollowers() {
+      try {
+        const token = localStorage.getItem('twitch_token');
+        const userData = localStorage.getItem('twitch_user');
+        
+        if (!token || !userData) {
+          console.error('Token ou données utilisateur manquants');
+          return null;
+        }
+
+        const user = JSON.parse(userData);
+        const broadcasterId = user.id;
+
+        // Utiliser l'API Twitch pour récupérer le nombre de followers
+        const response = await fetch(`https://api.twitch.tv/helix/channels/followers?broadcaster_id=${broadcasterId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Client-Id': 'z8q1w4g12yrql6cyb5zzwmhe1pnxyn'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Données de followers récupérées:', data);
+          
+          if (data && data.total !== undefined) {
+            // Utiliser le nombre réel de followers
+            return data.total;
+          } else if (data && data.data && data.pagination) {
+            // Si l'API a changé et ne renvoie plus le total directement
+            return data.data.length;
+          }
+        }
+        return null;
+      } catch (error) {
+        console.error('Erreur lors de la récupération des followers:', error);
+        return null;
+      }
     }
 
     // Mettre à jour les informations actuelles
-    function updateCurrentInfo() {
-      const currentFollowers = localStorage.getItem('current_followers_count') || '0';
+    async function updateCurrentInfo() {
+      // Tenter de récupérer le nombre réel de followers depuis l'API Twitch
+      let currentFollowers = await fetchCurrentFollowers();
+      
+      // Si la récupération a échoué, utiliser la valeur en cache
+      if (currentFollowers === null) {
+        currentFollowers = localStorage.getItem('current_followers_count') || '0';
+      } else {
+        // Mettre à jour le cache avec la nouvelle valeur
+        localStorage.setItem('current_followers_count', currentFollowers.toString());
+      }
+      
       const config = JSON.parse(localStorage.getItem('followers_goal_config') || '{}');
       const goal = config.goal || 1000;
       const progress = Math.min(100, Math.round((parseInt(currentFollowers) / goal) * 100));
@@ -286,12 +350,22 @@
       document.getElementById('current-progress').textContent = progress + '%';
     }
 
-    // Ajuster manuellement les followers
-    function adjustFollowers(amount) {
-      const current = parseInt(localStorage.getItem('current_followers_count') || '0');
-      const newValue = Math.max(0, current + amount);
+    // Ajuster manuellement les followers (uniquement pour les tests)
+    async function adjustFollowers(amount) {
+      // Récupérer d'abord le nombre réel de followers
+      let currentFollowers = await fetchCurrentFollowers();
+      
+      // Si la récupération a échoué, utiliser la valeur en cache
+      if (currentFollowers === null) {
+        currentFollowers = parseInt(localStorage.getItem('current_followers_count') || '0');
+      }
+      
+      // Ajuster la valeur (uniquement pour les tests)
+      const newValue = Math.max(0, currentFollowers + amount);
       localStorage.setItem('current_followers_count', newValue.toString());
-      updateCurrentInfo();
+      
+      // Mettre à jour l'affichage
+      await updateCurrentInfo();
       updatePreview();
     }
 
@@ -311,10 +385,10 @@
     }
 
     // Réinitialiser la configuration
-    function resetConfig() {
+    async function resetConfig() {
       if (confirm('Êtes-vous sûr de vouloir réinitialiser la configuration ?')) {
         localStorage.removeItem('followers_goal_config');
-        loadConfig();
+        await loadConfig();
       }
     }
 
@@ -346,7 +420,9 @@
     });
 
     // Charger la configuration au démarrage
-    loadConfig();
+    document.addEventListener('DOMContentLoaded', () => {
+      loadConfig();
+    });
   </script>
 </body>
 </html>

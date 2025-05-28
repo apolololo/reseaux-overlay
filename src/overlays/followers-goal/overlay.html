@@ -83,10 +83,11 @@
           }
 
           const user = JSON.parse(userData);
-          const username = user.login;
+          const broadcasterId = user.id;
 
-          // Utiliser l'API Twitch pour récupérer les informations du canal
-          const response = await fetch(`https://api.twitch.tv/helix/users?login=${username}`, {
+          // Utiliser l'API Twitch pour récupérer le nombre de followers
+          // Selon la documentation actuelle, nous devons utiliser l'endpoint /channels/followers
+          const response = await fetch(`https://api.twitch.tv/helix/channels/followers?broadcaster_id=${broadcasterId}`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Client-Id': 'z8q1w4g12yrql6cyb5zzwmhe1pnxyn'
@@ -95,19 +96,32 @@
 
           if (response.ok) {
             const data = await response.json();
-            if (data.data && data.data.length > 0) {
-              // Pour l'instant, utiliser une valeur simulée car l'API followers nécessite des permissions spéciales
-              // Dans un vrai environnement, vous devriez utiliser l'API Twitch EventSub ou une solution backend
+            console.log('Données de followers récupérées:', data);
+            
+            // L'API actuelle renvoie un champ 'total' qui contient le nombre total de followers
+            if (data && data.total !== undefined) {
+              // Utiliser le nombre réel de followers
+              this.currentFollowers = data.total;
+              localStorage.setItem('current_followers_count', this.currentFollowers.toString());
+              console.log('Nombre de followers mis à jour:', this.currentFollowers);
+            } else if (data && data.data && data.pagination) {
+              // Si l'API a changé et ne renvoie plus le total directement
+              // Nous pouvons essayer de compter les followers dans la réponse paginée
+              this.currentFollowers = data.data.length;
+              localStorage.setItem('current_followers_count', this.currentFollowers.toString());
+              console.log('Nombre de followers estimé à partir des données:', this.currentFollowers);
+            } else {
+              // Fallback si l'API ne renvoie pas les données attendues
               const savedFollowers = localStorage.getItem('current_followers_count');
               if (savedFollowers) {
                 this.currentFollowers = parseInt(savedFollowers);
               } else {
-                // Valeur par défaut simulée
-                this.currentFollowers = Math.floor(Math.random() * 500) + 100;
-                localStorage.setItem('current_followers_count', this.currentFollowers.toString());
+                this.currentFollowers = 0;
+                localStorage.setItem('current_followers_count', '0');
               }
-              this.updateDisplay();
+              console.log('Utilisation du nombre de followers de secours:', this.currentFollowers);
             }
+            this.updateDisplay();
           } else {
             console.error('Erreur lors de la récupération des informations utilisateur:', response.status);
           }
@@ -166,16 +180,6 @@
         setInterval(() => {
           this.fetchFollowersCount();
         }, 30000);
-        
-        // Simuler l'augmentation des followers pour la démonstration
-        // (à supprimer en production)
-        setInterval(() => {
-          if (Math.random() < 0.3) { // 30% de chance d'avoir un nouveau follower
-            this.currentFollowers++;
-            localStorage.setItem('current_followers_count', this.currentFollowers.toString());
-            this.updateDisplay();
-          }
-        }, 10000); // Toutes les 10 secondes
       }
     }
 

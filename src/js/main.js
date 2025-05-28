@@ -300,7 +300,9 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Ajouter l'événement click
       configButton.addEventListener('click', () => {
-        window.open(configUrl, '_blank', 'width=600,height=800,scrollbars=yes,resizable=yes');
+        // Construire l'URL absolue pour éviter les problèmes de chemin relatif
+        const absoluteConfigUrl = new URL(configUrl, window.location.origin).href;
+        window.open(absoluteConfigUrl, '_blank', 'width=600,height=800,scrollbars=yes,resizable=yes');
       });
       
       // Ajouter le bouton avant le bouton de copie
