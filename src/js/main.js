@@ -42,17 +42,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const sizeInfo = document.querySelector('.size-info');
   const previewContainerWrapper = document.querySelector('.preview-container');
 
-  // Génération d'un jeton simple pour les overlays (compatible partout)
+  // Génération d'un jeton enrichi pour les overlays avec données Twitch
   function generateOverlayToken(overlayPath) {
-    // Récupérer l'ID utilisateur Twitch
+    // Récupérer l'ID utilisateur Twitch et le token
     const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
+    const twitchToken = localStorage.getItem('twitch_token');
     const userId = userData?.id || 'anonymous';
     
-    // Créer un jeton simple qui contient l'ID utilisateur et le chemin de l'overlay
-    const tokenData = userId + '-' + overlayPath;
+    // Créer un jeton qui contient toutes les données nécessaires
+    const tokenData = {
+      userId: userId,
+      overlayPath: overlayPath,
+      twitchData: {
+        token: twitchToken,
+        user: userData
+      },
+      timestamp: Date.now()
+    };
     
-    // Encoder en base64 pour plus de lisibilité
-    const token = btoa(tokenData);
+    // Encoder en base64 pour plus de sécurité et lisibilité
+    const token = btoa(JSON.stringify(tokenData));
     
     return token;
   }
@@ -133,14 +142,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Gestion de la copie d'URL avec jetons et feedback amélioré
+  // Gestion de la copie d'URL avec jetons enrichis et feedback amélioré
   copyButton.addEventListener('click', async () => {
     const activeOverlay = document.querySelector('.overlay-item.active');
     if (!activeOverlay) return;
 
     const localPath = activeOverlay.dataset.url;
     
-    // Générer un nouveau jeton pour cet overlay (format simple)
+    // Générer un nouveau jeton enrichi pour cet overlay
     const token = generateOverlayToken(localPath);
     
     // Construire l'URL avec le jeton

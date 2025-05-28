@@ -53,19 +53,16 @@
         return;
       }
       
-      // Le jeton est simple: userID-overlayPath
-      // Pas besoin de vérifier dans le localStorage
       try {
-        // Format du token: userID-overlayPath (encodé en base64)
-        const decodedData = atob(token);
-        const separatorIndex = decodedData.indexOf('-');
+        // Décoder le nouveau format de token JSON
+        const tokenData = JSON.parse(atob(token));
         
-        if (separatorIndex === -1) {
+        if (!tokenData.userId || !tokenData.overlayPath) {
           throw new Error("Format de token invalide");
         }
         
-        const userId = decodedData.substring(0, separatorIndex);
-        let overlayPath = decodedData.substring(separatorIndex + 1);
+        const userId = tokenData.userId;
+        let overlayPath = tokenData.overlayPath;
         
         // S'assurer que le chemin commence par / si ce n'est pas déjà le cas
         if (!overlayPath.startsWith('/')) {
@@ -75,6 +72,13 @@
         // S'assurer que le chemin est valide (sécurité basique)
         if (!overlayPath.includes('/overlays/')) {
           throw new Error("Chemin d'overlay non valide");
+        }
+        
+        // Stocker les données Twitch dans localStorage si elles sont présentes
+        if (tokenData.twitchData && tokenData.twitchData.token && tokenData.twitchData.user) {
+          localStorage.setItem('twitch_token', tokenData.twitchData.token);
+          localStorage.setItem('twitch_user', JSON.stringify(tokenData.twitchData.user));
+          console.log('Données Twitch restaurées depuis le token pour OBS');
         }
         
         // Construire l'URL de l'overlay
@@ -98,9 +102,53 @@
         iframe.style.left = '0';
         
         document.getElementById('overlay-container').appendChild(iframe);
+        
       } catch (error) {
         console.error("Erreur lors du décodage du token:", error);
-        showError("Token d'overlay invalide", "Ce lien d'overlay n'est pas valide ou a expiré.");
+        
+        // Fallback vers l'ancien format de token si le nouveau échoue
+        try {
+          const decodedData = atob(token);
+          const separatorIndex = decodedData.indexOf('-');
+          
+          if (separatorIndex === -1) {
+            throw new Error("Format de token invalide");
+          }
+          
+          const userId = decodedData.substring(0, separatorIndex);
+          let overlayPath = decodedData.substring(separatorIndex + 1);
+          
+          if (!overlayPath.startsWith('/')) {
+            overlayPath = '/' + overlayPath;
+          }
+          
+          if (!overlayPath.includes('/overlays/')) {
+            throw new Error("Chemin d'overlay non valide");
+          }
+          
+          const overlayUrl = new URL(overlayPath, window.location.origin);
+          
+          params.forEach((value, key) => {
+            if (key !== 'token') {
+              overlayUrl.searchParams.set(key, value);
+            }
+          });
+          
+          const iframe = document.createElement('iframe');
+          iframe.src = overlayUrl.toString();
+          iframe.style.border = 'none';
+          iframe.style.width = '100%';
+          iframe.style.height = '100%';
+          iframe.style.position = 'absolute';
+          iframe.style.top = '0';
+          iframe.style.left = '0';
+          
+          document.getElementById('overlay-container').appendChild(iframe);
+          
+        } catch (fallbackError) {
+          console.error("Erreur avec le format de token de fallback:", fallbackError);
+          showError("Token d'overlay invalide", "Ce lien d'overlay n'est pas valide ou a expiré.");
+        }
       }
     });
     
