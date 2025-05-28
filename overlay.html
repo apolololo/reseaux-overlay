@@ -2,208 +2,117 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APO Overlay</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #9146FF;
-            --secondary: #00ADB5;
-            --background: #0e0e10;
-            --surface: #18181b;
-            --text: #efeff1;
-            --text-secondary: #adadb8;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background: transparent;
-            color: var(--text);
-            width: 1920px;
-            height: 1080px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .error-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 2rem;
-            border-radius: 8px;
-            text-align: center;
-            font-family: Arial, sans-serif;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APO Overlay</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    .error-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: 'Montserrat', Arial, sans-serif;
+      color: #fff;
+      background: #1a1a1a;
+      text-align: center;
+      padding: 20px;
+    }
+    .error-icon {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    .error-message {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .error-details {
+      font-size: 16px;
+      opacity: 0.7;
+      max-width: 600px;
+    }
+  </style>
 </head>
 <body>
-    <div id="overlay-container"></div>
-
-    <script>
-        class OverlayLoader {
-            constructor() {
-                this.container = document.getElementById('overlay-container');
-                this.init();
-            }
-
-            init() {
-                const params = new URLSearchParams(window.location.search);
-                const overlayId = params.get('id');
-
-                if (!overlayId) {
-                    this.showError("Aucun ID d'overlay spécifié");
-                    return;
-                }
-
-                this.loadOverlay(overlayId);
-            }
-
-            loadOverlay(overlayId) {
-                try {
-                    console.log("Tentative de chargement de l'overlay avec ID:", overlayId);
-                    
-                    // Vérifier si des paramètres d'overlay sont présents dans l'URL
-                    const params = new URLSearchParams(window.location.search);
-                    const htmlContent = params.get('html');
-                    const cssContent = params.get('css');
-                    const jsContent = params.get('js');
-                    const overlayName = params.get('name') || 'Mon Overlay';
-                    
-                    // Si les paramètres sont présents dans l'URL, les utiliser directement
-                    if (htmlContent && cssContent) {
-                        console.log("Chargement de l'overlay depuis les paramètres d'URL");
-                        
-                        // Créer le document HTML avec le contenu des paramètres
-                        const content = `
-                            <!DOCTYPE html>
-                            <html>
-                            <head>
-                                <meta charset="UTF-8">
-                                <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0">
-                                <title>${overlayName}</title>
-                                <style>
-                                    html, body {
-                                        margin: 0;
-                                        padding: 0;
-                                        width: 1920px;
-                                        height: 1080px;
-                                        overflow: hidden;
-                                        background: transparent;
-                                        transform-origin: top left;
-                                    }
-                                    ${decodeURIComponent(cssContent)}
-                                </style>
-                            </head>
-                            <body>
-                                ${decodeURIComponent(htmlContent)}
-                                <script>${jsContent ? decodeURIComponent(jsContent) : ''}<\/script>
-                            </body>
-                            </html>
-                        `;
-                        
-                        // Remplacer le contenu du document
-                        document.documentElement.innerHTML = content;
-                        console.log("Overlay chargé avec succès depuis les paramètres d'URL");
-                        return;
-                    }
-                    
-                    // Sinon, essayer de charger depuis localStorage
-                    let overlayData = localStorage.getItem(`overlay_${overlayId}`);
-                    console.log("Données d'overlay trouvées dans localStorage:", overlayData ? "Oui" : "Non");
-                    
-                    // Si pas trouvé avec le format actuel, essayer l'ancien format
-                    if (!overlayData) {
-                        // Essayer de trouver dans la liste des overlays
-                        const myOverlays = JSON.parse(localStorage.getItem('my_overlays') || '[]');
-                        const foundOverlay = myOverlays.find(o => o.id === overlayId);
-                        
-                        if (foundOverlay) {
-                            // Récupérer les données complètes
-                            overlayData = localStorage.getItem(`overlay_${overlayId}`);
-                        }
-                    }
-                    
-                    if (!overlayData) {
-                        console.error("Overlay non trouvé. ID recherché:", overlayId);
-                        console.log("IDs disponibles:", Object.keys(localStorage).filter(key => key.startsWith('overlay_')));
-                        this.showError(`Overlay non trouvé (ID: ${overlayId}). Vérifiez que l'overlay a été sauvegardé correctement.`);
-                        return;
-                    }
-                    
-                    // Analyser les données JSON
-                    const overlay = JSON.parse(overlayData);
-                    console.log("Overlay chargé:", overlay);
-                    
-                    if (!overlay || !overlay.files) {
-                        console.error("Format d'overlay invalide:", overlay);
-                        this.showError("Format d'overlay invalide");
-                        return;
-                    }
-
-                    // Créer le document HTML avec le contenu de l'overlay
-                    const content = `
-                        <!DOCTYPE html>
-                        <html>
-                        <head>
-                            <meta charset="UTF-8">
-                            <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0">
-                            <title>${overlay.name}</title>
-                            <style>
-                                html, body {
-                                    margin: 0;
-                                    padding: 0;
-                                    width: 1920px;
-                                    height: 1080px;
-                                    overflow: hidden;
-                                    background: transparent;
-                                    transform-origin: top left;
-                                }
-                                ${overlay.files.css || ''}
-                            </style>
-                        </head>
-                        <body>
-                            ${overlay.files.html || ''}
-                            <script>
-                                try {
-                                    ${overlay.files.js || ''}
-                                } catch(e) {
-                                    console.error('Erreur dans le script overlay:', e);
-                                }
-                            <\/script>
-                        </body>
-                        </html>
-                    `;
-                    
-                    // Remplacer le contenu du document
-                    document.documentElement.innerHTML = content;
-                    console.log("Overlay chargé avec succès depuis localStorage");
-                    
-                } catch (error) {
-                    console.error('Erreur lors du chargement de l\'overlay:', error);
-                    this.showError(`Erreur: ${error.message}`);
-                }
-            }
-
-            showError(message) {
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'error-message';
-                errorDiv.textContent = message;
-                document.body.appendChild(errorDiv);
-            }
+  <div id="overlay-container"></div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+      
+      if (!token) {
+        showError("Token d'overlay manquant", "Veuillez utiliser un lien valide généré depuis l'application APO Overlays.");
+        return;
+      }
+      
+      // Le jeton est simple: userID-overlayPath
+      // Pas besoin de vérifier dans le localStorage
+      try {
+        // Format du token: userID-overlayPath (encodé en base64)
+        const decodedData = atob(token);
+        const separatorIndex = decodedData.indexOf('-');
+        
+        if (separatorIndex === -1) {
+          throw new Error("Format de token invalide");
         }
-
-        // Initialiser le chargeur d'overlay
-        new OverlayLoader();
-    </script>
+        
+        const userId = decodedData.substring(0, separatorIndex);
+        let overlayPath = decodedData.substring(separatorIndex + 1);
+        
+        // S'assurer que le chemin commence par / si ce n'est pas déjà le cas
+        if (!overlayPath.startsWith('/')) {
+          overlayPath = '/' + overlayPath;
+        }
+        
+        // S'assurer que le chemin est valide (sécurité basique)
+        if (!overlayPath.includes('/overlays/')) {
+          throw new Error("Chemin d'overlay non valide");
+        }
+        
+        // Construire l'URL de l'overlay
+        const overlayUrl = new URL(overlayPath, window.location.origin);
+        
+        // Transférer tous les paramètres de l'URL actuelle vers l'URL de l'overlay
+        params.forEach((value, key) => {
+          if (key !== 'token') { // Ne pas transférer le token
+            overlayUrl.searchParams.set(key, value);
+          }
+        });
+        
+        // Créer un iframe pour charger l'overlay
+        const iframe = document.createElement('iframe');
+        iframe.src = overlayUrl.toString();
+        iframe.style.border = 'none';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.position = 'absolute';
+        iframe.style.top = '0';
+        iframe.style.left = '0';
+        
+        document.getElementById('overlay-container').appendChild(iframe);
+      } catch (error) {
+        console.error("Erreur lors du décodage du token:", error);
+        showError("Token d'overlay invalide", "Ce lien d'overlay n'est pas valide ou a expiré.");
+      }
+    });
+    
+    function showError(title, message) {
+      document.body.innerHTML = `
+        <div class="error-container">
+          <div class="error-icon">⚠️</div>
+          <div class="error-message">${title}</div>
+          <div class="error-details">${message}</div>
+        </div>
+      `;
+    }
+  </script>
 </body>
 </html>

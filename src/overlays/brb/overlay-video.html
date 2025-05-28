@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+  <title>Be Right Back - APO</title>
+  <link rel="stylesheet" href="./overlay.css">
+  <link rel="stylesheet" href="./video-layout.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <!-- Éléments de fond -->
+    <div class="background">
+      <div class="gradient-circle circle-1"></div>
+      <div class="gradient-circle circle-2"></div>
+      <div class="gradient-circle circle-3"></div>
+    </div>
+    
+    <!-- Effet d'étoiles -->
+    <div class="stars-container">
+      <div class="star-field"></div>
+    </div>
+
+    <!-- Zone vidéo -->
+    <div class="video-zone" id="videoZone">
+      <div class="video-controls">
+        <input type="text" id="videoInput" placeholder="Collez l'URL YouTube ou Twitch ici">
+        <button id="loadVideo">Charger la vidéo</button>
+      </div>
+    </div>
+
+    <div class="content with-video">
+      <!-- Logo -->
+      <div class="logo-container video-logo-container">
+        <div class="logo">APO</div>
+        <div class="logo-underline"></div>
+      </div>
+
+      <div class="main-content">
+        <!-- Message principal -->
+        <div class="message-section">
+          <div class="message-container">
+            <div class="main-message">Je reviens dans un instant</div>
+            <div class="sub-message">Petite pause en cours...</div>
+          </div>
+          
+          <!-- Indicateur de pause -->
+          <div class="pause-indicator">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Code créateur -->
+    <div class="video-creator-code">
+      <span class="label">CODE CRÉATEUR</span>
+      <span class="code">APO21</span>
+      <span class="ad-tag">#AD</span>
+    </div>
+
+    <!-- Bouton de suppression discret -->
+    <button id="removeVideo" class="remove-video-btn" style="display: none;">×</button>
+  </div>
+
+  <style>
+    .video-controls {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      z-index: 1000;
+    }
+
+    #videoInput {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background: rgba(255,255,255,0.15);
+      border: 2px solid rgba(255,255,255,0.3);
+      color: white;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    #videoInput:focus {
+      border-color: rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.2);
+    }
+
+    #loadVideo {
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      background: linear-gradient(45deg, #ff00c8, #00f0ff);
+      color: white;
+      margin: 0 auto;
+      display: block;
+    }
+
+    #loadVideo:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+    }
+
+    #loadVideo:active {
+      transform: translateY(1px);
+    }
+
+    .remove-video-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(255, 59, 48, 0.8);
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 1001;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .remove-video-btn:hover {
+      background: rgba(255, 59, 48, 1);
+      transform: scale(1.1);
+    }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const videoZone = document.getElementById('videoZone');
+      const videoInput = document.getElementById('videoInput');
+      const loadVideoBtn = document.getElementById('loadVideo');
+      const removeVideoBtn = document.getElementById('removeVideo');
+      const urlParams = new URLSearchParams(window.location.search);
+      const videoId = urlParams.get('v');
+      const videoType = urlParams.get('type') || 'youtube'; // Par défaut, on considère que c'est YouTube
+
+      function extractYouTubeVideoId(url) {
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : null;
+      }
+
+      function extractTwitchInfo(url) {
+        // Formats possibles:
+        // https://www.twitch.tv/channelname
+        // https://player.twitch.tv/?channel=channelname
+        // https://player.twitch.tv/?video=v123456789
+        // https://www.twitch.tv/videos/123456789
+        
+        let result = { type: null, id: null };
+        
+        // Vérifier si c'est un lien vers une chaîne
+        const channelMatch = url.match(/twitch\.tv\/(?!videos|collections|clips)([a-zA-Z0-9_]+)/);
+        if (channelMatch) {
+          result.type = 'channel';
+          result.id = channelMatch[1];
+          return result;
+        }
+        
+        // Vérifier si c'est un lien vers une vidéo
+        const videoMatch = url.match(/twitch\.tv\/videos\/(\d+)/);
+        if (videoMatch) {
+          result.type = 'video';
+          result.id = videoMatch[1];
+          return result;
+        }
+        
+        // Vérifier les formats d'embed
+        const embedChannelMatch = url.match(/player\.twitch\.tv\/\?channel=([a-zA-Z0-9_]+)/);
+        if (embedChannelMatch) {
+          result.type = 'channel';
+          result.id = embedChannelMatch[1];
+          return result;
+        }
+        
+        const embedVideoMatch = url.match(/player\.twitch\.tv\/\?video=v?(\d+)/);
+        if (embedVideoMatch) {
+          result.type = 'video';
+          result.id = embedVideoMatch[1];
+          return result;
+        }
+        
+        return result;
+      }
+
+      function loadYouTubeVideo(videoId) {
+        const videoControls = videoZone.querySelector('.video-controls');
+        if (videoControls) {
+          videoControls.style.display = 'none';
+        }
+
+        const iframe = document.createElement('iframe');
+        iframe.width = '100%';
+        iframe.height = '100%';
+        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&playsinline=1&enablejsapi=1&origin=${window.location.origin}`;
+        iframe.frameBorder = '0';
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+        iframe.allowFullscreen = true;
+        
+        videoZone.appendChild(iframe);
+        removeVideoBtn.style.display = 'flex';
+
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('v', videoId);
+        newUrl.searchParams.set('type', 'youtube');
+        window.history.replaceState({}, '', newUrl);
+      }
+
+      function loadTwitchStream(twitchInfo) {
+        const videoControls = videoZone.querySelector('.video-controls');
+        if (videoControls) {
+          videoControls.style.display = 'none';
+        }
+
+        const iframe = document.createElement('iframe');
+        iframe.width = '100%';
+        iframe.height = '100%';
+        
+        // Construire l'URL en fonction du type (chaîne ou vidéo)
+        let embedUrl;
+        if (twitchInfo.type === 'channel') {
+          embedUrl = `https://player.twitch.tv/?channel=${twitchInfo.id}&parent=${window.location.hostname}`;
+        } else if (twitchInfo.type === 'video') {
+          embedUrl = `https://player.twitch.tv/?video=v${twitchInfo.id}&parent=${window.location.hostname}`;
+        }
+        
+        iframe.src = embedUrl;
+        iframe.frameBorder = '0';
+        iframe.allow = 'autoplay; fullscreen';
+        iframe.allowFullscreen = true;
+        
+        videoZone.appendChild(iframe);
+        removeVideoBtn.style.display = 'flex';
+
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('v', twitchInfo.id);
+        newUrl.searchParams.set('type', twitchInfo.type === 'channel' ? 'twitch-channel' : 'twitch-video');
+        window.history.replaceState({}, '', newUrl);
+      }
+
+      function showControls() {
+        videoZone.innerHTML = `
+          <div class="video-controls">
+            <input type="text" id="videoInput" placeholder="Collez l'URL YouTube ou Twitch ici">
+            <button id="loadVideo">Charger la vidéo</button>
+          </div>
+        `;
+        removeVideoBtn.style.display = 'none';
+
+        // Réattacher les gestionnaires d'événements
+        document.getElementById('videoInput').addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            handleLoadVideo();
+          }
+        });
+        document.getElementById('loadVideo').addEventListener('click', handleLoadVideo);
+      }
+
+      function handleLoadVideo() {
+        const url = document.getElementById('videoInput').value.trim();
+        if (!url) return;
+        
+        // Vérifier si c'est une URL YouTube
+        const youtubeVideoId = extractYouTubeVideoId(url);
+        if (youtubeVideoId) {
+          loadYouTubeVideo(youtubeVideoId);
+          return;
+        }
+        
+        // Vérifier si c'est une URL Twitch
+        const twitchInfo = extractTwitchInfo(url);
+        if (twitchInfo.type && twitchInfo.id) {
+          loadTwitchStream(twitchInfo);
+          return;
+        }
+        
+        // Si on arrive ici, l'URL n'est ni YouTube ni Twitch
+        alert('URL invalide. Veuillez entrer une URL YouTube ou Twitch valide.');
+      }
+
+      function handleRemoveVideo() {
+        showControls();
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete('v');
+        newUrl.searchParams.delete('type');
+        window.history.replaceState({}, '', newUrl);
+      }
+
+      // Initialisation des gestionnaires d'événements
+      videoInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          handleLoadVideo();
+        }
+      });
+      loadVideoBtn.addEventListener('click', handleLoadVideo);
+      removeVideoBtn.addEventListener('click', handleRemoveVideo);
+
+      // Charger la vidéo depuis l'URL au chargement de la page
+      if (videoId) {
+        if (videoType === 'youtube') {
+          loadYouTubeVideo(videoId);
+        } else if (videoType.startsWith('twitch-')) {
+          const twitchType = videoType === 'twitch-channel' ? 'channel' : 'video';
+          loadTwitchStream({ type: twitchType, id: videoId });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

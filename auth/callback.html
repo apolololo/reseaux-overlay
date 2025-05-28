@@ -4,174 +4,35 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Authentification en cours - APO Overlays</title>
+  <link rel="stylesheet" href="/src/overlay.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Montserrat', sans-serif;
-      background: #0e0e10;
-      color: #efeff1;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .auth-container {
-      position: relative;
-      width: 100%;
-      max-width: 400px;
-      padding: 40px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .auth-background {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      overflow: hidden;
-    }
-
-    .auth-gradient-circle {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(60px);
-      opacity: 0.5;
-    }
-
-    .auth-circle-1 {
-      width: 300px;
-      height: 300px;
-      background: #9146FF;
-      top: -100px;
-      left: -100px;
-      animation: float 8s ease-in-out infinite;
-    }
-
-    .auth-circle-2 {
-      width: 400px;
-      height: 400px;
-      background: #00ADB5;
-      bottom: -150px;
-      right: -150px;
-      animation: float 12s ease-in-out infinite;
-    }
-
-    .auth-circle-3 {
-      width: 200px;
-      height: 200px;
-      background: #FF6B6B;
-      bottom: 50%;
-      left: 50%;
-      transform: translate(-50%, 50%);
-      animation: float 10s ease-in-out infinite;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-20px); }
-    }
-
-    .auth-title {
-      font-size: 2em;
-      margin-bottom: 20px;
-      color: #9146FF;
-      text-align: center;
-    }
-
-    .auth-subtitle {
-      text-align: center;
-      color: #adadb8;
-      margin-bottom: 30px;
-    }
-
-    .loading-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .loading-spinner {
-      width: 50px;
-      height: 50px;
-      border: 3px solid rgba(145, 70, 255, 0.1);
-      border-left-color: #9146FF;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .loading-text {
-      color: #adadb8;
-      font-size: 1.1em;
-    }
-
-    .error-container {
-      display: none;
-      margin-top: 20px;
-      padding: 20px;
-      background: rgba(255, 82, 82, 0.1);
-      border: 1px solid rgba(255, 82, 82, 0.2);
-      border-radius: 12px;
-      text-align: center;
-    }
-
-    .error-message {
-      color: #ff5252;
-      margin-bottom: 15px;
-    }
-
-    .retry-button {
-      background: #9146FF;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 600;
-      transition: all 0.2s ease;
-    }
-
-    .retry-button:hover {
-      background: #7c3ad1;
-      transform: translateY(-2px);
-    }
-  </style>
 </head>
 <body>
-  <div class="auth-background">
-    <div class="auth-gradient-circle auth-circle-1"></div>
-    <div class="auth-gradient-circle auth-circle-2"></div>
-    <div class="auth-gradient-circle auth-circle-3"></div>
-  </div>
-
-  <div class="auth-container">
-    <h1 class="auth-title">Authentification</h1>
-    <p id="status-message" class="auth-subtitle">Traitement de votre connexion...</p>
-    
-    <div class="loading-container active">
-      <div class="loading-spinner"></div>
-      <div id="loading-text" class="loading-text">Vérification...</div>
+  <div class="login-container">
+    <!-- Éléments de fond -->
+    <div class="auth-background">
+      <div class="auth-gradient-circle auth-circle-1"></div>
+      <div class="auth-gradient-circle auth-circle-2"></div>
+      <div class="auth-gradient-circle auth-circle-3"></div>
     </div>
+    
+    <div class="login-box">
+      <h1 class="login-title">Authentification</h1>
+      <p id="status-message" class="login-subtitle">Traitement de votre connexion...</p>
+      
+      <div class="loading-container active">
+        <div class="loading-spinner"></div>
+        <div id="loading-text" class="loading-text">Vérification...</div>
+      </div>
 
-    <div id="error-container" class="error-container">
-      <div id="error-message" class="error-message">Une erreur s'est produite</div>
-      <button id="retry-button" class="retry-button">Réessayer</button>
+      <div id="error-container" style="display: none; margin-top: 20px; color: #ff5252; background: rgba(255, 82, 82, 0.1); padding: 12px; border-radius: 8px; text-align: left;">
+        <div id="error-message">Une erreur s'est produite</div>
+        <button id="retry-button" style="margin-top: 12px; background: #9146FF; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+          Réessayer
+        </button>
+      </div>
     </div>
   </div>
 
@@ -183,6 +44,7 @@
       const errorMessage = document.getElementById('error-message');
       const retryButton = document.getElementById('retry-button');
       
+      // Fonction pour obtenir les paramètres de l'URL
       const getUrlParams = () => {
         const params = new URLSearchParams(window.location.search);
         return {
@@ -193,48 +55,81 @@
         };
       };
 
+      // Gérer le bouton de nouvelle tentative
       retryButton.addEventListener('click', () => {
-        window.location.href = './auth.html';
+        window.location.href = '/src/auth.html';
       });
       
+      // Fonction pour échanger le code contre un token
       const exchangeCodeForToken = async (code) => {
         try {
           loadingText.textContent = "Échange du code contre un token...";
+          console.log("Échange du code contre un token...", code);
+          console.log("URL de redirection utilisée:", 'https://apo-overlay.netlify.app/auth/callback.html');
+          console.log("Client ID utilisé (dans auth.html):", "z8q1w4g12yrql6cyb5zzwmhe1pnxyn");
           
-          // Simuler une réponse d'authentification réussie pour le mode démo
-          // Dans un environnement de production, cette partie serait remplacée par un vrai appel API
-          const demoUser = {
-            id: 'twitch_' + Math.random().toString(36).substring(2, 9),
-            display_name: 'Streamer' + Math.floor(Math.random() * 1000),
-            email: 'streamer@example.com',
-            profile_image_url: 'https://static-cdn.jtvnw.net/user-default-pictures-uv/75305d54-c7cc-40d1-bb9c-91fbe85943c7-profile_image-300x300.png',
-            created_at: new Date().toISOString()
-          };
+          // Appel à notre fonction Supabase Edge qui gère l'échange de code
+          const response = await fetch('https://uejmtvhqzadtxrqtowtm.supabase.co/functions/v1/twitch-auth', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+              code,
+              origin: window.location.origin,
+              redirect_uri: 'https://apo-overlay.netlify.app/auth/callback.html'
+            })
+          });
           
-          // Simuler une réponse
-          const data = {
-            access_token: 'mock_token_' + Math.random().toString(36).substring(2, 9),
-            expires_in: 14400,
-            user: demoUser
-          };
+          if (!response.ok) {
+            let errorText;
+            try {
+              const errorJson = await response.json();
+              errorText = JSON.stringify(errorJson);
+              console.error("Erreur de la fonction Supabase (JSON):", errorJson);
+            } catch (e) {
+              errorText = await response.text();
+              console.error("Erreur de la fonction Supabase (texte):", errorText);
+            }
+            throw new Error('Erreur lors de l\'échange du code: ' + response.status + ' ' + errorText);
+          }
+          
+          const data = await response.json();
+          console.log("Données reçues:", data);
           
           if (data.error) {
             throw new Error(data.error);
           }
           
+          // Stocker le token et l'expiration en local storage
           localStorage.setItem('twitch_token', data.access_token);
           const expiresAt = new Date().getTime() + (data.expires_in * 1000);
           localStorage.setItem('twitch_expires_at', expiresAt.toString());
           
+          // Stocker également les infos utilisateur si retournées
           if (data.user) {
             localStorage.setItem('twitch_user', JSON.stringify(data.user));
+            console.log("Informations utilisateur stockées:", data.user);
+          }
+          
+          // Stocker les informations des abonnés si disponibles
+          if (data.subscriberCount !== undefined) {
+            localStorage.setItem('twitch_subscriber_count', data.subscriberCount.toString());
+            console.log("Nombre d'abonnés stocké:", data.subscriberCount);
+          }
+          
+          // Stocker les points d'abonnement si disponibles
+          if (data.subscriberPoints !== undefined) {
+            localStorage.setItem('twitch_subscriber_points', data.subscriberPoints.toString());
+            console.log("Points d'abonnement stockés:", data.subscriberPoints);
           }
           
           loadingText.textContent = "Connexion réussie !";
           statusMessage.textContent = "Vous êtes connecté ! Redirection...";
           
+          // Rediriger vers la page principale
           setTimeout(() => {
-            window.location.href = '/my-overlays.html';
+            window.location.href = '/index.html';
           }, 1500);
           
         } catch (error) {
@@ -244,6 +139,7 @@
           errorContainer.style.display = 'block';
           errorMessage.textContent = error.message || "Détails non disponibles";
           
+          // Ajouter des détails supplémentaires pour le débogage
           if (error.message && error.message.includes('invalid client')) {
             errorMessage.innerHTML = "Erreur d'authentification Twitch: Client ID ou Secret invalide.<br><br>" +
               "Vérifiez que les identifiants client sont correctement configurés dans la console développeur Twitch " +
@@ -257,31 +153,43 @@
         }
       };
       
+      // Traiter les paramètres d'URL
       const params = getUrlParams();
+      console.log("Paramètres reçus:", params);
       
+      // Vérifier si l'état correspond
       const storedState = localStorage.getItem('twitch_auth_state');
       
       if (params.error) {
+        // Gérer les erreurs retournées par Twitch
         statusMessage.textContent = "Erreur d'authentification";
         loadingText.textContent = params.error_description || params.error;
         errorContainer.style.display = 'block';
         errorMessage.textContent = params.error_description || params.error;
+        console.error("Erreur Twitch:", params.error, params.error_description);
       } else if (!params.state || params.state !== storedState) {
+        // Vérification de l'état échouée (possible attaque CSRF)
         statusMessage.textContent = "Erreur de sécurité";
         loadingText.textContent = "Vérification d'état échouée";
         errorContainer.style.display = 'block';
         errorMessage.textContent = "Erreur de sécurité (état invalide)";
+        console.error("État invalide:", params.state, "attendu:", storedState);
       } else if (params.code) {
+        // Échanger le code contre un token
+        console.log("Code d'autorisation reçu, échange en cours...");
         await exchangeCodeForToken(params.code);
       } else {
+        // Aucun code ou erreur dans l'URL
         statusMessage.textContent = "Erreur d'authentification";
         loadingText.textContent = "Aucun code d'autorisation reçu";
         errorContainer.style.display = 'block';
         errorMessage.textContent = "Aucun code d'autorisation n'a été reçu";
+        console.error("Aucun code reçu dans l'URL");
       }
       
+      // Nettoyer l'état stocké
       localStorage.removeItem('twitch_auth_state');
     });
   </script>
 </body>
-</html>
+</html> 

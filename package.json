@@ -1,8 +1,8 @@
 {
-  "name": "apo-overlays",
-  "version": "1.0.0",
-  "description": "Système d'overlays pour streamers",
-  "main": "index.js",
+  "name": "apo-overlay-generator",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -10,12 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@codemirror/lang-javascript": "^6.2.4",
-    "@codemirror/state": "^6.5.2",
-    "@supabase/supabase-js": "^2.39.0",
-    "apo-overlays": "file:"
-  },
-  "devDependencies": {
+    "@supabase/supabase-js": "^2.38.4",
+    "apo-overlay-generator": "file:",
     "vite": "^5.0.0"
   }
 }

@@ -5,28 +5,28 @@ import { resolve } from 'path';
 export default defineConfig({
   base: '/',
   build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        editor: resolve(__dirname, 'editor.html'),
-        overlay: resolve(__dirname, 'overlay.html'),
-        login: resolve(__dirname, 'login.html'),
-        'my-overlays': resolve(__dirname, 'my-overlays.html'),
-        marketplace: resolve(__dirname, 'marketplace.html'),
+        auth: resolve(__dirname, 'src/auth.html'),
+        callback: resolve(__dirname, 'auth/callback.html'),
+        overlay: resolve(__dirname, 'overlay.html'), // Added this entry
+        apo: resolve(__dirname, 'src/overlays/apo/overlay.html'),
+        starting: resolve(__dirname, 'src/overlays/starting/overlay.html'),
+        brb: resolve(__dirname, 'src/overlays/brb/overlay.html'),
+        brbVideo: resolve(__dirname, 'src/overlays/brb/overlay-video.html'),
+        end: resolve(__dirname, 'src/overlays/end/overlay.html'),
+        gameStatus: resolve(__dirname, 'src/overlays/game-status/overlay.html'),
+        mapInfo: resolve(__dirname, 'src/overlays/maps/overlay.html')
       },
-      external: [
-        'src/components/navigation.js',
-        'src/templates/default/script.js'
-      ]
-    }
+    },
+    assetsDir: 'assets',
+    outDir: 'dist',
+    emptyOutDir: true,
+    copyPublicDir: true
   },
   server: {
     port: 8080,
-    open: true
-  },
-  optimizeDeps: {
-    include: []
+    open: '/index.html'
   }
 });
