@@ -168,6 +168,46 @@
       padding: 8px 15px;
       font-size: 14px;
     }
+    
+    .obs-url-container {
+      background: #e8f5e9;
+      border: 1px solid #4caf50;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 20px 0;
+    }
+    
+    .obs-url-container h3 {
+      color: #2e7d32;
+      margin-bottom: 10px;
+    }
+    
+    .url-box {
+      display: flex;
+      margin-top: 10px;
+    }
+    
+    .url-box input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px 0 0 4px;
+      font-size: 14px;
+    }
+    
+    .url-box button {
+      padding: 8px 15px;
+      background-color: #17a2b8;
+      color: white;
+      border: none;
+      border-radius: 0 4px 4px 0;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .url-box button:hover {
+      background-color: #138496;
+    }
   </style>
 </head>
 <body>
@@ -250,6 +290,16 @@
           Objectif Followers: 850/1000 (85%)
         </div>
       </div>
+      
+      <div class="obs-url-container">
+        <h3>📋 URL pour OBS</h3>
+        <p>Copiez cette URL et utilisez-la comme source de navigateur dans OBS :</p>
+        <div class="url-box">
+          <input type="text" id="obs-url-input" readonly>
+          <button class="btn-secondary btn-small" onclick="copyObsUrl()">Copier</button>
+        </div>
+        <p class="mt-2"><small>Note: Cette URL contient tous vos paramètres de configuration actuels.</small></p>
+      </div>
 
       <div class="buttons">
         <button type="button" class="btn-secondary" onclick="resetConfig()">Réinitialiser</button>
@@ -282,10 +332,9 @@
       }
       
       // Mettre à jour les informations actuelles (fonction asynchrone)
-      updateCurrentInfo().then(() => {
-        // Mettre à jour l'aperçu une fois les informations actualisées
-        updatePreview();
-      });
+      await updateCurrentInfo();
+      // Mettre à jour l'aperçu une fois les informations actualisées
+      updatePreview();
     }
     
     async function fetchCurrentFollowers() {
@@ -425,8 +474,10 @@
     function updatePreview() {
       const goal = document.getElementById('goal').value;
       const title = document.getElementById('title').value;
+      const style = document.getElementById('style').value;
       const bgColor = document.getElementById('bg-color').value;
       const textColor = document.getElementById('text-color').value;
+      const progressColor = document.getElementById('progress-color').value;
       const currentFollowers = localStorage.getItem('current_followers_count') || '0';
       const progress = Math.min(100, Math.round((parseInt(currentFollowers) / goal) * 100));
       
@@ -434,6 +485,16 @@
       preview.textContent = `${title}: ${currentFollowers}/${goal} (${progress}%)`;
       preview.style.backgroundColor = bgColor;
       preview.style.color = textColor;
+      
+      // Générer l'URL pour OBS
+      const baseUrl = window.location.href.split('?')[0].replace('config.html', 'overlay.html');
+      const obsUrl = `${baseUrl}?obs=true&goal=${goal}&title=${encodeURIComponent(title)}&style=${style}&bgColor=${encodeURIComponent(bgColor)}&textColor=${encodeURIComponent(textColor)}&progressColor=${encodeURIComponent(progressColor)}&current=${currentFollowers}`;
+      
+      // Mettre à jour le champ d'URL OBS
+      const obsUrlInput = document.getElementById('obs-url-input');
+      if (obsUrlInput) {
+        obsUrlInput.value = obsUrl;
+      }
     }
 
     // Réinitialiser la configuration
@@ -458,18 +519,55 @@
       };
       
       localStorage.setItem('followers_goal_config', JSON.stringify(config));
-      alert('Configuration sauvegardée avec succès!');
+      localStorage.setItem('followers_goal', config.goal);
       
-      // Fermer la fenêtre après un court délai
+      // Sauvegarder également le nombre actuel de followers pour assurer la cohérence
+      const currentFollowers = document.getElementById('current-followers').textContent;
+      if (currentFollowers && !isNaN(parseInt(currentFollowers))) {
+        localStorage.setItem('current_followers_count', currentFollowers);
+      }
+      
+      // Mettre à jour l'URL OBS après la sauvegarde
+      updatePreview();
+      
+      // Afficher un message de confirmation
+      const saveBtn = document.querySelector('button[type="submit"]');
+      const originalText = saveBtn.textContent;
+      saveBtn.textContent = 'Sauvegardé ✓';
+      saveBtn.style.backgroundColor = '#4caf50';
+      
       setTimeout(() => {
+        saveBtn.textContent = originalText;
+        saveBtn.style.backgroundColor = '';
+        // Fermer la fenêtre après un court délai
         window.close();
-      }, 1000);
+      }, 2000);
     });
 
     // Mettre à jour l'aperçu en temps réel
     document.querySelectorAll('input, select').forEach(element => {
       element.addEventListener('input', updatePreview);
     });
+    
+    // Fonction pour copier l'URL OBS dans le presse-papier
+    function copyObsUrl() {
+      const urlInput = document.getElementById('obs-url-input');
+      if (urlInput) {
+        urlInput.select();
+        document.execCommand('copy');
+        
+        // Feedback visuel
+        const button = document.querySelector('.url-box button');
+        const originalText = button.textContent;
+        button.textContent = 'Copié ✓';
+        button.style.backgroundColor = '#4caf50';
+        
+        setTimeout(() => {
+          button.textContent = originalText;
+          button.style.backgroundColor = '';
+        }, 2000);
+      }
+    }
 
     // Charger la configuration au démarrage
     document.addEventListener('DOMContentLoaded', () => {
