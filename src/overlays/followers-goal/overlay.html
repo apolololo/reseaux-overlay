@@ -49,6 +49,9 @@
         this.lastFetchTime = 0;
         this.isOBSContext = this.detectOBSContext();
         this.lastConfigTimestamp = 0;
+        this.configChannel = null;
+        this.fastPollingInterval = null;
+        this.configCheckInterval = null;
         this.init();
       }
       
@@ -110,7 +113,7 @@
         this.debugLog(`Initialisation du widget. Contexte OBS: ${this.isOBSContext}`);
         this.loadSettings();
         this.updateDisplay();
-        this.startPolling();
+        this.startFastPolling(); // Polling plus rapide
         this.setupConfigSync();
       }
 
@@ -165,23 +168,26 @@
       setupConfigSync() {
         this.debugLog('Configuration de la synchronisation...');
         
+        // BroadcastChannel pour synchronisation immédiate
         if (typeof BroadcastChannel !== 'undefined') {
           try {
             this.configChannel = new BroadcastChannel('followers_goal_config');
             this.configChannel.addEventListener('message', (event) => {
               if (event.data.type === 'config_update') {
-                this.debugLog('Configuration mise à jour via BroadcastChannel');
+                this.debugLog('Configuration mise à jour via BroadcastChannel (IMMÉDIATE)');
                 this.handleConfigUpdate(event.data.config, event.data.currentFollowers);
               }
             });
+            this.debugLog('BroadcastChannel configuré pour sync immédiate');
           } catch (e) {
             this.debugLog('BroadcastChannel non supporté', e);
           }
         }
         
-        setInterval(() => {
+        // Vérification très fréquente des changements de config (toutes les 500ms)
+        this.configCheckInterval = setInterval(() => {
           this.checkConfigChanges();
-        }, 2000);
+        }, 500);
       }
 
       checkConfigChanges() {
@@ -200,6 +206,7 @@
       handleConfigUpdate(config, currentFollowers) {
         if (config) {
           localStorage.setItem('followers_goal_config', JSON.stringify(config));
+          localStorage.setItem('followers_goal_config_timestamp', Date.now().toString());
           if (config.goal) {
             this.goalFollowers = config.goal;
           }
@@ -212,12 +219,12 @@
         }
         
         this.updateDisplay();
-        this.debugLog('Configuration synchronisée', { config, currentFollowers });
+        this.debugLog('Configuration synchronisée IMMÉDIATEMENT', { config, currentFollowers });
       }
 
       async fetchFollowersCount() {
         const now = Date.now();
-        this.debugLog(`Tentative de récupération des followers (dernière: ${this.lastFetchTime ? new Date(this.lastFetchTime).toLocaleTimeString() : 'jamais'})`);
+        this.debugLog(`Récupération des followers (dernière: ${this.lastFetchTime ? new Date(this.lastFetchTime).toLocaleTimeString() : 'jamais'})`);
         
         try {
           const token = localStorage.getItem('twitch_token');
@@ -257,29 +264,52 @@
               const data = await response.json();
               this.debugLog('Données reçues', data);
               
+              let newFollowerCount = null;
+              
               if (data && typeof data.total === 'number') {
-                this.currentFollowers = data.total;
-                this.debugLog('Followers depuis total', this.currentFollowers);
+                newFollowerCount = data.total;
+                this.debugLog('Followers depuis total', newFollowerCount);
               } else if (data && data.total_count !== undefined) {
-                this.currentFollowers = data.total_count;
-                this.debugLog('Followers depuis total_count', this.currentFollowers);
+                newFollowerCount = data.total_count;
+                this.debugLog('Followers depuis total_count', newFollowerCount);
               } else if (data && data.data && Array.isArray(data.data)) {
                 if (data.data.length > 0 && data.data[0].follower_count !== undefined) {
-                  this.currentFollowers = data.data[0].follower_count;
-                  this.debugLog('Followers depuis follower_count', this.currentFollowers);
-                } else {
-                  this.debugLog('Pas de données de followers trouvées, utilisation du cache');
-                  const savedFollowers = localStorage.getItem('current_followers_count');
-                  if (savedFollowers) {
-                    this.currentFollowers = parseInt(savedFollowers);
-                  }
+                  newFollowerCount = data.data[0].follower_count;
+                  this.debugLog('Followers depuis follower_count', newFollowerCount);
                 }
               }
               
-              localStorage.setItem('current_followers_count', this.currentFollowers.toString());
+              if (newFollowerCount !== null) {
+                // Vérifier si le nombre a changé
+                if (newFollowerCount !== this.currentFollowers) {
+                  this.debugLog(`Changement détecté: ${this.currentFollowers} -> ${newFollowerCount}`);
+                  this.currentFollowers = newFollowerCount;
+                  
+                  // Sauvegarder et diffuser le changement
+                  localStorage.setItem('current_followers_count', this.currentFollowers.toString());
+                  this.updateDisplay();
+                  
+                  // Diffuser le changement via BroadcastChannel
+                  if (this.configChannel) {
+                    this.configChannel.postMessage({
+                      type: 'follower_count_update',
+                      currentFollowers: this.currentFollowers,
+                      timestamp: Date.now()
+                    });
+                  }
+                } else {
+                  this.debugLog('Aucun changement de followers détecté');
+                }
+              } else {
+                this.debugLog('Pas de données de followers trouvées, utilisation du cache');
+                const savedFollowers = localStorage.getItem('current_followers_count');
+                if (savedFollowers) {
+                  this.currentFollowers = parseInt(savedFollowers);
+                }
+              }
+              
               this.lastFetchTime = now;
               this.updateDisplay();
-              this.debugLog('Mise à jour réussie', this.currentFollowers);
               
             } else {
               this.debugLog(`Erreur API: ${response.status}`);
@@ -349,19 +379,41 @@
         this.debugLog(`Affichage mis à jour: ${this.currentFollowers}/${this.goalFollowers}`);
       }
 
-      startPolling() {
-        this.debugLog('Démarrage du polling...');
+      startFastPolling() {
+        this.debugLog('Démarrage du polling rapide...');
         
+        // Premier fetch immédiat
         this.fetchFollowersCount();
         
-        setInterval(() => {
+        // Polling très fréquent (toutes les 10 secondes au lieu de 30)
+        this.fastPollingInterval = setInterval(() => {
           this.fetchFollowersCount();
-        }, 30000);
+        }, 10000);
+      }
+      
+      // Nettoyer les intervalles
+      destroy() {
+        if (this.fastPollingInterval) {
+          clearInterval(this.fastPollingInterval);
+        }
+        if (this.configCheckInterval) {
+          clearInterval(this.configCheckInterval);
+        }
+        if (this.configChannel) {
+          this.configChannel.close();
+        }
       }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      new FollowersGoal();
+      window.followersGoalWidget = new FollowersGoal();
+    });
+    
+    // Nettoyer lors du déchargement
+    window.addEventListener('beforeunload', () => {
+      if (window.followersGoalWidget) {
+        window.followersGoalWidget.destroy();
+      }
     });
   </script>
 </body>

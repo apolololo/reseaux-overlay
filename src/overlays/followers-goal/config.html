@@ -259,6 +259,22 @@
   </div>
 
   <script>
+    // Configuration en temps réel avec synchronisation immédiate
+    let configSyncInterval;
+    let broadcastChannel;
+    
+    // Initialiser le canal de diffusion
+    function initBroadcastChannel() {
+      if (typeof BroadcastChannel !== 'undefined') {
+        try {
+          broadcastChannel = new BroadcastChannel('followers_goal_config');
+          console.log('Canal de diffusion initialisé');
+        } catch (e) {
+          console.warn('BroadcastChannel non supporté', e);
+        }
+      }
+    }
+
     // Charger la configuration existante
     async function loadConfig() {
       const config = JSON.parse(localStorage.getItem('followers_goal_config') || '{}');
@@ -282,24 +298,32 @@
       updatePreview();
     }
     
-    // Fonction pour diffuser les changements de configuration
+    // Fonction pour diffuser les changements de configuration IMMÉDIATEMENT
     function broadcastConfigUpdate() {
       const config = JSON.parse(localStorage.getItem('followers_goal_config') || '{}');
       const currentFollowers = localStorage.getItem('current_followers_count') || '0';
+      const timestamp = Date.now();
       
-      // Utiliser BroadcastChannel pour synchroniser entre onglets
-      if (typeof BroadcastChannel !== 'undefined') {
-        const channel = new BroadcastChannel('followers_goal_config');
-        channel.postMessage({
-          type: 'config_update',
-          config: config,
-          currentFollowers: currentFollowers,
-          timestamp: Date.now()
-        });
+      // Mettre à jour le timestamp AVANT de diffuser
+      localStorage.setItem('followers_goal_config_timestamp', timestamp.toString());
+      
+      console.log('Diffusion de la configuration:', config);
+      
+      // Utiliser BroadcastChannel pour synchroniser entre onglets IMMÉDIATEMENT
+      if (broadcastChannel) {
+        try {
+          broadcastChannel.postMessage({
+            type: 'config_update',
+            config: config,
+            currentFollowers: currentFollowers,
+            timestamp: timestamp,
+            force: true // Forcer la mise à jour
+          });
+          console.log('Configuration diffusée via BroadcastChannel');
+        } catch (e) {
+          console.error('Erreur lors de la diffusion:', e);
+        }
       }
-      
-      // Mettre à jour un timestamp pour les pollings
-      localStorage.setItem('followers_goal_config_timestamp', Date.now().toString());
     }
 
     // Mettre à jour les informations actuelles
@@ -321,7 +345,7 @@
       document.getElementById('current-progress').textContent = progress + '%';
     }
 
-    // Ajuster manuellement les followers (uniquement pour les tests)
+    // Ajuster manuellement les followers avec diffusion immédiate
     async function adjustFollowers(amount) {
       let currentFollowers = await fetchCurrentFollowers();
       
@@ -335,7 +359,7 @@
       await updateCurrentInfo();
       updatePreview();
       
-      // Diffuser le changement
+      // Diffuser le changement IMMÉDIATEMENT
       broadcastConfigUpdate();
     }
 
@@ -358,12 +382,13 @@
     async function resetConfig() {
       if (confirm('Êtes-vous sûr de vouloir réinitialiser la configuration ?')) {
         localStorage.removeItem('followers_goal_config');
+        localStorage.removeItem('followers_goal_config_timestamp');
         await loadConfig();
         broadcastConfigUpdate();
       }
     }
 
-    // Sauvegarder la configuration
+    // Sauvegarder la configuration avec diffusion immédiate
     document.getElementById('config-form').addEventListener('submit', function(e) {
       e.preventDefault();
       
@@ -376,9 +401,10 @@
         progressColor: document.getElementById('progress-color').value
       };
       
+      console.log('Sauvegarde de la configuration:', config);
       localStorage.setItem('followers_goal_config', JSON.stringify(config));
       
-      // Diffuser le changement immédiatement
+      // Diffuser le changement IMMÉDIATEMENT après sauvegarde
       broadcastConfigUpdate();
       
       alert('Configuration sauvegardée avec succès!');
@@ -388,21 +414,16 @@
       }, 1000);
     });
 
-    // Mettre à jour l'aperçu en temps réel et diffuser les changements
+    // Mettre à jour l'aperçu en temps réel et diffuser les changements pendant la saisie
     document.querySelectorAll('input, select').forEach(element => {
       element.addEventListener('input', () => {
         updatePreview();
-        // Optionnel: diffuser les changements en temps réel pendant la saisie
+        // Optionnel: diffuser en temps réel pendant la saisie (peut être trop fréquent)
         // broadcastConfigUpdate();
       });
     });
 
-    // Charger la configuration au démarrage
-    document.addEventListener('DOMContentLoaded', () => {
-      loadConfig();
-    });
-
-    // Charger la configuration existante
+    // Récupérer les followers depuis l'API Twitch
     async function fetchCurrentFollowers() {
       try {
         const token = localStorage.getItem('twitch_token');
@@ -481,6 +502,12 @@
         return null;
       }
     }
+
+    // Charger la configuration au démarrage
+    document.addEventListener('DOMContentLoaded', () => {
+      initBroadcastChannel();
+      loadConfig();
+    });
   </script>
 </body>
 </html>
