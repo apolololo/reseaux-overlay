@@ -128,6 +128,12 @@
             this.currentFollowers = parseInt(current);
             // Sauvegarder dans localStorage pour la cohérence
             localStorage.setItem('current_followers_count', this.currentFollowers.toString());
+          } else {
+            // Si pas de paramètre current dans l'URL, vérifier dans localStorage
+            const storedFollowers = localStorage.getItem('current_followers_count');
+            if (storedFollowers) {
+              this.currentFollowers = parseInt(storedFollowers);
+            }
           }
           
           // Sauvegarder la configuration dans localStorage pour la cohérence
@@ -160,11 +166,20 @@
           
           if (current) {
             this.currentFollowers = parseInt(current);
+          } else {
+            // Charger le nombre de followers depuis localStorage
+            const storedFollowers = localStorage.getItem('current_followers_count');
+            if (storedFollowers) {
+              this.currentFollowers = parseInt(storedFollowers);
+            }
           }
         }
         
         // Définir l'objectif
         this.goalFollowers = config.goal || 1000;
+        
+        // Sauvegarder la configuration actuelle
+        this.config = config;
         
         // Appliquer les styles de la configuration
         this.applyStyles(config);
@@ -321,14 +336,23 @@
         
         // Mettre en place le polling pour les mises à jour des followers
         setInterval(() => {
-          // En mode OBS, vérifier si l'URL a changé
+          // Toujours vérifier les données dans localStorage pour assurer la synchronisation
+          const storedFollowers = localStorage.getItem('current_followers_count');
+          
           if (isObs) {
+            // En mode OBS, vérifier d'abord les paramètres d'URL (prioritaires)
             const newUrlParams = new URLSearchParams(window.location.search);
             const newCurrent = newUrlParams.get('current');
             
             if (newCurrent && parseInt(newCurrent) !== this.currentFollowers) {
               console.log('Mise à jour des followers depuis l\'URL:', newCurrent);
               this.currentFollowers = parseInt(newCurrent);
+              this.updateDisplay();
+            } 
+            // Ensuite, vérifier localStorage pour les mises à jour depuis le site
+            else if (storedFollowers && parseInt(storedFollowers) !== this.currentFollowers) {
+              console.log('Mise à jour des followers depuis localStorage:', storedFollowers);
+              this.currentFollowers = parseInt(storedFollowers);
               this.updateDisplay();
             }
           } else {
@@ -339,8 +363,20 @@
         
         // Vérifier les changements de configuration toutes les 2 secondes pour plus de réactivité
         setInterval(() => {
-          // En mode OBS, vérifier si les paramètres d'URL ont changé
+          // Récupérer la configuration actuelle du localStorage
+          const configStr = localStorage.getItem('followers_goal_config');
+          let localConfig = null;
+          
+          if (configStr) {
+            try {
+              localConfig = JSON.parse(configStr);
+            } catch (e) {
+              console.error('Erreur lors du parsing de la configuration:', e);
+            }
+          }
+          
           if (isObs) {
+            // En mode OBS, vérifier d'abord les paramètres d'URL (prioritaires)
             const newUrlParams = new URLSearchParams(window.location.search);
             const newGoal = newUrlParams.get('goal');
             const newTitle = newUrlParams.get('title');
@@ -361,23 +397,24 @@
               this.loadSettings();
               this.updateDisplay();
             }
+            // Ensuite, vérifier localStorage pour les mises à jour depuis le site
+            else if (localConfig && JSON.stringify(this.config || {}) !== JSON.stringify(localConfig)) {
+              console.log('Configuration modifiée dans localStorage, rechargement...');
+              this.config = localConfig;
+              this.loadSettings();
+              this.updateDisplay();
+            }
           } else {
             // En mode normal, vérifier les changements dans localStorage
-            const configStr = localStorage.getItem('followers_goal_config');
-            if (configStr) {
-              try {
-                const newConfig = JSON.parse(configStr);
-                const currentConfig = JSON.stringify(this.config || {});
-                
-                // Si la configuration a changé, recharger les paramètres
-                if (currentConfig !== JSON.stringify(newConfig)) {
-                  console.log('Configuration modifiée, rechargement des paramètres');
-                  this.config = newConfig;
-                  this.loadSettings();
-                  this.updateDisplay();
-                }
-              } catch (e) {
-                console.error('Erreur lors de la vérification de la configuration:', e);
+            if (localConfig) {
+              const currentConfig = JSON.stringify(this.config || {});
+              
+              // Si la configuration a changé, recharger les paramètres
+              if (currentConfig !== JSON.stringify(localConfig)) {
+                console.log('Configuration modifiée, rechargement des paramètres');
+                this.config = localConfig;
+                this.loadSettings();
+                this.updateDisplay();
               }
             }
           }
@@ -388,8 +425,76 @@
     }
 
     // Initialiser le widget quand la page est chargée
+    let followersGoalInstance;
+    
+    // Fonction pour vérifier les changements dans localStorage
+    function checkForLocalStorageChanges() {
+      if (!followersGoalInstance) return;
+      
+      // Vérifier les changements de configuration
+      const configStr = localStorage.getItem('followers_goal_config');
+      if (configStr) {
+        try {
+          const newConfig = JSON.parse(configStr);
+          const currentConfig = followersGoalInstance.config || {};
+          
+          // Vérifier si la configuration a changé
+          if (JSON.stringify(currentConfig) !== JSON.stringify(newConfig)) {
+            console.log('Configuration modifiée dans localStorage, mise à jour...');
+            followersGoalInstance.config = newConfig;
+            followersGoalInstance.goalFollowers = newConfig.goal;
+            followersGoalInstance.applyStyles(newConfig);
+            followersGoalInstance.updateDisplay();
+          }
+        } catch (e) {
+          console.error('Erreur lors de la vérification de la configuration:', e);
+        }
+      }
+      
+      // Vérifier les changements de nombre de followers
+      const storedFollowers = localStorage.getItem('current_followers_count');
+      if (storedFollowers && parseInt(storedFollowers) !== followersGoalInstance.currentFollowers) {
+        console.log('Nombre de followers modifié dans localStorage, mise à jour...');
+        followersGoalInstance.currentFollowers = parseInt(storedFollowers);
+        followersGoalInstance.updateDisplay();
+      }
+    }
+    
     document.addEventListener('DOMContentLoaded', () => {
-      new FollowersGoal();
+      followersGoalInstance = new FollowersGoal();
+      
+      // Écouter l'événement de synchronisation personnalisé
+      window.addEventListener('follower-goal-sync', (event) => {
+        console.log('Événement de synchronisation reçu:', event.detail);
+        
+        if (event.detail && event.detail.config) {
+          // Mettre à jour la configuration
+          followersGoalInstance.config = event.detail.config;
+          followersGoalInstance.goalFollowers = event.detail.config.goal;
+          followersGoalInstance.applyStyles(event.detail.config);
+        }
+        
+        if (event.detail && event.detail.currentFollowers) {
+          // Mettre à jour le nombre de followers
+          followersGoalInstance.currentFollowers = parseInt(event.detail.currentFollowers);
+        }
+        
+        // Mettre à jour l'affichage
+        followersGoalInstance.updateDisplay();
+      });
+      
+      // Vérifier périodiquement les changements dans localStorage
+      // Cela permet de synchroniser même si les événements ne sont pas reçus
+      // (par exemple, si les instances sont dans des fenêtres ou navigateurs différents)
+      setInterval(checkForLocalStorageChanges, 2000);
+      
+      // Vérifier également lors de la visibilité de la page
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          console.log('Page visible, vérification des mises à jour...');
+          checkForLocalStorageChanges();
+        }
+      });
     });
   </script>
 </body>

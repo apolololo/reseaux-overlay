@@ -514,8 +514,20 @@
       await updateCurrentInfo();
       updatePreview();
       
+      // Récupérer la configuration actuelle pour la synchronisation
+      const config = JSON.parse(localStorage.getItem('followers_goal_config') || '{}');
+      
+      // Déclencher l'événement de synchronisation pour mettre à jour toutes les instances ouvertes
+      const syncEvent = new CustomEvent('follower-goal-sync', { 
+        detail: { 
+          config: config,
+          currentFollowers: newValue.toString() 
+        } 
+      });
+      window.dispatchEvent(syncEvent);
+      
       // Notification de mise à jour
-      showNotification('Nombre de followers mis à jour');
+      showNotification('Nombre de followers mis à jour et synchronisé');
     }
     
     // Afficher une notification temporaire
@@ -604,17 +616,29 @@
       // Mettre à jour l'URL OBS après la sauvegarde
       updatePreview();
       
+      // Déclencher l'événement de synchronisation pour mettre à jour toutes les instances ouvertes
+      const syncEvent = new CustomEvent('follower-goal-sync', { 
+        detail: { 
+          config: config,
+          currentFollowers: currentFollowers 
+        } 
+      });
+      window.dispatchEvent(syncEvent);
+      
       // Afficher un message de confirmation
       const saveBtn = document.querySelector('button[type="submit"]');
       const originalText = saveBtn.textContent;
       saveBtn.textContent = 'Sauvegardé ✓';
       saveBtn.style.backgroundColor = '#4caf50';
       
+      // Afficher une notification
+      showNotification('Configuration sauvegardée et synchronisée');
+      
       setTimeout(() => {
         saveBtn.textContent = originalText;
         saveBtn.style.backgroundColor = '';
-        // Fermer la fenêtre après un court délai
-        window.close();
+        // Ne pas fermer automatiquement la fenêtre pour permettre d'autres modifications
+        // window.close();
       }, 2000);
     });
 
@@ -645,6 +669,28 @@
     
     // Fonction pour mettre à jour l'URL OBS et forcer une synchronisation
     function updateObsUrl() {
+      // Récupérer les valeurs actuelles
+      const goal = document.getElementById('goal').value;
+      const title = document.getElementById('title').value;
+      const style = document.getElementById('style').value;
+      const bgColor = document.getElementById('bg-color').value;
+      const textColor = document.getElementById('text-color').value;
+      const progressColor = document.getElementById('progress-color').value;
+      const currentFollowers = document.getElementById('current-followers').textContent;
+      
+      // Sauvegarder la configuration dans localStorage pour assurer la synchronisation
+      const config = {
+        goal: parseInt(goal),
+        title: title,
+        style: style,
+        bgColor: bgColor,
+        textColor: textColor,
+        progressColor: progressColor
+      };
+      
+      localStorage.setItem('followers_goal_config', JSON.stringify(config));
+      localStorage.setItem('current_followers_count', currentFollowers);
+      
       // Mettre à jour l'aperçu pour générer une nouvelle URL avec timestamp
       updatePreview();
       
@@ -670,6 +716,15 @@
       
       // Afficher une notification
       showNotification('Widget OBS synchronisé');
+      
+      // Déclencher un événement personnalisé pour notifier les autres instances
+      const syncEvent = new CustomEvent('follower-goal-sync', { 
+        detail: { 
+          config: config,
+          currentFollowers: currentFollowers 
+        } 
+      });
+      window.dispatchEvent(syncEvent);
     }
 
     // Charger la configuration au démarrage
