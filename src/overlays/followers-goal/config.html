@@ -298,30 +298,82 @@
           return null;
         }
 
-        const user = JSON.parse(userData);
-        const broadcasterId = user.id;
-
-        // Utiliser l'API Twitch pour récupérer le nombre de followers
-        const response = await fetch(`https://api.twitch.tv/helix/channels/followers?broadcaster_id=${broadcasterId}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Client-Id': 'z8q1w4g12yrql6cyb5zzwmhe1pnxyn'
+        try {
+          const user = JSON.parse(userData);
+          if (!user || !user.id) {
+            console.error('Données utilisateur invalides:', userData);
+            return null;
           }
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Données de followers récupérées:', data);
           
-          if (data && data.total !== undefined) {
-            // Utiliser le nombre réel de followers
-            return data.total;
-          } else if (data && data.data && data.pagination) {
-            // Si l'API a changé et ne renvoie plus le total directement
-            return data.data.length;
+          const broadcasterId = user.id;
+          console.log('Récupération des followers pour l\'ID:', broadcasterId);
+
+          // Utiliser l'API Twitch pour récupérer le nombre de followers
+          // L'API a changé: https://dev.twitch.tv/docs/api/reference/#get-channel-followers
+          const response = await fetch(`https://api.twitch.tv/helix/channels/followers?broadcaster_id=${broadcasterId}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Client-Id': 'z8q1w4g12yrql6cyb5zzwmhe1pnxyn'
+            }
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Données de followers récupérées:', data);
+            
+            // Vérifier la structure de la réponse pour s'adapter aux changements d'API
+            if (data && typeof data.total === 'number') {
+              // Format ancien de l'API: { total: X, data: [...], pagination: {...} }
+              console.log('Nombre de followers depuis total:', data.total);
+              return data.total;
+            } else if (data && data.total_count !== undefined) {
+              // Nouveau format possible: { total_count: X, data: [...], pagination: {...} }
+              console.log('Nombre de followers depuis total_count:', data.total_count);
+              return data.total_count;
+            } else if (data && data.data && Array.isArray(data.data)) {
+              // Si l'API a changé et ne renvoie plus le total directement
+              if (data.data.length > 0 && data.data[0].follower_count !== undefined) {
+                // Format possible: { data: [{ follower_count: X }] }
+                console.log('Nombre de followers depuis follower_count:', data.data[0].follower_count);
+                return data.data[0].follower_count;
+              } else if (data.data.length > 0 && data.data[0].followed_at) {
+                // Compter les followers dans la réponse paginée (moins précis)
+                // Mais l'API actuelle limite à 100 résultats par page
+                console.log('Nombre de followers estimé depuis la longueur des données (limité):', data.data.length);
+                console.warn('Attention: Ce nombre est limité par la pagination de l\'API et peut être inexact');
+                return data.data.length;
+              } else {
+                // Aucune donnée de followers trouvée
+                console.warn('Aucune donnée de followers trouvée dans la réponse API');
+                return null;
+              }
+            } else {
+              // Fallback si l'API ne renvoie pas les données attendues
+              console.warn('Format de réponse API non reconnu:', data);
+              return null;
+            }
+          } else {
+            console.error('Erreur lors de la récupération des followers:', response.status, response.statusText);
+            // Essayer d'extraire plus d'informations sur l'erreur
+            try {
+              const errorData = await response.json();
+              console.error('Détails de l\'erreur:', errorData);
+              
+              // Vérifier si le token est expiré
+              if (response.status === 401 || 
+                  (errorData && errorData.message && errorData.message.includes('token'))) {
+                console.error('Le token d\'authentification semble être expiré ou invalide');
+              }
+            } catch (e) {
+              console.error('Impossible de lire les détails de l\'erreur');
+            }
+            return null;
           }
+        } catch (parseError) {
+          console.error('Erreur lors du traitement des données utilisateur:', parseError);
+          console.error('Données utilisateur brutes:', userData);
+          return null;
         }
-        return null;
       } catch (error) {
         console.error('Erreur lors de la récupération des followers:', error);
         return null;
