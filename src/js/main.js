@@ -75,6 +75,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
       
+      // Ajouter des paramètres spécifiques pour certains overlays
+      if (localPath.includes('followers-goal')) {
+        // Récupérer les informations utilisateur et le token
+        const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
+        const token = localStorage.getItem('twitch_token');
+        const followerCount = localStorage.getItem('twitch_follower_count') || '0';
+        
+        // Définir un objectif par défaut (20% de plus que le nombre actuel de followers)
+        const currentFollowers = parseInt(followerCount);
+        const defaultGoal = Math.ceil(currentFollowers * 1.2);
+        
+        // Ajouter les paramètres nécessaires pour l'overlay followers goal
+        newUrl.searchParams.set('userId', userData.id || '');
+        newUrl.searchParams.set('token', token || '');
+        newUrl.searchParams.set('goal', defaultGoal.toString());
+        newUrl.searchParams.set('refreshInterval', '60'); // 60 secondes par défaut
+        newUrl.searchParams.set('showLatest', 'true');
+      }
+      
       previewFrame.src = newUrl.toString();
       
       // Mise à jour de la taille recommandée
@@ -137,20 +156,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const localPath = activeOverlay.dataset.url;
     
-    // Générer un nouveau jeton pour cet overlay (format simple)
-    const token = generateOverlayToken(localPath);
-    
     // Construire l'URL avec le jeton
     const overlayUrl = new URL('/overlay.html', PRODUCTION_URL);
-    overlayUrl.searchParams.set('token', token);
     
-    // Copier tous les paramètres pertinents de la preview
-    const previewUrl = new URL(previewFrame.src);
-    previewUrl.searchParams.forEach((value, key) => {
-      if (key !== 'token') { // Ne pas copier l'ancien token s'il existe
-        overlayUrl.searchParams.set(key, value);
-      }
-    });
+    // Vérifier si c'est l'overlay followers goal
+    if (localPath.includes('followers-goal')) {
+      // Récupérer les informations utilisateur et le token
+      const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
+      const token = localStorage.getItem('twitch_token');
+      const followerCount = localStorage.getItem('twitch_follower_count') || '0';
+      
+      // Définir un objectif par défaut (20% de plus que le nombre actuel de followers)
+      const currentFollowers = parseInt(followerCount);
+      const defaultGoal = Math.ceil(currentFollowers * 1.2);
+      
+      // Ajouter les paramètres nécessaires pour l'overlay followers goal
+      overlayUrl.searchParams.set('userId', userData.id || '');
+      overlayUrl.searchParams.set('token', token || '');
+      overlayUrl.searchParams.set('goal', defaultGoal.toString());
+      overlayUrl.searchParams.set('refreshInterval', '60'); // 60 secondes par défaut
+      overlayUrl.searchParams.set('showLatest', 'true');
+      overlayUrl.searchParams.set('overlay', 'followers-goal');
+    } else {
+      // Pour les autres overlays, utiliser le jeton standard
+      const token = generateOverlayToken(localPath);
+      overlayUrl.searchParams.set('token', token);
+      
+      // Copier tous les paramètres pertinents de la preview
+      const previewUrl = new URL(previewFrame.src);
+      previewUrl.searchParams.forEach((value, key) => {
+        if (key !== 'token') { // Ne pas copier l'ancien token s'il existe
+          overlayUrl.searchParams.set(key, value);
+        }
+      });
+    }
     
     try {
       await navigator.clipboard.writeText(overlayUrl.toString());

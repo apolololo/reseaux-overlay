@@ -47,7 +47,44 @@
     document.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
       const token = params.get('token');
+      const overlayType = params.get('overlay');
       
+      // Gestion spéciale pour l'overlay followers goal
+      if (overlayType === 'followers-goal') {
+        const userId = params.get('userId');
+        const authToken = params.get('token');
+        const goal = params.get('goal');
+        
+        if (!userId || !authToken) {
+          showError("Paramètres manquants", "L'overlay Followers Goal nécessite un ID utilisateur et un token d'authentification.");
+          return;
+        }
+        
+        // Construire l'URL de l'overlay followers goal
+        const overlayUrl = new URL('/src/overlays/followers-goal/overlay.html', window.location.origin);
+        
+        // Transférer tous les paramètres pertinents
+        params.forEach((value, key) => {
+          if (key !== 'overlay') { // Ne pas transférer le type d'overlay
+            overlayUrl.searchParams.set(key, value);
+          }
+        });
+        
+        // Créer un iframe pour charger l'overlay
+        const iframe = document.createElement('iframe');
+        iframe.src = overlayUrl.toString();
+        iframe.style.border = 'none';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.position = 'absolute';
+        iframe.style.top = '0';
+        iframe.style.left = '0';
+        
+        document.getElementById('overlay-container').appendChild(iframe);
+        return;
+      }
+      
+      // Gestion standard pour les autres overlays
       if (!token) {
         showError("Token d'overlay manquant", "Veuillez utiliser un lien valide généré depuis l'application APO Overlays.");
         return;

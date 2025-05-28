@@ -112,6 +112,12 @@
             console.log("Informations utilisateur stockées:", data.user);
           }
           
+          // Stocker les informations des followers si disponibles
+          if (data.followerCount !== undefined) {
+            localStorage.setItem('twitch_follower_count', data.followerCount.toString());
+            console.log("Nombre de followers stocké:", data.followerCount);
+          }
+          
           // Stocker les informations des abonnés si disponibles
           if (data.subscriberCount !== undefined) {
             localStorage.setItem('twitch_subscriber_count', data.subscriberCount.toString());
