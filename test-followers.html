@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Followers Goal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #9146FF;
+    }
+    .test-links {
+      margin-top: 20px;
+    }
+    .test-link {
+      display: block;
+      margin-bottom: 10px;
+      padding: 10px;
+      background-color: #f0f0f0;
+      border-radius: 4px;
+      word-break: break-all;
+    }
+    .test-button {
+      display: inline-block;
+      margin-top: 5px;
+      padding: 8px 16px;
+      background-color: #9146FF;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Test Followers Goal</h1>
+    <p>Cette page permet de tester l'overlay Followers Goal avec différentes configurations.</p>
+    
+    <div class="test-links">
+      <div class="test-link">
+        <strong>Test direct de l'overlay :</strong>
+        <div id="direct-link"></div>
+        <a href="#" id="direct-button" class="test-button">Ouvrir</a>
+      </div>
+      
+      <div class="test-link">
+        <strong>Test via overlay.html :</strong>
+        <div id="overlay-link"></div>
+        <a href="#" id="overlay-button" class="test-button">Ouvrir</a>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Récupérer les informations utilisateur et le token depuis le localStorage
+      const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
+      const token = localStorage.getItem('twitch_token');
+      const followerCount = localStorage.getItem('twitch_follower_count') || '0';
+      
+      // Définir un objectif par défaut (20% de plus que le nombre actuel de followers)
+      const currentFollowers = parseInt(followerCount);
+      const defaultGoal = Math.ceil(currentFollowers * 1.2);
+      
+      // Construire les URLs de test
+      const directUrl = new URL('./src/overlays/followers-goal/overlay.html', window.location.origin);
+      directUrl.searchParams.set('userId', userData.id || '');
+      directUrl.searchParams.set('token', token || '');
+      directUrl.searchParams.set('goal', defaultGoal.toString());
+      directUrl.searchParams.set('refreshInterval', '60');
+      directUrl.searchParams.set('showLatest', 'true');
+      
+      const overlayUrl = new URL('./overlay.html', window.location.origin);
+      overlayUrl.searchParams.set('overlay', 'followers-goal');
+      overlayUrl.searchParams.set('userId', userData.id || '');
+      overlayUrl.searchParams.set('token', token || '');
+      overlayUrl.searchParams.set('goal', defaultGoal.toString());
+      overlayUrl.searchParams.set('refreshInterval', '60');
+      overlayUrl.searchParams.set('showLatest', 'true');
+      
+      // Afficher les URLs
+      document.getElementById('direct-link').textContent = directUrl.toString();
+      document.getElementById('overlay-link').textContent = overlayUrl.toString();
+      
+      // Configurer les boutons
+      document.getElementById('direct-button').href = directUrl.toString();
+      document.getElementById('overlay-button').href = overlayUrl.toString();
+    });
+  </script>
+</body>
+</html>

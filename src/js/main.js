@@ -92,6 +92,14 @@ document.addEventListener('DOMContentLoaded', () => {
         newUrl.searchParams.set('goal', defaultGoal.toString());
         newUrl.searchParams.set('refreshInterval', '60'); // 60 secondes par défaut
         newUrl.searchParams.set('showLatest', 'true');
+        
+        console.log("URL de l'overlay followers goal (preview):", newUrl.toString());
+        console.log("Paramètres followers goal:", {
+          userId: userData.id || 'non défini',
+          tokenPresent: !!token,
+          goal: defaultGoal,
+          followerCount: followerCount
+        });
       }
       
       previewFrame.src = newUrl.toString();
@@ -157,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const localPath = activeOverlay.dataset.url;
     
     // Construire l'URL avec le jeton
-    const overlayUrl = new URL('/overlay.html', PRODUCTION_URL);
+    const overlayUrl = new URL('./overlay.html', PRODUCTION_URL);
     
     // Vérifier si c'est l'overlay followers goal
     if (localPath.includes('followers-goal')) {
@@ -177,6 +185,14 @@ document.addEventListener('DOMContentLoaded', () => {
       overlayUrl.searchParams.set('refreshInterval', '60'); // 60 secondes par défaut
       overlayUrl.searchParams.set('showLatest', 'true');
       overlayUrl.searchParams.set('overlay', 'followers-goal');
+      
+      console.log("URL de l'overlay followers goal (copie):", overlayUrl.toString());
+      console.log("Paramètres followers goal (copie):", {
+        userId: userData.id || 'non défini',
+        tokenPresent: !!token,
+        goal: defaultGoal,
+        followerCount: followerCount
+      });
     } else {
       // Pour les autres overlays, utiliser le jeton standard
       const token = generateOverlayToken(localPath);

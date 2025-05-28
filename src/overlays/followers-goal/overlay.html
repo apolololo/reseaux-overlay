@@ -83,10 +83,15 @@
       
       if (!params.userId || !params.token) {
         console.error("Identifiant utilisateur ou token manquant dans l'URL");
+        currentFollowersElement.textContent = "Erreur";
+        latestFollowerElement.textContent = "Paramètres manquants: userId ou token";
         return;
       }
       
       try {
+        console.log("Tentative de récupération des followers avec userId:", params.userId);
+        console.log("URL complète:", `https://api.twitch.tv/helix/channels/followers?broadcaster_id=${params.userId}`);
+        
         // Appel à l'API Twitch pour récupérer le nombre de followers
         const response = await fetch(`https://api.twitch.tv/helix/channels/followers?broadcaster_id=${params.userId}`, {
           headers: {
@@ -96,10 +101,13 @@
         });
         
         if (!response.ok) {
-          throw new Error(`Erreur API: ${response.status}`);
+          const errorText = await response.text();
+          console.error(`Erreur API (${response.status}):`, errorText);
+          throw new Error(`Erreur API: ${response.status} - ${errorText}`);
         }
         
         const data = await response.json();
+        console.log("Données reçues de l'API:", data);
         const followerCount = data.total || 0;
         
         // Mettre à jour l'affichage
@@ -110,24 +118,46 @@
         if (config.showLatestFollower && data.data && data.data.length > 0) {
           const latestFollower = data.data[0];
           latestFollowerElement.textContent = `Dernier follower : ${latestFollower.user_name || 'Inconnu'}`;
+        } else if (config.showLatestFollower) {
+          latestFollowerElement.textContent = "Aucun follower récent trouvé";
         }
         
       } catch (error) {
         console.error("Erreur lors de la récupération des followers:", error);
+        currentFollowersElement.textContent = "Erreur";
+        latestFollowerElement.textContent = `Erreur: ${error.message}`;
       }
     }
 
     // Initialisation
     function init() {
+      console.log("Initialisation du widget Followers Goal");
+      console.log("Paramètres URL:", getUrlParams());
+      
+      // Afficher un message d'initialisation
+      currentFollowersElement.textContent = "Chargement...";
+      latestFollowerElement.textContent = "Connexion à Twitch en cours...";
+      
       updateConfigFromParams();
       fetchFollowersData();
       
       // Rafraîchir les données à intervalles réguliers
       setInterval(fetchFollowersData, config.refreshInterval);
+      
+      console.log("Widget initialisé avec succès");
+      console.log("Intervalle de rafraîchissement:", config.refreshInterval / 1000, "secondes");
+      console.log("Objectif de followers:", config.goalFollowers);
     }
 
     // Démarrer l'application
     document.addEventListener('DOMContentLoaded', init);
+    
+    // Afficher les erreurs dans l'interface
+    window.addEventListener('error', function(event) {
+      console.error("Erreur globale:", event.error);
+      currentFollowersElement.textContent = "Erreur";
+      latestFollowerElement.textContent = `Erreur JavaScript: ${event.message}`;
+    });
   </script>
 </body>
 </html>
