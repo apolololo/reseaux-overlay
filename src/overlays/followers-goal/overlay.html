@@ -32,7 +32,7 @@
       border-radius: 12px;
       padding: 20px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      transition: background 0.3s ease;
+      transition: all 0.3s ease;
     }
 
     .goal-container.no-bg {
@@ -107,36 +107,25 @@
         showPercentage: params.get('showPercentage') !== 'false'
       };
 
-      // Appliquer les styles
-      document.documentElement.style.setProperty('--progress-color', config.progressColor);
-      document.documentElement.style.setProperty('--text-color', config.textColor);
-
-      // Appliquer les options de visibilité
       const goalContainer = document.getElementById('goal-container');
       const progressContainer = document.getElementById('progress-container');
       const percentageElement = document.getElementById('percentage');
 
       function updateVisibility() {
-        if (!config.showBackground) {
-          goalContainer.classList.add('no-bg');
-        } else {
-          goalContainer.classList.remove('no-bg');
-        }
+        // Mise à jour du fond
+        goalContainer.style.background = config.showBackground ? 'rgba(0, 0, 0, 0.8)' : 'transparent';
+        goalContainer.style.boxShadow = config.showBackground ? '0 4px 6px rgba(0, 0, 0, 0.1)' : 'none';
         
-        if (config.showProgressBar) {
-          progressContainer.classList.add('show');
-        } else {
-          progressContainer.classList.remove('show');
-        }
+        // Mise à jour de la barre de progression
+        progressContainer.style.display = config.showProgressBar ? 'block' : 'none';
         
-        if (config.showPercentage) {
-          percentageElement.classList.add('show');
-        } else {
-          percentageElement.classList.remove('show');
-        }
+        // Mise à jour du pourcentage
+        percentageElement.style.display = config.showPercentage ? 'block' : 'none';
       }
 
-      // Appliquer la visibilité initiale
+      // Appliquer les styles initiaux
+      document.documentElement.style.setProperty('--progress-color', config.progressColor);
+      document.documentElement.style.setProperty('--text-color', config.textColor);
       updateVisibility();
 
       let currentFollowers = 0;
