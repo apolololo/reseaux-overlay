@@ -234,6 +234,24 @@
       </div>
     </div>
 
+    <div class="config-section">
+      <h2>
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <path fill="currentColor" d="M17,17H7V7H17M21,11V9H19V7C19,5.89 18.1,5 17,5H15V3H13V5H11V3H9V5H7C5.89,5 5,5.89 5,7V9H3V11H5V13H3V15H5V17A2,2 0 0,0 7,19H9V21H11V19H13V21H15V19H17A2,2 0 0,0 19,17V15H21V13H19V11M13,13H11V11H13"/>
+        </svg>
+        URL OBS
+      </h2>
+      <div class="form-group">
+        <input type="text" id="obs-url" readonly>
+        <button class="copy-button" onclick="copyObsUrl()">
+          <svg viewBox="0 0 24 24" width="24" height="24">
+            <path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/>
+          </svg>
+          Copier
+        </button>
+      </div>
+    </div>
+
     <div class="preview-section">
       <h3 class="preview-title">
         <svg viewBox="0 0 24 24" width="24" height="24">
@@ -253,6 +271,41 @@
       Enregistrer la configuration
     </button>
   </div>
+
+  <style>
+    /* Styles existants */
+    .copy-button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .copy-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(145, 70, 255, 0.3);
+    }
+
+    #obs-url {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid var(--border-color);
+      border-radius: 6px;
+      background: var(--bg-dark);
+      color: var(--text-light);
+      font-family: 'Montserrat', sans-serif;
+      cursor: text;
+    }
+  </style>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -288,16 +341,26 @@
       // Mettre à jour l'aperçu
       function updatePreview() {
         const iframe = document.getElementById('preview-frame');
-        const params = new URLSearchParams({
-          target: config.target,
-          text: config.text,
-          progressColor: config.progressColor,
-          textColor: config.textColor,
-          showBackground: String(config.showBackground),
-          showProgressBar: String(config.showProgressBar),
-          showPercentage: String(config.showPercentage)
-        });
-        iframe.src = `overlay.html?${params.toString()}`;
+        const params = new URLSearchParams();
+        
+        // Ajouter les paramètres un par un
+        params.set('target', config.target);
+        params.set('text', config.text);
+        params.set('progressColor', config.progressColor);
+        params.set('textColor', config.textColor);
+        params.set('showBackground', config.showBackground ? 'true' : 'false');
+        params.set('showProgressBar', config.showProgressBar ? 'true' : 'false');
+        params.set('showPercentage', config.showPercentage ? 'true' : 'false');
+        
+        const url = `overlay.html?${params.toString()}`;
+        iframe.src = url;
+        
+        // Mettre à jour l'URL OBS
+        const obsUrlInput = document.getElementById('obs-url');
+        if (obsUrlInput) {
+          const fullUrl = window.location.origin + window.location.pathname.replace('config.html', url);
+          obsUrlInput.value = fullUrl;
+        }
       }
 
       // Écouter les changements
@@ -354,7 +417,6 @@
         `;
         document.body.appendChild(successMessage);
         
-        // Supprimer le message après 3 secondes
         setTimeout(() => {
           successMessage.remove();
         }, 3000);
@@ -363,6 +425,83 @@
       // Initialiser l'aperçu
       updatePreview();
     });
+
+    function copyObsUrl() {
+      const obsUrlInput = document.getElementById('obs-url');
+      obsUrlInput.select();
+      document.execCommand('copy');
+      
+      // Afficher un message de succès
+      const successMessage = document.createElement('div');
+      successMessage.className = 'save-success';
+      successMessage.innerHTML = `
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
+        </svg>
+        URL copiée !
+      `;
+      document.body.appendChild(successMessage);
+      
+      setTimeout(() => {
+        successMessage.remove();
+      }, 3000);
+    }
   </script>
 </body>
 </html>
+
+<style>
+    .copy-button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .copy-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(145, 70, 255, 0.3);
+    }
+
+    #obs-url {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid var(--border-color);
+      border-radius: 6px;
+      background: var(--bg-dark);
+      color: var(--text-light);
+      font-family: 'Montserrat', sans-serif;
+      cursor: text;
+    }
+  </style>
+
+  function copyObsUrl() {
+    const obsUrlInput = document.getElementById('obs-url');
+    obsUrlInput.select();
+    document.execCommand('copy');
+    
+    // Afficher un message de succès
+    const successMessage = document.createElement('div');
+    successMessage.className = 'save-success';
+    successMessage.innerHTML = `
+      <svg viewBox="0 0 24 24" width="24" height="24">
+        <path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
+      </svg>
+      URL copiée !
+    `;
+    document.body.appendChild(successMessage);
+    
+    setTimeout(() => {
+      successMessage.remove();
+    }, 3000);
+  }
+</style>
