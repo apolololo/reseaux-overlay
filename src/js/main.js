@@ -66,54 +66,32 @@ document.addEventListener('DOMContentLoaded', () => {
     return token;
   }
 
-  // Fonction pour générer une URL permanente pour le widget Followers Goal
-  function generatePermanentWidgetUrl() {
-    const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
-    const userId = userData?.id || 'anonymous';
-    
-    // URL permanente basée sur l'ID utilisateur
-    return `${PRODUCTION_URL}/widget-followers-goal.html?userId=${userId}`;
-  }
-
   // Gestion des overlays avec support des tailles et jetons
   document.querySelectorAll('.overlay-item').forEach(item => {
-    item.addEventListener('click', () => {      
-      document.querySelectorAll('.overlay-item').forEach(i => i.classList.remove('active'));      
+    item.addEventListener('click', () => {
+      // Retirer la classe active de tous les items
+      document.querySelectorAll('.overlay-item').forEach(i => i.classList.remove('active'));
+      
+      // Ajouter la classe active à l'item cliqué
       item.classList.add('active');
       
-      // Vérifier si c'est le widget Followers Goal
-      const overlayUrl = item.dataset.url;
-      if (overlayUrl && overlayUrl.includes('followers-goal')) {
-        // Rediriger vers la page de configuration du widget
-        window.location.href = './widget-config.html';
-        return;
-      }
-      
-      // Construire l'URL complète pour la preview (pour les autres overlays)
-      const localPath = item.dataset.url;
-      
-      // Préserver les paramètres d'URL existants lors du changement d'overlay
-      const currentParams = new URLSearchParams(previewFrame.src.split('?')[1] || '');
-      const newUrl = new URL(localPath, window.location.origin);
-      currentParams.forEach((value, key) => {
-        if (key !== 'token') { // Ne pas copier l'ancien token
-          newUrl.searchParams.set(key, value);
-        }
-      });
-      
-      previewFrame.src = newUrl.toString();
-      
-      // Mise à jour de la taille recommandée
+      // Mettre à jour l'iframe de prévisualisation
+      const iframe = document.getElementById('overlay-preview');
+      const url = item.dataset.url;
       const size = item.dataset.size;
-      if (size) {
-        sizeInfo.textContent = `Taille recommandée : ${size}`;
-        
-        // Ajuster le ratio de la preview et effectuer le centrage
-        updatePreviewSize();
+      
+      // Vérifier si c'est le widget followers goal
+      if (item.dataset.config) {
+        // Ouvrir la page de configuration dans un nouvel onglet
+        window.open(item.dataset.config, '_blank');
       }
       
-      // Gérer le bouton de configuration
-      updateConfigButton(item);
+      iframe.src = url;
+      
+      // Mettre à jour l'info de taille
+      if (sizeInfo) {
+        sizeInfo.textContent = `Taille recommandée : ${size}`;
+      }
     });
   });
 
@@ -166,40 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const localPath = activeOverlay.dataset.url;
     
-    // Vérifier si c'est le widget Followers Goal
-    if (localPath && localPath.includes('followers-goal')) {
-      // Utiliser l'URL permanente pour le widget Followers Goal
-      const permanentUrl = generatePermanentWidgetUrl();
-      
-      try {
-        await navigator.clipboard.writeText(permanentUrl);
-        copyButton.style.transition = 'transform 0.2s ease';
-        copyButton.style.transform = 'scale(1.05)';
-        copyButton.innerHTML = `
-          <svg viewBox="0 0 24 24" width="18" height="18">
-            <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-          </svg>
-          URL Permanente Copiée !
-        `;
-        
-        setTimeout(() => {
-          copyButton.style.transform = 'scale(1)';
-          setTimeout(() => {
-            copyButton.innerHTML = `
-              <svg viewBox="0 0 24 24" width="18" height="18">
-                <path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-              </svg>
-              Copier l'URL pour OBS
-            `;
-          }, 200);
-        }, 1000);
-      } catch (err) {
-        console.error('Erreur lors de la copie:', err);
-      }
-      return;
-    }
-    
-    // Pour les autres overlays, utiliser le système de token existant
     // Générer un nouveau jeton enrichi pour cet overlay
     const token = generateOverlayToken(localPath);
     

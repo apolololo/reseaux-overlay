@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -84,9 +83,10 @@
         // Construire l'URL de l'overlay
         const overlayUrl = new URL(overlayPath, window.location.origin);
         
-        // Transférer tous les paramètres de l'URL actuelle vers l'URL de l'overlay
+        // Transférer uniquement les paramètres nécessaires
+        const essentialParams = ['token', 'target', 'text', 'progressColor', 'textColor'];
         params.forEach((value, key) => {
-          if (key !== 'token') { // Ne pas transférer le token
+          if (essentialParams.includes(key)) {
             overlayUrl.searchParams.set(key, value);
           }
         });

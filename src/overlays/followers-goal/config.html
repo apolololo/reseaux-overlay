@@ -3,590 +3,202 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Configuration - Followers Goal</title>
+  <title>Configuration Followers Goal - APO</title>
+  <link rel="stylesheet" href="/src/styles/main.css">
+  <link rel="stylesheet" href="/src/styles/app.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    .config-container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: var(--bg-dark);
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 20px;
+    .config-section {
+      margin-bottom: 2rem;
     }
 
-    .container {
-      max-width: 500px;
-      margin: 0 auto;
-      background: white;
-      border-radius: 15px;
-      padding: 30px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-    }
-
-    h1 {
-      text-align: center;
-      color: #333;
-      margin-bottom: 30px;
-      font-size: 24px;
+    .config-section h2 {
+      color: var(--primary);
+      margin-bottom: 1rem;
     }
 
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 1.5rem;
     }
 
-    label {
+    .form-group label {
       display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: #555;
+      margin-bottom: 0.5rem;
+      color: var(--text-light);
     }
 
-    input[type="number"], input[type="text"], select {
+    .form-group input[type="number"],
+    .form-group input[type="text"],
+    .form-group input[type="color"] {
       width: 100%;
-      padding: 12px;
-      border: 2px solid #e1e5e9;
-      border-radius: 8px;
-      font-size: 16px;
-      transition: border-color 0.3s ease;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: var(--bg-darker);
+      color: var(--text-light);
+      font-family: 'Montserrat', sans-serif;
     }
 
-    input[type="number"]:focus, input[type="text"]:focus, select:focus {
-      outline: none;
-      border-color: #9146FF;
-    }
-
-    input[type="color"] {
-      width: 60px;
+    .form-group input[type="color"] {
       height: 40px;
-      border: none;
+      padding: 0;
+    }
+
+    .preview-section {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: var(--bg-darker);
       border-radius: 8px;
-      cursor: pointer;
     }
 
-    .color-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    .preview-title {
+      color: var(--text-light);
+      margin-bottom: 1rem;
     }
 
-    .preview {
-      background: #f8f9fa;
-      border: 2px dashed #dee2e6;
-      border-radius: 10px;
-      padding: 20px;
-      margin: 20px 0;
-      text-align: center;
-    }
-
-    .preview-widget {
-      display: inline-block;
-      padding: 15px 25px;
-      border-radius: 10px;
-      font-weight: bold;
-      min-width: 200px;
-    }
-
-    .buttons {
-      display: flex;
-      gap: 10px;
-      margin-top: 30px;
-    }
-
-    button {
-      flex: 1;
-      padding: 12px 20px;
-      border: none;
+    .preview-container {
+      width: 500px;
+      height: 300px;
+      border: 1px solid var(--border-color);
       border-radius: 8px;
-      font-size: 16px;
+      overflow: hidden;
+    }
+
+    .preview-container iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .save-button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 6px;
+      font-family: 'Montserrat', sans-serif;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: background 0.3s ease;
     }
 
-    .btn-primary {
-      background: linear-gradient(135deg, #9146FF 0%, #00D4AA 100%);
-      color: white;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(145, 70, 255, 0.3);
-    }
-
-    .btn-secondary {
-      background: #6c757d;
-      color: white;
-    }
-
-    .btn-secondary:hover {
-      background: #5a6268;
-    }
-
-    .current-info {
-      background: #e3f2fd;
-      border: 1px solid #2196f3;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 20px;
-    }
-
-    .current-info h3 {
-      color: #1976d2;
-      margin-bottom: 10px;
-    }
-
-    .info-item {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 5px;
-    }
-
-    .manual-controls {
-      background: #fff3cd;
-      border: 1px solid #ffc107;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 20px;
-    }
-
-    .manual-controls h3 {
-      color: #856404;
-      margin-bottom: 10px;
-    }
-
-    .manual-buttons {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .btn-small {
-      padding: 8px 15px;
-      font-size: 14px;
+    .save-button:hover {
+      background: var(--primary-dark);
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🎯 Configuration Followers Goal</h1>
+  <div class="config-container">
+    <h1>Configuration Followers Goal</h1>
     
-    <div class="current-info">
-      <h3>📊 Informations actuelles</h3>
-      <div class="info-item">
-        <span>Followers actuels:</span>
-        <span id="current-followers">-</span>
-      </div>
-      <div class="info-item">
-        <span>Objectif:</span>
-        <span id="current-goal">-</span>
-      </div>
-      <div class="info-item">
-        <span>Progression:</span>
-        <span id="current-progress">-</span>
+    <div class="config-section">
+      <h2>Objectif</h2>
+      <div class="form-group">
+        <label for="goal-target">Nombre de followers cible</label>
+        <input type="number" id="goal-target" min="1" value="1000">
       </div>
     </div>
 
-    <div class="manual-controls">
-      <h3>🔧 Contrôles manuels (pour test)</h3>
-      <p>Ajustez manuellement le nombre de followers pour tester l'overlay:</p>
-      <div class="manual-buttons">
-        <button class="btn-secondary btn-small" onclick="adjustFollowers(-1)">-1</button>
-        <button class="btn-secondary btn-small" onclick="adjustFollowers(-10)">-10</button>
-        <button class="btn-secondary btn-small" onclick="adjustFollowers(1)">+1</button>
-        <button class="btn-secondary btn-small" onclick="adjustFollowers(10)">+10</button>
+    <div class="config-section">
+      <h2>Personnalisation</h2>
+      <div class="form-group">
+        <label for="goal-text">Texte de l'objectif</label>
+        <input type="text" id="goal-text" value="Objectif : {current}/{target} followers">
+      </div>
+      <div class="form-group">
+        <label for="progress-color">Couleur de la barre de progression</label>
+        <input type="color" id="progress-color" value="#FF0000">
+      </div>
+      <div class="form-group">
+        <label for="text-color">Couleur du texte</label>
+        <input type="color" id="text-color" value="#FFFFFF">
       </div>
     </div>
 
-    <form id="config-form">
-      <div class="form-group">
-        <label for="goal">🎯 Objectif de followers:</label>
-        <input type="number" id="goal" min="1" max="100000" value="1000" required>
+    <div class="preview-section">
+      <h3 class="preview-title">Aperçu</h3>
+      <div class="preview-container">
+        <iframe id="preview-frame" src="overlay.html"></iframe>
       </div>
+    </div>
 
-      <div class="form-group">
-        <label for="title">📝 Titre personnalisé:</label>
-        <input type="text" id="title" value="Objectif Followers" maxlength="50">
-      </div>
-
-      <div class="form-group">
-        <label for="style">🎨 Style d'affichage:</label>
-        <select id="style">
-          <option value="modern">Moderne</option>
-          <option value="classic">Classique</option>
-          <option value="minimal">Minimal</option>
-          <option value="neon">Néon</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>🌈 Couleurs:</label>
-        <div class="color-group">
-          <label for="bg-color">Arrière-plan:</label>
-          <input type="color" id="bg-color" value="#9146FF">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <div class="color-group">
-          <label for="text-color">Texte:</label>
-          <input type="color" id="text-color" value="#FFFFFF">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <div class="color-group">
-          <label for="progress-color">Barre de progression:</label>
-          <input type="color" id="progress-color" value="#00D4AA">
-        </div>
-      </div>
-
-      <div class="preview">
-        <h3>👀 Aperçu</h3>
-        <div id="preview-widget" class="preview-widget">
-          Objectif Followers: 850/1000 (85%)
-        </div>
-      </div>
-
-      <div class="buttons">
-        <button type="button" class="btn-secondary" onclick="resetConfig()">Réinitialiser</button>
-        <button type="submit" class="btn-primary">Sauvegarder</button>
-      </div>
-    </form>
+    <button class="save-button" id="save-config">Enregistrer la configuration</button>
   </div>
 
   <script>
-    // Configuration en temps réel avec synchronisation améliorée
-    let configSyncInterval;
-    let broadcastChannel;
-    
-    // Initialiser le canal de diffusion
-    function initBroadcastChannel() {
-      if (typeof BroadcastChannel !== 'undefined') {
-        try {
-          broadcastChannel = new BroadcastChannel('followers_goal_config');
-          console.log('Canal de diffusion initialisé');
-        } catch (e) {
-          console.warn('BroadcastChannel non supporté', e);
-        }
-      }
-    }
-
-    // Charger la configuration existante
-    async function loadConfig() {
-      const config = JSON.parse(localStorage.getItem('followers_goal_config') || '{}');
-      
-      document.getElementById('goal').value = config.goal || 1000;
-      document.getElementById('title').value = config.title || 'Objectif Followers';
-      document.getElementById('style').value = config.style || 'modern';
-      document.getElementById('bg-color').value = config.bgColor || '#9146FF';
-      document.getElementById('text-color').value = config.textColor || '#FFFFFF';
-      document.getElementById('progress-color').value = config.progressColor || '#00D4AA';
-      
-      let currentFollowers = await fetchCurrentFollowers();
-      
-      if (currentFollowers === null) {
-        currentFollowers = localStorage.getItem('current_followers_count') || '0';
-      } else {
-        localStorage.setItem('current_followers_count', currentFollowers.toString());
-      }
-      
-      await updateCurrentInfo();
-      updatePreview();
-    }
-    
-    // Fonction pour diffuser les changements de configuration avec timestamp forcé
-    function broadcastConfigUpdate() {
-      const config = JSON.parse(localStorage.getItem('followers_goal_config') || '{}');
-      const currentFollowers = localStorage.getItem('current_followers_count') || '0';
-      const timestamp = Date.now();
-      
-      console.log('=== SAUVEGARDE ET DIFFUSION DE LA CONFIGURATION ===');
-      console.log('Configuration:', config);
-      console.log('Timestamp:', timestamp);
-      
-      // Sauvegarder avec timestamp AVANT de diffuser
-      localStorage.setItem('followers_goal_config_timestamp', timestamp.toString());
-      
-      // Forcer la propagation via storage event
-      window.dispatchEvent(new StorageEvent('storage', {
-        key: 'followers_goal_config_timestamp',
-        newValue: timestamp.toString(),
-        storageArea: localStorage
-      }));
-      
-      // Diffusion via BroadcastChannel (priorité)
-      if (broadcastChannel) {
-        try {
-          broadcastChannel.postMessage({
-            type: 'config_update',
-            config: config,
-            currentFollowers: currentFollowers,
-            timestamp: timestamp,
-            force: true
-          });
-          console.log('✅ Configuration diffusée via BroadcastChannel');
-        } catch (e) {
-          console.error('❌ Erreur BroadcastChannel:', e);
-        }
-      }
-      
-      // Diffusion via postMessage pour OBS
-      try {
-        window.parent.postMessage({
-          type: 'followers_goal_config_update',
-          config: config,
-          currentFollowers: currentFollowers,
-          timestamp: timestamp
-        }, '*');
-        console.log('✅ Configuration diffusée via postMessage');
-      } catch (e) {
-        console.log('⚠️ postMessage non disponible');
-      }
-      
-      // Diffusion via tous les iframes possible
-      try {
-        const frames = window.parent.frames;
-        for (let i = 0; i < frames.length; i++) {
-          try {
-            frames[i].postMessage({
-              type: 'followers_goal_config_update',
-              config: config,
-              currentFollowers: currentFollowers,
-              timestamp: timestamp
-            }, '*');
-          } catch (e) {
-            // Ignore les erreurs de cross-origin
-          }
-        }
-        console.log('✅ Configuration diffusée vers tous les iframes');
-      } catch (e) {
-        console.log('⚠️ Diffusion iframes échouée');
-      }
-    }
-
-    // Mettre à jour les informations actuelles
-    async function updateCurrentInfo() {
-      let currentFollowers = await fetchCurrentFollowers();
-      
-      if (currentFollowers === null) {
-        currentFollowers = localStorage.getItem('current_followers_count') || '0';
-      } else {
-        localStorage.setItem('current_followers_count', currentFollowers.toString());
-      }
-      
-      const config = JSON.parse(localStorage.getItem('followers_goal_config') || '{}');
-      const goal = config.goal || 1000;
-      const progress = Math.min(100, Math.round((parseInt(currentFollowers) / goal) * 100));
-      
-      document.getElementById('current-followers').textContent = currentFollowers;
-      document.getElementById('current-goal').textContent = goal;
-      document.getElementById('current-progress').textContent = progress + '%';
-    }
-
-    // Ajuster manuellement les followers avec diffusion immédiate
-    async function adjustFollowers(amount) {
-      let currentFollowers = await fetchCurrentFollowers();
-      
-      if (currentFollowers === null) {
-        currentFollowers = parseInt(localStorage.getItem('current_followers_count') || '0');
-      }
-      
-      const newValue = Math.max(0, currentFollowers + amount);
-      localStorage.setItem('current_followers_count', newValue.toString());
-      localStorage.setItem('current_followers_timestamp', Date.now().toString());
-      
-      await updateCurrentInfo();
-      updatePreview();
-      
-      // Diffuser le changement immédiatement
-      setTimeout(() => {
-        broadcastConfigUpdate();
-      }, 10);
-    }
-
-    // Mettre à jour l'aperçu
-    function updatePreview() {
-      const goal = document.getElementById('goal').value;
-      const title = document.getElementById('title').value;
-      const bgColor = document.getElementById('bg-color').value;
-      const textColor = document.getElementById('text-color').value;
-      const currentFollowers = localStorage.getItem('current_followers_count') || '0';
-      const progress = Math.min(100, Math.round((parseInt(currentFollowers) / goal) * 100));
-      
-      const preview = document.getElementById('preview-widget');
-      preview.textContent = `${title}: ${currentFollowers}/${goal} (${progress}%)`;
-      preview.style.backgroundColor = bgColor;
-      preview.style.color = textColor;
-    }
-
-    // Réinitialiser la configuration
-    async function resetConfig() {
-      if (confirm('Êtes-vous sûr de vouloir réinitialiser la configuration ?')) {
-        localStorage.removeItem('followers_goal_config');
-        localStorage.removeItem('followers_goal_config_timestamp');
-        await loadConfig();
-        
-        // Diffuser la réinitialisation
-        setTimeout(() => {
-          broadcastConfigUpdate();
-        }, 100);
-      }
-    }
-
-    // Sauvegarder la configuration avec diffusion TRIPLE pour garantir la réception
-    document.getElementById('config-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      const config = {
-        goal: parseInt(document.getElementById('goal').value),
-        title: document.getElementById('title').value,
-        style: document.getElementById('style').value,
-        bgColor: document.getElementById('bg-color').value,
-        textColor: document.getElementById('text-color').value,
-        progressColor: document.getElementById('progress-color').value
-      };
-      
-      console.log('=== DÉBUT SAUVEGARDE TRIPLE ===');
-      console.log('Nouvelle configuration:', config);
-      
-      // Sauvegarder la configuration
-      localStorage.setItem('followers_goal_config', JSON.stringify(config));
-      
-      // Diffuser immédiatement (3 fois pour être sûr)
-      setTimeout(() => {
-        console.log('🚀 Diffusion 1/3');
-        broadcastConfigUpdate();
-      }, 50);
-      
-      setTimeout(() => {
-        console.log('🚀 Diffusion 2/3');
-        broadcastConfigUpdate();
-      }, 150);
-      
-      setTimeout(() => {
-        console.log('🚀 Diffusion 3/3');
-        broadcastConfigUpdate();
-      }, 300);
-      
-      alert('Configuration sauvegardée avec succès!');
-      
-      setTimeout(() => {
-        window.close();
-      }, 1000);
-    });
-
-    // Mettre à jour l'aperçu en temps réel ET diffuser les changements
-    document.querySelectorAll('input, select').forEach(element => {
-      element.addEventListener('input', () => {
-        updatePreview();
-        
-        // Diffuser les changements en temps réel pendant la saisie
-        clearTimeout(element._diffusionTimeout);
-        element._diffusionTimeout = setTimeout(() => {
-          // Sauvegarder temporairement pour les tests en temps réel
-          const tempConfig = {
-            goal: parseInt(document.getElementById('goal').value),
-            title: document.getElementById('title').value,
-            style: document.getElementById('style').value,
-            bgColor: document.getElementById('bg-color').value,
-            textColor: document.getElementById('text-color').value,
-            progressColor: document.getElementById('progress-color').value
-          };
-          
-          localStorage.setItem('followers_goal_config', JSON.stringify(tempConfig));
-          broadcastConfigUpdate();
-        }, 500); // Attendre 500ms après la dernière modification
-      });
-    });
-
-    // Récupérer les followers depuis l'API Twitch
-    async function fetchCurrentFollowers() {
-      try {
-        const token = localStorage.getItem('twitch_token');
-        const userData = localStorage.getItem('twitch_user');
-        
-        if (!token || !userData) {
-          console.error('Token ou données utilisateur manquants');
-          return null;
-        }
-
-        try {
-          const user = JSON.parse(userData);
-          if (!user || !user.id) {
-            console.error('Données utilisateur invalides:', userData);
-            return null;
-          }
-          
-          const broadcasterId = user.id;
-          console.log('Récupération des followers pour l\'ID:', broadcasterId);
-
-          const response = await fetch(`https://api.twitch.tv/helix/channels/followers?broadcaster_id=${broadcasterId}`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Client-Id': 'z8q1w4g12yrql6cyb5zzwmhe1pnxyn'
-            }
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            console.log('Données de followers récupérées:', data);
-            
-            if (data && typeof data.total === 'number') {
-              console.log('Nombre de followers depuis total:', data.total);
-              return data.total;
-            } else if (data && data.total_count !== undefined) {
-              console.log('Nombre de followers depuis total_count:', data.total_count);
-              return data.total_count;
-            } else if (data && data.data && Array.isArray(data.data)) {
-              if (data.data.length > 0 && data.data[0].follower_count !== undefined) {
-                console.log('Nombre de followers depuis follower_count:', data.data[0].follower_count);
-                return data.data[0].follower_count;
-              } else if (data.data.length > 0 && data.data[0].followed_at) {
-                console.log('Nombre de followers estimé depuis la longueur des données (limité):', data.data.length);
-                console.warn('Attention: Ce nombre est limité par la pagination de l\'API et peut être inexact');
-                return data.data.length;
-              } else {
-                console.warn('Aucune donnée de followers trouvée dans la réponse API');
-                return null;
-              }
-            } else {
-              console.warn('Format de réponse API non reconnu:', data);
-              return null;
-            }
-          } else {
-            console.error('Erreur lors de la récupération des followers:', response.status, response.statusText);
-            try {
-              const errorData = await response.json();
-              console.error('Détails de l\'erreur:', errorData);
-              
-              if (response.status === 401 || 
-                  (errorData && errorData.message && errorData.message.includes('token'))) {
-                console.error('Le token d\'authentification semble être expiré ou invalide');
-              }
-            } catch (e) {
-              console.error('Impossible de lire les détails de l\'erreur');
-            }
-            return null;
-          }
-        } catch (parseError) {
-          console.error('Erreur lors du traitement des données utilisateur:', parseError);
-          console.error('Données utilisateur brutes:', userData);
-          return null;
-        }
-      } catch (error) {
-        console.error('Erreur lors de la récupération des followers:', error);
-        return null;
-      }
-    }
-
-    // Charger la configuration au démarrage
     document.addEventListener('DOMContentLoaded', () => {
-      initBroadcastChannel();
-      loadConfig();
+      const config = {
+        target: 1000,
+        text: "Objectif : {current}/{target} followers",
+        progressColor: "#FF0000",
+        textColor: "#FFFFFF"
+      };
+
+      // Charger la configuration existante
+      const savedConfig = localStorage.getItem('followers-goal-config');
+      if (savedConfig) {
+        Object.assign(config, JSON.parse(savedConfig));
+        updateFormValues();
+      }
+
+      // Mettre à jour les valeurs du formulaire
+      function updateFormValues() {
+        document.getElementById('goal-target').value = config.target;
+        document.getElementById('goal-text').value = config.text;
+        document.getElementById('progress-color').value = config.progressColor;
+        document.getElementById('text-color').value = config.textColor;
+        updatePreview();
+      }
+
+      // Mettre à jour l'aperçu
+      function updatePreview() {
+        const iframe = document.getElementById('preview-frame');
+        const params = new URLSearchParams({
+          target: config.target,
+          text: config.text,
+          progressColor: config.progressColor,
+          textColor: config.textColor
+        });
+        iframe.src = `overlay.html?${params.toString()}`;
+      }
+
+      // Écouter les changements
+      document.getElementById('goal-target').addEventListener('change', (e) => {
+        config.target = parseInt(e.target.value);
+        updatePreview();
+      });
+
+      document.getElementById('goal-text').addEventListener('input', (e) => {
+        config.text = e.target.value;
+        updatePreview();
+      });
+
+      document.getElementById('progress-color').addEventListener('input', (e) => {
+        config.progressColor = e.target.value;
+        updatePreview();
+      });
+
+      document.getElementById('text-color').addEventListener('input', (e) => {
+        config.textColor = e.target.value;
+        updatePreview();
+      });
+
+      // Sauvegarder la configuration
+      document.getElementById('save-config').addEventListener('click', () => {
+        localStorage.setItem('followers-goal-config', JSON.stringify(config));
+        alert('Configuration sauvegardée !');
+      });
     });
   </script>
 </body>

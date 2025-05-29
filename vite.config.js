@@ -10,9 +10,7 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         auth: resolve(__dirname, 'src/auth.html'),
         callback: resolve(__dirname, 'auth/callback.html'),
-        overlay: resolve(__dirname, 'overlay.html'),
-        widgetConfig: resolve(__dirname, 'widget-config.html'),
-        widgetFollowersGoal: resolve(__dirname, 'widget-followers-goal.html'),
+        overlay: resolve(__dirname, 'overlay.html'), // Added this entry
         apo: resolve(__dirname, 'src/overlays/apo/overlay.html'),
         starting: resolve(__dirname, 'src/overlays/starting/overlay.html'),
         brb: resolve(__dirname, 'src/overlays/brb/overlay.html'),
