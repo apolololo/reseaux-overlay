@@ -94,7 +94,7 @@
       
       // Configuration
       const TWITCH_CLIENT_ID = "z8q1w4g12yrql6cyb5zzwmhe1pnxyn";
-      const GOOGLE_CLIENT_ID = "1234567890-abcdefghijklmnopqrstuvwxyz.apps.googleusercontent.com"; // À remplacer par votre vrai Client ID
+      const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
       const REDIRECT_URI = "https://apo-overlay.netlify.app/auth/callback.html";
       
       function handleTwitchLogin() {
