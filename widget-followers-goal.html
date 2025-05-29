@@ -1,0 +1,321 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Widget Followers Goal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: transparent;
+      overflow: hidden;
+      width: 500px;
+      height: 300px;
+    }
+    
+    .widget-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      border-radius: 15px;
+      background: linear-gradient(135deg, var(--primary-color, #6C63FF) 0%, var(--secondary-color, #38BDF8) 100%);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .widget-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-color, #FFFFFF);
+      margin-bottom: 15px;
+      text-align: center;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .progress-container {
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 15px;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 20px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 10px;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+      border-radius: 10px;
+      transition: width 0.8s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      animation: shimmer 2s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+    
+    .followers-info {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 400px;
+      color: var(--text-color, #FFFFFF);
+      font-weight: 600;
+      font-size: 16px;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+    
+    .current-followers {
+      font-size: 18px;
+    }
+    
+    .goal-followers {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+    
+    .percentage {
+      font-size: 14px;
+      margin-top: 5px;
+      text-align: center;
+      color: var(--text-color, #FFFFFF);
+      opacity: 0.8;
+    }
+    
+    /* Styles par design */
+    .style-gaming {
+      background: linear-gradient(135deg, #FF6B35 0%, #F7931E 50%, #FFD23F 100%);
+      border: 2px solid #FF6B35;
+      box-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
+    }
+    
+    .style-elegant {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 25px;
+      box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+    }
+    
+    .style-retro {
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+      border: 3px solid #ff9a9e;
+      border-radius: 10px;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .style-minimal {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="widget-container" id="widget">
+    <div class="widget-title" id="widget-title">Objectif Followers</div>
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+      </div>
+      <div class="followers-info">
+        <span class="current-followers" id="current-followers">0</span>
+        <span class="goal-followers" id="goal-followers">/ 1000</span>
+      </div>
+      <div class="percentage" id="percentage">0%</div>
+    </div>
+  </div>
+
+  <script>
+    class FollowersGoalWidget {
+      constructor() {
+        this.userId = this.getUserId();
+        this.config = this.getDefaultConfig();
+        this.currentFollowers = 0;
+        this.init();
+      }
+      
+      getUserId() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('userId') || 'anonymous';
+      }
+      
+      getDefaultConfig() {
+        return {
+          title: 'Objectif Followers',
+          goal: 1000,
+          style: 'minimal',
+          primaryColor: '#6C63FF',
+          secondaryColor: '#38BDF8',
+          textColor: '#FFFFFF'
+        };
+      }
+      
+      async init() {
+        await this.loadConfig();
+        this.applyConfig();
+        this.fetchFollowers();
+        this.setupConfigListener();
+        
+        // Actualiser les followers toutes les 5 secondes
+        setInterval(() => this.fetchFollowers(), 5000);
+        
+        // Vérifier les mises à jour de config toutes les secondes
+        setInterval(() => this.loadConfig(), 1000);
+      }
+      
+      async loadConfig() {
+        // Charger depuis les paramètres d'URL (pour l'aperçu)
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('preview') === 'true') {
+          this.config = {
+            title: params.get('title') || this.config.title,
+            goal: parseInt(params.get('goal')) || this.config.goal,
+            style: params.get('style') || this.config.style,
+            primaryColor: params.get('primaryColor') || this.config.primaryColor,
+            secondaryColor: params.get('secondaryColor') || this.config.secondaryColor,
+            textColor: params.get('textColor') || this.config.textColor
+          };
+          return;
+        }
+        
+        // Charger depuis localStorage
+        const savedConfig = localStorage.getItem(`widget_config_${this.userId}`);
+        if (savedConfig) {
+          try {
+            const config = JSON.parse(savedConfig);
+            this.config = { ...this.config, ...config };
+          } catch (e) {
+            console.error('Erreur lors du chargement de la configuration:', e);
+          }
+        }
+      }
+      
+      applyConfig() {
+        // Appliquer le titre
+        document.getElementById('widget-title').textContent = this.config.title;
+        
+        // Appliquer le style
+        const widget = document.getElementById('widget');
+        widget.className = `widget-container style-${this.config.style}`;
+        
+        // Appliquer les couleurs personnalisées
+        document.documentElement.style.setProperty('--primary-color', this.config.primaryColor);
+        document.documentElement.style.setProperty('--secondary-color', this.config.secondaryColor);
+        document.documentElement.style.setProperty('--text-color', this.config.textColor);
+        
+        // Mettre à jour l'objectif
+        document.getElementById('goal-followers').textContent = `/ ${this.config.goal}`;
+        
+        this.updateProgress();
+      }
+      
+      async fetchFollowers() {
+        try {
+          // Récupérer le token Twitch depuis le localStorage ou l'URL
+          let twitchToken = localStorage.getItem('twitch_token');
+          let twitchUser = JSON.parse(localStorage.getItem('twitch_user') || '{}');
+          
+          if (!twitchToken && this.userId !== 'anonymous') {
+            console.log('Token Twitch non trouvé dans localStorage');
+            return;
+          }
+          
+          if (twitchUser.id && twitchToken) {
+            const response = await fetch(`https://api.twitch.tv/helix/channels/followers?broadcaster_id=${twitchUser.id}`, {
+              headers: {
+                'Authorization': `Bearer ${twitchToken}`,
+                'Client-Id': 'your-client-id' // Remplacer par votre Client ID
+              }
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              this.currentFollowers = data.total || 0;
+            } else {
+              console.error('Erreur lors de la récupération des followers:', response.status);
+              // Simuler des followers pour le test
+              this.currentFollowers = Math.floor(Math.random() * this.config.goal * 0.8);
+            }
+          } else {
+            // Mode démonstration avec des followers simulés
+            this.currentFollowers = Math.floor(Math.random() * this.config.goal * 0.8);
+          }
+          
+          this.updateProgress();
+        } catch (error) {
+          console.error('Erreur lors de la récupération des followers:', error);
+          // Mode démonstration
+          this.currentFollowers = Math.floor(Math.random() * this.config.goal * 0.8);
+          this.updateProgress();
+        }
+      }
+      
+      updateProgress() {
+        const percentage = Math.min((this.currentFollowers / this.config.goal) * 100, 100);
+        
+        document.getElementById('current-followers').textContent = this.currentFollowers.toLocaleString();
+        document.getElementById('goal-followers').textContent = `/ ${this.config.goal.toLocaleString()}`;
+        document.getElementById('progress-fill').style.width = `${percentage}%`;
+        document.getElementById('percentage').textContent = `${Math.round(percentage)}%`;
+      }
+      
+      setupConfigListener() {
+        // Écouter les changements de configuration via BroadcastChannel
+        try {
+          const channel = new BroadcastChannel('widget-config');
+          channel.onmessage = (event) => {
+            if (event.data.type === 'config-update' && event.data.config.userId === this.userId) {
+              this.config = { ...this.config, ...event.data.config };
+              this.applyConfig();
+            }
+          };
+        } catch (e) {
+          console.log('BroadcastChannel non supporté');
+        }
+        
+        // Écouter les changements localStorage
+        window.addEventListener('storage', (e) => {
+          if (e.key === `widget_config_${this.userId}`) {
+            this.loadConfig().then(() => this.applyConfig());
+          }
+        });
+      }
+    }
+    
+    // Initialiser le widget
+    new FollowersGoalWidget();
+  </script>
+</body>
+</html>
