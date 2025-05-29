@@ -94,7 +94,7 @@
       
       // Configuration
       const TWITCH_CLIENT_ID = "z8q1w4g12yrql6cyb5zzwmhe1pnxyn";
-      const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+      const GOOGLE_CLIENT_ID = "1234567890-abcdefghijklmnopqrstuvwxyz.apps.googleusercontent.com"; // À remplacer par votre vrai Client ID
       const REDIRECT_URI = "https://apo-overlay.netlify.app/auth/callback.html";
       
       function handleTwitchLogin() {
@@ -139,8 +139,13 @@
         }
       }
 
-      twitchLogin.addEventListener('click', handleTwitchLogin);
-      youtubeLogin.addEventListener('click', handleYouTubeLogin);
+      // Ajouter les écouteurs d'événements
+      if (twitchLogin) {
+        twitchLogin.addEventListener('click', handleTwitchLogin);
+      }
+      if (youtubeLogin) {
+        youtubeLogin.addEventListener('click', handleYouTubeLogin);
+      }
     });
   </script>
 </body>
