@@ -114,18 +114,35 @@
       // Fonction pour récupérer le nombre de followers
       async function fetchFollowers() {
         try {
-          const response = await fetch('/api/twitch/followers');
+          const token = localStorage.getItem('twitch_token');
+          if (!token) {
+            console.error('Token Twitch non trouvé');
+            return;
+          }
+
+          const response = await fetch('/api/twitch/followers', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('Erreur lors de la récupération des followers');
+          }
+
           const data = await response.json();
           if (data.followers !== undefined) {
             updateDisplay(data.followers);
+            // Stocker le nombre de followers pour la synchronisation
+            localStorage.setItem('current_followers_count', data.followers);
           }
         } catch (error) {
           console.error('Erreur lors de la récupération des followers:', error);
         }
       }
 
-      // Mettre à jour toutes les 30 secondes
-      setInterval(fetchFollowers, 30000);
+      // Mettre à jour toutes les 5 secondes
+      setInterval(fetchFollowers, 5000);
       // Première mise à jour immédiate
       fetchFollowers();
 
@@ -172,6 +189,32 @@
       // Charger le nombre de followers initial
       const initialFollowers = parseInt(localStorage.getItem('current_followers_count')) || 0;
       updateDisplay(initialFollowers);
+
+      // Écouter les événements de WebSocket pour les mises à jour en temps réel
+      const ws = new WebSocket('wss://votre-serveur-websocket.com');
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'followers_update' && data.count !== undefined) {
+            updateDisplay(data.count);
+            localStorage.setItem('current_followers_count', data.count);
+          }
+        } catch (error) {
+          console.error('Erreur lors du traitement du message WebSocket:', error);
+        }
+      };
+
+      ws.onerror = (error) => {
+        console.error('Erreur WebSocket:', error);
+      };
+
+      ws.onclose = () => {
+        console.log('Connexion WebSocket fermée, tentative de reconnexion...');
+        setTimeout(() => {
+          // Tentative de reconnexion après 5 secondes
+          window.location.reload();
+        }, 5000);
+      };
     });
   </script>
 </body>

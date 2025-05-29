@@ -80,13 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const url = item.dataset.url;
       const size = item.dataset.size;
       
-      // Vérifier si c'est le widget followers goal
-      if (item.dataset.config) {
-        // Ouvrir la page de configuration dans un nouvel onglet
-        const configUrl = new URL(item.dataset.config, window.location.origin);
-        window.open(configUrl.href, '_blank');
-      }
-      
       // Mettre à jour l'URL de l'iframe avec les paramètres de configuration
       const config = localStorage.getItem('followers-goal-config');
       if (config) {
