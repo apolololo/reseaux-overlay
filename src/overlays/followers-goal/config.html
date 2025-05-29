@@ -262,15 +262,17 @@
     // Configuration en temps réel avec synchronisation cross-domain ultra-améliorée
     let configSyncInterval;
     let broadcastChannel;
+    let forceUpdateChannel;
     
-    // Initialiser le canal de diffusion
-    function initBroadcastChannel() {
+    // Initialiser les canaux de diffusion
+    function initBroadcastChannels() {
       if (typeof BroadcastChannel !== 'undefined') {
         try {
           broadcastChannel = new BroadcastChannel('followers_goal_config');
-          console.log('Canal de diffusion initialisé');
+          forceUpdateChannel = new BroadcastChannel('followers_goal_sync');
+          console.log('📡 Canaux de diffusion initialisés');
         } catch (e) {
-          console.warn('BroadcastChannel non supporté', e);
+          console.warn('⚠️ BroadcastChannel non supporté', e);
         }
       }
     }
@@ -298,101 +300,146 @@
       updatePreview();
     }
     
-    // Fonction pour diffuser les changements de configuration avec méthodes multiples
+    // Fonction pour diffuser les changements de configuration avec TOUTES les méthodes possibles
     function broadcastConfigUpdate() {
       const config = JSON.parse(localStorage.getItem('followers_goal_config') || '{}');
       const currentFollowers = localStorage.getItem('current_followers_count') || '0';
       const timestamp = Date.now();
       
-      console.log('=== SAUVEGARDE CROSS-DOMAIN ULTRA-RENFORCÉE ===');
+      console.log('🚀 DIFFUSION CONFIGURATION ULTRA-RENFORCÉE');
       console.log('Configuration:', config);
       console.log('Timestamp:', timestamp);
       
       // Sauvegarder avec timestamp AVANT de diffuser
       localStorage.setItem('followers_goal_config_timestamp', timestamp.toString());
       
-      // 1. Forcer la propagation via storage event
-      window.dispatchEvent(new StorageEvent('storage', {
-        key: 'followers_goal_config_timestamp',
-        newValue: timestamp.toString(),
-        storageArea: localStorage
-      }));
+      const updateMessage = {
+        type: 'followers_goal_config_update',
+        config: config,
+        currentFollowers: currentFollowers,
+        timestamp: timestamp,
+        source: 'config_page',
+        force: true
+      };
       
-      // 2. Diffusion via BroadcastChannel (priorité)
+      // 1. BroadcastChannel (tous les canaux)
       if (broadcastChannel) {
         try {
           broadcastChannel.postMessage({
             type: 'config_update',
-            config: config,
-            currentFollowers: currentFollowers,
-            timestamp: timestamp,
-            force: true
+            ...updateMessage
           });
-          console.log('✅ Configuration diffusée via BroadcastChannel');
+          console.log('✅ Diffusion BroadcastChannel config');
         } catch (e) {
-          console.error('❌ Erreur BroadcastChannel:', e);
+          console.error('❌ Erreur BroadcastChannel config:', e);
         }
       }
       
-      // 3. Diffusion vers le parent (pour overlay.html)
-      try {
-        window.parent.postMessage({
-          type: 'followers_goal_config_update',
-          config: config,
-          currentFollowers: currentFollowers,
-          timestamp: timestamp,
-          source: 'config_page'
-        }, '*');
-        console.log('✅ Configuration diffusée vers parent');
-      } catch (e) {
-        console.log('⚠️ postMessage parent non disponible');
-      }
-      
-      // 4. Diffusion vers window.opener (si ouvert dans une popup)
-      try {
-        if (window.opener && !window.opener.closed) {
-          window.opener.postMessage({
-            type: 'followers_goal_config_update',
-            config: config,
-            currentFollowers: currentFollowers,
-            timestamp: timestamp,
-            source: 'config_popup'
-          }, '*');
-          console.log('✅ Configuration diffusée vers opener');
+      if (forceUpdateChannel) {
+        try {
+          forceUpdateChannel.postMessage(updateMessage);
+          console.log('✅ Diffusion BroadcastChannel sync');
+        } catch (e) {
+          console.error('❌ Erreur BroadcastChannel sync:', e);
         }
-      } catch (e) {
-        console.log('⚠️ window.opener non disponible');
       }
       
-      // 5. Diffusion vers tous les iframes possibles
+      // 2. Diffusion vers toutes les fenêtres possibles
+      const broadcastTargets = [
+        window.parent,
+        window.top,
+        window.opener
+      ].filter(target => target && target !== window);
+      
+      broadcastTargets.forEach((target, index) => {
+        try {
+          target.postMessage(updateMessage, '*');
+          console.log(`✅ Message envoyé vers target ${index + 1}`);
+        } catch (e) {
+          console.log(`⚠️ Target ${index + 1} non accessible`);
+        }
+      });
+      
+      // 3. Forcer les événements storage avec variations
       try {
-        const frames = window.parent.frames;
-        for (let i = 0; i < frames.length; i++) {
-          try {
-            frames[i].postMessage({
-              type: 'followers_goal_config_update',
-              config: config,
-              currentFollowers: currentFollowers,
-              timestamp: timestamp,
-              source: 'config_to_frames'
-            }, '*');
-          } catch (e) {
-            // Ignore les erreurs de cross-origin
+        // Force update avec clé temporaire
+        localStorage.setItem('followers_goal_force_update', timestamp.toString());
+        
+        // Déclencher manuellement les événements storage
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'followers_goal_config',
+          newValue: JSON.stringify(config),
+          oldValue: null,
+          storageArea: localStorage,
+          url: window.location.href
+        }));
+        
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'followers_goal_config_timestamp',
+          newValue: timestamp.toString(),
+          oldValue: null,
+          storageArea: localStorage,
+          url: window.location.href
+        }));
+        
+        console.log('✅ Événements storage forcés');
+        
+        // Nettoyer après 1 seconde
+        setTimeout(() => {
+          localStorage.removeItem('followers_goal_force_update');
+        }, 1000);
+      } catch (e) {
+        console.error('❌ Erreur événements storage:', e);
+      }
+      
+      // 4. Diffusion vers les iframes de la page parent
+      try {
+        if (window.parent && window.parent.frames) {
+          for (let i = 0; i < window.parent.frames.length; i++) {
+            try {
+              window.parent.frames[i].postMessage(updateMessage, '*');
+            } catch (e) {
+              // Ignore les erreurs cross-origin
+            }
           }
         }
-        console.log('✅ Configuration diffusée vers tous les iframes');
+        console.log('✅ Diffusion vers tous les iframes');
       } catch (e) {
         console.log('⚠️ Diffusion iframes échouée');
       }
       
-      // 6. Diffusion via LocalStorage avec événement forcé
-      try {
-        localStorage.setItem('followers_goal_config_force_update', timestamp.toString());
+      // 5. Répétition avec délais pour garantir la réception
+      for (let i = 1; i <= 3; i++) {
         setTimeout(() => {
-          localStorage.removeItem('followers_goal_config_force_update');
-        }, 1000);
-      } catch (e) {
-        console.log('⚠️ Force update localStorage échoué');
+          console.log(`🔄 Répétition diffusion ${i}/3`);
+          
+          // Re-diffuser via tous les canaux
+          if (broadcastChannel) {
+            broadcastChannel.postMessage({
+              type: 'config_update',
+              ...updateMessage,
+              retry: i
+            });
+          }
+          
+          if (forceUpdateChannel) {
+            forceUpdateChannel.postMessage({
+              ...updateMessage,
+              retry: i
+            });
+          }
+          
+          broadcastTargets.forEach(target => {
+            try {
+              target.postMessage({
+                ...updateMessage,
+                retry: i
+              }, '*');
+            } catch (e) {
+              // Silent fail
+            }
+          });
+        }, i * 200);
       }
     }
 
@@ -478,7 +525,7 @@
         progressColor: document.getElementById('progress-color').value
       };
       
-      console.log('=== SAUVEGARDE CROSS-DOMAIN ULTRA-RENFORCÉE ===');
+      console.log('🚀 SAUVEGARDE CONFIGURATION ULTRA-RENFORCÉE');
       console.log('Nouvelle configuration:', config);
       
       // Sauvegarder la configuration
@@ -504,7 +551,7 @@
       element.addEventListener('input', () => {
         updatePreview();
         
-        // Diffuser les changements en temps réel pendant la saisie
+        // Diffuser les changements en temps réel pendant la saisie (plus agressif)
         clearTimeout(element._diffusionTimeout);
         element._diffusionTimeout = setTimeout(() => {
           // Sauvegarder temporairement pour les tests en temps réel
@@ -518,8 +565,9 @@
           };
           
           localStorage.setItem('followers_goal_config', JSON.stringify(tempConfig));
+          console.log('⚡ Diffusion temps réel:', tempConfig);
           broadcastConfigUpdate();
-        }, 300); // Attendre 300ms après la dernière modification (plus réactif)
+        }, 150); // Réduit à 150ms pour plus de réactivité
       });
     });
 
@@ -605,19 +653,25 @@
 
     // Charger la configuration au démarrage avec écoute cross-domain
     document.addEventListener('DOMContentLoaded', () => {
-      initBroadcastChannel();
+      initBroadcastChannels();
       loadConfig();
       
       // Écouter les messages cross-domain
       window.addEventListener('message', (event) => {
         if (event.data.type === 'followers_goal_ping') {
-          console.log('Ping reçu, envoi de sync response');
+          console.log('📡 Ping reçu, envoi de sync response');
           // Répondre avec la configuration actuelle
           setTimeout(() => {
             broadcastConfigUpdate();
           }, 100);
         }
       });
+      
+      // Diffusion forcée périodique toutes les 2 secondes
+      setInterval(() => {
+        console.log('🔄 Diffusion périodique automatique');
+        broadcastConfigUpdate();
+      }, 2000);
     });
   </script>
 </body>
