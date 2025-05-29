@@ -83,15 +83,26 @@ document.addEventListener('DOMContentLoaded', () => {
       // Vérifier si c'est le widget followers goal
       if (item.dataset.config) {
         // Ouvrir la page de configuration dans un nouvel onglet
-        window.open(item.dataset.config, '_blank');
+        const configUrl = new URL(item.dataset.config, window.location.origin);
+        window.open(configUrl.href, '_blank');
       }
       
-      iframe.src = url;
+      // Mettre à jour l'URL de l'iframe avec les paramètres de configuration
+      const config = localStorage.getItem('followers-goal-config');
+      if (config) {
+        const params = new URLSearchParams(JSON.parse(config));
+        iframe.src = `${url}?${params.toString()}`;
+      } else {
+        iframe.src = url;
+      }
       
       // Mettre à jour l'info de taille
       if (sizeInfo) {
         sizeInfo.textContent = `Taille recommandée : ${size}`;
       }
+
+      // Mettre à jour le bouton de configuration
+      updateConfigButton(item);
     });
   });
 
@@ -151,13 +162,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const overlayUrl = new URL('/overlay.html', PRODUCTION_URL);
     overlayUrl.searchParams.set('token', token);
     
-    // Copier tous les paramètres pertinents de la preview
-    const previewUrl = new URL(previewFrame.src);
-    previewUrl.searchParams.forEach((value, key) => {
-      if (key !== 'token') { // Ne pas copier l'ancien token s'il existe
+    // Ajouter les paramètres de configuration si disponibles
+    const config = localStorage.getItem('followers-goal-config');
+    if (config) {
+      const params = new URLSearchParams(JSON.parse(config));
+      params.forEach((value, key) => {
         overlayUrl.searchParams.set(key, value);
-      }
-    });
+      });
+    }
     
     try {
       await navigator.clipboard.writeText(overlayUrl.toString());

@@ -91,8 +91,11 @@
       document.documentElement.style.setProperty('--progress-color', config.progressColor);
       document.documentElement.style.setProperty('--text-color', config.textColor);
 
+      let currentFollowers = 0;
+
       // Fonction pour mettre à jour l'affichage
-      function updateDisplay(currentFollowers) {
+      function updateDisplay(followers) {
+        currentFollowers = followers;
         const percentage = Math.min(100, Math.round((currentFollowers / config.target) * 100));
         
         // Mettre à jour le texte
@@ -108,6 +111,24 @@
         document.getElementById('percentage').textContent = `${percentage}%`;
       }
 
+      // Fonction pour récupérer le nombre de followers
+      async function fetchFollowers() {
+        try {
+          const response = await fetch('/api/twitch/followers');
+          const data = await response.json();
+          if (data.followers !== undefined) {
+            updateDisplay(data.followers);
+          }
+        } catch (error) {
+          console.error('Erreur lors de la récupération des followers:', error);
+        }
+      }
+
+      // Mettre à jour toutes les 30 secondes
+      setInterval(fetchFollowers, 30000);
+      // Première mise à jour immédiate
+      fetchFollowers();
+
       // Écouter les messages de configuration
       window.addEventListener('message', (event) => {
         if (event.data.type === 'followers_goal_config_update') {
@@ -116,6 +137,7 @@
             Object.assign(config, newConfig);
             document.documentElement.style.setProperty('--progress-color', config.progressColor);
             document.documentElement.style.setProperty('--text-color', config.textColor);
+            updateDisplay(currentFollowers);
           }
           if (event.data.currentFollowers !== undefined) {
             updateDisplay(event.data.currentFollowers);
@@ -125,12 +147,13 @@
 
       // Écouter les changements de stockage local
       window.addEventListener('storage', (event) => {
-        if (event.key === 'followers_goal_config') {
+        if (event.key === 'followers-goal-config') {
           const newConfig = JSON.parse(event.newValue);
           if (newConfig) {
             Object.assign(config, newConfig);
             document.documentElement.style.setProperty('--progress-color', config.progressColor);
             document.documentElement.style.setProperty('--text-color', config.textColor);
+            updateDisplay(currentFollowers);
           }
         }
         if (event.key === 'current_followers_count') {
@@ -147,8 +170,8 @@
       }
 
       // Charger le nombre de followers initial
-      const currentFollowers = parseInt(localStorage.getItem('current_followers_count')) || 0;
-      updateDisplay(currentFollowers);
+      const initialFollowers = parseInt(localStorage.getItem('current_followers_count')) || 0;
+      updateDisplay(initialFollowers);
     });
   </script>
 </body>
