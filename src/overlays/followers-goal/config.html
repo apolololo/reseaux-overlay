@@ -77,6 +77,19 @@
       cursor: pointer;
     }
 
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
     .preview-section {
       margin-top: 2rem;
       padding: 1.5rem;
@@ -200,6 +213,27 @@
       </div>
     </div>
 
+    <div class="config-section">
+      <h2>
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <path fill="currentColor" d="M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9M12,4.5C17,4.5 21.27,7.61 23,12C21.27,16.39 17,19.5 12,19.5C7,19.5 2.73,16.39 1,12C2.73,7.61 7,4.5 12,4.5M3.18,12C4.83,15.36 8.24,17.5 12,17.5C15.76,17.5 19.17,15.36 20.82,12C19.17,8.64 15.76,6.5 12,6.5C8.24,6.5 4.83,8.64 3.18,12Z"/>
+        </svg>
+        Visibilité
+      </h2>
+      <div class="checkbox-group">
+        <input type="checkbox" id="show-background" checked>
+        <label for="show-background">Afficher le fond</label>
+      </div>
+      <div class="checkbox-group">
+        <input type="checkbox" id="show-progress-bar" checked>
+        <label for="show-progress-bar">Afficher la barre de progression</label>
+      </div>
+      <div class="checkbox-group">
+        <input type="checkbox" id="show-percentage" checked>
+        <label for="show-percentage">Afficher le pourcentage</label>
+      </div>
+    </div>
+
     <div class="preview-section">
       <h3 class="preview-title">
         <svg viewBox="0 0 24 24" width="24" height="24">
@@ -226,7 +260,10 @@
         target: 1000,
         text: "Objectif : {current}/{target} followers",
         progressColor: "#FF0000",
-        textColor: "#FFFFFF"
+        textColor: "#FFFFFF",
+        showBackground: true,
+        showProgressBar: true,
+        showPercentage: true
       };
 
       // Charger la configuration existante
@@ -242,6 +279,9 @@
         document.getElementById('goal-text').value = config.text;
         document.getElementById('progress-color').value = config.progressColor;
         document.getElementById('text-color').value = config.textColor;
+        document.getElementById('show-background').checked = config.showBackground;
+        document.getElementById('show-progress-bar').checked = config.showProgressBar;
+        document.getElementById('show-percentage').checked = config.showPercentage;
         updatePreview();
       }
 
@@ -252,7 +292,10 @@
           target: config.target,
           text: config.text,
           progressColor: config.progressColor,
-          textColor: config.textColor
+          textColor: config.textColor,
+          showBackground: config.showBackground,
+          showProgressBar: config.showProgressBar,
+          showPercentage: config.showPercentage
         });
         iframe.src = `overlay.html?${params.toString()}`;
       }
@@ -275,6 +318,21 @@
 
       document.getElementById('text-color').addEventListener('input', (e) => {
         config.textColor = e.target.value;
+        updatePreview();
+      });
+
+      document.getElementById('show-background').addEventListener('change', (e) => {
+        config.showBackground = e.target.checked;
+        updatePreview();
+      });
+
+      document.getElementById('show-progress-bar').addEventListener('change', (e) => {
+        config.showProgressBar = e.target.checked;
+        updatePreview();
+      });
+
+      document.getElementById('show-percentage').addEventListener('change', (e) => {
+        config.showPercentage = e.target.checked;
         updatePreview();
       });
 
