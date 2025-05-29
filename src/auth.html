@@ -103,8 +103,7 @@
           errorContainer.style.display = 'none';
           
           const state = Math.random().toString(36).substring(2, 15);
-          localStorage.setItem('auth_state', state);
-          localStorage.setItem('auth_type', 'twitch');
+          localStorage.setItem('twitch_auth_state', state); // Changé ici
           
           const scope = 'user:read:email channel:read:subscriptions moderator:read:followers';
           const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${TWITCH_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}&force_verify=true`;
@@ -124,8 +123,7 @@
           errorContainer.style.display = 'none';
           
           const state = Math.random().toString(36).substring(2, 15);
-          localStorage.setItem('auth_state', state);
-          localStorage.setItem('auth_type', 'youtube');
+          localStorage.setItem('youtube_auth_state', state); // Changé ici
           
           const scope = 'https://www.googleapis.com/auth/youtube.readonly';
           const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}&access_type=offline&prompt=consent`;

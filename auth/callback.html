@@ -64,12 +64,14 @@
       const exchangeCodeForToken = async (code) => {
         try {
           loadingText.textContent = "Échange du code contre un token...";
-          console.log("Échange du code contre un token...", code);
-          console.log("URL de redirection utilisée:", 'https://apo-overlay.netlify.app/auth/callback.html');
-          console.log("Client ID utilisé (dans auth.html):", "z8q1w4g12yrql6cyb5zzwmhe1pnxyn");
           
-          // Appel à notre fonction Supabase Edge qui gère l'échange de code
-          const response = await fetch('https://uejmtvhqzadtxrqtowtm.supabase.co/functions/v1/twitch-auth', {
+          // Vérifier le type d'authentification
+          const authType = localStorage.getItem('auth_type');
+          const endpoint = authType === 'youtube' ? 
+            'https://uejmtvhqzadtxrqtowtm.supabase.co/functions/v1/youtube-auth' :
+            'https://uejmtvhqzadtxrqtowtm.supabase.co/functions/v1/twitch-auth';
+          
+          const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -86,42 +88,26 @@
             try {
               const errorJson = await response.json();
               errorText = JSON.stringify(errorJson);
-              console.error("Erreur de la fonction Supabase (JSON):", errorJson);
             } catch (e) {
               errorText = await response.text();
-              console.error("Erreur de la fonction Supabase (texte):", errorText);
             }
             throw new Error('Erreur lors de l\'échange du code: ' + response.status + ' ' + errorText);
           }
           
           const data = await response.json();
-          console.log("Données reçues:", data);
           
           if (data.error) {
             throw new Error(data.error);
           }
           
           // Stocker le token et l'expiration en local storage
-          localStorage.setItem('twitch_token', data.access_token);
+          localStorage.setItem(`${authType}_token`, data.access_token);
           const expiresAt = new Date().getTime() + (data.expires_in * 1000);
-          localStorage.setItem('twitch_expires_at', expiresAt.toString());
+          localStorage.setItem(`${authType}_expires_at`, expiresAt.toString());
           
-          // Stocker également les infos utilisateur si retournées
-          if (data.user) {
-            localStorage.setItem('twitch_user', JSON.stringify(data.user));
-            console.log("Informations utilisateur stockées:", data.user);
-          }
-          
-          // Stocker les informations des abonnés si disponibles
-          if (data.subscriberCount !== undefined) {
-            localStorage.setItem('twitch_subscriber_count', data.subscriberCount.toString());
-            console.log("Nombre d'abonnés stocké:", data.subscriberCount);
-          }
-          
-          // Stocker les points d'abonnement si disponibles
-          if (data.subscriberPoints !== undefined) {
-            localStorage.setItem('twitch_subscriber_points', data.subscriberPoints.toString());
-            console.log("Points d'abonnement stockés:", data.subscriberPoints);
+          // Stocker les infos utilisateur
+          if (data.user || data.channelInfo) {
+            localStorage.setItem(`${authType}_user`, JSON.stringify(data.user || data.channelInfo));
           }
           
           loadingText.textContent = "Connexion réussie !";
@@ -138,58 +124,38 @@
           statusMessage.textContent = "Une erreur s'est produite";
           errorContainer.style.display = 'block';
           errorMessage.textContent = error.message || "Détails non disponibles";
-          
-          // Ajouter des détails supplémentaires pour le débogage
-          if (error.message && error.message.includes('invalid client')) {
-            errorMessage.innerHTML = "Erreur d'authentification Twitch: Client ID ou Secret invalide.<br><br>" +
-              "Vérifiez que les identifiants client sont correctement configurés dans la console développeur Twitch " +
-              "et que l'URL de redirection <strong>https://apo-overlay.netlify.app/auth/callback.html</strong> " +
-              "est bien enregistrée dans les paramètres de l'application Twitch.";
-          } else if (error.message && error.message.includes('redirect_uri does not match')) {
-            errorMessage.innerHTML = "Erreur d'authentification Twitch: L'URL de redirection ne correspond pas.<br><br>" +
-              "Vérifiez que l'URL de redirection <strong>https://apo-overlay.netlify.app/auth/callback.html</strong> " +
-              "est exactement celle qui est enregistrée dans les paramètres de l'application Twitch.";
-          }
         }
       };
       
       // Traiter les paramètres d'URL
       const params = getUrlParams();
-      console.log("Paramètres reçus:", params);
       
       // Vérifier si l'état correspond
-      const storedState = localStorage.getItem('twitch_auth_state');
+      const authType = localStorage.getItem('auth_type');
+      const storedState = localStorage.getItem(`${authType}_auth_state`);
       
       if (params.error) {
-        // Gérer les erreurs retournées par Twitch
         statusMessage.textContent = "Erreur d'authentification";
         loadingText.textContent = params.error_description || params.error;
         errorContainer.style.display = 'block';
         errorMessage.textContent = params.error_description || params.error;
-        console.error("Erreur Twitch:", params.error, params.error_description);
       } else if (!params.state || params.state !== storedState) {
-        // Vérification de l'état échouée (possible attaque CSRF)
         statusMessage.textContent = "Erreur de sécurité";
         loadingText.textContent = "Vérification d'état échouée";
         errorContainer.style.display = 'block';
         errorMessage.textContent = "Erreur de sécurité (état invalide)";
-        console.error("État invalide:", params.state, "attendu:", storedState);
       } else if (params.code) {
-        // Échanger le code contre un token
-        console.log("Code d'autorisation reçu, échange en cours...");
         await exchangeCodeForToken(params.code);
       } else {
-        // Aucun code ou erreur dans l'URL
         statusMessage.textContent = "Erreur d'authentification";
         loadingText.textContent = "Aucun code d'autorisation reçu";
         errorContainer.style.display = 'block';
         errorMessage.textContent = "Aucun code d'autorisation n'a été reçu";
-        console.error("Aucun code reçu dans l'URL");
       }
       
       // Nettoyer l'état stocké
-      localStorage.removeItem('twitch_auth_state');
+      localStorage.removeItem(`${authType}_auth_state`);
     });
   </script>
 </body>
-</html> 
+</html>
