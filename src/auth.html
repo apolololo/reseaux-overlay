@@ -94,7 +94,7 @@
       
       // Configuration
       const TWITCH_CLIENT_ID = "z8q1w4g12yrql6cyb5zzwmhe1pnxyn";
-      const GOOGLE_CLIENT_ID = "1234567890-abcdefghijklmnopqrstuvwxyz.apps.googleusercontent.com"; // À remplacer par votre vrai Client ID
+      const GOOGLE_CLIENT_ID = "71772203410-j272jlnqe6564jdsb8c21ltncsplgl4t.apps.googleusercontent.com";
       const REDIRECT_URI = "https://apo-overlay.netlify.app/auth/callback.html";
       
       function handleTwitchLogin() {
@@ -103,7 +103,8 @@
           errorContainer.style.display = 'none';
           
           const state = Math.random().toString(36).substring(2, 15);
-          localStorage.setItem('twitch_auth_state', state); // Changé ici
+          localStorage.setItem('twitch_auth_state', state);
+          localStorage.setItem('auth_type', 'twitch');
           
           const scope = 'user:read:email channel:read:subscriptions moderator:read:followers';
           const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${TWITCH_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}&force_verify=true`;
@@ -123,7 +124,8 @@
           errorContainer.style.display = 'none';
           
           const state = Math.random().toString(36).substring(2, 15);
-          localStorage.setItem('youtube_auth_state', state); // Changé ici
+          localStorage.setItem('youtube_auth_state', state);
+          localStorage.setItem('auth_type', 'youtube');
           
           const scope = 'https://www.googleapis.com/auth/youtube.readonly';
           const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}&access_type=offline&prompt=consent`;
