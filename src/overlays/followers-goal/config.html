@@ -259,7 +259,7 @@
   </div>
 
   <script>
-    // Configuration en temps réel avec synchronisation améliorée
+    // Configuration en temps réel avec synchronisation cross-domain ultra-améliorée
     let configSyncInterval;
     let broadcastChannel;
     
@@ -298,27 +298,27 @@
       updatePreview();
     }
     
-    // Fonction pour diffuser les changements de configuration avec timestamp forcé
+    // Fonction pour diffuser les changements de configuration avec méthodes multiples
     function broadcastConfigUpdate() {
       const config = JSON.parse(localStorage.getItem('followers_goal_config') || '{}');
       const currentFollowers = localStorage.getItem('current_followers_count') || '0';
       const timestamp = Date.now();
       
-      console.log('=== SAUVEGARDE ET DIFFUSION DE LA CONFIGURATION ===');
+      console.log('=== SAUVEGARDE CROSS-DOMAIN ULTRA-RENFORCÉE ===');
       console.log('Configuration:', config);
       console.log('Timestamp:', timestamp);
       
       // Sauvegarder avec timestamp AVANT de diffuser
       localStorage.setItem('followers_goal_config_timestamp', timestamp.toString());
       
-      // Forcer la propagation via storage event
+      // 1. Forcer la propagation via storage event
       window.dispatchEvent(new StorageEvent('storage', {
         key: 'followers_goal_config_timestamp',
         newValue: timestamp.toString(),
         storageArea: localStorage
       }));
       
-      // Diffusion via BroadcastChannel (priorité)
+      // 2. Diffusion via BroadcastChannel (priorité)
       if (broadcastChannel) {
         try {
           broadcastChannel.postMessage({
@@ -334,20 +334,37 @@
         }
       }
       
-      // Diffusion via postMessage pour OBS
+      // 3. Diffusion vers le parent (pour overlay.html)
       try {
         window.parent.postMessage({
           type: 'followers_goal_config_update',
           config: config,
           currentFollowers: currentFollowers,
-          timestamp: timestamp
+          timestamp: timestamp,
+          source: 'config_page'
         }, '*');
-        console.log('✅ Configuration diffusée via postMessage');
+        console.log('✅ Configuration diffusée vers parent');
       } catch (e) {
-        console.log('⚠️ postMessage non disponible');
+        console.log('⚠️ postMessage parent non disponible');
       }
       
-      // Diffusion via tous les iframes possible
+      // 4. Diffusion vers window.opener (si ouvert dans une popup)
+      try {
+        if (window.opener && !window.opener.closed) {
+          window.opener.postMessage({
+            type: 'followers_goal_config_update',
+            config: config,
+            currentFollowers: currentFollowers,
+            timestamp: timestamp,
+            source: 'config_popup'
+          }, '*');
+          console.log('✅ Configuration diffusée vers opener');
+        }
+      } catch (e) {
+        console.log('⚠️ window.opener non disponible');
+      }
+      
+      // 5. Diffusion vers tous les iframes possibles
       try {
         const frames = window.parent.frames;
         for (let i = 0; i < frames.length; i++) {
@@ -356,7 +373,8 @@
               type: 'followers_goal_config_update',
               config: config,
               currentFollowers: currentFollowers,
-              timestamp: timestamp
+              timestamp: timestamp,
+              source: 'config_to_frames'
             }, '*');
           } catch (e) {
             // Ignore les erreurs de cross-origin
@@ -365,6 +383,16 @@
         console.log('✅ Configuration diffusée vers tous les iframes');
       } catch (e) {
         console.log('⚠️ Diffusion iframes échouée');
+      }
+      
+      // 6. Diffusion via LocalStorage avec événement forcé
+      try {
+        localStorage.setItem('followers_goal_config_force_update', timestamp.toString());
+        setTimeout(() => {
+          localStorage.removeItem('followers_goal_config_force_update');
+        }, 1000);
+      } catch (e) {
+        console.log('⚠️ Force update localStorage échoué');
       }
     }
 
@@ -387,7 +415,7 @@
       document.getElementById('current-progress').textContent = progress + '%';
     }
 
-    // Ajuster manuellement les followers avec diffusion immédiate
+    // Ajuster manuellement les followers avec diffusion immédiate cross-domain
     async function adjustFollowers(amount) {
       let currentFollowers = await fetchCurrentFollowers();
       
@@ -402,7 +430,7 @@
       await updateCurrentInfo();
       updatePreview();
       
-      // Diffuser le changement immédiatement
+      // Diffuser le changement immédiatement avec toutes les méthodes
       setTimeout(() => {
         broadcastConfigUpdate();
       }, 10);
@@ -437,7 +465,7 @@
       }
     }
 
-    // Sauvegarder la configuration avec diffusion TRIPLE pour garantir la réception
+    // Sauvegarder la configuration avec diffusion ULTRA-RENFORCÉE
     document.getElementById('config-form').addEventListener('submit', function(e) {
       e.preventDefault();
       
@@ -450,27 +478,19 @@
         progressColor: document.getElementById('progress-color').value
       };
       
-      console.log('=== DÉBUT SAUVEGARDE TRIPLE ===');
+      console.log('=== SAUVEGARDE CROSS-DOMAIN ULTRA-RENFORCÉE ===');
       console.log('Nouvelle configuration:', config);
       
       // Sauvegarder la configuration
       localStorage.setItem('followers_goal_config', JSON.stringify(config));
       
-      // Diffuser immédiatement (3 fois pour être sûr)
-      setTimeout(() => {
-        console.log('🚀 Diffusion 1/3');
-        broadcastConfigUpdate();
-      }, 50);
-      
-      setTimeout(() => {
-        console.log('🚀 Diffusion 2/3');
-        broadcastConfigUpdate();
-      }, 150);
-      
-      setTimeout(() => {
-        console.log('🚀 Diffusion 3/3');
-        broadcastConfigUpdate();
-      }, 300);
+      // Diffuser immédiatement (5 fois avec intervalles pour garantir la réception)
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+          console.log(`🚀 Diffusion cross-domain ${i + 1}/5`);
+          broadcastConfigUpdate();
+        }, i * 100 + 50);
+      }
       
       alert('Configuration sauvegardée avec succès!');
       
@@ -479,7 +499,7 @@
       }, 1000);
     });
 
-    // Mettre à jour l'aperçu en temps réel ET diffuser les changements
+    // Mettre à jour l'aperçu en temps réel ET diffuser les changements cross-domain
     document.querySelectorAll('input, select').forEach(element => {
       element.addEventListener('input', () => {
         updatePreview();
@@ -499,7 +519,7 @@
           
           localStorage.setItem('followers_goal_config', JSON.stringify(tempConfig));
           broadcastConfigUpdate();
-        }, 500); // Attendre 500ms après la dernière modification
+        }, 300); // Attendre 300ms après la dernière modification (plus réactif)
       });
     });
 
@@ -583,10 +603,21 @@
       }
     }
 
-    // Charger la configuration au démarrage
+    // Charger la configuration au démarrage avec écoute cross-domain
     document.addEventListener('DOMContentLoaded', () => {
       initBroadcastChannel();
       loadConfig();
+      
+      // Écouter les messages cross-domain
+      window.addEventListener('message', (event) => {
+        if (event.data.type === 'followers_goal_ping') {
+          console.log('Ping reçu, envoi de sync response');
+          // Répondre avec la configuration actuelle
+          setTimeout(() => {
+            broadcastConfigUpdate();
+          }, 100);
+        }
+      });
     });
   </script>
 </body>

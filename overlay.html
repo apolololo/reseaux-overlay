@@ -103,6 +103,9 @@
         
         document.getElementById('overlay-container').appendChild(iframe);
         
+        // Configuration de la synchronisation cross-domain améliorée
+        setupCrossDomainSync(iframe);
+        
       } catch (error) {
         console.error("Erreur lors du décodage du token:", error);
         
@@ -145,12 +148,93 @@
           
           document.getElementById('overlay-container').appendChild(iframe);
           
+          // Configuration de la synchronisation cross-domain
+          setupCrossDomainSync(iframe);
+          
         } catch (fallbackError) {
           console.error("Erreur avec le format de token de fallback:", fallbackError);
           showError("Token d'overlay invalide", "Ce lien d'overlay n'est pas valide ou a expiré.");
         }
       }
     });
+    
+    function setupCrossDomainSync(iframe) {
+      console.log('=== CONFIGURATION DE LA SYNCHRONISATION CROSS-DOMAIN ===');
+      
+      // Écouter les événements de storage pour propager les changements
+      window.addEventListener('storage', (event) => {
+        if (event.key === 'followers_goal_config_timestamp' || 
+            event.key === 'followers_goal_config' ||
+            event.key === 'current_followers_count' ||
+            event.key === 'current_followers_timestamp') {
+          
+          console.log('Storage event détecté:', event.key, event.newValue);
+          
+          // Propager vers l'iframe
+          if (iframe && iframe.contentWindow) {
+            try {
+              const config = JSON.parse(localStorage.getItem('followers_goal_config') || '{}');
+              const currentFollowers = localStorage.getItem('current_followers_count') || '0';
+              
+              iframe.contentWindow.postMessage({
+                type: 'followers_goal_config_update',
+                config: config,
+                currentFollowers: currentFollowers,
+                timestamp: Date.now(),
+                source: 'overlay_parent',
+                force: true
+              }, '*');
+              
+              console.log('✅ Configuration propagée vers iframe via postMessage');
+            } catch (e) {
+              console.error('❌ Erreur lors de la propagation:', e);
+            }
+          }
+        }
+      });
+      
+      // Écouter les messages de configuration depuis d'autres fenêtres
+      window.addEventListener('message', (event) => {
+        if (event.data.type === 'followers_goal_config_update') {
+          console.log('=== MESSAGE CONFIG REÇU DANS OVERLAY PARENT ===', event.data);
+          
+          // Propager vers l'iframe
+          if (iframe && iframe.contentWindow) {
+            try {
+              iframe.contentWindow.postMessage(event.data, '*');
+              console.log('✅ Message propagé vers iframe');
+            } catch (e) {
+              console.error('❌ Erreur propagation iframe:', e);
+            }
+          }
+        }
+      });
+      
+      // Vérification périodique pour forcer la synchronisation
+      setInterval(() => {
+        if (iframe && iframe.contentWindow) {
+          try {
+            const config = JSON.parse(localStorage.getItem('followers_goal_config') || '{}');
+            const currentFollowers = localStorage.getItem('current_followers_count') || '0';
+            const configTimestamp = localStorage.getItem('followers_goal_config_timestamp');
+            
+            if (Object.keys(config).length > 0 || currentFollowers !== '0') {
+              iframe.contentWindow.postMessage({
+                type: 'followers_goal_sync_check',
+                config: config,
+                currentFollowers: currentFollowers,
+                timestamp: configTimestamp ? parseInt(configTimestamp) : Date.now(),
+                source: 'overlay_parent_periodic'
+              }, '*');
+            }
+          } catch (e) {
+            // Silent fail pour éviter les logs trop verbeux
+          }
+        }
+      }, 1000); // Vérification chaque seconde
+      
+      console.log('✅ Synchronisation cross-domain configurée');
+    }
     
     function showError(title, message) {
       document.body.innerHTML = `
