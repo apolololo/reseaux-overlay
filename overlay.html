@@ -44,10 +44,6 @@
   <div id="overlay-container"></div>
   
   <script>
-    let currentIframe = null;
-    let syncChannel = null;
-    let storageWatcher = null;
-    
     document.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
       const token = params.get('token');
@@ -96,19 +92,16 @@
         });
         
         // Créer un iframe pour charger l'overlay
-        currentIframe = document.createElement('iframe');
-        currentIframe.src = overlayUrl.toString();
-        currentIframe.style.border = 'none';
-        currentIframe.style.width = '100%';
-        currentIframe.style.height = '100%';
-        currentIframe.style.position = 'absolute';
-        currentIframe.style.top = '0';
-        currentIframe.style.left = '0';
+        const iframe = document.createElement('iframe');
+        iframe.src = overlayUrl.toString();
+        iframe.style.border = 'none';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.position = 'absolute';
+        iframe.style.top = '0';
+        iframe.style.left = '0';
         
-        document.getElementById('overlay-container').appendChild(currentIframe);
-        
-        // Configuration de la synchronisation cross-domain ultra-améliorée
-        setupAdvancedCrossDomainSync();
+        document.getElementById('overlay-container').appendChild(iframe);
         
       } catch (error) {
         console.error("Erreur lors du décodage du token:", error);
@@ -141,19 +134,16 @@
             }
           });
           
-          currentIframe = document.createElement('iframe');
-          currentIframe.src = overlayUrl.toString();
-          currentIframe.style.border = 'none';
-          currentIframe.style.width = '100%';
-          currentIframe.style.height = '100%';
-          currentIframe.style.position = 'absolute';
-          currentIframe.style.top = '0';
-          currentIframe.style.left = '0';
+          const iframe = document.createElement('iframe');
+          iframe.src = overlayUrl.toString();
+          iframe.style.border = 'none';
+          iframe.style.width = '100%';
+          iframe.style.height = '100%';
+          iframe.style.position = 'absolute';
+          iframe.style.top = '0';
+          iframe.style.left = '0';
           
-          document.getElementById('overlay-container').appendChild(currentIframe);
-          
-          // Configuration de la synchronisation cross-domain
-          setupAdvancedCrossDomainSync();
+          document.getElementById('overlay-container').appendChild(iframe);
           
         } catch (fallbackError) {
           console.error("Erreur avec le format de token de fallback:", fallbackError);
@@ -161,180 +151,6 @@
         }
       }
     });
-    
-    function setupAdvancedCrossDomainSync() {
-      console.log('=== CONFIGURATION SYNCHRONISATION CROSS-DOMAIN ULTRA-AVANCÉE ===');
-      
-      // 1. Initialiser BroadcastChannel pour communication directe
-      if (typeof BroadcastChannel !== 'undefined') {
-        try {
-          syncChannel = new BroadcastChannel('followers_goal_sync');
-          syncChannel.addEventListener('message', (event) => {
-            console.log('🔄 Message BroadcastChannel reçu:', event.data);
-            forwardToIframe(event.data);
-          });
-          console.log('✅ BroadcastChannel initialisé');
-        } catch (e) {
-          console.warn('⚠️ BroadcastChannel non supporté:', e);
-        }
-      }
-      
-      // 2. Surveillance ultra-agressive du localStorage
-      let lastConfigSnapshot = '';
-      let lastFollowersSnapshot = '';
-      
-      function checkConfigChanges() {
-        const currentConfig = localStorage.getItem('followers_goal_config') || '';
-        const currentFollowers = localStorage.getItem('current_followers_count') || '';
-        
-        if (currentConfig !== lastConfigSnapshot || currentFollowers !== lastFollowersSnapshot) {
-          console.log('🔄 Changement détecté dans localStorage');
-          
-          try {
-            const configData = currentConfig ? JSON.parse(currentConfig) : {};
-            const message = {
-              type: 'followers_goal_config_update',
-              config: configData,
-              currentFollowers: currentFollowers,
-              timestamp: Date.now(),
-              source: 'overlay_parent_watcher'
-            };
-            
-            forwardToIframe(message);
-            
-            lastConfigSnapshot = currentConfig;
-            lastFollowersSnapshot = currentFollowers;
-          } catch (e) {
-            console.error('❌ Erreur parsing config:', e);
-          }
-        }
-      }
-      
-      // Surveillance toutes les 100ms (ultra-rapide)
-      storageWatcher = setInterval(checkConfigChanges, 100);
-      
-      // 3. Écouter les événements storage standard
-      window.addEventListener('storage', (event) => {
-        if (event.key === 'followers_goal_config' || 
-            event.key === 'current_followers_count' ||
-            event.key === 'followers_goal_config_timestamp') {
-          
-          console.log('📡 Storage event:', event.key, event.newValue);
-          
-          try {
-            const config = JSON.parse(localStorage.getItem('followers_goal_config') || '{}');
-            const currentFollowers = localStorage.getItem('current_followers_count') || '0';
-            
-            const message = {
-              type: 'followers_goal_config_update',
-              config: config,
-              currentFollowers: currentFollowers,
-              timestamp: Date.now(),
-              source: 'overlay_parent_storage'
-            };
-            
-            forwardToIframe(message);
-          } catch (e) {
-            console.error('❌ Erreur storage event:', e);
-          }
-        }
-      });
-      
-      // 4. Écouter les messages des autres fenêtres
-      window.addEventListener('message', (event) => {
-        console.log('📨 Message reçu dans overlay parent:', event.data);
-        
-        if (event.data.type === 'followers_goal_config_update' ||
-            event.data.type === 'followers_goal_sync_check') {
-          forwardToIframe(event.data);
-        }
-        
-        // Ping response pour synchronisation forcée
-        if (event.data.type === 'followers_goal_ping') {
-          const config = JSON.parse(localStorage.getItem('followers_goal_config') || '{}');
-          const currentFollowers = localStorage.getItem('current_followers_count') || '0';
-          
-          const response = {
-            type: 'followers_goal_config_update',
-            config: config,
-            currentFollowers: currentFollowers,
-            timestamp: Date.now(),
-            source: 'overlay_parent_ping_response',
-            force: true
-          };
-          
-          forwardToIframe(response);
-        }
-      });
-      
-      // 5. Synchronisation forcée périodique toutes les 500ms
-      setInterval(() => {
-        try {
-          const config = JSON.parse(localStorage.getItem('followers_goal_config') || '{}');
-          const currentFollowers = localStorage.getItem('current_followers_count') || '0';
-          const configTimestamp = localStorage.getItem('followers_goal_config_timestamp');
-          
-          if (Object.keys(config).length > 0 || currentFollowers !== '0') {
-            const message = {
-              type: 'followers_goal_sync_check',
-              config: config,
-              currentFollowers: currentFollowers,
-              timestamp: configTimestamp ? parseInt(configTimestamp) : Date.now(),
-              source: 'overlay_parent_periodic_force'
-            };
-            
-            forwardToIframe(message);
-          }
-        } catch (e) {
-          // Silent fail pour éviter le spam
-        }
-      }, 500);
-      
-      // 6. Première synchronisation forcée après chargement
-      setTimeout(() => {
-        console.log('🚀 Synchronisation forcée initiale');
-        try {
-          const config = JSON.parse(localStorage.getItem('followers_goal_config') || '{}');
-          const currentFollowers = localStorage.getItem('current_followers_count') || '0';
-          
-          const message = {
-            type: 'followers_goal_config_update',
-            config: config,
-            currentFollowers: currentFollowers,
-            timestamp: Date.now(),
-            source: 'overlay_parent_initial',
-            force: true
-          };
-          
-          forwardToIframe(message);
-        } catch (e) {
-          console.error('❌ Erreur sync initiale:', e);
-        }
-      }, 1000);
-      
-      console.log('✅ Synchronisation cross-domain ultra-avancée configurée');
-    }
-    
-    function forwardToIframe(message) {
-      if (currentIframe && currentIframe.contentWindow) {
-        try {
-          currentIframe.contentWindow.postMessage(message, '*');
-          console.log('📤 Message transféré vers iframe:', message.type);
-        } catch (e) {
-          console.error('❌ Erreur transfert iframe:', e);
-        }
-      }
-      
-      // Aussi diffuser via BroadcastChannel si disponible
-      if (syncChannel) {
-        try {
-          syncChannel.postMessage(message);
-          console.log('📡 Message diffusé via BroadcastChannel');
-        } catch (e) {
-          console.error('❌ Erreur BroadcastChannel:', e);
-        }
-      }
-    }
     
     function showError(title, message) {
       document.body.innerHTML = `
@@ -345,16 +161,6 @@
         </div>
       `;
     }
-    
-    // Nettoyage au déchargement
-    window.addEventListener('beforeunload', () => {
-      if (storageWatcher) {
-        clearInterval(storageWatcher);
-      }
-      if (syncChannel) {
-        syncChannel.close();
-      }
-    });
   </script>
 </body>
 </html>
