@@ -13,19 +13,26 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Vérification de l'authentification
-  const checkAuth = () => {
-    const token = localStorage.getItem('twitch_token');
-    const expiresAt = localStorage.getItem('twitch_expires_at');
+  // Vérifier l'authentification Twitch ou Google
+  function checkAuth() {
+    // Vérifier l'authentification Twitch
+    const twitchToken = localStorage.getItem('twitch_token');
+    const twitchExpiresAt = localStorage.getItem('twitch_expires_at');
+    const hasTwitchAuth = twitchToken && twitchExpiresAt && Date.now() < parseInt(twitchExpiresAt);
     
-    // Vérifier si le token existe et n'est pas expiré
-    if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
-      // Rediriger vers la page d'authentification
+    // Vérifier l'authentification Google
+    const googleToken = localStorage.getItem('google_token');
+    const googleExpiresAt = localStorage.getItem('google_expires_at');
+    const hasGoogleAuth = googleToken && googleExpiresAt && Date.now() < parseInt(googleExpiresAt);
+    
+    // Rediriger vers la page d'authentification si aucun token valide n'est disponible
+    if (!hasTwitchAuth && !hasGoogleAuth) {
       window.location.href = './src/auth.html';
       return false;
     }
+    
     return true;
-  };
+  }
   
   // Vérifier l'authentification au chargement
   if (!checkAuth()) return;
@@ -42,21 +49,33 @@ document.addEventListener('DOMContentLoaded', () => {
   const sizeInfo = document.querySelector('.size-info');
   const previewContainerWrapper = document.querySelector('.preview-container');
 
-  // Génération d'un jeton enrichi pour les overlays avec données Twitch
+  // Génération d'un jeton enrichi pour les overlays avec données Twitch et YouTube
   function generateOverlayToken(overlayPath) {
-    // Récupérer l'ID utilisateur Twitch et le token
-    const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
+    // Récupérer les données Twitch
+    const twitchUserData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
     const twitchToken = localStorage.getItem('twitch_token');
-    const userId = userData?.id || 'anonymous';
+    
+    // Récupérer les données YouTube
+    const googleUserData = JSON.parse(localStorage.getItem('google_user') || '{}');
+    const googleToken = localStorage.getItem('google_token');
+    const youtubeChannelData = JSON.parse(localStorage.getItem('youtube_channel') || '{}');
+    
+    // Déterminer l'ID utilisateur principal
+    const userId = twitchUserData?.id || googleUserData?.id || 'anonymous';
     
     // Créer un jeton qui contient toutes les données nécessaires
     const tokenData = {
       userId: userId,
       overlayPath: overlayPath,
-      twitchData: {
+      twitchData: twitchToken ? {
         token: twitchToken,
-        user: userData
-      },
+        user: twitchUserData
+      } : null,
+      youtubeData: googleToken ? {
+        token: googleToken,
+        user: googleUserData,
+        channel: youtubeChannelData
+      } : null,
       timestamp: Date.now()
     };
     
