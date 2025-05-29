@@ -138,8 +138,9 @@
           // ID client Twitch (using environment variable when available)
           const clientId = "z8q1w4g12yrql6cyb5zzwmhe1pnxyn";
           
-          // URL de redirection
-          const redirectUri = "https://apo-overlay.netlify.app/auth/callback.html";
+          // URL de redirection - utiliser l'URL actuelle pour le développement local
+          const baseUrl = window.location.origin;
+          const redirectUri = baseUrl + "/auth/callback.html";
           
           // Générer un état aléatoire pour la sécurité
           const state = Math.random().toString(36).substring(2, 15);
@@ -171,10 +172,12 @@
           errorContainer.style.display = 'none';
           
           // ID client Google
-          const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "votre-client-id-google";
+          // Utilisez un ID client valide pour Google
+          const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "1098123020683-iqtdlh9g8hgkbvqp4qm7hgb9jd3s0dih.apps.googleusercontent.com";
           
-          // URL de redirection
-          const redirectUri = "https://apo-overlay.netlify.app/auth/google-callback.html";
+          // URL de redirection - utiliser l'URL actuelle pour le développement local
+          const baseUrl = window.location.origin;
+          const redirectUri = baseUrl + "/auth/google-callback.html";
           
           // Générer un état aléatoire pour la sécurité
           const state = Math.random().toString(36).substring(2, 15);
