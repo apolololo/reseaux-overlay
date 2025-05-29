@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authentification Directe</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    h1 {
+      color: #333;
+    }
+    
+    .auth-link {
+      display: block;
+      margin: 20px 0;
+      padding: 15px;
+      background-color: #f5f5f5;
+      border-radius: 5px;
+      word-break: break-all;
+    }
+    
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 10px 0;
+      background-color: #4CAF50;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+    
+    .twitch {
+      background-color: #9146FF;
+    }
+    
+    .google {
+      background-color: #4285F4;
+    }
+  </style>
+</head>
+<body>
+  <h1>Liens d'Authentification Directs</h1>
+  <p>Cliquez sur les liens ci-dessous pour vous authentifier directement :</p>
+  
+  <h2>Authentification Twitch</h2>
+  <a href="https://id.twitch.tv/oauth2/authorize?client_id=z8q1w4g12yrql6cyb5zzwmhe1pnxyn&redirect_uri=https%3A%2F%2Fuejmtvhqzadtxrqtowtm.supabase.co%2Fauth%2Fv1%2Fcallback&response_type=code&scope=user%3Aread%3Aemail%20channel%3Aread%3Asubscriptions%20moderator%3Aread%3Afollowers&state=test123&force_verify=true" class="button twitch">
+    Se connecter avec Twitch
+  </a>
+  <div class="auth-link">
+    https://id.twitch.tv/oauth2/authorize?client_id=z8q1w4g12yrql6cyb5zzwmhe1pnxyn&redirect_uri=https%3A%2F%2Fuejmtvhqzadtxrqtowtm.supabase.co%2Fauth%2Fv1%2Fcallback&response_type=code&scope=user%3Aread%3Aemail%20channel%3Aread%3Asubscriptions%20moderator%3Aread%3Afollowers&state=test123&force_verify=true
+  </div>
+  
+  <h2>Authentification Google</h2>
+  <a href="https://accounts.google.com/o/oauth2/v2/auth?client_id=1098123020683-iqtdlh9g8hgkbvqp4qm7hgb9jd3s0dih.apps.googleusercontent.com&redirect_uri=https%3A%2F%2Fuejmtvhqzadtxrqtowtm.supabase.co%2Fauth%2Fv1%2Fcallback&response_type=code&scope=email%20profile%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube.readonly&state=test456&access_type=offline&prompt=consent" class="button google">
+    Se connecter avec Google
+  </a>
+  <div class="auth-link">
+    https://accounts.google.com/o/oauth2/v2/auth?client_id=1098123020683-iqtdlh9g8hgkbvqp4qm7hgb9jd3s0dih.apps.googleusercontent.com&redirect_uri=https%3A%2F%2Fuejmtvhqzadtxrqtowtm.supabase.co%2Fauth%2Fv1%2Fcallback&response_type=code&scope=email%20profile%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube.readonly&state=test456&access_type=offline&prompt=consent
+  </div>
+  
+  <h2>Liens avec URL de redirection locale</h2>
+  
+  <h3>Twitch avec redirection locale</h3>
+  <a href="https://id.twitch.tv/oauth2/authorize?client_id=z8q1w4g12yrql6cyb5zzwmhe1pnxyn&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fauth%2Fcallback.html&response_type=code&scope=user%3Aread%3Aemail%20channel%3Aread%3Asubscriptions%20moderator%3Aread%3Afollowers&state=test789&force_verify=true" class="button twitch">
+    Twitch (redirection locale)
+  </a>
+  
+  <h3>Google avec redirection locale</h3>
+  <a href="https://accounts.google.com/o/oauth2/v2/auth?client_id=1098123020683-iqtdlh9g8hgkbvqp4qm7hgb9jd3s0dih.apps.googleusercontent.com&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fauth%2Fgoogle-callback.html&response_type=code&scope=email%20profile%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube.readonly&state=test101112&access_type=offline&prompt=consent" class="button google">
+    Google (redirection locale)
+  </a>
+</body>
+</html>
