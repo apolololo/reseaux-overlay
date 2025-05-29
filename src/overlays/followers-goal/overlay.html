@@ -186,19 +186,17 @@
       fetchFollowers();
 
       // Écouter les messages de configuration
-      window.addEventListener('message', (event) => {
-        if (event.data.type === 'followers_goal_config_update') {
-          Object.assign(config, event.data.config);
-          document.documentElement.style.setProperty('--progress-color', config.progressColor);
-          document.documentElement.style.setProperty('--text-color', config.textColor);
-          updateVisibility();
-          updateDisplay(currentFollowers);
-        }
+      window.addEventListener('followers_goal_config_update', (event) => {
+        Object.assign(config, event.detail);
+        document.documentElement.style.setProperty('--progress-color', config.progressColor);
+        document.documentElement.style.setProperty('--text-color', config.textColor);
+        updateVisibility();
+        updateDisplay(currentFollowers);
       });
 
       // Écouter les changements de stockage local
       window.addEventListener('storage', (event) => {
-        if (event.key === 'followers-goal-config') {
+        if (event.key === 'followers_goal_config') {
           const newConfig = JSON.parse(event.newValue);
           Object.assign(config, newConfig);
           document.documentElement.style.setProperty('--progress-color', config.progressColor);

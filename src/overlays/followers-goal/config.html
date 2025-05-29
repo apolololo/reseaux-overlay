@@ -267,7 +267,7 @@
       };
 
       // Charger la configuration existante
-      const savedConfig = localStorage.getItem('followers-goal-config');
+      const savedConfig = localStorage.getItem('followers_goal_config');
       if (savedConfig) {
         Object.assign(config, JSON.parse(savedConfig));
         updateFormValues();
@@ -338,7 +338,10 @@
 
       // Sauvegarder la configuration
       document.getElementById('save-config').addEventListener('click', () => {
-        localStorage.setItem('followers-goal-config', JSON.stringify(config));
+        localStorage.setItem('followers_goal_config', JSON.stringify(config));
+        
+        // Déclencher un événement de synchronisation
+        window.dispatchEvent(new CustomEvent('followers_goal_config_update', { detail: config }));
         
         // Afficher le message de succès
         const successMessage = document.createElement('div');
