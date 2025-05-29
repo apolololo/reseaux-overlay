@@ -304,21 +304,21 @@
       const currentFollowers = localStorage.getItem('current_followers_count') || '0';
       const timestamp = Date.now();
       
-      console.log('=== SAUVEGARDE DE LA CONFIGURATION ===');
+      console.log('=== SAUVEGARDE ET DIFFUSION DE LA CONFIGURATION ===');
       console.log('Configuration:', config);
       console.log('Timestamp:', timestamp);
       
       // Sauvegarder avec timestamp AVANT de diffuser
       localStorage.setItem('followers_goal_config_timestamp', timestamp.toString());
       
-      // Créer un événement de changement forcé pour localStorage
+      // Forcer la propagation via storage event
       window.dispatchEvent(new StorageEvent('storage', {
         key: 'followers_goal_config_timestamp',
         newValue: timestamp.toString(),
         storageArea: localStorage
       }));
       
-      // Utiliser BroadcastChannel pour synchroniser entre onglets
+      // Diffusion via BroadcastChannel (priorité)
       if (broadcastChannel) {
         try {
           broadcastChannel.postMessage({
@@ -328,13 +328,13 @@
             timestamp: timestamp,
             force: true
           });
-          console.log('Configuration diffusée via BroadcastChannel');
+          console.log('✅ Configuration diffusée via BroadcastChannel');
         } catch (e) {
-          console.error('Erreur lors de la diffusion:', e);
+          console.error('❌ Erreur BroadcastChannel:', e);
         }
       }
       
-      // Alternative: utiliser postMessage pour tous les iframes
+      // Diffusion via postMessage pour OBS
       try {
         window.parent.postMessage({
           type: 'followers_goal_config_update',
@@ -342,9 +342,29 @@
           currentFollowers: currentFollowers,
           timestamp: timestamp
         }, '*');
-        console.log('Configuration diffusée via postMessage');
+        console.log('✅ Configuration diffusée via postMessage');
       } catch (e) {
-        console.log('postMessage non disponible ou bloqué');
+        console.log('⚠️ postMessage non disponible');
+      }
+      
+      // Diffusion via tous les iframes possible
+      try {
+        const frames = window.parent.frames;
+        for (let i = 0; i < frames.length; i++) {
+          try {
+            frames[i].postMessage({
+              type: 'followers_goal_config_update',
+              config: config,
+              currentFollowers: currentFollowers,
+              timestamp: timestamp
+            }, '*');
+          } catch (e) {
+            // Ignore les erreurs de cross-origin
+          }
+        }
+        console.log('✅ Configuration diffusée vers tous les iframes');
+      } catch (e) {
+        console.log('⚠️ Diffusion iframes échouée');
       }
     }
 
@@ -382,8 +402,10 @@
       await updateCurrentInfo();
       updatePreview();
       
-      // Diffuser le changement
-      broadcastConfigUpdate();
+      // Diffuser le changement immédiatement
+      setTimeout(() => {
+        broadcastConfigUpdate();
+      }, 10);
     }
 
     // Mettre à jour l'aperçu
@@ -407,11 +429,15 @@
         localStorage.removeItem('followers_goal_config');
         localStorage.removeItem('followers_goal_config_timestamp');
         await loadConfig();
-        broadcastConfigUpdate();
+        
+        // Diffuser la réinitialisation
+        setTimeout(() => {
+          broadcastConfigUpdate();
+        }, 100);
       }
     }
 
-    // Sauvegarder la configuration avec diffusion immédiate et timestamp forcé
+    // Sauvegarder la configuration avec diffusion TRIPLE pour garantir la réception
     document.getElementById('config-form').addEventListener('submit', function(e) {
       e.preventDefault();
       
@@ -424,16 +450,27 @@
         progressColor: document.getElementById('progress-color').value
       };
       
-      console.log('=== DÉBUT SAUVEGARDE ===');
+      console.log('=== DÉBUT SAUVEGARDE TRIPLE ===');
       console.log('Nouvelle configuration:', config);
       
       // Sauvegarder la configuration
       localStorage.setItem('followers_goal_config', JSON.stringify(config));
       
-      // Diffuser le changement IMMÉDIATEMENT avec timestamp unique
+      // Diffuser immédiatement (3 fois pour être sûr)
       setTimeout(() => {
+        console.log('🚀 Diffusion 1/3');
         broadcastConfigUpdate();
-      }, 100);
+      }, 50);
+      
+      setTimeout(() => {
+        console.log('🚀 Diffusion 2/3');
+        broadcastConfigUpdate();
+      }, 150);
+      
+      setTimeout(() => {
+        console.log('🚀 Diffusion 3/3');
+        broadcastConfigUpdate();
+      }, 300);
       
       alert('Configuration sauvegardée avec succès!');
       
@@ -442,10 +479,27 @@
       }, 1000);
     });
 
-    // Mettre à jour l'aperçu en temps réel
+    // Mettre à jour l'aperçu en temps réel ET diffuser les changements
     document.querySelectorAll('input, select').forEach(element => {
       element.addEventListener('input', () => {
         updatePreview();
+        
+        // Diffuser les changements en temps réel pendant la saisie
+        clearTimeout(element._diffusionTimeout);
+        element._diffusionTimeout = setTimeout(() => {
+          // Sauvegarder temporairement pour les tests en temps réel
+          const tempConfig = {
+            goal: parseInt(document.getElementById('goal').value),
+            title: document.getElementById('title').value,
+            style: document.getElementById('style').value,
+            bgColor: document.getElementById('bg-color').value,
+            textColor: document.getElementById('text-color').value,
+            progressColor: document.getElementById('progress-color').value
+          };
+          
+          localStorage.setItem('followers_goal_config', JSON.stringify(tempConfig));
+          broadcastConfigUpdate();
+        }, 500); // Attendre 500ms après la dernière modification
       });
     });
 
