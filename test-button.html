@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Bouton</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    
+    #result {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #f0f0f0;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Test de Bouton Simple</h1>
+  
+  <button id="testButton">Cliquez-moi</button>
+  <button onclick="testDirectClick()">Cliquez-moi (onclick direct)</button>
+  
+  <div id="result"></div>
+  
+  <script>
+    // Fonction pour afficher un message
+    function showMessage(message) {
+      document.getElementById('result').textContent = message;
+    }
+    
+    // Fonction pour le clic direct
+    function testDirectClick() {
+      showMessage("Clic direct détecté à " + new Date().toLocaleTimeString());
+      alert("Clic direct détecté!");
+    }
+    
+    // Attacher un gestionnaire d'événement au bouton
+    document.getElementById('testButton').addEventListener('click', function() {
+      showMessage("Clic détecté via addEventListener à " + new Date().toLocaleTimeString());
+      alert("Clic détecté via addEventListener!");
+    });
+    
+    // Afficher un message au chargement
+    document.addEventListener('DOMContentLoaded', function() {
+      showMessage("Page chargée à " + new Date().toLocaleTimeString());
+    });
+  </script>
+</body>
+</html>
