@@ -156,10 +156,10 @@ document.addEventListener('DOMContentLoaded', () => {
     overlayUrl.searchParams.set('token', token);
     
     // Ajouter les paramètres de configuration si disponibles
-    const config = localStorage.getItem('followers-goal-config');
+    const config = localStorage.getItem('followers_goal_config');
     if (config) {
-      const params = new URLSearchParams(JSON.parse(config));
-      params.forEach((value, key) => {
+      const configParams = JSON.parse(config);
+      Object.entries(configParams).forEach(([key, value]) => {
         overlayUrl.searchParams.set(key, value);
       });
     }
