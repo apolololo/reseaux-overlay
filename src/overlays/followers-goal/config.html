@@ -293,9 +293,9 @@
           text: config.text,
           progressColor: config.progressColor,
           textColor: config.textColor,
-          showBackground: config.showBackground,
-          showProgressBar: config.showProgressBar,
-          showPercentage: config.showPercentage
+          showBackground: String(config.showBackground),
+          showProgressBar: String(config.showProgressBar),
+          showPercentage: String(config.showPercentage)
         });
         iframe.src = `overlay.html?${params.toString()}`;
       }
