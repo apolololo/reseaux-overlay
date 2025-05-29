@@ -36,8 +36,8 @@
     }
 
     .goal-container.no-bg {
-      background: transparent;
-      box-shadow: none;
+      background: transparent !important;
+      box-shadow: none !important;
     }
 
     .goal-text {
@@ -59,7 +59,7 @@
     }
 
     .progress-container.show {
-      display: block;
+      display: block !important;
     }
 
     .progress-bar {
@@ -79,7 +79,7 @@
     }
 
     .percentage.show {
-      display: block;
+      display: block !important;
     }
   </style>
 </head>
@@ -116,15 +116,28 @@
       const progressContainer = document.getElementById('progress-container');
       const percentageElement = document.getElementById('percentage');
 
-      if (!config.showBackground) {
-        goalContainer.classList.add('no-bg');
+      function updateVisibility() {
+        if (!config.showBackground) {
+          goalContainer.classList.add('no-bg');
+        } else {
+          goalContainer.classList.remove('no-bg');
+        }
+        
+        if (config.showProgressBar) {
+          progressContainer.classList.add('show');
+        } else {
+          progressContainer.classList.remove('show');
+        }
+        
+        if (config.showPercentage) {
+          percentageElement.classList.add('show');
+        } else {
+          percentageElement.classList.remove('show');
+        }
       }
-      if (config.showProgressBar) {
-        progressContainer.classList.add('show');
-      }
-      if (config.showPercentage) {
-        percentageElement.classList.add('show');
-      }
+
+      // Appliquer la visibilité initiale
+      updateVisibility();
 
       let currentFollowers = 0;
 
@@ -189,25 +202,7 @@
           Object.assign(config, event.data.config);
           document.documentElement.style.setProperty('--progress-color', config.progressColor);
           document.documentElement.style.setProperty('--text-color', config.textColor);
-          
-          if (!config.showBackground) {
-            goalContainer.classList.add('no-bg');
-          } else {
-            goalContainer.classList.remove('no-bg');
-          }
-          
-          if (config.showProgressBar) {
-            progressContainer.classList.add('show');
-          } else {
-            progressContainer.classList.remove('show');
-          }
-          
-          if (config.showPercentage) {
-            percentageElement.classList.add('show');
-          } else {
-            percentageElement.classList.remove('show');
-          }
-          
+          updateVisibility();
           updateDisplay(currentFollowers);
         }
       });
@@ -219,6 +214,7 @@
           Object.assign(config, newConfig);
           document.documentElement.style.setProperty('--progress-color', config.progressColor);
           document.documentElement.style.setProperty('--text-color', config.textColor);
+          updateVisibility();
           updateDisplay(currentFollowers);
         }
       });
