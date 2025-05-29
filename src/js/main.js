@@ -148,12 +148,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const localPath = activeOverlay.dataset.url;
     
-    // Générer un nouveau jeton enrichi pour cet overlay
-    const token = generateOverlayToken(localPath);
-    
-    // Construire l'URL avec le jeton
-    const overlayUrl = new URL('/overlay.html', PRODUCTION_URL);
-    overlayUrl.searchParams.set('token', token);
+    // Construire l'URL avec les paramètres de configuration
+    const overlayUrl = new URL(localPath, PRODUCTION_URL);
     
     // Ajouter les paramètres de configuration si disponibles
     const config = localStorage.getItem('followers_goal_config');
