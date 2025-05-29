@@ -97,7 +97,10 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
-      const config = {
+      
+      // Charger la configuration sauvegardée
+      const savedConfig = localStorage.getItem('followers_goal_config');
+      const config = savedConfig ? JSON.parse(savedConfig) : {
         target: parseInt(params.get('target')) || 1000,
         text: params.get('text') || "Objectif : {current}/{target} followers",
         progressColor: params.get('progressColor') || "#FF0000",
