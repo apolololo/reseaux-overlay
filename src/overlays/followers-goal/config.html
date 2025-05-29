@@ -230,7 +230,7 @@
       };
 
       // Charger la configuration existante
-      const savedConfig = localStorage.getItem('followers_goal_config');
+      const savedConfig = localStorage.getItem('followers-goal-config');
       if (savedConfig) {
         Object.assign(config, JSON.parse(savedConfig));
         updateFormValues();
@@ -246,19 +246,13 @@
       }
 
       // Mettre à jour l'aperçu
-      async function updatePreview() {
+      function updatePreview() {
         const iframe = document.getElementById('preview-frame');
-        // Récupérer le nombre de followers en direct
-        let currentFollowers = await fetchCurrentFollowers();
-        if (currentFollowers !== null) {
-          config.current = currentFollowers;
-        }
         const params = new URLSearchParams({
           target: config.target,
           text: config.text,
           progressColor: config.progressColor,
-          textColor: config.textColor,
-          current: config.current || 0
+          textColor: config.textColor
         });
         iframe.src = `overlay.html?${params.toString()}`;
       }
@@ -285,13 +279,9 @@
       });
 
       // Sauvegarder la configuration
-      document.getElementById('save-config').addEventListener('click', async () => {
-        localStorage.setItem('followers_goal_config', JSON.stringify(config));
-        // Mettre à jour le nombre de followers en direct
-        let currentFollowers = await fetchCurrentFollowers();
-        if (currentFollowers !== null) {
-          localStorage.setItem('current_followers_count', currentFollowers);
-        }
+      document.getElementById('save-config').addEventListener('click', () => {
+        localStorage.setItem('followers-goal-config', JSON.stringify(config));
+        
         // Afficher le message de succès
         const successMessage = document.createElement('div');
         successMessage.className = 'save-success';
@@ -302,6 +292,8 @@
           Configuration sauvegardée !
         `;
         document.body.appendChild(successMessage);
+        
+        // Supprimer le message après 3 secondes
         setTimeout(() => {
           successMessage.remove();
         }, 3000);
@@ -313,28 +305,3 @@
   </script>
 </body>
 </html>
-
-// Fonction pour récupérer le nombre de followers en direct depuis l'API Twitch
-async function fetchCurrentFollowers() {
-  try {
-    const token = localStorage.getItem('twitch_token');
-    const userData = localStorage.getItem('twitch_user');
-    if (!token || !userData) return null;
-    const user = JSON.parse(userData);
-    if (!user || !user.id) return null;
-    const broadcasterId = user.id;
-    const response = await fetch(`https://api.twitch.tv/helix/channels/followers?broadcaster_id=${broadcasterId}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Client-Id': 'z8q1w4g12yrql6cyb5zzwmhe1pnxyn'
-      }
-    });
-    if (response.ok) {
-      const data = await response.json();
-      if (data && typeof data.total === 'number') {
-        return data.total;
-      }
-    }
-  } catch (e) { return null; }
-  return null;
-}

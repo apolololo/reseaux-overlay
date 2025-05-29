@@ -164,7 +164,7 @@
 
       // Écouter les changements de stockage local
       window.addEventListener('storage', (event) => {
-        if (event.key === 'followers_goal_config') {
+        if (event.key === 'followers-goal-config') {
           const newConfig = JSON.parse(event.newValue);
           if (newConfig) {
             Object.assign(config, newConfig);
@@ -179,7 +179,7 @@
       });
 
       // Charger la configuration initiale
-      const savedConfig = localStorage.getItem('followers_goal_config');
+      const savedConfig = localStorage.getItem('followers-goal-config');
       if (savedConfig) {
         Object.assign(config, JSON.parse(savedConfig));
         document.documentElement.style.setProperty('--progress-color', config.progressColor);
@@ -191,32 +191,30 @@
       updateDisplay(initialFollowers);
 
       // Écouter les événements de WebSocket pour les mises à jour en temps réel
-      let ws;
-      try {
-        ws = new WebSocket('wss://votre-serveur-websocket.com');
-        ws.onmessage = (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            if (data.type === 'followers_update' && data.count !== undefined) {
-              updateDisplay(data.count);
-              localStorage.setItem('current_followers_count', data.count);
-            }
-          } catch (error) {
-            console.error('Erreur lors du traitement du message WebSocket:', error);
+      const ws = new WebSocket('wss://votre-serveur-websocket.com');
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'followers_update' && data.count !== undefined) {
+            updateDisplay(data.count);
+            localStorage.setItem('current_followers_count', data.count);
           }
-        };
-        ws.onerror = (error) => {
-          console.error('Erreur WebSocket:', error);
-        };
-        ws.onclose = () => {
-          console.log('Connexion WebSocket fermée, tentative de reconnexion...');
-          setTimeout(() => {
-            window.location.reload();
-          }, 5000);
-        };
-      } catch (e) {
-        console.warn('WebSocket non configuré ou indisponible.');
-      }
+        } catch (error) {
+          console.error('Erreur lors du traitement du message WebSocket:', error);
+        }
+      };
+
+      ws.onerror = (error) => {
+        console.error('Erreur WebSocket:', error);
+      };
+
+      ws.onclose = () => {
+        console.log('Connexion WebSocket fermée, tentative de reconnexion...');
+        setTimeout(() => {
+          // Tentative de reconnexion après 5 secondes
+          window.location.reload();
+        }, 5000);
+      };
     });
   </script>
 </body>
