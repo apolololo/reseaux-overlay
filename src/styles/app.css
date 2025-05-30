@@ -264,12 +264,6 @@ body {
   z-index: 10;
 }
 
-.twitch-info, .youtube-info {
-  display: flex;
-  align-items: center;
-  margin-right: 15px;
-}
-
 #copy-url {
   padding: 0.875rem 1.75rem;
   background-color: var(--primary);
