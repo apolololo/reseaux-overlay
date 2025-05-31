@@ -155,8 +155,14 @@
           // Définir les scopes nécessaires
           const scope = 'user-read-currently-playing user-read-playback-state';
           
+          // Construire l'URL avec les paramètres
+          const params = new URLSearchParams({
+            state: state,
+            scope: scope
+          });
+          
           // Rediriger vers la fonction Edge qui gère l'authentification
-          window.location.href = `/.netlify/functions/spotify-auth?state=${state}&scope=${encodeURIComponent(scope)}`;
+          window.location.href = `/.netlify/functions/spotify-auth?${params.toString()}`;
         } catch (error) {
           loading.classList.remove('active');
           errorContainer.style.display = 'block';
