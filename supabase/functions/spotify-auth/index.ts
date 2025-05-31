@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const SPOTIFY_CLIENT_ID = Deno.env.get("SPOTIFY_CLIENT_ID");
 const SPOTIFY_CLIENT_SECRET = Deno.env.get("SPOTIFY_CLIENT_SECRET");
-const SPOTIFY_REDIRECT_URI = Deno.env.get("SPOTIFY_REDIRECT_URI") || "https://apo-overlay.netlify.app/auth/spotify-callback.html";
+const SPOTIFY_REDIRECT_URI = Deno.env.get("SPOTIFY_REDIRECT_URI") || "https://uejmtvhqzadtxrqtowtm.supabase.co/auth/v1/callback";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
