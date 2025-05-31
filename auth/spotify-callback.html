@@ -60,12 +60,11 @@
         try {
           loadingText.textContent = "Échange du code contre un token...";
           
-          const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlam10dmhxemFkdHhycXRvd3RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcyMjg0ODIsImV4cCI6MjA2MjgwNDQ4Mn0.QDDIr28cyQ2kS7zqlcFbulWdI8AVEMurxamqscIiF-o";
-          const response = await fetch(`https://uejmtvhqzadtxrqtowtm.supabase.co/functions/v1/spotify-auth?apikey=${supabaseAnonKey}`, {
+          // Appel direct à la fonction Supabase sans paramètres d'authentification supplémentaires
+          const response = await fetch('https://uejmtvhqzadtxrqtowtm.supabase.co/functions/v1/spotify-auth', {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${supabaseAnonKey}`
+              'Content-Type': 'application/json'
             },
             body: JSON.stringify({ code })
           });

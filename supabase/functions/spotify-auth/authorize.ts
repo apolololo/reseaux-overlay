@@ -33,16 +33,14 @@ serve(async (req) => {
     authUrl.searchParams.set("state", state || "");
     authUrl.searchParams.set("scope", scope || "");
 
-    return new Response(
-      JSON.stringify({ url: authUrl.toString() }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          ...corsHeaders,
-        },
-      }
-    );
+    // Rediriger directement vers l'URL d'autorisation Spotify au lieu de renvoyer l'URL
+    return new Response(null, {
+      status: 302, // Redirection temporaire
+      headers: {
+        "Location": authUrl.toString(),
+        ...corsHeaders,
+      },
+    });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: error.message }),

@@ -143,37 +143,21 @@
       });
 
       // Gérer le clic sur le bouton Spotify
-      spotifyButton.addEventListener('click', async () => {
+      spotifyButton.addEventListener('click', () => {
         try {
           loading.classList.add('active');
           errorContainer.style.display = 'none';
           
+          // Générer un état aléatoire pour la sécurité
           const state = Math.random().toString(36).substring(2, 15);
           localStorage.setItem('spotify_auth_state', state);
           
+          // Définir les scopes nécessaires
           const scope = 'user-read-currently-playing user-read-playback-state';
           
-          // Récupérer la clé anonyme Supabase depuis les variables d'environnement ou utiliser celle du fichier .env
-          const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlam10dmhxemFkdHhycXRvd3RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcyMjg0ODIsImV4cCI6MjA2MjgwNDQ4Mn0.QDDIr28cyQ2kS7zqlcFbulWdI8AVEMurxamqscIiF-o";
-          
-          // Construire l'URL avec l'API key comme paramètre de requête
-          const apiUrl = `https://uejmtvhqzadtxrqtowtm.supabase.co/functions/v1/spotify-auth/authorize?state=${state}&scope=${encodeURIComponent(scope)}&apikey=${supabaseAnonKey}`;
-          
-          // Faire une requête pour obtenir l'URL d'autorisation Spotify
-          const response = await fetch(apiUrl);
-          
-          if (!response.ok) {
-            throw new Error(`Erreur lors de la connexion à Spotify: ${response.status}`);
-          }
-          
-          const data = await response.json();
-          
-          if (data.url) {
-            // Redirection vers l'URL d'autorisation Spotify
-            window.location.href = data.url;
-          } else {
-            throw new Error('URL de redirection Spotify non reçue');
-          }
+          // Rediriger directement vers la fonction Supabase
+          // La fonction Supabase s'occupera de la redirection vers Spotify
+          window.location.href = `https://uejmtvhqzadtxrqtowtm.supabase.co/functions/v1/spotify-auth/authorize?state=${state}&scope=${encodeURIComponent(scope)}`;
         } catch (error) {
           loading.classList.remove('active');
           errorContainer.style.display = 'block';
