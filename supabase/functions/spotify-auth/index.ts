@@ -7,7 +7,7 @@ const SPOTIFY_REDIRECT_URI = Deno.env.get("SPOTIFY_REDIRECT_URI") || "https://ue
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
 async function exchangeCodeForToken(code: string) {
@@ -60,6 +60,21 @@ serve(async (req) => {
   }
 
   try {
+    // Vérifier l'en-tête d'autorisation
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "En-tête d'autorisation manquant" }),
+        {
+          status: 401,
+          headers: {
+            "Content-Type": "application/json",
+            ...corsHeaders,
+          },
+        }
+      );
+    }
+
     const { code } = await req.json();
 
     if (!code) {
