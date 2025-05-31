@@ -323,20 +323,33 @@
       
       <!-- Section Exemples d'Overlays -->
       <div class="overlay-examples">
-          <h2>Découvrez nos Overlays</h2>
-          <div class="example-images">
-              <!-- Ajoutez ici des images d'exemple de vos overlays -->
-              <img src="/path/to/overlay-example-1.png" alt="Exemple Overlay 1">
-              <img src="/path/to/overlay-example-2.png" alt="Exemple Overlay 2">
-              <!-- Ajoutez d'autres images si nécessaire -->
+          <h2>Découvrez nos Overlays en action</h2>
+          <p style="color: var(--text-secondary); margin-bottom: 20px;">Voici un aperçu de quelques-uns de nos overlays populaires :</p>
+          
+          <div class="example-item" style="background: rgba(255, 255, 255, 0.08); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+              <h3>Starting Soon</h3>
+              <p style="color: var(--text-secondary); margin-bottom: 15px;">Préparez votre audience avant le début de votre stream avec cet écran élégant.</p>
+              <!-- Ici, vous pourriez intégrer une image ou une petite vidéo de l'overlay Starting Soon -->
+              <img src="/path/to/starting-soon-example.png" alt="Exemple Overlay Starting Soon" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);">
           </div>
-           <p style="color: var(--text-secondary); margin-top: 15px;">Et bien d'autres disponibles une fois connecté !</p>
+
+          <div class="example-item" style="background: rgba(255, 255, 255, 0.08); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+              <h3>Followers Goal Widget</h3>
+              <p style="color: var(--text-secondary); margin-bottom: 15px;">Motivez votre communauté en affichant vos objectifs de followers.</p>
+              <!-- Simulation du widget Followers Goal -->
+              <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 8px; width: fit-content; margin: 0 auto; font-size: 1.5rem; color: var(--primary);">
+                  Followers : <span id="animated-followers-goal">0</span> / 1000
+              </div>
+              <p style="color: var(--text-secondary); margin-top: 15px;">Animation simulant l'atteinte d'un objectif.</p>
+          </div>
+
+          <p style="color: var(--text-secondary); margin-top: 15px;">Et bien d'autres overlays personnalisables disponibles une fois connecté !</p>
       </div>
       
       <!-- Section Compteur de Followers (Exemple) -->
-      <div class="followers-counter-section">
+      <!-- <div class="followers-counter-section">
           <h2>Plus de <span id="animated-followers-count">0</span> créateurs nous font confiance !</h2>
-      </div>
+      </div> -->
 
       <div id="loading" class="loading-container">
         <div class="loading-spinner"></div>
@@ -350,37 +363,36 @@
   </div>
 
   <script>
-    // Script pour l'animation du compteur de followers
-    const followersCountElement = document.getElementById('animated-followers-count');
-    const targetFollowers = 1500; // Remplacez par un nombre représentatif
-    const duration = 2000; // Durée de l'animation en ms
-    let startTimestamp = null;
+    // Script pour l'animation du compteur de followers sur la page de connexion
+    const followersGoalElement = document.getElementById('animated-followers-goal');
+    if (followersGoalElement) {
+        const targetGoal = 1000; // Objectif de followers
+        const currentProgress = 750; // Progression actuelle (pour l'animation)
+        const animationDuration = 2500; // Durée de l'animation en ms
+        let startTimestamp = null;
 
-    const step = (timestamp) => {
-      if (!startTimestamp) startTimestamp = timestamp;
-      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-      followersCountElement.textContent = Math.floor(progress * targetFollowers);
-      if (progress < 1) {
-        window.requestAnimationFrame(step);
-      }
-    };
+        const animateCount = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / animationDuration, 1);
+            followersGoalElement.textContent = Math.floor(progress * currentProgress);
+            if (progress < 1) {
+                window.requestAnimationFrame(animateCount);
+            }
+        };
 
-    // Démarre l'animation lorsque la section est visible
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          window.requestAnimationFrame(step);
-          observer.unobserve(entry.target); // Arrête d'observer une fois l'animation lancée
-        }
-      });
-    });
+        // Démarre l'animation lorsque l'élément est visible
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    window.requestAnimationFrame(animateCount);
+                    observer.unobserve(entry.target); // Arrête d'observer une fois l'animation lancée
+                }
+            });
+        }, { threshold: 0.1 }); // Déclenche lorsque 10% de l'élément est visible
 
-    const followersSection = document.querySelector('.followers-counter-section');
-    if (followersSection) {
-      observer.observe(followersSection);
+        observer.observe(followersGoalElement.parentElement); // Observer l'élément parent pour plus de robustesse
     }
 
-    // Reste du script existant pour la connexion
     document.addEventListener('DOMContentLoaded', () => {
       const twitchButton = document.getElementById('twitch-login');
       const spotifyButton = document.getElementById('spotify-login');
