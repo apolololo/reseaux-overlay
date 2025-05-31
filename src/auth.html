@@ -8,6 +8,54 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    .login-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+    }
+
+    .login-button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .twitch-button {
+      background: #9146FF;
+      color: white;
+    }
+
+    .twitch-button:hover {
+      background: #7B31FF;
+      transform: translateY(-2px);
+    }
+
+    .spotify-button {
+      background: #1DB954;
+      color: white;
+    }
+
+    .spotify-button:hover {
+      background: #1AA34A;
+      transform: translateY(-2px);
+    }
+
+    .login-button img {
+      width: 24px;
+      height: 24px;
+    }
+  </style>
 </head>
 <body>
   <div class="login-container">
@@ -20,16 +68,23 @@
     
     <div class="login-box">
       <h1 class="login-title">APO Overlays</h1>
-      <p class="login-subtitle">Connectez-vous avec Twitch pour accéder aux overlays</p>
+      <p class="login-subtitle">Connectez-vous pour accéder aux overlays</p>
       
-      <button id="login-button" class="login-button">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Twitch_Glitch_Logo_Purple.svg/878px-Twitch_Glitch_Logo_Purple.svg.png" alt="Twitch" />
-        Connexion avec Twitch
-      </button>
+      <div class="login-buttons">
+        <button id="twitch-login" class="login-button twitch-button">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Twitch_Glitch_Logo_Purple.svg/878px-Twitch_Glitch_Logo_Purple.svg.png" alt="Twitch" />
+          Connexion avec Twitch
+        </button>
+
+        <button id="spotify-login" class="login-button spotify-button">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Spotify_logo_without_text.svg/768px-Spotify_logo_without_text.svg.png" alt="Spotify" />
+          Connexion avec Spotify
+        </button>
+      </div>
       
       <div id="loading" class="loading-container">
         <div class="loading-spinner"></div>
-        <div class="loading-text">Redirection vers Twitch...</div>
+        <div class="loading-text">Redirection en cours...</div>
       </div>
 
       <div id="error-container" style="display: none; margin-top: 20px; color: #ff5252; background: rgba(255, 82, 82, 0.1); padding: 12px; border-radius: 8px; text-align: left;">
@@ -40,22 +95,21 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const loginButton = document.getElementById('login-button');
+      const twitchButton = document.getElementById('twitch-login');
+      const spotifyButton = document.getElementById('spotify-login');
       const loading = document.getElementById('loading');
       const errorContainer = document.getElementById('error-container');
       const errorMessage = document.getElementById('error-message');
       
-      // Vérifier si l'utilisateur est déjà connecté
-      const checkAuthentication = () => {
+      // Vérifier si l'utilisateur est déjà connecté à Twitch
+      const checkTwitchAuth = () => {
         const token = localStorage.getItem('twitch_token');
         const expiresAt = localStorage.getItem('twitch_expires_at');
         
         if (token && expiresAt && new Date().getTime() < parseInt(expiresAt)) {
-          // Token valide, rediriger vers la page principale
           window.location.href = '/index.html';
         }
 
-        // Check if there's an error in URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('error')) {
           errorContainer.style.display = 'block';
@@ -64,36 +118,46 @@
       };
       
       // Vérifier l'authentification au chargement
-      checkAuthentication();
+      checkTwitchAuth();
       
-      // Gérer le clic sur le bouton de connexion
-      loginButton.addEventListener('click', () => {
+      // Gérer le clic sur le bouton Twitch
+      twitchButton.addEventListener('click', () => {
         try {
-          // Afficher le chargement
           loading.classList.add('active');
           errorContainer.style.display = 'none';
           
-          // ID client Twitch (using environment variable when available)
           const clientId = "z8q1w4g12yrql6cyb5zzwmhe1pnxyn";
-          
-          // URL de redirection (utiliser l'URL actuelle pour le développement local)
           const redirectUri = "https://apo-overlay.netlify.app/auth/callback.html";
-          
-          // Générer un état aléatoire pour la sécurité
           const state = Math.random().toString(36).substring(2, 15);
           localStorage.setItem('twitch_auth_state', state);
           
-          // Construire l'URL d'authentification Twitch
           const scope = 'user:read:email channel:read:subscriptions moderator:read:followers';
           const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}&force_verify=true`;
           
-          console.log("URL de redirection:", redirectUri);
-          console.log("URL d'authentification:", authUrl);
-          
-          // Rediriger vers l'authentification Twitch
           window.location.href = authUrl;
         } catch (error) {
-          console.error("Erreur lors de la redirection:", error);
+          loading.classList.remove('active');
+          errorContainer.style.display = 'block';
+          errorMessage.textContent = "Une erreur s'est produite lors de la tentative de connexion. Veuillez réessayer.";
+        }
+      });
+
+      // Gérer le clic sur le bouton Spotify
+      spotifyButton.addEventListener('click', () => {
+        try {
+          loading.classList.add('active');
+          errorContainer.style.display = 'none';
+          
+          const clientId = "VOTRE_CLIENT_ID_SPOTIFY";
+          const redirectUri = "https://apo-overlay.netlify.app/auth/spotify-callback.html";
+          const state = Math.random().toString(36).substring(2, 15);
+          localStorage.setItem('spotify_auth_state', state);
+          
+          const scope = 'user-read-currently-playing user-read-playback-state';
+          const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}&state=${state}`;
+          
+          window.location.href = authUrl;
+        } catch (error) {
           loading.classList.remove('active');
           errorContainer.style.display = 'block';
           errorMessage.textContent = "Une erreur s'est produite lors de la tentative de connexion. Veuillez réessayer.";
