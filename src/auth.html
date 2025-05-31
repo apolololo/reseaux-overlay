@@ -155,8 +155,7 @@
           // Définir les scopes nécessaires
           const scope = 'user-read-currently-playing user-read-playback-state';
           
-          // Rediriger directement vers la fonction Supabase
-          // La fonction Supabase s'occupera de la redirection vers Spotify
+          // Rediriger vers la fonction d'autorisation Spotify
           window.location.href = `https://uejmtvhqzadtxrqtowtm.supabase.co/functions/v1/spotify-auth/authorize?state=${state}&scope=${encodeURIComponent(scope)}`;
         } catch (error) {
           loading.classList.remove('active');

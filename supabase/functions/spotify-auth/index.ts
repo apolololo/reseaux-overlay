@@ -60,21 +60,6 @@ serve(async (req) => {
   }
 
   try {
-    // Vérifier l'en-tête d'autorisation
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: "En-tête d'autorisation manquant" }),
-        {
-          status: 401,
-          headers: {
-            "Content-Type": "application/json",
-            ...corsHeaders,
-          },
-        }
-      );
-    }
-
     const { code } = await req.json();
 
     if (!code) {
