@@ -2,10 +2,12 @@ export default async function handler(event, context) {
   try {
     // Vérifier si nous avons des paramètres de requête
     if (!event.queryStringParameters) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'Paramètres manquants' })
-      };
+      return new Response(JSON.stringify({ error: 'Paramètres manquants' }), {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
     }
 
     // Récupérer les paramètres de la requête avec des valeurs par défaut
@@ -22,30 +24,34 @@ export default async function handler(event, context) {
     const redirectUri = `${protocol}://${host}/auth/spotify-callback.html`;
 
     if (!clientId || !clientSecret) {
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: 'Configuration Spotify manquante' })
-      };
+      return new Response(JSON.stringify({ error: 'Configuration Spotify manquante' }), {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
     }
 
     // Construire l'URL d'autorisation Spotify
     const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}&scope=${encodeURIComponent(scope)}`;
 
     // Rediriger vers l'URL d'autorisation Spotify
-    return {
-      statusCode: 302,
+    return new Response(null, {
+      status: 302,
       headers: {
-        Location: authUrl
+        'Location': authUrl
       }
-    };
+    });
   } catch (error) {
     console.error('Erreur dans la fonction spotify-auth:', error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ 
-        error: 'Erreur interne du serveur',
-        details: error.message 
-      })
-    };
+    return new Response(JSON.stringify({ 
+      error: 'Erreur interne du serveur',
+      details: error.message 
+    }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
   }
 } 
