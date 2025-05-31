@@ -82,21 +82,6 @@
         </button>
       </div>
       
-      <div class="ad-container" style="margin-top: 20px; background: rgba(255, 255, 255, 0.05); padding: 8px; border-radius: 8px; min-height: 60px; display: flex; justify-content: center; align-items: center;">
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4235710569572969"
-             crossorigin="anonymous"></script>
-        <!-- pub horizontale compacte -->
-        <ins class="adsbygoogle"
-             style="display:block; width: 100%; height: 60px;"
-             data-ad-client="ca-pub-4235710569572969"
-             data-ad-slot="5135376177"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-        <script>
-             (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
-      </div>
-      
       <div id="loading" class="loading-container">
         <div class="loading-spinner"></div>
         <div class="loading-text">Redirection en cours...</div>
@@ -170,8 +155,8 @@
           // Définir les scopes nécessaires
           const scope = 'user-read-currently-playing user-read-playback-state';
           
-          // Rediriger vers la fonction d'autorisation Spotify
-          window.location.href = `https://uejmtvhqzadtxrqtowtm.supabase.co/functions/v1/spotify-auth/authorize?state=${state}&scope=${encodeURIComponent(scope)}`;
+          // Rediriger vers la fonction Edge qui gère l'authentification
+          window.location.href = `/.netlify/functions/spotify-auth?state=${state}&scope=${encodeURIComponent(scope)}`;
         } catch (error) {
           loading.classList.remove('active');
           errorContainer.style.display = 'block';
