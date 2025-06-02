@@ -95,8 +95,18 @@ document.addEventListener('DOMContentLoaded', () => {
       const config = localStorage.getItem(configKey);
       if (config) {
         const configParams = JSON.parse(config);
-        Object.entries(configParams).forEach(([key, value]) => {
-          previewUrl.searchParams.set(key, value);
+        // S'assurer que tous les paramètres nécessaires sont inclus
+        const requiredParams = {
+          target: configParams.target || 1000,
+          text: configParams.text || "Objectif : {current}/{target} followers",
+          progressColor: configParams.progressColor || "#FF0000",
+          textColor: configParams.textColor || "#FFFFFF",
+          showBackground: configParams.showBackground !== false,
+          showProgressBar: configParams.showProgressBar !== false,
+          showPercentage: configParams.showPercentage !== false
+        };
+        Object.entries(requiredParams).forEach(([key, value]) => {
+          previewUrl.searchParams.set(key, value.toString());
         });
       }
       
@@ -175,8 +185,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const config = localStorage.getItem(configKey);
     if (config) {
       const configParams = JSON.parse(config);
-      Object.entries(configParams).forEach(([key, value]) => {
-        overlayUrl.searchParams.set(key, value);
+      // S'assurer que tous les paramètres nécessaires sont inclus
+      const requiredParams = {
+        target: configParams.target || 1000,
+        text: configParams.text || "Objectif : {current}/{target} followers",
+        progressColor: configParams.progressColor || "#FF0000",
+        textColor: configParams.textColor || "#FFFFFF",
+        showBackground: configParams.showBackground !== false,
+        showProgressBar: configParams.showProgressBar !== false,
+        showPercentage: configParams.showPercentage !== false
+      };
+      Object.entries(requiredParams).forEach(([key, value]) => {
+        overlayUrl.searchParams.set(key, value.toString());
       });
     }
     

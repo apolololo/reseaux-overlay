@@ -116,10 +116,8 @@
         return;
       }
       
-      // Charger la configuration spécifique à l'utilisateur
-      const configKey = `followers_goal_config_${userData.id}`;
-      const savedConfig = localStorage.getItem(configKey);
-      const config = savedConfig ? JSON.parse(savedConfig) : {
+      // Charger la configuration depuis les paramètres d'URL
+      const config = {
         target: parseInt(params.get('target')) || 1000,
         text: params.get('text') || "Objectif : {current}/{target} followers",
         progressColor: params.get('progressColor') || "#FF0000",
@@ -168,7 +166,35 @@
         
         // Mettre à jour le pourcentage
         document.getElementById('percentage').textContent = `${percentage}%`;
+
+        // Envoyer la mise à jour à tous les widgets ouverts
+        const broadcastChannel = new BroadcastChannel('followers_goal_update');
+        broadcastChannel.postMessage({
+          type: 'display_update',
+          userId: userData.id,
+          data: {
+            followers: currentFollowers,
+            config: config
+          }
+        });
       }
+
+      // Écouter les mises à jour des autres widgets
+      const updateChannel = new BroadcastChannel('followers_goal_update');
+      updateChannel.onmessage = (event) => {
+        if (event.data.userId === userData.id) {
+          if (event.data.type === 'display_update') {
+            // Mettre à jour la configuration
+            Object.assign(config, event.data.data.config);
+            // Appliquer les styles
+            document.documentElement.style.setProperty('--progress-color', config.progressColor);
+            document.documentElement.style.setProperty('--text-color', config.textColor);
+            updateVisibility();
+            // Mettre à jour l'affichage
+            updateDisplay(event.data.data.followers);
+          }
+        }
+      };
 
       // Fonction pour récupérer le nombre de followers
       async function fetchFollowers() {
