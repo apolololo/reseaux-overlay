@@ -68,6 +68,7 @@ class GoogleAuth {
   // Démarrer le processus d'authentification Google avec popup
   async initiateAuth() {
     return new Promise((resolve, reject) => {
+      console.log('Initialisation de l\'authentification Google');
       const state = Math.random().toString(36).substring(2, 15);
       localStorage.setItem('google_auth_state', state);
       
@@ -80,6 +81,7 @@ class GoogleAuth {
       authUrl.searchParams.set('access_type', 'offline');
       authUrl.searchParams.set('prompt', 'consent');
 
+      console.log('Ouverture de la popup Google');
       const popup = window.open(
         authUrl.toString(),
         'google-auth',
@@ -87,30 +89,42 @@ class GoogleAuth {
       );
 
       if (!popup) {
+        console.error('La popup a été bloquée');
         reject(new Error('La popup a été bloquée par le navigateur'));
         return;
       }
 
       // Créer un gestionnaire de message unique
       const messageHandler = async (event) => {
+        console.log('Message reçu dans initiateAuth:', event.data);
         const allowedOrigin = 'https://apo-overlay.netlify.app';
-        if (event.origin !== allowedOrigin) return;
+        if (event.origin !== allowedOrigin) {
+          console.log('Origine non autorisée:', event.origin);
+          return;
+        }
 
         const data = event.data;
         if (data.type === 'GOOGLE_AUTH_SUCCESS') {
+          console.log('Succès de l\'authentification reçu');
           // Nettoyer l'écouteur
           window.removeEventListener('message', messageHandler);
           clearInterval(checkClosed);
           
           try {
+            console.log('Échange du code contre des tokens...');
             const tokens = await this.exchangeCodeForTokens(data.code, data.state);
+            console.log('Tokens reçus, récupération du profil...');
             await this.getUserProfile();
+            console.log('Profil récupéré, récupération des infos YouTube...');
             await this.getYouTubeChannelInfo();
+            console.log('Tout est prêt, résolution de la promesse');
             resolve(tokens);
           } catch (error) {
+            console.error('Erreur lors du traitement:', error);
             reject(error);
           }
         } else if (data.type === 'GOOGLE_AUTH_ERROR') {
+          console.error('Erreur d\'authentification reçue:', data.error);
           window.removeEventListener('message', messageHandler);
           clearInterval(checkClosed);
           reject(new Error(data.error));
@@ -123,6 +137,7 @@ class GoogleAuth {
       // Surveiller la popup
       const checkClosed = setInterval(() => {
         if (popup.closed) {
+          console.log('Popup fermée');
           clearInterval(checkClosed);
           window.removeEventListener('message', messageHandler);
           reject(new Error('Popup fermée par l\'utilisateur'));
