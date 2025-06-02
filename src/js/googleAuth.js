@@ -1,4 +1,4 @@
-export class GoogleAuth {
+class GoogleAuth {
   constructor() {
     this.clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     this.clientSecret = import.meta.env.VITE_GOOGLE_CLIENT_SECRET;
@@ -213,4 +213,4 @@ export class GoogleAuth {
   }
 }
 
-window.GoogleAuth = GoogleAuth;
+export { GoogleAuth };

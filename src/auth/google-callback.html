@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authentification Google - APO</title>
+  <link rel="stylesheet" href="/src/styles/main.css">
+  <link rel="stylesheet" href="/src/styles/app.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    .callback-container {
+      max-width: 400px;
+      margin: 4rem auto;
+      padding: 2rem;
+      background: var(--bg-dark);
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-left-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 2rem auto;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error-container {
+      display: none;
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(255, 82, 82, 0.1);
+      border-radius: 8px;
+      color: #ff5252;
+    }
+  </style>
+</head>
+<body>
+  <div class="callback-container">
+    <div class="loading-spinner"></div>
+    <h2>Authentification en cours...</h2>
+    <p>Veuillez patienter pendant que nous finalisons votre connexion.</p>
+    <div id="error-container" class="error-container">
+      <div id="error-message"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { GoogleAuth } from '../js/googleAuth.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const errorContainer = document.getElementById('error-container');
+      const errorMessage = document.getElementById('error-message');
+
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const error = urlParams.get('error');
+
+        if (error) {
+          throw new Error(`Erreur d'authentification: ${error}`);
+        }
+
+        if (!code) {
+          throw new Error('Code d\'autorisation manquant');
+        }
+
+        const googleAuth = new GoogleAuth();
+        await googleAuth.exchangeCodeForTokens(code);
+        
+        // Rediriger vers la page principale
+        window.location.replace('/index.html');
+      } catch (error) {
+        console.error('Erreur lors de l\'authentification:', error);
+        errorContainer.style.display = 'block';
+        errorMessage.textContent = error.message || 'Une erreur est survenue lors de l\'authentification. Veuillez réessayer.';
+      }
+    });
+  </script>
+</body>
+</html> 
