@@ -17,21 +17,42 @@ class GoogleAuth {
 
   // Initialiser l'écouteur de messages
   initializeMessageListener() {
+    console.log('Initialisation de l\'écouteur de messages Google Auth');
     window.addEventListener('message', async (event) => {
+      console.log('Message reçu:', {
+        origin: event.origin,
+        data: event.data,
+        expectedOrigin: 'https://apo-overlay.netlify.app'
+      });
+
       const allowedOrigin = 'https://apo-overlay.netlify.app';
-      if (event.origin !== allowedOrigin) return;
+      if (event.origin !== allowedOrigin) {
+        console.log('Origine non autorisée:', event.origin);
+        return;
+      }
 
       const data = event.data;
       if (data.type === 'GOOGLE_AUTH_SUCCESS') {
+        console.log('Succès de l\'authentification Google reçu');
         try {
           console.log('Code reçu de la popup:', data.code);
           const tokens = await this.exchangeCodeForTokens(data.code, data.state);
+          console.log('Tokens reçus:', !!tokens);
+          
+          console.log('Récupération du profil utilisateur...');
           await this.getUserProfile();
+          console.log('Profil utilisateur récupéré');
+          
+          console.log('Récupération des infos YouTube...');
           await this.getYouTubeChannelInfo();
+          console.log('Infos YouTube récupérées');
           
           // Forcer une vérification de l'authentification
           if (typeof window.checkAuth === 'function') {
+            console.log('Appel de checkAuth()...');
             window.checkAuth();
+          } else {
+            console.error('checkAuth() n\'est pas disponible');
           }
         } catch (error) {
           console.error('Erreur lors du traitement du code:', error);
@@ -39,7 +60,7 @@ class GoogleAuth {
       }
 
       if (data.type === 'GOOGLE_AUTH_ERROR') {
-        console.error('Erreur Google:', data.error);
+        console.error('Erreur Google reçue:', data.error);
       }
     });
   }

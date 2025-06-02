@@ -64,10 +64,13 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      console.log('Callback Google chargé');
       const urlParams = new URLSearchParams(window.location.search);
       const code = urlParams.get('code');
       const state = urlParams.get('state');
       const error = urlParams.get('error');
+      
+      console.log('Paramètres reçus:', { code: !!code, state: !!state, error });
       
       const loadingEl = document.getElementById('loading');
       const errorEl = document.getElementById('error');
@@ -75,48 +78,62 @@
       const successEl = document.getElementById('success');
 
       const allowedOrigin = 'https://apo-overlay.netlify.app';
+      console.log('Origine autorisée:', allowedOrigin);
 
       if (error) {
+        console.error('Erreur reçue:', error);
         loadingEl.style.display = 'none';
         errorEl.style.display = 'block';
         errorMessageEl.textContent = `Erreur: ${error}`;
         
         if (window.opener) {
+          console.log('Envoi du message d\'erreur à la fenêtre parent');
           window.opener.postMessage({
             type: 'GOOGLE_AUTH_ERROR',
             error: error
           }, allowedOrigin);
+        } else {
+          console.error('Pas de fenêtre parent trouvée');
         }
         return;
       }
 
       if (!code || !state) {
+        console.error('Code ou state manquant');
         loadingEl.style.display = 'none';
         errorEl.style.display = 'block';
         errorMessageEl.textContent = 'Code d\'autorisation manquant';
         
         if (window.opener) {
+          console.log('Envoi du message d\'erreur à la fenêtre parent');
           window.opener.postMessage({
             type: 'GOOGLE_AUTH_ERROR',
             error: 'Code d\'autorisation manquant'
           }, allowedOrigin);
+        } else {
+          console.error('Pas de fenêtre parent trouvée');
         }
         return;
       }
 
       // Succès - envoyer les données à la fenêtre parent
+      console.log('Authentification réussie, envoi des données à la fenêtre parent');
       loadingEl.style.display = 'none';
       successEl.style.display = 'block';
       
       if (window.opener) {
+        console.log('Envoi du message de succès à la fenêtre parent');
         window.opener.postMessage({
           type: 'GOOGLE_AUTH_SUCCESS',
           code: code,
           state: state
         }, allowedOrigin);
+      } else {
+        console.error('Pas de fenêtre parent trouvée');
       }
 
       // Fermer la popup après un court délai
+      console.log('Fermeture de la popup dans 1.5 secondes');
       setTimeout(() => {
         window.close();
       }, 1500);
