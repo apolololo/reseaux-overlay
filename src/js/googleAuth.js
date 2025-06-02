@@ -41,7 +41,7 @@ class GoogleAuth {
   }
 
   async initiateAuth() {
-    return new Promise((resolve, reject) => {
+    try {
       const state = Math.random().toString(36).substring(2, 15);
       localStorage.setItem('google_auth_state', state);
       
@@ -54,73 +54,11 @@ class GoogleAuth {
       authUrl.searchParams.set('access_type', 'offline');
       authUrl.searchParams.set('prompt', 'consent');
 
-      const popup = window.open(
-        authUrl.toString(),
-        'google-auth',
-        'width=500,height=600,scrollbars=yes,resizable=yes'
-      );
-
-      if (!popup) {
-        reject(new Error('La popup a été bloquée par le navigateur'));
-        return;
-      }
-
-      const messageHandler = async (event) => {
-        const allowedOrigin = 'https://apo-overlay.netlify.app';
-        if (event.origin !== allowedOrigin) return;
-
-        const data = event.data;
-        if (data.type === 'GOOGLE_AUTH_SUCCESS') {
-          window.removeEventListener('message', messageHandler);
-          clearInterval(checkClosed);
-          clearTimeout(timeout);
-          
-          try {
-            const tokens = await this.exchangeCodeForTokens(data.code, data.state);
-            if (tokens) {
-              await this.getUserProfile();
-              await this.getYouTubeChannelInfo();
-              localStorage.setItem('auth_provider', 'google');
-              resolve(tokens);
-            }
-          } catch (error) {
-            reject(error);
-          }
-        } else if (data.type === 'GOOGLE_AUTH_ERROR') {
-          window.removeEventListener('message', messageHandler);
-          clearInterval(checkClosed);
-          clearTimeout(timeout);
-          reject(new Error(data.error));
-        }
-      };
-
-      window.addEventListener('message', messageHandler);
-
-      let timeout;
-      const checkClosed = setInterval(() => {
-        try {
-          if (popup.closed) {
-            clearInterval(checkClosed);
-            clearTimeout(timeout);
-            window.removeEventListener('message', messageHandler);
-            reject(new Error('Popup fermée par l\'utilisateur'));
-          }
-        } catch (error) {
-          console.log('Impossible de vérifier l\'état de la popup (normal avec COOP)');
-        }
-      }, 1000);
-
-      timeout = setTimeout(() => {
-        clearInterval(checkClosed);
-        window.removeEventListener('message', messageHandler);
-        try {
-          popup.close();
-        } catch (e) {
-          // Ignorer les erreurs de fermeture
-        }
-        reject(new Error('Timeout de connexion Google'));
-      }, 300000);
-    });
+      window.location.href = authUrl.toString();
+    } catch (error) {
+      console.error('Erreur lors de l\'initialisation de l\'authentification:', error);
+      throw error;
+    }
   }
 
   async exchangeCodeForTokens(code, state) {
@@ -156,6 +94,7 @@ class GoogleAuth {
         localStorage.setItem('google_refresh_token', tokens.refresh_token);
       }
       localStorage.setItem('google_expires_at', Date.now() + (tokens.expires_in * 1000));
+      localStorage.setItem('auth_provider', 'google');
       localStorage.removeItem('google_auth_state');
 
       return tokens;
@@ -228,8 +167,7 @@ class GoogleAuth {
     const refreshToken = localStorage.getItem('google_refresh_token');
     const authProvider = localStorage.getItem('auth_provider');
     
-    if (!token || !expiresAt || !authProvider) return false;
-    if (authProvider !== 'google') return false;
+    if (!token || !expiresAt || authProvider !== 'google') return false;
 
     const isExpired = new Date().getTime() >= parseInt(expiresAt);
     

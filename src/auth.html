@@ -121,18 +121,13 @@
       });
 
       // Gérer le clic sur le bouton de connexion Google
-      googleLoginButton.addEventListener('click', async () => {
+      googleLoginButton.addEventListener('click', () => {
         try {
           loading.classList.add('active');
           errorContainer.style.display = 'none';
           
           const googleAuth = new GoogleAuth();
-          const tokens = await googleAuth.initiateAuth();
-          
-          if (tokens) {
-            // Rediriger une seule fois vers le dashboard
-            window.location.replace('/index.html');
-          }
+          googleAuth.initiateAuth();
         } catch (error) {
           console.error("Erreur lors de la connexion Google:", error);
           loading.classList.remove('active');
