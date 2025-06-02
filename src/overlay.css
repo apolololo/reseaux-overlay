@@ -64,13 +64,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto;
+  margin: 0 auto 1rem auto;
   transition: background-color 0.3s, transform 0.2s;
+  width: 100%;
 }
 
 .login-button:hover {
   background-color: #6C63FF;
   transform: translateY(-3px);
+}
+
+.login-button.google-button {
+  background-color: #4285F4; /* Couleur de Google */
+}
+
+.login-button.google-button:hover {
+  background-color: #357AE8;
 }
 
 .login-button img {
