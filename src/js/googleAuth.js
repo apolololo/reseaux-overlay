@@ -10,6 +10,38 @@ class GoogleAuth {
       'https://www.googleapis.com/auth/youtube',
       'https://www.googleapis.com/auth/youtube.channel-memberships.creator'
     ].join(' ');
+    
+    // Initialiser l'écouteur de messages immédiatement
+    this.initializeMessageListener();
+  }
+
+  // Initialiser l'écouteur de messages
+  initializeMessageListener() {
+    window.addEventListener('message', async (event) => {
+      const allowedOrigin = 'https://apo-overlay.netlify.app';
+      if (event.origin !== allowedOrigin) return;
+
+      const data = event.data;
+      if (data.type === 'GOOGLE_AUTH_SUCCESS') {
+        try {
+          console.log('Code reçu de la popup:', data.code);
+          const tokens = await this.exchangeCodeForTokens(data.code, data.state);
+          await this.getUserProfile();
+          await this.getYouTubeChannelInfo();
+          
+          // Forcer une vérification de l'authentification
+          if (typeof window.checkAuth === 'function') {
+            window.checkAuth();
+          }
+        } catch (error) {
+          console.error('Erreur lors du traitement du code:', error);
+        }
+      }
+
+      if (data.type === 'GOOGLE_AUTH_ERROR') {
+        console.error('Erreur Google:', data.error);
+      }
+    });
   }
 
   // Démarrer le processus d'authentification Google avec popup
@@ -27,7 +59,6 @@ class GoogleAuth {
       authUrl.searchParams.set('access_type', 'offline');
       authUrl.searchParams.set('prompt', 'consent');
 
-      // Ouvrir une popup au lieu de rediriger
       const popup = window.open(
         authUrl.toString(),
         'google-auth',
@@ -46,33 +77,6 @@ class GoogleAuth {
           reject(new Error('Popup fermée par l\'utilisateur'));
         }
       }, 1000);
-
-      // Écouter les messages de la popup
-      const messageListener = async (event) => {
-        if (event.origin !== 'https://apo-overlay.netlify.app') return;
-        
-        if (event.data.type === 'GOOGLE_AUTH_SUCCESS') {
-          clearInterval(checkClosed);
-          window.removeEventListener('message', messageListener);
-          popup.close();
-          
-          try {
-            const tokens = await this.exchangeCodeForTokens(event.data.code, event.data.state);
-            await this.getUserProfile();
-            await this.getYouTubeChannelInfo();
-            resolve(tokens);
-          } catch (error) {
-            reject(error);
-          }
-        } else if (event.data.type === 'GOOGLE_AUTH_ERROR') {
-          clearInterval(checkClosed);
-          window.removeEventListener('message', messageListener);
-          popup.close();
-          reject(new Error(event.data.error));
-        }
-      };
-
-      window.addEventListener('message', messageListener);
     });
   }
 
@@ -190,25 +194,79 @@ class GoogleAuth {
   isAuthenticated() {
     const token = localStorage.getItem('google_access_token');
     const expiresAt = localStorage.getItem('google_expires_at');
+    const refreshToken = localStorage.getItem('google_refresh_token');
     
     console.log('Google Auth Check:', {
       hasToken: !!token,
       expiresAt: expiresAt,
       currentTime: new Date().getTime(),
-      isValid: token && expiresAt && new Date().getTime() < parseInt(expiresAt)
+      hasRefreshToken: !!refreshToken
     });
+
+    // Si le token est expiré mais qu'on a un refresh token, essayer de le rafraîchir
+    if (token && expiresAt && new Date().getTime() >= parseInt(expiresAt) && refreshToken) {
+      this.refreshAccessToken().catch(console.error);
+      return true; // On considère toujours comme authentifié pendant le rafraîchissement
+    }
     
     return token && expiresAt && new Date().getTime() < parseInt(expiresAt);
   }
 
+  // Rafraîchir le token d'accès
+  async refreshAccessToken() {
+    const refreshToken = localStorage.getItem('google_refresh_token');
+    if (!refreshToken) return null;
+
+    try {
+      const response = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          client_id: this.clientId,
+          client_secret: this.clientSecret,
+          refresh_token: refreshToken,
+          grant_type: 'refresh_token'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors du rafraîchissement du token');
+      }
+
+      const tokens = await response.json();
+      localStorage.setItem('google_access_token', tokens.access_token);
+      localStorage.setItem('google_expires_at', Date.now() + (tokens.expires_in * 1000));
+      
+      return tokens;
+    } catch (error) {
+      console.error('Erreur lors du rafraîchissement du token:', error);
+      this.logout(); // Déconnexion en cas d'échec du rafraîchissement
+      return null;
+    }
+  }
+
   // Déconnexion
   logout() {
+    // Supprimer tous les tokens et données
     localStorage.removeItem('google_access_token');
     localStorage.removeItem('google_refresh_token');
     localStorage.removeItem('google_expires_at');
     localStorage.removeItem('google_user_profile');
     localStorage.removeItem('youtube_channel_info');
     localStorage.removeItem('google_auth_state');
+
+    // Révoquer le token côté Google
+    const token = localStorage.getItem('google_access_token');
+    if (token) {
+      fetch(`https://oauth2.googleapis.com/revoke?token=${token}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        }
+      }).catch(console.error);
+    }
   }
 }
 
