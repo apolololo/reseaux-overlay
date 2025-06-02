@@ -139,7 +139,15 @@ class GoogleAuth {
         throw new Error('Erreur lors de la récupération du profil');
       }
 
-      return await response.json();
+      const userProfile = await response.json();
+      
+      // Stocker automatiquement le profil
+      if (userProfile) {
+        localStorage.setItem('google_user_profile', JSON.stringify(userProfile));
+        console.log('Profil utilisateur stocké:', userProfile.name);
+      }
+      
+      return userProfile;
     } catch (error) {
       console.error('Erreur lors de la récupération du profil:', error);
       return null;
@@ -163,7 +171,15 @@ class GoogleAuth {
       }
 
       const data = await response.json();
-      return data.items && data.items.length > 0 ? data.items[0] : null;
+      const channelInfo = data.items && data.items.length > 0 ? data.items[0] : null;
+      
+      // Stocker automatiquement les infos de la chaîne
+      if (channelInfo) {
+        localStorage.setItem('youtube_channel_info', JSON.stringify(channelInfo));
+        console.log('Infos chaîne YouTube stockées:', channelInfo.snippet?.title);
+      }
+      
+      return channelInfo;
     } catch (error) {
       console.error('Erreur lors de la récupération des infos YouTube:', error);
       return null;

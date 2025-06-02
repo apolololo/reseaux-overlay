@@ -53,22 +53,8 @@
       const errorContainer = document.getElementById('error-container');
       const errorMessage = document.getElementById('error-message');
       
-      // Vérifier si l'utilisateur est déjà connecté (Twitch ou Google)
-      const checkAuthentication = () => {
-        const twitchToken = localStorage.getItem('twitch_token');
-        const twitchExpiresAt = localStorage.getItem('twitch_expires_at');
-        const googleAuth = new GoogleAuth();
-        
-        const isTwitchAuth = twitchToken && twitchExpiresAt && new Date().getTime() < parseInt(twitchExpiresAt);
-        const isGoogleAuth = googleAuth.isAuthenticated();
-        
-        if (isTwitchAuth || isGoogleAuth) {
-          // Token valide, rediriger vers la page principale
-          window.location.replace('/index.html');
-          return;
-        }
-
-        // Check if there's an error in URL parameters
+      // Vérifier s'il y a des erreurs dans l'URL
+      const checkUrlErrors = () => {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('error')) {
           errorContainer.style.display = 'block';
@@ -76,8 +62,8 @@
         }
       };
       
-      // Vérifier l'authentification au chargement
-      checkAuthentication();
+      // Vérifier les erreurs au chargement (mais pas rediriger automatiquement)
+      checkUrlErrors();
       
       // Gérer le clic sur le bouton de connexion Twitch (code existant)
       loginButton.addEventListener('click', () => {
@@ -125,20 +111,6 @@
           const tokens = await googleAuth.initiateAuth();
           
           if (tokens) {
-            // Récupérer le profil utilisateur
-            const userProfile = await googleAuth.getUserProfile();
-            if (userProfile) {
-              localStorage.setItem('google_user_profile', JSON.stringify(userProfile));
-              console.log('Profil utilisateur stocké:', userProfile.name);
-            }
-
-            // Récupérer les informations de la chaîne YouTube
-            const channelInfo = await googleAuth.getYouTubeChannelInfo();
-            if (channelInfo) {
-              localStorage.setItem('youtube_channel_info', JSON.stringify(channelInfo));
-              console.log('Infos chaîne YouTube stockées:', channelInfo.snippet?.title);
-            }
-
             // Rediriger vers la page principale
             window.location.href = '/index.html';
           }
