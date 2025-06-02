@@ -4,112 +4,182 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Authentification Google - APO Overlays</title>
+  <link rel="stylesheet" href="/src/overlay.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Montserrat', sans-serif;
-      background: #0A0C14;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-    }
-    .container {
-      text-align: center;
-      padding: 20px;
-    }
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid rgba(108, 99, 255, 0.3);
-      border-top: 3px solid #6C63FF;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 20px;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    .error {
+    .error-message {
       color: #ff5252;
       background: rgba(255, 82, 82, 0.1);
-      padding: 15px;
+      padding: 12px;
       border-radius: 8px;
       margin-top: 20px;
+      text-align: left;
     }
-    .success {
-      color: #4CAF50;
-      background: rgba(76, 175, 80, 0.1);
-      padding: 15px;
-      border-radius: 8px;
-      margin-top: 20px;
+    .retry-button {
+      margin-top: 12px;
+      background: #4285f4;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .retry-button:hover {
+      background: #3367d6;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div id="loading">
-      <div class="spinner"></div>
-      <div>Connexion avec Google en cours...</div>
+  <div class="login-container">
+    <div class="auth-background">
+      <div class="auth-gradient-circle auth-circle-1"></div>
+      <div class="auth-gradient-circle auth-circle-2"></div>
+      <div class="auth-gradient-circle auth-circle-3"></div>
     </div>
-    <div id="error" class="error" style="display: none;">
-      <div id="error-message">Une erreur s'est produite</div>
-    </div>
-    <div id="success" class="success" style="display: none;">
-      ✅ Connexion réussie ! Redirection en cours...
+    
+    <div class="login-box">
+      <h1 class="login-title">Authentification Google</h1>
+      <p id="status-message" class="login-subtitle">Traitement de votre connexion...</p>
+      
+      <div id="loading-container" class="loading-container active">
+        <div class="loading-spinner"></div>
+        <div id="loading-text" class="loading-text">Vérification...</div>
+      </div>
+
+      <div id="error-container" class="error-message" style="display: none;">
+        <div id="error-message"></div>
+        <button id="retry-button" class="retry-button">Réessayer</button>
+      </div>
     </div>
   </div>
 
-  <script type="module">
-    import '../src/js/googleAuth.js';
-
+  <script>
     document.addEventListener('DOMContentLoaded', async () => {
-      const loadingEl = document.getElementById('loading');
-      const errorEl = document.getElementById('error');
-      const errorMessageEl = document.getElementById('error-message');
-      const successEl = document.getElementById('success');
+      const statusMessage = document.getElementById('status-message');
+      const loadingText = document.getElementById('loading-text');
+      const loadingContainer = document.getElementById('loading-container');
+      const errorContainer = document.getElementById('error-container');
+      const errorMessage = document.getElementById('error-message');
+      const retryButton = document.getElementById('retry-button');
+
+      // Fonction pour afficher une erreur
+      const showError = (message) => {
+        statusMessage.textContent = "Erreur d'authentification";
+        loadingContainer.classList.remove('active');
+        errorContainer.style.display = 'block';
+        errorMessage.textContent = message;
+      };
+
+      // Gestionnaire du bouton de réessai
+      retryButton.addEventListener('click', () => {
+        window.location.href = '/src/auth.html';
+      });
 
       try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get('code');
-        const state = urlParams.get('state');
-        const error = urlParams.get('error');
+        // Récupérer les paramètres de l'URL
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+        const state = params.get('state');
+        const error = params.get('error');
+        const errorDescription = params.get('error_description');
 
+        // Vérifier les erreurs de l'authentification Google
         if (error) {
-          throw new Error(error);
+          throw new Error(errorDescription || error);
         }
 
-        if (!code || !state) {
-          throw new Error('Code d\'autorisation manquant');
+        // Vérifier la présence du code
+        if (!code) {
+          throw new Error("Aucun code d'autorisation reçu");
         }
 
-        const googleAuth = new GoogleAuth();
-        const tokens = await googleAuth.exchangeCodeForTokens(code, state);
+        // Vérifier l'état pour la sécurité
+        const storedState = localStorage.getItem('google_auth_state');
+        if (!state || state !== storedState) {
+          throw new Error("État de sécurité invalide");
+        }
+
+        // Récupérer les identifiants stockés
+        const clientId = localStorage.getItem('google_client_id');
+        const clientSecret = localStorage.getItem('google_client_secret');
+        if (!clientId || !clientSecret) {
+          throw new Error("Identifiants d'application manquants");
+        }
+
+        // Échanger le code contre un token
+        loadingText.textContent = "Échange du code d'autorisation...";
+        const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            client_id: clientId,
+            client_secret: clientSecret,
+            code: code,
+            redirect_uri: 'https://apo-overlay.netlify.app/auth/google-callback.html',
+            grant_type: 'authorization_code'
+          })
+        });
+
+        if (!tokenResponse.ok) {
+          const errorData = await tokenResponse.json();
+          throw new Error(errorData.error_description || errorData.error || "Erreur lors de l'échange du code");
+        }
+
+        const tokens = await tokenResponse.json();
+
+        // Stocker les tokens
+        localStorage.setItem('google_access_token', tokens.access_token);
+        if (tokens.refresh_token) {
+          localStorage.setItem('google_refresh_token', tokens.refresh_token);
+        }
+        localStorage.setItem('google_expires_at', (Date.now() + (tokens.expires_in * 1000)).toString());
+        localStorage.setItem('auth_provider', 'google');
+
+        // Récupérer le profil utilisateur
+        loadingText.textContent = "Récupération du profil...";
+        const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+          headers: { 'Authorization': `Bearer ${tokens.access_token}` }
+        });
+
+        if (!userResponse.ok) {
+          throw new Error("Erreur lors de la récupération du profil utilisateur");
+        }
+
+        const userData = await userResponse.json();
+        localStorage.setItem('google_user_profile', JSON.stringify(userData));
+
+        // Récupérer les informations YouTube
+        loadingText.textContent = "Récupération des données YouTube...";
+        const youtubeResponse = await fetch('https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&mine=true', {
+          headers: { 'Authorization': `Bearer ${tokens.access_token}` }
+        });
+
+        if (youtubeResponse.ok) {
+          const youtubeData = await youtubeResponse.json();
+          if (youtubeData.items?.[0]) {
+            localStorage.setItem('youtube_channel_info', JSON.stringify(youtubeData.items[0]));
+          }
+        }
+
+        // Nettoyer l'état
+        localStorage.removeItem('google_auth_state');
+        localStorage.removeItem('google_client_id');
+        localStorage.removeItem('google_client_secret');
+
+        // Afficher le succès et rediriger
+        loadingText.textContent = "Connexion réussie !";
+        statusMessage.textContent = "Vous êtes connecté ! Redirection...";
         
-        if (tokens) {
-          await googleAuth.getUserProfile();
-          await googleAuth.getYouTubeChannelInfo();
-          
-          loadingEl.style.display = 'none';
-          successEl.style.display = 'block';
-          
-          // Rediriger vers le dashboard après un court délai
-          setTimeout(() => {
-            window.location.replace('/index.html');
-          }, 1000);
-        }
+        setTimeout(() => {
+          window.location.replace('/index.html');
+        }, 1500);
+
       } catch (error) {
         console.error('Erreur lors de l\'authentification:', error);
-        loadingEl.style.display = 'none';
-        errorEl.style.display = 'block';
-        errorMessageEl.textContent = error.message || 'Une erreur s\'est produite lors de l\'authentification';
-        
-        // Rediriger vers la page de connexion après un délai en cas d'erreur
-        setTimeout(() => {
-          window.location.replace('/src/auth.html');
-        }, 3000);
+        showError(error.message || "Une erreur inattendue s'est produite");
       }
     });
   </script>

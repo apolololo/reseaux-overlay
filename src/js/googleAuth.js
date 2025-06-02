@@ -10,41 +10,19 @@ class GoogleAuth {
       'https://www.googleapis.com/auth/youtube',
       'https://www.googleapis.com/auth/youtube.channel-memberships.creator'
     ].join(' ');
-    
-    this.initializeMessageListener();
-  }
-
-  initializeMessageListener() {
-    window.addEventListener('message', async (event) => {
-      const allowedOrigin = 'https://apo-overlay.netlify.app';
-      if (event.origin !== allowedOrigin) return;
-
-      const data = event.data;
-      if (data.type === 'GOOGLE_AUTH_SUCCESS') {
-        try {
-          const tokens = await this.exchangeCodeForTokens(data.code, data.state);
-          if (tokens) {
-            await this.getUserProfile();
-            await this.getYouTubeChannelInfo();
-            localStorage.setItem('auth_provider', 'google');
-          }
-        } catch (error) {
-          console.error('Erreur lors du traitement du code:', error);
-          throw error;
-        }
-      }
-
-      if (data.type === 'GOOGLE_AUTH_ERROR') {
-        console.error('Erreur Google reçue:', data.error);
-      }
-    });
   }
 
   async initiateAuth() {
     try {
+      // Stocker les identifiants pour la page de callback
+      localStorage.setItem('google_client_id', this.clientId);
+      localStorage.setItem('google_client_secret', this.clientSecret);
+      
+      // Générer et stocker l'état pour la sécurité
       const state = Math.random().toString(36).substring(2, 15);
       localStorage.setItem('google_auth_state', state);
       
+      // Construire l'URL d'authentification
       const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
       authUrl.searchParams.set('client_id', this.clientId);
       authUrl.searchParams.set('redirect_uri', this.redirectUri);
@@ -54,6 +32,7 @@ class GoogleAuth {
       authUrl.searchParams.set('access_type', 'offline');
       authUrl.searchParams.set('prompt', 'consent');
 
+      // Rediriger vers la page d'authentification Google
       window.location.href = authUrl.toString();
     } catch (error) {
       console.error('Erreur lors de l\'initialisation de l\'authentification:', error);
@@ -65,7 +44,7 @@ class GoogleAuth {
     try {
       const storedState = localStorage.getItem('google_auth_state');
       if (state !== storedState) {
-        throw new Error('État de sécurité invalide');
+        throw new Error('État invalide');
       }
 
       const response = await fetch('https://oauth2.googleapis.com/token', {
@@ -74,9 +53,9 @@ class GoogleAuth {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
-          code: code,
           client_id: this.clientId,
           client_secret: this.clientSecret,
+          code: code,
           redirect_uri: this.redirectUri,
           grant_type: 'authorization_code'
         })
@@ -84,20 +63,19 @@ class GoogleAuth {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(`Erreur lors de l'échange du code: ${errorData.error_description || errorData.error}`);
+        throw new Error(errorData.error_description || errorData.error || 'Erreur lors de l\'échange du code');
       }
 
-      const tokens = await response.json();
+      const data = await response.json();
       
-      localStorage.setItem('google_access_token', tokens.access_token);
-      if (tokens.refresh_token) {
-        localStorage.setItem('google_refresh_token', tokens.refresh_token);
+      localStorage.setItem('google_access_token', data.access_token);
+      if (data.refresh_token) {
+        localStorage.setItem('google_refresh_token', data.refresh_token);
       }
-      localStorage.setItem('google_expires_at', Date.now() + (tokens.expires_in * 1000));
-      localStorage.setItem('auth_provider', 'google');
-      localStorage.removeItem('google_auth_state');
-
-      return tokens;
+      const expiresAt = Date.now() + (data.expires_in * 1000);
+      localStorage.setItem('google_expires_at', expiresAt.toString());
+      
+      return data;
     } catch (error) {
       console.error('Erreur lors de l\'échange du code:', error);
       throw error;
