@@ -81,6 +81,7 @@ class GoogleAuth {
               await this.getUserProfile();
               await this.getYouTubeChannelInfo();
               localStorage.setItem('auth_provider', 'google');
+              window.location.href = '/overlay.html';
               resolve(tokens);
             }
           } catch (error) {
