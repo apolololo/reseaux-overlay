@@ -74,7 +74,6 @@ class GoogleAuth {
       }
       const expiresAt = Date.now() + (data.expires_in * 1000);
       localStorage.setItem('google_expires_at', expiresAt.toString());
-      localStorage.setItem('auth_provider', 'google');
       
       return data;
     } catch (error) {

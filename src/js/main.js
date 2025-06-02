@@ -70,60 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return token;
   }
 
-  // Canal de diffusion pour la synchronisation
-  const broadcastChannel = new BroadcastChannel('followers_goal_update');
-
-  // Fonction pour générer l'URL avec la configuration
-  function generateOverlayUrl(url, token) {
-    const overlayUrl = new URL(url, PRODUCTION_URL);
-    overlayUrl.searchParams.set('token', token);
-    
-    const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
-    const configKey = `followers_goal_config_${userData.id || 'anonymous'}`;
-    const config = localStorage.getItem(configKey);
-    
-    const defaultConfig = {
-      target: 1000,
-      text: "Objectif : {current}/{target} followers",
-      progressColor: "#FF0000",
-      textColor: "#FFFFFF",
-      showBackground: true,
-      showProgressBar: true,
-      showPercentage: true
-    };
-
-    const finalConfig = config ? { ...defaultConfig, ...JSON.parse(config) } : defaultConfig;
-    
-    Object.entries(finalConfig).forEach(([key, value]) => {
-      overlayUrl.searchParams.set(key, value.toString());
-    });
-
-    return overlayUrl;
-  }
-
-  // Fonction pour sauvegarder et propager la configuration
-  function updateConfiguration(config) {
-    const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
-    const configKey = `followers_goal_config_${userData.id || 'anonymous'}`;
-    localStorage.setItem(configKey, JSON.stringify(config));
-
-    // Propager la mise à jour aux widgets
-    broadcastChannel.postMessage({
-      type: 'config_update',
-      userId: userData.id,
-      config: config
-    });
-
-    // Mettre à jour la prévisualisation
-    const activeOverlay = document.querySelector('.overlay-item.active');
-    if (activeOverlay) {
-      const url = activeOverlay.dataset.url;
-      const token = generateOverlayToken(url);
-      const previewUrl = generateOverlayUrl(url, token);
-      document.getElementById('overlay-preview').src = previewUrl.toString();
-    }
-  }
-
   // Gestion des overlays avec support des tailles et jetons
   document.querySelectorAll('.overlay-item').forEach(item => {
     item.addEventListener('click', () => {
@@ -133,15 +79,38 @@ document.addEventListener('DOMContentLoaded', () => {
       // Ajouter la classe active à l'item cliqué
       item.classList.add('active');
       
+      // Mettre à jour l'iframe de prévisualisation
+      const iframe = document.getElementById('overlay-preview');
       const url = item.dataset.url;
       const size = item.dataset.size;
       
       // Générer le token et l'URL avec la configuration
       const token = generateOverlayToken(url);
-      const previewUrl = generateOverlayUrl(url, token);
+      const previewUrl = new URL(url, PRODUCTION_URL);
+      previewUrl.searchParams.set('token', token);
+      
+      // Ajouter les paramètres de configuration spécifiques à l'utilisateur
+      const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
+      const configKey = `followers_goal_config_${userData.id || 'anonymous'}`;
+      const config = localStorage.getItem(configKey);
+      if (config) {
+        const configParams = JSON.parse(config);
+        // S'assurer que tous les paramètres nécessaires sont inclus
+        const requiredParams = {
+          target: configParams.target || 1000,
+          text: configParams.text || "Objectif : {current}/{target} followers",
+          progressColor: configParams.progressColor || "#FF0000",
+          textColor: configParams.textColor || "#FFFFFF",
+          showBackground: configParams.showBackground !== false,
+          showProgressBar: configParams.showProgressBar !== false,
+          showPercentage: configParams.showPercentage !== false
+        };
+        Object.entries(requiredParams).forEach(([key, value]) => {
+          previewUrl.searchParams.set(key, value.toString());
+        });
+      }
       
       // Mettre à jour l'iframe avec l'URL complète
-      const iframe = document.getElementById('overlay-preview');
       iframe.src = previewUrl.toString();
       
       // Mettre à jour l'info de taille
@@ -151,13 +120,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Mettre à jour le bouton de configuration
       updateConfigButton(item);
-
-      // Envoyer la configuration initiale au widget
-      broadcastChannel.postMessage({
-        type: 'config_update',
-        userId: JSON.parse(localStorage.getItem('twitch_user') || '{}').id,
-        config: JSON.parse(localStorage.getItem(`followers_goal_config_${JSON.parse(localStorage.getItem('twitch_user') || '{}').id}`) || '{}')
-      });
     });
   });
 
@@ -209,8 +171,34 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!activeOverlay) return;
 
     const localPath = activeOverlay.dataset.url;
+    
+    // Construire l'URL avec les paramètres de configuration
+    const overlayUrl = new URL(localPath, PRODUCTION_URL);
+    
+    // Générer un token avec les données d'authentification
     const token = generateOverlayToken(localPath);
-    const overlayUrl = generateOverlayUrl(localPath, token);
+    overlayUrl.searchParams.set('token', token);
+    
+    // Ajouter les paramètres de configuration spécifiques à l'utilisateur
+    const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
+    const configKey = `followers_goal_config_${userData.id || 'anonymous'}`;
+    const config = localStorage.getItem(configKey);
+    if (config) {
+      const configParams = JSON.parse(config);
+      // S'assurer que tous les paramètres nécessaires sont inclus
+      const requiredParams = {
+        target: configParams.target || 1000,
+        text: configParams.text || "Objectif : {current}/{target} followers",
+        progressColor: configParams.progressColor || "#FF0000",
+        textColor: configParams.textColor || "#FFFFFF",
+        showBackground: configParams.showBackground !== false,
+        showProgressBar: configParams.showProgressBar !== false,
+        showPercentage: configParams.showPercentage !== false
+      };
+      Object.entries(requiredParams).forEach(([key, value]) => {
+        overlayUrl.searchParams.set(key, value.toString());
+      });
+    }
     
     try {
       await navigator.clipboard.writeText(overlayUrl.toString());
