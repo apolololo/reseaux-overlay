@@ -1,4 +1,3 @@
-
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
@@ -10,7 +9,7 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         auth: resolve(__dirname, 'src/auth.html'),
         callback: resolve(__dirname, 'auth/callback.html'),
-        googleCallback: resolve(__dirname, 'auth/google-callback.html'),
+        'google-callback': resolve(__dirname, 'src/auth/google-callback.html'),
         overlay: resolve(__dirname, 'overlay.html'),
         privacy: resolve(__dirname, 'src/privacy.html'),
         apo: resolve(__dirname, 'src/overlays/apo/overlay.html'),
@@ -32,5 +31,10 @@ export default defineConfig({
   server: {
     port: 8080,
     open: '/index.html'
+  },
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src')
+    }
   }
 });
