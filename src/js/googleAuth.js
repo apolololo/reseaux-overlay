@@ -191,6 +191,13 @@ class GoogleAuth {
     const token = localStorage.getItem('google_access_token');
     const expiresAt = localStorage.getItem('google_expires_at');
     
+    console.log('Google Auth Check:', {
+      hasToken: !!token,
+      expiresAt: expiresAt,
+      currentTime: new Date().getTime(),
+      isValid: token && expiresAt && new Date().getTime() < parseInt(expiresAt)
+    });
+    
     return token && expiresAt && new Date().getTime() < parseInt(expiresAt);
   }
 
