@@ -33,6 +33,10 @@
           Retour à la connexion
         </button>
       </div>
+
+      <div id="success-container" style="display: none; margin-top: 20px; color: #4CAF50; background: rgba(76, 175, 80, 0.1); padding: 12px; border-radius: 8px; text-align: center;">
+        <div>✅ Connexion réussie ! Redirection en cours...</div>
+      </div>
     </div>
   </div>
 
@@ -46,58 +50,82 @@
       const error = urlParams.get('error');
       const errorContainer = document.getElementById('error-container');
       const errorMessage = document.getElementById('error-message');
+      const successContainer = document.getElementById('success-container');
+      const loadingContainer = document.querySelector('.loading-container');
+
+      console.log('Callback reçu avec les paramètres:', { code: !!code, state: !!state, error });
 
       if (error) {
-        document.querySelector('.loading-container').classList.remove('active');
+        loadingContainer.classList.remove('active');
         errorContainer.style.display = 'block';
         errorMessage.textContent = `Erreur d'authentification: ${error}`;
+        console.error('Erreur Google Auth:', error);
         return;
       }
 
       if (!code || !state) {
-        document.querySelector('.loading-container').classList.remove('active');
+        loadingContainer.classList.remove('active');
         errorContainer.style.display = 'block';
         errorMessage.textContent = 'Code d\'autorisation manquant';
+        console.error('Code ou state manquant:', { code, state });
         return;
       }
 
       const storedState = localStorage.getItem('google_auth_state');
       if (state !== storedState) {
-        document.querySelector('.loading-container').classList.remove('active');
+        loadingContainer.classList.remove('active');
         errorContainer.style.display = 'block';
         errorMessage.textContent = 'État de sécurité invalide';
+        console.error('État invalide:', { received: state, expected: storedState });
         return;
       }
 
       try {
+        console.log('Début de l\'échange de code pour tokens...');
         const googleAuth = new GoogleAuth();
         
         // Échanger le code contre des tokens
-        await googleAuth.exchangeCodeForTokens(code, state);
+        const tokens = await googleAuth.exchangeCodeForTokens(code, state);
+        console.log('Tokens reçus:', !!tokens);
         
         // Récupérer le profil utilisateur
         const userProfile = await googleAuth.getUserProfile();
         if (userProfile) {
           localStorage.setItem('google_user_profile', JSON.stringify(userProfile));
+          console.log('Profil utilisateur stocké:', userProfile.name);
         }
 
         // Récupérer les informations de la chaîne YouTube
         const channelInfo = await googleAuth.getYouTubeChannelInfo();
         if (channelInfo) {
           localStorage.setItem('youtube_channel_info', JSON.stringify(channelInfo));
+          console.log('Infos chaîne YouTube stockées:', channelInfo.snippet?.title);
         }
 
         // Nettoyer l'état d'authentification
         localStorage.removeItem('google_auth_state');
 
-        // Rediriger vers la page principale
-        window.location.href = '/index.html';
+        // Afficher le message de succès
+        loadingContainer.classList.remove('active');
+        successContainer.style.display = 'block';
+
+        // Rediriger vers la page principale après un court délai
+        setTimeout(() => {
+          window.location.href = '/index.html';
+        }, 2000);
         
       } catch (error) {
         console.error('Erreur lors de l\'authentification:', error);
-        document.querySelector('.loading-container').classList.remove('active');
+        loadingContainer.classList.remove('active');
         errorContainer.style.display = 'block';
-        errorMessage.textContent = 'Erreur lors de la connexion avec Google. Veuillez réessayer.';
+        
+        if (error.message.includes('credentials')) {
+          errorMessage.textContent = 'Erreur de configuration Google. Vérifiez les identifiants client.';
+        } else if (error.message.includes('redirect_uri')) {
+          errorMessage.textContent = 'Erreur d\'URL de redirection. Vérifiez la configuration dans Google Cloud Console.';
+        } else {
+          errorMessage.textContent = 'Erreur lors de la connexion avec Google. Veuillez réessayer.';
+        }
       }
     });
   </script>

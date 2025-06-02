@@ -1,8 +1,7 @@
-
 class GoogleAuth {
   constructor() {
     this.clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    this.redirectUri = `${window.location.origin}/auth/google-callback.html`;
+    this.redirectUri = 'https://apo-overlay.netlify.app/auth/google-callback.html';
     this.scopes = [
       'https://www.googleapis.com/auth/userinfo.profile',
       'openid',
