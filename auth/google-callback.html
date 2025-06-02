@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Authentification Spotify - APO Overlays</title>
+  <title>Authentification Google en cours - APO Overlays</title>
   <link rel="stylesheet" href="/src/overlay.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,7 +19,7 @@
     
     <div class="login-box">
       <h1 class="login-title">Authentification</h1>
-      <p id="status-message" class="login-subtitle">Traitement de votre connexion Spotify...</p>
+      <p id="status-message" class="login-subtitle">Traitement de votre connexion Google...</p>
       
       <div class="loading-container active">
         <div class="loading-spinner"></div>
@@ -28,7 +28,7 @@
 
       <div id="error-container" style="display: none; margin-top: 20px; color: #ff5252; background: rgba(255, 82, 82, 0.1); padding: 12px; border-radius: 8px; text-align: left;">
         <div id="error-message">Une erreur s'est produite</div>
-        <button id="retry-button" style="margin-top: 12px; background: #1DB954; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+        <button id="retry-button" style="margin-top: 12px; background: #4285F4; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
           Réessayer
         </button>
       </div>
@@ -48,7 +48,8 @@
         return {
           code: params.get('code'),
           state: params.get('state'),
-          error: params.get('error')
+          error: params.get('error'),
+          error_description: params.get('error_description')
         };
       };
 
@@ -60,19 +61,19 @@
         try {
           loadingText.textContent = "Échange du code contre un token...";
           
-          // Appel direct à la fonction Supabase sans paramètres d'authentification supplémentaires
-          const response = await fetch('https://uejmtvhqzadtxrqtowtm.supabase.co/functions/v1/spotify-auth', {
+          const response = await fetch('https://uejmtvhqzadtxrqtowtm.supabase.co/functions/v1/google-auth', {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlam10dmhxemFkdHhycXRvd3RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTcxMjY3NTQsImV4cCI6MjAzMjcwMjc1NH0.66b1043c8fd7aa585bbb3464de61c1517609b1ec49e0f7d20adc21d14d81a9ec',
-              'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlam10dmhxemFkdHhycXRvd3RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTcxMjY3NTQsImV4cCI6MjAzMjcwMjc1NH0.66b1043c8fd7aa585bbb3464de61c1517609b1ec49e0f7d20adc21d14d81a9ec'
+              'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ code })
+            body: JSON.stringify({ 
+              code,
+              redirect_uri: `${window.location.origin}/auth/google-callback.html`
+            })
           });
           
           if (!response.ok) {
-            throw new Error('Erreur lors de l\'échange du code');
+            throw new Error(`Erreur lors de l'échange du code: ${response.status}`);
           }
           
           const data = await response.json();
@@ -81,13 +82,13 @@
             throw new Error(data.error);
           }
           
-          localStorage.setItem('spotify_token', data.access_token);
-          localStorage.setItem('spotify_refresh_token', data.refresh_token);
+          localStorage.setItem('google_token', data.access_token);
+          localStorage.setItem('google_refresh_token', data.refresh_token);
           const expiresAt = new Date().getTime() + (data.expires_in * 1000);
-          localStorage.setItem('spotify_expires_at', expiresAt.toString());
+          localStorage.setItem('google_expires_at', expiresAt.toString());
           
-          if (data.currentTrack) {
-            localStorage.setItem('spotify_current_track', JSON.stringify(data.currentTrack));
+          if (data.user) {
+            localStorage.setItem('google_user', JSON.stringify(data.user));
           }
           
           loadingText.textContent = "Connexion réussie !";
@@ -107,12 +108,18 @@
       };
       
       const params = getUrlParams();
+      const storedState = localStorage.getItem('google_auth_state');
       
       if (params.error) {
         statusMessage.textContent = "Erreur d'authentification";
-        loadingText.textContent = params.error;
+        loadingText.textContent = params.error_description || params.error;
         errorContainer.style.display = 'block';
-        errorMessage.textContent = params.error;
+        errorMessage.textContent = params.error_description || params.error;
+      } else if (!params.state || params.state !== storedState) {
+        statusMessage.textContent = "Erreur de sécurité";
+        loadingText.textContent = "Vérification d'état échouée";
+        errorContainer.style.display = 'block';
+        errorMessage.textContent = "Erreur de sécurité (état invalide)";
       } else if (params.code) {
         await exchangeCodeForToken(params.code);
       } else {
@@ -121,6 +128,8 @@
         errorContainer.style.display = 'block';
         errorMessage.textContent = "Aucun code d'autorisation n'a été reçu";
       }
+      
+      localStorage.removeItem('google_auth_state');
     });
   </script>
 </body>

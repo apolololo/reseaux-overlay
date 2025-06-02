@@ -9,10 +9,9 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         auth: resolve(__dirname, 'src/auth.html'),
         callback: resolve(__dirname, 'auth/callback.html'),
-        spotifyCallback: resolve(__dirname, 'auth/spotify-callback.html'),
+        googleCallback: resolve(__dirname, 'auth/google-callback.html'),
         overlay: resolve(__dirname, 'overlay.html'),
         privacy: resolve(__dirname, 'src/privacy.html'),
-        about: resolve(__dirname, 'about.html'), // Added about page
         apo: resolve(__dirname, 'src/overlays/apo/overlay.html'),
         starting: resolve(__dirname, 'src/overlays/starting/overlay.html'),
         brb: resolve(__dirname, 'src/overlays/brb/overlay.html'),
