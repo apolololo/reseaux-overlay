@@ -1,11 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Authentification Google - APO Overlays</title>
-  <link rel="stylesheet" href="../src/overlay.css" />
+  <link rel="stylesheet" href="/src/styles/overlay.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
@@ -41,7 +40,7 @@
   </div>
 
   <script type="module">
-    import '../src/js/googleAuth.js';
+    import '/src/js/googleAuth.js';
     
     document.addEventListener('DOMContentLoaded', async () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -111,7 +110,7 @@
 
         // Rediriger vers la page principale après un court délai
         setTimeout(() => {
-          window.location.href = '/index.html';
+          window.location.href = '/';
         }, 2000);
         
       } catch (error) {
