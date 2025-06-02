@@ -15,16 +15,33 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 document.addEventListener('DOMContentLoaded', () => {
   // Vérification de l'authentification
   const checkAuth = () => {
-    const token = localStorage.getItem('twitch_token');
-    const expiresAt = localStorage.getItem('twitch_expires_at');
+    const authProvider = localStorage.getItem('auth_provider');
     
-    // Vérifier si le token existe et n'est pas expiré
-    if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
-      // Rediriger vers la page d'authentification
-      window.location.href = './src/auth.html';
-      return false;
+    if (authProvider === 'twitch') {
+      const token = localStorage.getItem('twitch_token');
+      const expiresAt = localStorage.getItem('twitch_expires_at');
+      
+      // Vérifier si le token Twitch existe et n'est pas expiré
+      if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
+        window.location.replace('./src/auth.html');
+        return false;
+      }
+      return true;
+    } else if (authProvider === 'google') {
+      const token = localStorage.getItem('google_access_token');
+      const expiresAt = localStorage.getItem('google_expires_at');
+      
+      // Vérifier si le token Google existe et n'est pas expiré
+      if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
+        window.location.replace('./src/auth.html');
+        return false;
+      }
+      return true;
     }
-    return true;
+    
+    // Si aucun provider n'est défini, rediriger vers l'authentification
+    window.location.replace('./src/auth.html');
+    return false;
   };
   
   // Vérifier l'authentification au chargement

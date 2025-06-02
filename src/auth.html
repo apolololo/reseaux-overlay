@@ -84,6 +84,33 @@
       const loading = document.getElementById('loading');
       const errorContainer = document.getElementById('error-container');
       const errorMessage = document.getElementById('error-message');
+
+      // Vérifier si l'utilisateur est déjà authentifié
+      const checkExistingAuth = () => {
+        const authProvider = localStorage.getItem('auth_provider');
+        
+        if (authProvider === 'twitch') {
+          const token = localStorage.getItem('twitch_token');
+          const expiresAt = localStorage.getItem('twitch_expires_at');
+          
+          if (token && expiresAt && new Date().getTime() < parseInt(expiresAt)) {
+            window.location.replace('../index.html');
+            return true;
+          }
+        } else if (authProvider === 'google') {
+          const token = localStorage.getItem('google_access_token');
+          const expiresAt = localStorage.getItem('google_expires_at');
+          
+          if (token && expiresAt && new Date().getTime() < parseInt(expiresAt)) {
+            window.location.replace('../index.html');
+            return true;
+          }
+        }
+        return false;
+      };
+      
+      // Si l'utilisateur est déjà authentifié, rediriger vers l'index
+      if (checkExistingAuth()) return;
       
       // Vérifier s'il y a des erreurs dans l'URL
       const checkUrlErrors = () => {
