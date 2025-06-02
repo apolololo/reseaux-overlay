@@ -74,6 +74,7 @@ class GoogleAuth {
         if (data.type === 'GOOGLE_AUTH_SUCCESS') {
           window.removeEventListener('message', messageHandler);
           clearInterval(checkClosed);
+          clearTimeout(timeout);
           
           try {
             const tokens = await this.exchangeCodeForTokens(data.code, data.state);
@@ -89,19 +90,39 @@ class GoogleAuth {
         } else if (data.type === 'GOOGLE_AUTH_ERROR') {
           window.removeEventListener('message', messageHandler);
           clearInterval(checkClosed);
+          clearTimeout(timeout);
           reject(new Error(data.error));
         }
       };
 
       window.addEventListener('message', messageHandler);
 
+      let timeout;
       const checkClosed = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(checkClosed);
-          window.removeEventListener('message', messageHandler);
-          reject(new Error('Popup fermée par l\'utilisateur'));
+        try {
+          if (popup.closed) {
+            clearInterval(checkClosed);
+            clearTimeout(timeout);
+            window.removeEventListener('message', messageHandler);
+            reject(new Error('Popup fermée par l\'utilisateur'));
+          }
+        } catch (error) {
+          // Ignorer les erreurs de Cross-Origin-Opener-Policy
+          console.log('Impossible de vérifier l\'état de la popup (normal avec COOP)');
         }
       }, 1000);
+
+      // Timeout de 5 minutes pour éviter les blocages
+      timeout = setTimeout(() => {
+        clearInterval(checkClosed);
+        window.removeEventListener('message', messageHandler);
+        try {
+          popup.close();
+        } catch (e) {
+          // Ignorer les erreurs de fermeture
+        }
+        reject(new Error('Timeout de connexion Google'));
+      }, 300000);
     });
   }
 

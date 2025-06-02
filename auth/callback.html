@@ -105,6 +105,7 @@
           localStorage.setItem('twitch_token', data.access_token);
           const expiresAt = new Date().getTime() + (data.expires_in * 1000);
           localStorage.setItem('twitch_expires_at', expiresAt.toString());
+          localStorage.setItem('auth_provider', 'twitch');
           
           // Stocker également les infos utilisateur si retournées
           if (data.user) {
