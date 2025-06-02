@@ -74,17 +74,18 @@
       const errorMessageEl = document.getElementById('error-message');
       const successEl = document.getElementById('success');
 
+      const allowedOrigin = 'https://apo-overlay.netlify.app';
+
       if (error) {
         loadingEl.style.display = 'none';
         errorEl.style.display = 'block';
         errorMessageEl.textContent = `Erreur: ${error}`;
         
-        // Envoyer l'erreur à la fenêtre parent
         if (window.opener) {
           window.opener.postMessage({
             type: 'GOOGLE_AUTH_ERROR',
             error: error
-          }, window.location.origin);
+          }, allowedOrigin);
         }
         return;
       }
@@ -98,7 +99,7 @@
           window.opener.postMessage({
             type: 'GOOGLE_AUTH_ERROR',
             error: 'Code d\'autorisation manquant'
-          }, window.location.origin);
+          }, allowedOrigin);
         }
         return;
       }
@@ -112,7 +113,7 @@
           type: 'GOOGLE_AUTH_SUCCESS',
           code: code,
           state: state
-        }, window.location.origin);
+        }, allowedOrigin);
       }
 
       // Fermer la popup après un court délai

@@ -34,6 +34,11 @@ class GoogleAuth {
         'width=500,height=600,scrollbars=yes,resizable=yes'
       );
 
+      if (!popup) {
+        reject(new Error('La popup a été bloquée par le navigateur'));
+        return;
+      }
+
       // Surveiller la popup
       const checkClosed = setInterval(() => {
         if (popup.closed) {
@@ -44,7 +49,7 @@ class GoogleAuth {
 
       // Écouter les messages de la popup
       const messageListener = async (event) => {
-        if (event.origin !== window.location.origin) return;
+        if (event.origin !== 'https://apo-overlay.netlify.app') return;
         
         if (event.data.type === 'GOOGLE_AUTH_SUCCESS') {
           clearInterval(checkClosed);
@@ -53,6 +58,8 @@ class GoogleAuth {
           
           try {
             const tokens = await this.exchangeCodeForTokens(event.data.code, event.data.state);
+            await this.getUserProfile();
+            await this.getYouTubeChannelInfo();
             resolve(tokens);
           } catch (error) {
             reject(error);
