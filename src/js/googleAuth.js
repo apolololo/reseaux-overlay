@@ -27,10 +27,6 @@ class GoogleAuth {
             await this.getUserProfile();
             await this.getYouTubeChannelInfo();
             localStorage.setItem('auth_provider', 'google');
-            // Forcer un délai avant la redirection et utiliser href au lieu de replace
-            setTimeout(() => {
-              window.location.href = '/index.html';
-            }, 500);
           }
         } catch (error) {
           console.error('Erreur lors du traitement du code:', error);
