@@ -179,23 +179,6 @@
         });
       }
 
-      // Écouter les mises à jour des autres widgets
-      const updateChannel = new BroadcastChannel('followers_goal_update');
-      updateChannel.onmessage = (event) => {
-        if (event.data.userId === userData.id) {
-          if (event.data.type === 'display_update') {
-            // Mettre à jour la configuration
-            Object.assign(config, event.data.data.config);
-            // Appliquer les styles
-            document.documentElement.style.setProperty('--progress-color', config.progressColor);
-            document.documentElement.style.setProperty('--text-color', config.textColor);
-            updateVisibility();
-            // Mettre à jour l'affichage
-            updateDisplay(event.data.data.followers);
-          }
-        }
-      };
-
       // Fonction pour récupérer le nombre de followers
       async function fetchFollowers() {
         try {
@@ -218,14 +201,6 @@
           const data = await response.json();
           if (data.total !== undefined) {
             updateDisplay(data.total);
-            
-            // Envoyer la mise à jour du nombre de followers à tous les widgets ouverts
-            const broadcastChannel = new BroadcastChannel('followers_goal_update');
-            broadcastChannel.postMessage({
-              type: 'followers_update',
-              followers: data.total,
-              userId: userData.id
-            });
           }
         } catch (error) {
           console.error('Erreur lors de la récupération des followers:', error);
@@ -233,56 +208,32 @@
       }
 
       // Mettre à jour toutes les 30 secondes
-      setInterval(fetchFollowers, 30000);
+      const updateInterval = setInterval(fetchFollowers, 30000);
       
       // Première mise à jour immédiate
       fetchFollowers();
 
-      // Écouter les messages de configuration
-      window.addEventListener('followers_goal_config_update', (event) => {
-        Object.assign(config, event.detail);
-        // Sauvegarder la configuration avec l'ID utilisateur
-        localStorage.setItem(configKey, JSON.stringify(config));
-        document.documentElement.style.setProperty('--progress-color', config.progressColor);
-        document.documentElement.style.setProperty('--text-color', config.textColor);
-        updateVisibility();
-        updateDisplay(currentFollowers);
-        
-        // Envoyer la mise à jour à tous les widgets ouverts
-        const broadcastChannel = new BroadcastChannel('followers_goal_update');
-        broadcastChannel.postMessage({
-          type: 'config_update',
-          config: config,
-          userId: userData.id
-        });
-      });
-
-      // Écouter les mises à jour via BroadcastChannel
+      // Canal de diffusion pour la synchronisation
       const broadcastChannel = new BroadcastChannel('followers_goal_update');
+
+      // Écouter les mises à jour de configuration
       broadcastChannel.onmessage = (event) => {
         if (event.data.userId === userData.id) {
-          if (event.data.type === 'config_update') {
-            Object.assign(config, event.data.config);
+          const newConfig = event.data.config;
+          if (newConfig) {
+            Object.assign(config, newConfig);
             document.documentElement.style.setProperty('--progress-color', config.progressColor);
             document.documentElement.style.setProperty('--text-color', config.textColor);
             updateVisibility();
             updateDisplay(currentFollowers);
-          } else if (event.data.type === 'followers_update') {
-            updateDisplay(event.data.followers);
           }
         }
       };
 
-      // Écouter les changements de stockage local
-      window.addEventListener('storage', (event) => {
-        if (event.key === 'followers_goal_config') {
-          const newConfig = JSON.parse(event.newValue);
-          Object.assign(config, newConfig);
-          document.documentElement.style.setProperty('--progress-color', config.progressColor);
-          document.documentElement.style.setProperty('--text-color', config.textColor);
-          updateVisibility();
-          updateDisplay(currentFollowers);
-        }
+      // Nettoyer l'intervalle quand la page est fermée
+      window.addEventListener('unload', () => {
+        clearInterval(updateInterval);
+        broadcastChannel.close();
       });
     });
   </script>
