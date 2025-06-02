@@ -27,7 +27,10 @@ class GoogleAuth {
             await this.getUserProfile();
             await this.getYouTubeChannelInfo();
             localStorage.setItem('auth_provider', 'google');
-            window.location.replace('/index.html');
+            // Forcer un délai avant la redirection
+            setTimeout(() => {
+              window.location.href = '/index.html';
+            }, 500);
           }
         } catch (error) {
           console.error('Erreur lors du traitement du code:', error);
@@ -231,14 +234,17 @@ class GoogleAuth {
     const refreshToken = localStorage.getItem('google_refresh_token');
     const authProvider = localStorage.getItem('auth_provider');
     
+    if (!token || !expiresAt || !authProvider) return false;
     if (authProvider !== 'google') return false;
 
-    if (token && expiresAt && new Date().getTime() >= parseInt(expiresAt) && refreshToken) {
+    const isExpired = new Date().getTime() >= parseInt(expiresAt);
+    
+    if (isExpired && refreshToken) {
       this.refreshAccessToken().catch(console.error);
       return true;
     }
     
-    return token && expiresAt && new Date().getTime() < parseInt(expiresAt);
+    return !isExpired;
   }
 
   async refreshAccessToken() {
