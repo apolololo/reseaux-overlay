@@ -11,10 +11,35 @@ class GoogleAuth {
     ].join(' ');
   }
 
+  // Générer un code verifier pour PKCE
+  generateCodeVerifier() {
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    return btoa(String.fromCharCode.apply(null, array))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=/g, '');
+  }
+
+  // Générer un code challenge pour PKCE
+  async generateCodeChallenge(verifier) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(verifier);
+    const digest = await crypto.subtle.digest('SHA-256', data);
+    return btoa(String.fromCharCode.apply(null, new Uint8Array(digest)))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=/g, '');
+  }
+
   // Démarrer le processus d'authentification Google
-  initiateAuth() {
+  async initiateAuth() {
     const state = Math.random().toString(36).substring(2, 15);
+    const codeVerifier = this.generateCodeVerifier();
+    const codeChallenge = await this.generateCodeChallenge(codeVerifier);
+    
     localStorage.setItem('google_auth_state', state);
+    localStorage.setItem('google_code_verifier', codeVerifier);
     
     const authUrl = new URL('https://accounts.google.com/oauth2/authorize');
     authUrl.searchParams.set('client_id', this.clientId);
@@ -22,6 +47,8 @@ class GoogleAuth {
     authUrl.searchParams.set('response_type', 'code');
     authUrl.searchParams.set('scope', this.scopes);
     authUrl.searchParams.set('state', state);
+    authUrl.searchParams.set('code_challenge', codeChallenge);
+    authUrl.searchParams.set('code_challenge_method', 'S256');
     authUrl.searchParams.set('access_type', 'offline');
     authUrl.searchParams.set('prompt', 'consent');
 
@@ -31,6 +58,11 @@ class GoogleAuth {
   // Échanger le code d'autorisation contre des tokens
   async exchangeCodeForTokens(code, state) {
     try {
+      const codeVerifier = localStorage.getItem('google_code_verifier');
+      if (!codeVerifier) {
+        throw new Error('Code verifier manquant');
+      }
+
       const response = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
         headers: {
@@ -39,22 +71,29 @@ class GoogleAuth {
         body: new URLSearchParams({
           code: code,
           client_id: this.clientId,
-          client_secret: import.meta.env.VITE_GOOGLE_CLIENT_SECRET,
+          code_verifier: codeVerifier,
           redirect_uri: this.redirectUri,
           grant_type: 'authorization_code'
         })
       });
 
       if (!response.ok) {
-        throw new Error('Erreur lors de l\'échange du code');
+        const errorData = await response.json();
+        console.error('Erreur de l\'API Google:', errorData);
+        throw new Error(`Erreur lors de l'échange du code: ${errorData.error_description || errorData.error}`);
       }
 
       const tokens = await response.json();
       
       // Stocker les tokens
       localStorage.setItem('google_access_token', tokens.access_token);
-      localStorage.setItem('google_refresh_token', tokens.refresh_token);
+      if (tokens.refresh_token) {
+        localStorage.setItem('google_refresh_token', tokens.refresh_token);
+      }
       localStorage.setItem('google_expires_at', Date.now() + (tokens.expires_in * 1000));
+
+      // Nettoyer le code verifier
+      localStorage.removeItem('google_code_verifier');
 
       return tokens;
     } catch (error) {
@@ -125,6 +164,8 @@ class GoogleAuth {
     localStorage.removeItem('google_expires_at');
     localStorage.removeItem('google_user_profile');
     localStorage.removeItem('youtube_channel_info');
+    localStorage.removeItem('google_auth_state');
+    localStorage.removeItem('google_code_verifier');
   }
 }
 
