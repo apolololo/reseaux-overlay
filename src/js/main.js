@@ -75,6 +75,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const twitchToken = localStorage.getItem('twitch_token');
     const userId = userData?.id || 'anonymous';
     
+    // Récupérer la configuration spécifique à l'utilisateur
+    const configKey = `followers_goal_config_${userId}`;
+    const config = localStorage.getItem(configKey);
+    
     // Créer un jeton qui contient toutes les données nécessaires
     const tokenData = {
       userId: userId,
@@ -83,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
         token: twitchToken,
         user: userData
       },
+      config: config ? JSON.parse(config) : null,
       timestamp: Date.now()
     };
     

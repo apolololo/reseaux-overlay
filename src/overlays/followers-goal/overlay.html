@@ -98,8 +98,25 @@
     document.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
       
-      // Charger la configuration sauvegardée
-      const savedConfig = localStorage.getItem('followers_goal_config');
+      // Récupérer l'ID utilisateur depuis les paramètres de l'URL ou le token
+      const token = params.get('token');
+      let userId = params.get('userId');
+      
+      if (token) {
+        try {
+          const tokenData = JSON.parse(atob(token));
+          userId = tokenData.userId;
+          if (tokenData.config) {
+            Object.assign(config, tokenData.config);
+          }
+        } catch (error) {
+          console.error('Erreur lors du décodage du token:', error);
+        }
+      }
+      
+      // Charger la configuration sauvegardée spécifique à l'utilisateur
+      const configKey = `followers_goal_config_${userId}`;
+      const savedConfig = localStorage.getItem(configKey);
       const config = savedConfig ? JSON.parse(savedConfig) : {
         target: parseInt(params.get('target')) || 1000,
         text: params.get('text') || "Objectif : {current}/{target} followers",
@@ -191,6 +208,10 @@
       // Écouter les messages de configuration
       window.addEventListener('followers_goal_config_update', (event) => {
         Object.assign(config, event.detail);
+        // Sauvegarder la configuration pour cet utilisateur spécifique
+        if (userId) {
+          localStorage.setItem(`followers_goal_config_${userId}`, JSON.stringify(config));
+        }
         document.documentElement.style.setProperty('--progress-color', config.progressColor);
         document.documentElement.style.setProperty('--text-color', config.textColor);
         updateVisibility();
@@ -199,7 +220,7 @@
 
       // Écouter les changements de stockage local
       window.addEventListener('storage', (event) => {
-        if (event.key === 'followers_goal_config') {
+        if (userId && event.key === `followers_goal_config_${userId}`) {
           const newConfig = JSON.parse(event.newValue);
           Object.assign(config, newConfig);
           document.documentElement.style.setProperty('--progress-color', config.progressColor);
