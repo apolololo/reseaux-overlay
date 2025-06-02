@@ -1,6 +1,7 @@
 class GoogleAuth {
   constructor() {
     this.clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    this.clientSecret = import.meta.env.VITE_GOOGLE_CLIENT_SECRET;
     this.redirectUri = 'https://apo-overlay.netlify.app/auth/google-callback.html';
     this.scopes = [
       'https://www.googleapis.com/auth/userinfo.profile',
@@ -11,56 +12,69 @@ class GoogleAuth {
     ].join(' ');
   }
 
-  // Générer un code verifier pour PKCE
-  generateCodeVerifier() {
-    const array = new Uint8Array(32);
-    crypto.getRandomValues(array);
-    return btoa(String.fromCharCode.apply(null, array))
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=/g, '');
-  }
-
-  // Générer un code challenge pour PKCE
-  async generateCodeChallenge(verifier) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(verifier);
-    const digest = await crypto.subtle.digest('SHA-256', data);
-    return btoa(String.fromCharCode.apply(null, new Uint8Array(digest)))
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=/g, '');
-  }
-
-  // Démarrer le processus d'authentification Google
+  // Démarrer le processus d'authentification Google avec popup
   async initiateAuth() {
-    const state = Math.random().toString(36).substring(2, 15);
-    const codeVerifier = this.generateCodeVerifier();
-    const codeChallenge = await this.generateCodeChallenge(codeVerifier);
-    
-    localStorage.setItem('google_auth_state', state);
-    localStorage.setItem('google_code_verifier', codeVerifier);
-    
-    const authUrl = new URL('https://accounts.google.com/oauth2/authorize');
-    authUrl.searchParams.set('client_id', this.clientId);
-    authUrl.searchParams.set('redirect_uri', this.redirectUri);
-    authUrl.searchParams.set('response_type', 'code');
-    authUrl.searchParams.set('scope', this.scopes);
-    authUrl.searchParams.set('state', state);
-    authUrl.searchParams.set('code_challenge', codeChallenge);
-    authUrl.searchParams.set('code_challenge_method', 'S256');
-    authUrl.searchParams.set('access_type', 'offline');
-    authUrl.searchParams.set('prompt', 'consent');
+    return new Promise((resolve, reject) => {
+      const state = Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('google_auth_state', state);
+      
+      const authUrl = new URL('https://accounts.google.com/oauth2/authorize');
+      authUrl.searchParams.set('client_id', this.clientId);
+      authUrl.searchParams.set('redirect_uri', this.redirectUri);
+      authUrl.searchParams.set('response_type', 'code');
+      authUrl.searchParams.set('scope', this.scopes);
+      authUrl.searchParams.set('state', state);
+      authUrl.searchParams.set('access_type', 'offline');
+      authUrl.searchParams.set('prompt', 'consent');
 
-    window.location.href = authUrl.toString();
+      // Ouvrir une popup au lieu de rediriger
+      const popup = window.open(
+        authUrl.toString(),
+        'google-auth',
+        'width=500,height=600,scrollbars=yes,resizable=yes'
+      );
+
+      // Surveiller la popup
+      const checkClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkClosed);
+          reject(new Error('Popup fermée par l\'utilisateur'));
+        }
+      }, 1000);
+
+      // Écouter les messages de la popup
+      const messageListener = async (event) => {
+        if (event.origin !== window.location.origin) return;
+        
+        if (event.data.type === 'GOOGLE_AUTH_SUCCESS') {
+          clearInterval(checkClosed);
+          window.removeEventListener('message', messageListener);
+          popup.close();
+          
+          try {
+            const tokens = await this.exchangeCodeForTokens(event.data.code, event.data.state);
+            resolve(tokens);
+          } catch (error) {
+            reject(error);
+          }
+        } else if (event.data.type === 'GOOGLE_AUTH_ERROR') {
+          clearInterval(checkClosed);
+          window.removeEventListener('message', messageListener);
+          popup.close();
+          reject(new Error(event.data.error));
+        }
+      };
+
+      window.addEventListener('message', messageListener);
+    });
   }
 
   // Échanger le code d'autorisation contre des tokens
   async exchangeCodeForTokens(code, state) {
     try {
-      const codeVerifier = localStorage.getItem('google_code_verifier');
-      if (!codeVerifier) {
-        throw new Error('Code verifier manquant');
+      const storedState = localStorage.getItem('google_auth_state');
+      if (state !== storedState) {
+        throw new Error('État de sécurité invalide');
       }
 
       const response = await fetch('https://oauth2.googleapis.com/token', {
@@ -71,7 +85,7 @@ class GoogleAuth {
         body: new URLSearchParams({
           code: code,
           client_id: this.clientId,
-          code_verifier: codeVerifier,
+          client_secret: this.clientSecret,
           redirect_uri: this.redirectUri,
           grant_type: 'authorization_code'
         })
@@ -92,8 +106,8 @@ class GoogleAuth {
       }
       localStorage.setItem('google_expires_at', Date.now() + (tokens.expires_in * 1000));
 
-      // Nettoyer le code verifier
-      localStorage.removeItem('google_code_verifier');
+      // Nettoyer l'état d'authentification
+      localStorage.removeItem('google_auth_state');
 
       return tokens;
     } catch (error) {
@@ -165,7 +179,6 @@ class GoogleAuth {
     localStorage.removeItem('google_user_profile');
     localStorage.removeItem('youtube_channel_info');
     localStorage.removeItem('google_auth_state');
-    localStorage.removeItem('google_code_verifier');
   }
 }
 

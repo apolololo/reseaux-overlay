@@ -112,18 +112,39 @@
       });
 
       // Gérer le clic sur le bouton de connexion Google
-      googleLoginButton.addEventListener('click', () => {
+      googleLoginButton.addEventListener('click', async () => {
         try {
           loading.classList.add('active');
           errorContainer.style.display = 'none';
           
           const googleAuth = new GoogleAuth();
-          googleAuth.initiateAuth();
+          
+          // Utiliser la nouvelle méthode popup
+          const tokens = await googleAuth.initiateAuth();
+          
+          if (tokens) {
+            // Récupérer le profil utilisateur
+            const userProfile = await googleAuth.getUserProfile();
+            if (userProfile) {
+              localStorage.setItem('google_user_profile', JSON.stringify(userProfile));
+              console.log('Profil utilisateur stocké:', userProfile.name);
+            }
+
+            // Récupérer les informations de la chaîne YouTube
+            const channelInfo = await googleAuth.getYouTubeChannelInfo();
+            if (channelInfo) {
+              localStorage.setItem('youtube_channel_info', JSON.stringify(channelInfo));
+              console.log('Infos chaîne YouTube stockées:', channelInfo.snippet?.title);
+            }
+
+            // Rediriger vers la page principale
+            window.location.href = '/index.html';
+          }
         } catch (error) {
-          console.error("Erreur lors de la redirection Google:", error);
+          console.error("Erreur lors de la connexion Google:", error);
           loading.classList.remove('active');
           errorContainer.style.display = 'block';
-          errorMessage.textContent = "Une erreur s'est produite lors de la tentative de connexion avec Google. Veuillez réessayer.";
+          errorMessage.textContent = error.message || "Une erreur s'est produite lors de la tentative de connexion avec Google. Veuillez réessayer.";
         }
       });
     });
