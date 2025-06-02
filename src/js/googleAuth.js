@@ -15,31 +15,18 @@ class GoogleAuth {
   }
 
   initializeMessageListener() {
-    console.log('Initialisation de l\'écouteur de messages Google Auth');
     window.addEventListener('message', async (event) => {
-      console.log('Message reçu:', {
-        origin: event.origin,
-        data: event.data,
-        expectedOrigin: 'https://apo-overlay.netlify.app'
-      });
-
       const allowedOrigin = 'https://apo-overlay.netlify.app';
-      if (event.origin !== allowedOrigin) {
-        console.log('Origine non autorisée:', event.origin);
-        return;
-      }
+      if (event.origin !== allowedOrigin) return;
 
       const data = event.data;
       if (data.type === 'GOOGLE_AUTH_SUCCESS') {
-        console.log('Succès de l\'authentification Google reçu');
         try {
-          console.log('Code reçu de la popup:', data.code);
           const tokens = await this.exchangeCodeForTokens(data.code, data.state);
-          console.log('Tokens reçus:', !!tokens);
-          
           if (tokens) {
             await this.getUserProfile();
             await this.getYouTubeChannelInfo();
+            localStorage.setItem('auth_provider', 'google');
             window.location.replace('/index.html');
           }
         } catch (error) {
@@ -56,7 +43,6 @@ class GoogleAuth {
 
   async initiateAuth() {
     return new Promise((resolve, reject) => {
-      console.log('Initialisation de l\'authentification Google');
       const state = Math.random().toString(36).substring(2, 15);
       localStorage.setItem('google_auth_state', state);
       
@@ -69,7 +55,6 @@ class GoogleAuth {
       authUrl.searchParams.set('access_type', 'offline');
       authUrl.searchParams.set('prompt', 'consent');
 
-      console.log('Ouverture de la popup Google');
       const popup = window.open(
         authUrl.toString(),
         'google-auth',
@@ -82,7 +67,6 @@ class GoogleAuth {
       }
 
       const messageHandler = async (event) => {
-        console.log('Message reçu dans initiateAuth:', event.data);
         const allowedOrigin = 'https://apo-overlay.netlify.app';
         if (event.origin !== allowedOrigin) return;
 
@@ -96,6 +80,7 @@ class GoogleAuth {
             if (tokens) {
               await this.getUserProfile();
               await this.getYouTubeChannelInfo();
+              localStorage.setItem('auth_provider', 'google');
               resolve(tokens);
             }
           } catch (error) {
@@ -143,7 +128,6 @@ class GoogleAuth {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Erreur de l\'API Google:', errorData);
         throw new Error(`Erreur lors de l'échange du code: ${errorData.error_description || errorData.error}`);
       }
 
@@ -182,7 +166,6 @@ class GoogleAuth {
       
       if (userProfile) {
         localStorage.setItem('google_user_profile', JSON.stringify(userProfile));
-        console.log('Profil utilisateur stocké:', userProfile.name);
       }
       
       return userProfile;
@@ -212,7 +195,6 @@ class GoogleAuth {
       
       if (channelInfo) {
         localStorage.setItem('youtube_channel_info', JSON.stringify(channelInfo));
-        console.log('Infos chaîne YouTube stockées:', channelInfo.snippet?.title);
       }
       
       return channelInfo;
@@ -226,7 +208,10 @@ class GoogleAuth {
     const token = localStorage.getItem('google_access_token');
     const expiresAt = localStorage.getItem('google_expires_at');
     const refreshToken = localStorage.getItem('google_refresh_token');
+    const authProvider = localStorage.getItem('auth_provider');
     
+    if (authProvider !== 'google') return false;
+
     if (token && expiresAt && new Date().getTime() >= parseInt(expiresAt) && refreshToken) {
       this.refreshAccessToken().catch(console.error);
       return true;
@@ -276,6 +261,7 @@ class GoogleAuth {
     localStorage.removeItem('google_user_profile');
     localStorage.removeItem('youtube_channel_info');
     localStorage.removeItem('google_auth_state');
+    localStorage.removeItem('auth_provider');
 
     const token = localStorage.getItem('google_access_token');
     if (token) {
