@@ -18,7 +18,7 @@ class GoogleAuth {
       const state = Math.random().toString(36).substring(2, 15);
       localStorage.setItem('google_auth_state', state);
       
-      const authUrl = new URL('https://accounts.google.com/oauth2/authorize');
+      const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
       authUrl.searchParams.set('client_id', this.clientId);
       authUrl.searchParams.set('redirect_uri', this.redirectUri);
       authUrl.searchParams.set('response_type', 'code');
