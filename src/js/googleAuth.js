@@ -1,4 +1,4 @@
-class GoogleAuth {
+export class GoogleAuth {
   constructor() {
     this.clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     this.clientSecret = import.meta.env.VITE_GOOGLE_CLIENT_SECRET;
@@ -74,6 +74,7 @@ class GoogleAuth {
       }
       const expiresAt = Date.now() + (data.expires_in * 1000);
       localStorage.setItem('google_expires_at', expiresAt.toString());
+      localStorage.setItem('auth_provider', 'google');
       
       return data;
     } catch (error) {

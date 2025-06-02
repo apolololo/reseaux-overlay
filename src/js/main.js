@@ -1,3 +1,5 @@
+import { GoogleAuth } from './googleAuth.js';
+
 // Gestion de la navigation
 document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -13,9 +15,19 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Vérification de l'authentification Twitch
+  // Vérification de l'authentification Twitch ou Google
   const checkAuth = () => {
     const authProvider = localStorage.getItem('auth_provider');
+    
+    if (authProvider === 'google') {
+      const googleAuth = new GoogleAuth();
+      if (!googleAuth.isAuthenticated()) {
+        window.location.replace('./src/auth.html');
+        return false;
+      }
+      return true;
+    }
+    
     if (authProvider !== 'twitch') {
       window.location.replace('./src/auth.html');
       return false;
