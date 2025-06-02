@@ -111,10 +111,8 @@
           const tokens = await googleAuth.initiateAuth();
           
           if (tokens) {
-            // Attendre un peu pour que les données soient bien stockées
-            setTimeout(() => {
-              window.location.href = '/index.html';
-            }, 500);
+            // Rediriger vers le dashboard
+            window.location.href = '/index.html';
           }
         } catch (error) {
           console.error("Erreur lors de la connexion Google:", error);

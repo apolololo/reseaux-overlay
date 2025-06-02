@@ -91,10 +91,40 @@ class GoogleAuth {
         return;
       }
 
+      // Créer un gestionnaire de message unique
+      const messageHandler = async (event) => {
+        const allowedOrigin = 'https://apo-overlay.netlify.app';
+        if (event.origin !== allowedOrigin) return;
+
+        const data = event.data;
+        if (data.type === 'GOOGLE_AUTH_SUCCESS') {
+          // Nettoyer l'écouteur
+          window.removeEventListener('message', messageHandler);
+          clearInterval(checkClosed);
+          
+          try {
+            const tokens = await this.exchangeCodeForTokens(data.code, data.state);
+            await this.getUserProfile();
+            await this.getYouTubeChannelInfo();
+            resolve(tokens);
+          } catch (error) {
+            reject(error);
+          }
+        } else if (data.type === 'GOOGLE_AUTH_ERROR') {
+          window.removeEventListener('message', messageHandler);
+          clearInterval(checkClosed);
+          reject(new Error(data.error));
+        }
+      };
+
+      // Ajouter l'écouteur de message
+      window.addEventListener('message', messageHandler);
+
       // Surveiller la popup
       const checkClosed = setInterval(() => {
         if (popup.closed) {
           clearInterval(checkClosed);
+          window.removeEventListener('message', messageHandler);
           reject(new Error('Popup fermée par l\'utilisateur'));
         }
       }, 1000);
