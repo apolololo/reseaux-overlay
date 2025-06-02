@@ -8,7 +8,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
   <div class="login-container">
@@ -48,23 +47,44 @@
     .login-button {
       width: 100%;
       margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 0.8rem 1.5rem;
+      font-size: 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      border: none;
+      color: white;
+      font-weight: 600;
+      transition: all 0.3s ease;
     }
 
     .twitch-button {
       background-color: #9146FF;
     }
 
+    .twitch-button:hover {
+      background-color: #7731ff;
+      transform: translateY(-2px);
+    }
+
     .google-button {
       background-color: #4285F4;
     }
 
-    .login-button:hover {
+    .google-button:hover {
+      background-color: #3367d6;
       transform: translateY(-2px);
     }
 
-    .google-button img {
+    .login-button img {
       width: 24px;
       height: 24px;
+    }
+
+    .google-button img {
       background: white;
       border-radius: 50%;
       padding: 2px;
@@ -87,8 +107,10 @@
         
         if ((twitchToken && expiresAt && new Date().getTime() < parseInt(expiresAt)) || googleToken) {
           window.location.href = '/index.html';
+          return;
         }
 
+        // Check if there's an error in URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('error')) {
           errorContainer.style.display = 'block';
@@ -96,22 +118,30 @@
         }
       };
       
+      // Vérifier l'authentification au chargement
       checkAuthentication();
       
-      // Connexion Twitch
+      // Gérer le clic sur le bouton de connexion Twitch
       twitchButton.addEventListener('click', () => {
         try {
           loading.classList.add('active');
           errorContainer.style.display = 'none';
           
+          // ID client Twitch
           const clientId = "z8q1w4g12yrql6cyb5zzwmhe1pnxyn";
+          
+          // URL de redirection
           const redirectUri = "https://apo-overlay.netlify.app/auth/callback.html";
+          
+          // Générer un état aléatoire pour la sécurité
           const state = Math.random().toString(36).substring(2, 15);
           localStorage.setItem('twitch_auth_state', state);
           
+          // Construire l'URL d'authentification Twitch
           const scope = 'user:read:email channel:read:subscriptions moderator:read:followers';
           const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}&force_verify=true`;
           
+          // Rediriger vers l'authentification Twitch
           window.location.href = authUrl;
         } catch (error) {
           console.error("Erreur lors de la redirection:", error);
@@ -121,7 +151,7 @@
         }
       });
 
-      // Connexion Google
+      // Gérer le clic sur le bouton de connexion Google
       googleButton.addEventListener('click', () => {
         try {
           loading.classList.add('active');
