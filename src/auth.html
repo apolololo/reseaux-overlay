@@ -134,8 +134,11 @@
           console.log('Tokens reçus:', !!tokens);
           
           if (tokens) {
-            console.log('Redirection vers le dashboard...');
-            window.location.replace('/index.html');
+            console.log('Authentification Google réussie, redirection vers le dashboard...');
+            // Attendre un peu pour s'assurer que les données sont sauvegardées
+            setTimeout(() => {
+              window.location.replace('/index.html');
+            }, 100);
           } else {
             console.error('Pas de tokens reçus');
             throw new Error('Échec de l\'authentification');
