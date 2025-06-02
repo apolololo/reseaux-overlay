@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Authentification - APO</title>
   <link rel="stylesheet" href="/src/styles/main.css">
   <link rel="stylesheet" href="/src/styles/app.css">
@@ -88,43 +88,6 @@
     .auth-footer a:hover {
       text-decoration: underline;
     }
-
-    .loading-container {
-      display: none;
-      align-items: center;
-      justify-content: center;
-      gap: 1rem;
-      margin-top: 1rem;
-      padding: 1rem;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-    }
-
-    .loading-container.active {
-      display: flex;
-    }
-
-    .loading-spinner {
-      width: 24px;
-      height: 24px;
-      border: 3px solid rgba(255, 255, 255, 0.1);
-      border-left-color: var(--primary);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .error-container {
-      display: none;
-      margin-top: 1rem;
-      padding: 1rem;
-      background: rgba(255, 82, 82, 0.1);
-      border-radius: 8px;
-      color: #ff5252;
-    }
   </style>
 </head>
 <body>
@@ -153,58 +116,48 @@
       </button>
     </div>
 
-    <div id="loading" class="loading-container">
-      <div class="loading-spinner"></div>
-      <div class="loading-text">Connexion en cours...</div>
-    </div>
-
-    <div id="error-container" class="error-container">
-      <div id="error-message"></div>
-    </div>
-
     <div class="auth-footer">
       <p>En vous connectant, vous acceptez nos <a href="/src/privacy.html">conditions d'utilisation</a></p>
     </div>
   </div>
 
   <script type="module">
-    import { GoogleAuth } from '@/js/googleAuth.js';
+    import { TwitchAuth } from './js/twitchAuth.js';
+    import { GoogleAuth } from './js/googleAuth.js';
 
     document.addEventListener('DOMContentLoaded', () => {
+      const twitchLoginButton = document.getElementById('twitch-login');
       const googleLoginButton = document.getElementById('google-login');
-      const loading = document.getElementById('loading');
-      const errorContainer = document.getElementById('error-container');
-      const errorMessage = document.getElementById('error-message');
 
       // Vérifier si l'utilisateur est déjà authentifié
+      const twitchToken = localStorage.getItem('twitch_token');
+      const twitchExpiresAt = localStorage.getItem('twitch_expires_at');
       const googleAuth = new GoogleAuth();
+      const isTwitchAuth = twitchToken && twitchExpiresAt && new Date().getTime() < parseInt(twitchExpiresAt);
       const isGoogleAuth = googleAuth.isAuthenticated();
 
-      if (isGoogleAuth) {
+      if (isTwitchAuth || isGoogleAuth) {
         window.location.replace('/index.html');
         return;
       }
+
+      // Gérer la connexion Twitch
+      twitchLoginButton.addEventListener('click', async () => {
+        try {
+          const twitchAuth = new TwitchAuth();
+          await twitchAuth.initiateAuth();
         } catch (error) {
           console.error('Erreur lors de la connexion Twitch:', error);
-          loading.classList.remove('active');
-          errorContainer.style.display = 'block';
-          errorMessage.textContent = "Une erreur s'est produite lors de la tentative de connexion. Veuillez réessayer.";
         }
       });
 
       // Gérer la connexion Google
       googleLoginButton.addEventListener('click', async () => {
         try {
-          loading.classList.add('active');
-          errorContainer.style.display = 'none';
-          
           const googleAuth = new GoogleAuth();
           await googleAuth.initiateAuth();
         } catch (error) {
           console.error('Erreur lors de la connexion Google:', error);
-          loading.classList.remove('active');
-          errorContainer.style.display = 'block';
-          errorMessage.textContent = error.message || "Une erreur s'est produite lors de la tentative de connexion avec Google. Veuillez réessayer.";
         }
       });
     });

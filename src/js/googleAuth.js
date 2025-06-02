@@ -213,4 +213,4 @@ class GoogleAuth {
   }
 }
 
-export { GoogleAuth };
+window.GoogleAuth = GoogleAuth;
