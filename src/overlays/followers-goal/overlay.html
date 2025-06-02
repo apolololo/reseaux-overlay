@@ -97,25 +97,27 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
+      let token, userData, twitchToken;
       
-      // Récupérer l'ID utilisateur depuis les paramètres de l'URL ou le token
-      const token = params.get('token');
-      let userId = params.get('userId');
-      
-      if (token) {
+      // Récupérer et décoder le token
+      const urlToken = params.get('token');
+      if (urlToken) {
         try {
-          const tokenData = JSON.parse(atob(token));
-          userId = tokenData.userId;
-          if (tokenData.config) {
-            Object.assign(config, tokenData.config);
-          }
+          const tokenData = JSON.parse(atob(urlToken));
+          userData = tokenData.twitchData.user;
+          twitchToken = tokenData.twitchData.token;
         } catch (error) {
           console.error('Erreur lors du décodage du token:', error);
         }
       }
       
-      // Charger la configuration sauvegardée spécifique à l'utilisateur
-      const configKey = `followers_goal_config_${userId}`;
+      if (!userData || !twitchToken) {
+        console.error('Données d\'authentification Twitch manquantes');
+        return;
+      }
+      
+      // Charger la configuration spécifique à l'utilisateur
+      const configKey = `followers_goal_config_${userData.id}`;
       const savedConfig = localStorage.getItem(configKey);
       const config = savedConfig ? JSON.parse(savedConfig) : {
         target: parseInt(params.get('target')) || 1000,
@@ -171,34 +173,14 @@
       // Fonction pour récupérer le nombre de followers
       async function fetchFollowers() {
         try {
-          let token, userData;
-          
-          // Récupérer les données d'authentification du token URL
-          const urlToken = params.get('token');
-          if (urlToken) {
-            try {
-              const tokenData = JSON.parse(atob(urlToken));
-              token = tokenData.twitchData.token;
-              userData = tokenData.twitchData.user;
-            } catch (error) {
-              console.error('Erreur lors du décodage du token URL:', error);
-            }
-          }
-          
-          // Fallback sur localStorage si pas de token URL
-          if (!token || !userData) {
-            token = localStorage.getItem('twitch_token');
-            userData = JSON.parse(localStorage.getItem('twitch_user'));
-          }
-          
-          if (!token || !userData) {
+          if (!twitchToken || !userData) {
             console.error('Token Twitch ou données utilisateur non trouvés');
             return;
           }
 
           const response = await fetch(`https://api.twitch.tv/helix/channels/followers?broadcaster_id=${userData.id}`, {
             headers: {
-              'Authorization': `Bearer ${token}`,
+              'Authorization': `Bearer ${twitchToken}`,
               'Client-Id': 'z8q1w4g12yrql6cyb5zzwmhe1pnxyn'
             }
           });
@@ -225,10 +207,8 @@
       // Écouter les messages de configuration
       window.addEventListener('followers_goal_config_update', (event) => {
         Object.assign(config, event.detail);
-        // Sauvegarder la configuration pour cet utilisateur spécifique
-        if (userId) {
-          localStorage.setItem(`followers_goal_config_${userId}`, JSON.stringify(config));
-        }
+        // Sauvegarder la configuration avec l'ID utilisateur
+        localStorage.setItem(configKey, JSON.stringify(config));
         document.documentElement.style.setProperty('--progress-color', config.progressColor);
         document.documentElement.style.setProperty('--text-color', config.textColor);
         updateVisibility();
@@ -237,7 +217,7 @@
 
       // Écouter les changements de stockage local
       window.addEventListener('storage', (event) => {
-        if (userId && event.key === `followers_goal_config_${userId}`) {
+        if (event.key === 'followers_goal_config') {
           const newConfig = JSON.parse(event.newValue);
           Object.assign(config, newConfig);
           document.documentElement.style.setProperty('--progress-color', config.progressColor);

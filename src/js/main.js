@@ -13,48 +13,26 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Vérification de l'authentification
+  // Vérification de l'authentification Twitch
   const checkAuth = () => {
     const authProvider = localStorage.getItem('auth_provider');
-    
-    if (authProvider === 'twitch') {
-      const token = localStorage.getItem('twitch_token');
-      const expiresAt = localStorage.getItem('twitch_expires_at');
-      
-      // Vérifier si le token Twitch existe et n'est pas expiré
-      if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
-        window.location.replace('./src/auth.html');
-        return false;
-      }
-      return true;
-    } else if (authProvider === 'google') {
-      const token = localStorage.getItem('google_access_token');
-      const expiresAt = localStorage.getItem('google_expires_at');
-      
-      // Vérifier si le token Google existe et n'est pas expiré
-      if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
-        window.location.replace('./src/auth.html');
-        return false;
-      }
-      return true;
+    if (authProvider !== 'twitch') {
+      window.location.replace('./src/auth.html');
+      return false;
     }
+
+    const token = localStorage.getItem('twitch_token');
+    const expiresAt = localStorage.getItem('twitch_expires_at');
     
-    // Si aucun provider n'est défini, rediriger vers l'authentification
-    window.location.replace('./src/auth.html');
-    return false;
+    if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
+      window.location.replace('./src/auth.html');
+      return false;
+    }
+    return true;
   };
   
   // Vérifier l'authentification au chargement
   if (!checkAuth()) return;
-
-  // Masquer le widget followers-goal pour les utilisateurs Google
-  const authProvider = localStorage.getItem('auth_provider');
-  if (authProvider === 'google') {
-    const followersGoalItem = document.querySelector('.overlay-item[data-url="src/overlays/followers-goal/overlay.html"]');
-    if (followersGoalItem) {
-      followersGoalItem.style.display = 'none';
-    }
-  }
 
   // L'URL de production sera automatiquement détectée
   const PRODUCTION_URL = window.location.origin;
@@ -75,10 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const twitchToken = localStorage.getItem('twitch_token');
     const userId = userData?.id || 'anonymous';
     
-    // Récupérer la configuration spécifique à l'utilisateur
-    const configKey = `followers_goal_config_${userId}`;
-    const config = localStorage.getItem(configKey);
-    
     // Créer un jeton qui contient toutes les données nécessaires
     const tokenData = {
       userId: userId,
@@ -87,7 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
         token: twitchToken,
         user: userData
       },
-      config: config ? JSON.parse(config) : null,
       timestamp: Date.now()
     };
     
@@ -182,20 +155,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Construire l'URL avec les paramètres de configuration
     const overlayUrl = new URL(localPath, PRODUCTION_URL);
     
-    // Récupérer les données de l'utilisateur Twitch
-    const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
-    const twitchToken = localStorage.getItem('twitch_token');
-    
-    // Ajouter l'ID utilisateur à l'URL
-    if (userData.id) {
-      overlayUrl.searchParams.set('userId', userData.id);
-    }
-    
-    // Générer un token avec les données d'authentification et la configuration
+    // Générer un token avec les données d'authentification
     const token = generateOverlayToken(localPath);
     overlayUrl.searchParams.set('token', token);
     
     // Ajouter les paramètres de configuration spécifiques à l'utilisateur
+    const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
     const configKey = `followers_goal_config_${userData.id || 'anonymous'}`;
     const config = localStorage.getItem(configKey);
     if (config) {
