@@ -211,7 +211,7 @@
         const isGoogleAuth = googleAuth.isAuthenticated();
         
         if (!isTwitchAuth && !isGoogleAuth) {
-          window.location.href = './src/auth.html';
+          window.location.replace('/src/auth.html');
           return false;
         }
         
@@ -294,7 +294,7 @@
           const googleAuth = new GoogleAuth();
           googleAuth.logout();
           
-          window.location.href = './src/auth.html';
+          window.location.replace('/src/auth.html');
         });
       }
     });
