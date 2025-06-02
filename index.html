@@ -221,8 +221,14 @@
           googleData: !!googleUserData
         });
         
-        if (!authProvider || (!isTwitchAuth && !isGoogleAuth)) {
-          console.log('Aucun compte valide trouvé, redirection vers auth');
+        // Si on est sur la page auth et qu'on est déjà authentifié, rediriger vers index
+        if (window.location.pathname.includes('/auth.html') && (isTwitchAuth || isGoogleAuth)) {
+          window.location.replace('/index.html');
+          return false;
+        }
+        
+        // Si on est sur index et qu'on n'est pas authentifié, rediriger vers auth
+        if (!window.location.pathname.includes('/auth.html') && !isTwitchAuth && !isGoogleAuth) {
           window.location.replace('/src/auth.html');
           return false;
         }

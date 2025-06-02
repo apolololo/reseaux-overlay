@@ -123,25 +123,15 @@
       // Gérer le clic sur le bouton de connexion Google
       googleLoginButton.addEventListener('click', async () => {
         try {
-          console.log('Début de la connexion Google');
           loading.classList.add('active');
           errorContainer.style.display = 'none';
           
           const googleAuth = new GoogleAuth();
-          
-          console.log('Appel de initiateAuth()');
           const tokens = await googleAuth.initiateAuth();
-          console.log('Tokens reçus:', !!tokens);
           
           if (tokens) {
-            console.log('Authentification Google réussie, redirection vers le dashboard...');
-            // Attendre un peu pour s'assurer que les données sont sauvegardées
-            setTimeout(() => {
-              window.location.replace('/index.html');
-            }, 100);
-          } else {
-            console.error('Pas de tokens reçus');
-            throw new Error('Échec de l\'authentification');
+            // Rediriger une seule fois vers le dashboard
+            window.location.replace('/index.html');
           }
         } catch (error) {
           console.error("Erreur lors de la connexion Google:", error);
