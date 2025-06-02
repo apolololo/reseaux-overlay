@@ -27,7 +27,7 @@ class GoogleAuth {
             await this.getUserProfile();
             await this.getYouTubeChannelInfo();
             localStorage.setItem('auth_provider', 'google');
-            // Forcer un délai avant la redirection
+            // Forcer un délai avant la redirection et utiliser href au lieu de replace
             setTimeout(() => {
               window.location.href = '/index.html';
             }, 500);
@@ -110,12 +110,10 @@ class GoogleAuth {
             reject(new Error('Popup fermée par l\'utilisateur'));
           }
         } catch (error) {
-          // Ignorer les erreurs de Cross-Origin-Opener-Policy
           console.log('Impossible de vérifier l\'état de la popup (normal avec COOP)');
         }
       }, 1000);
 
-      // Timeout de 5 minutes pour éviter les blocages
       timeout = setTimeout(() => {
         clearInterval(checkClosed);
         window.removeEventListener('message', messageHandler);
