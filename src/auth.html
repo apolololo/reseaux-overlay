@@ -1,11 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Connexion - APO Overlays</title>
-  <link rel="stylesheet" href="./overlay.css" />
+  <link rel="stylesheet" href="./styles/overlay.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
@@ -54,19 +53,8 @@
       const errorContainer = document.getElementById('error-container');
       const errorMessage = document.getElementById('error-message');
       
-      // Vérifier si l'utilisateur est déjà connecté (Twitch ou Google)
-      const checkAuthentication = () => {
-        const twitchToken = localStorage.getItem('twitch_token');
-        const twitchExpiresAt = localStorage.getItem('twitch_expires_at');
-        const googleAuth = new GoogleAuth();
-        
-        if ((twitchToken && twitchExpiresAt && new Date().getTime() < parseInt(twitchExpiresAt)) || 
-            googleAuth.isAuthenticated()) {
-          // Token valide, rediriger vers la page principale
-          window.location.href = '/index.html';
-        }
-
-        // Check if there's an error in URL parameters
+      // Vérifier s'il y a des erreurs dans l'URL
+      const checkUrlErrors = () => {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('error')) {
           errorContainer.style.display = 'block';
@@ -74,8 +62,8 @@
         }
       };
       
-      // Vérifier l'authentification au chargement
-      checkAuthentication();
+      // Vérifier les erreurs au chargement (mais pas rediriger automatiquement)
+      checkUrlErrors();
       
       // Gérer le clic sur le bouton de connexion Twitch (code existant)
       loginButton.addEventListener('click', () => {
@@ -112,18 +100,32 @@
       });
 
       // Gérer le clic sur le bouton de connexion Google
-      googleLoginButton.addEventListener('click', () => {
+      googleLoginButton.addEventListener('click', async () => {
         try {
+          console.log('Début de la connexion Google');
           loading.classList.add('active');
           errorContainer.style.display = 'none';
           
           const googleAuth = new GoogleAuth();
-          googleAuth.initiateAuth();
+          
+          // Utiliser la nouvelle méthode popup
+          console.log('Appel de initiateAuth()');
+          const tokens = await googleAuth.initiateAuth();
+          console.log('Tokens reçus:', !!tokens);
+          
+          if (tokens) {
+            console.log('Redirection vers le dashboard...');
+            // Forcer la redirection
+            window.location.replace('/index.html');
+          } else {
+            console.error('Pas de tokens reçus');
+            throw new Error('Échec de l\'authentification');
+          }
         } catch (error) {
-          console.error("Erreur lors de la redirection Google:", error);
+          console.error("Erreur lors de la connexion Google:", error);
           loading.classList.remove('active');
           errorContainer.style.display = 'block';
-          errorMessage.textContent = "Une erreur s'est produite lors de la tentative de connexion avec Google. Veuillez réessayer.";
+          errorMessage.textContent = error.message || "Une erreur s'est produite lors de la tentative de connexion avec Google. Veuillez réessayer.";
         }
       });
     });

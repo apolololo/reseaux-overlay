@@ -198,7 +198,10 @@
       const app = document.getElementById('app');
       const loadingScreen = document.querySelector('.loading-screen');
 
-      const checkAuth = () => {
+      // Exposer checkAuth globalement
+      window.checkAuth = () => {
+        console.log('=== VÉRIFICATION AUTHENTIFICATION ===');
+        
         const twitchToken = localStorage.getItem('twitch_token');
         const twitchExpiresAt = localStorage.getItem('twitch_expires_at');
         const twitchUserData = localStorage.getItem('twitch_user');
@@ -210,8 +213,37 @@
         const isTwitchAuth = twitchToken && twitchExpiresAt && new Date().getTime() < parseInt(twitchExpiresAt);
         const isGoogleAuth = googleAuth.isAuthenticated();
         
-        if (!isTwitchAuth && !isGoogleAuth) {
-          window.location.href = './src/auth.html';
+        console.log('Auth Status:', {
+          twitch: isTwitchAuth,
+          google: isGoogleAuth,
+          twitchData: !!twitchUserData,
+          googleData: !!googleUserData
+        });
+        
+        // Déterminer le type de compte connecté et afficher UNIQUEMENT ce compte
+        let activeAccountType = null;
+        
+        if (isTwitchAuth && twitchUserData) {
+          activeAccountType = 'twitch';
+          // Nettoyer les données Google si présentes
+          localStorage.removeItem('google_access_token');
+          localStorage.removeItem('google_refresh_token');
+          localStorage.removeItem('google_expires_at');
+          localStorage.removeItem('google_user_profile');
+          localStorage.removeItem('youtube_channel_info');
+        } else if (isGoogleAuth && googleUserData) {
+          activeAccountType = 'google';
+          // Nettoyer les données Twitch si présentes
+          localStorage.removeItem('twitch_token');
+          localStorage.removeItem('twitch_expires_at');
+          localStorage.removeItem('twitch_user');
+        }
+        
+        console.log('Active Account Type:', activeAccountType);
+        
+        if (!activeAccountType) {
+          console.log('Aucun compte valide trouvé, redirection vers auth');
+          window.location.replace('/src/auth.html');
           return false;
         }
         
@@ -219,12 +251,18 @@
         loadingScreen.style.display = 'none';
         app.style.display = 'flex';
         
-        // Afficher les informations utilisateur Twitch
-        if (isTwitchAuth && twitchUserData) {
+        // Masquer toutes les infos d'abord
+        const twitchInfo = document.getElementById('twitch-info');
+        const googleInfo = document.getElementById('google-info');
+        if (twitchInfo) twitchInfo.style.display = 'none';
+        if (googleInfo) googleInfo.style.display = 'none';
+        
+        // Afficher UNIQUEMENT les informations du compte actif
+        if (activeAccountType === 'twitch' && twitchUserData) {
           try {
             const user = JSON.parse(twitchUserData);
-            const twitchInfo = document.getElementById('twitch-info');
             if (twitchInfo && user) {
+              twitchInfo.style.display = 'block';
               twitchInfo.innerHTML = `
                 <div class="user-profile">
                   ${user.profile_image_url ? `<img src="${user.profile_image_url}" alt="${user.display_name}">` : ''}
@@ -235,16 +273,13 @@
           } catch (e) {
             console.error("Erreur lors de l'affichage des infos utilisateur Twitch", e);
           }
-        }
-        
-        // Afficher les informations utilisateur Google/YouTube
-        if (isGoogleAuth && googleUserData) {
+        } else if (activeAccountType === 'google' && googleUserData) {
           try {
             const googleUser = JSON.parse(googleUserData);
             const youtubeChannel = youtubeChannelData ? JSON.parse(youtubeChannelData) : null;
-            const googleInfo = document.getElementById('google-info');
             
             if (googleInfo && googleUser) {
+              googleInfo.style.display = 'block';
               let profileHtml = `
                 <div class="user-profile google-profile">
                   ${googleUser.picture ? `<img src="${googleUser.picture}" alt="${googleUser.name}">` : ''}
@@ -277,7 +312,7 @@
       };
       
       // Vérifier l'authentification au chargement
-      checkAuth();
+      window.checkAuth();
       
       // Gérer la déconnexion
       const logoutButton = document.getElementById('logout-button');
@@ -294,7 +329,7 @@
           const googleAuth = new GoogleAuth();
           googleAuth.logout();
           
-          window.location.href = './src/auth.html';
+          window.location.replace('/src/auth.html');
         });
       }
     });
