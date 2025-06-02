@@ -47,6 +47,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // Vérifier l'authentification au chargement
   if (!checkAuth()) return;
 
+  // Masquer le widget followers-goal pour les utilisateurs Google
+  const authProvider = localStorage.getItem('auth_provider');
+  if (authProvider === 'google') {
+    const followersGoalItem = document.querySelector('.overlay-item[data-url="src/overlays/followers-goal/overlay.html"]');
+    if (followersGoalItem) {
+      followersGoalItem.style.display = 'none';
+    }
+  }
+
   // L'URL de production sera automatiquement détectée
   const PRODUCTION_URL = window.location.origin;
   const previewContainer = document.querySelector('.preview-background');
