@@ -84,14 +84,24 @@ document.addEventListener('DOMContentLoaded', () => {
       const url = item.dataset.url;
       const size = item.dataset.size;
       
-      // Mettre à jour l'URL de l'iframe avec les paramètres de configuration
-      const config = localStorage.getItem('followers-goal-config');
+      // Générer le token et l'URL avec la configuration
+      const token = generateOverlayToken(url);
+      const previewUrl = new URL(url, PRODUCTION_URL);
+      previewUrl.searchParams.set('token', token);
+      
+      // Ajouter les paramètres de configuration spécifiques à l'utilisateur
+      const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
+      const configKey = `followers_goal_config_${userData.id || 'anonymous'}`;
+      const config = localStorage.getItem(configKey);
       if (config) {
-        const params = new URLSearchParams(JSON.parse(config));
-        iframe.src = `${url}?${params.toString()}`;
-      } else {
-        iframe.src = url;
+        const configParams = JSON.parse(config);
+        Object.entries(configParams).forEach(([key, value]) => {
+          previewUrl.searchParams.set(key, value);
+        });
       }
+      
+      // Mettre à jour l'iframe avec l'URL complète
+      iframe.src = previewUrl.toString();
       
       // Mettre à jour l'info de taille
       if (sizeInfo) {

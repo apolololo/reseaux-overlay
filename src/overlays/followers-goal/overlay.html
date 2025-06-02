@@ -192,6 +192,14 @@
           const data = await response.json();
           if (data.total !== undefined) {
             updateDisplay(data.total);
+            
+            // Envoyer la mise à jour du nombre de followers à tous les widgets ouverts
+            const broadcastChannel = new BroadcastChannel('followers_goal_update');
+            broadcastChannel.postMessage({
+              type: 'followers_update',
+              followers: data.total,
+              userId: userData.id
+            });
           }
         } catch (error) {
           console.error('Erreur lors de la récupération des followers:', error);
@@ -213,7 +221,31 @@
         document.documentElement.style.setProperty('--text-color', config.textColor);
         updateVisibility();
         updateDisplay(currentFollowers);
+        
+        // Envoyer la mise à jour à tous les widgets ouverts
+        const broadcastChannel = new BroadcastChannel('followers_goal_update');
+        broadcastChannel.postMessage({
+          type: 'config_update',
+          config: config,
+          userId: userData.id
+        });
       });
+
+      // Écouter les mises à jour via BroadcastChannel
+      const broadcastChannel = new BroadcastChannel('followers_goal_update');
+      broadcastChannel.onmessage = (event) => {
+        if (event.data.userId === userData.id) {
+          if (event.data.type === 'config_update') {
+            Object.assign(config, event.data.config);
+            document.documentElement.style.setProperty('--progress-color', config.progressColor);
+            document.documentElement.style.setProperty('--text-color', config.textColor);
+            updateVisibility();
+            updateDisplay(currentFollowers);
+          } else if (event.data.type === 'followers_update') {
+            updateDisplay(event.data.followers);
+          }
+        }
+      };
 
       // Écouter les changements de stockage local
       window.addEventListener('storage', (event) => {
