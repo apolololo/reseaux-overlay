@@ -182,8 +182,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Construire l'URL avec les paramètres de configuration
     const overlayUrl = new URL(localPath, PRODUCTION_URL);
     
-    // Ajouter les paramètres de configuration si disponibles
-    const config = localStorage.getItem('followers_goal_config');
+    // Récupérer les données de l'utilisateur Twitch
+    const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
+    const twitchToken = localStorage.getItem('twitch_token');
+    
+    // Ajouter l'ID utilisateur à l'URL
+    if (userData.id) {
+      overlayUrl.searchParams.set('userId', userData.id);
+    }
+    
+    // Générer un token avec les données d'authentification et la configuration
+    const token = generateOverlayToken(localPath);
+    overlayUrl.searchParams.set('token', token);
+    
+    // Ajouter les paramètres de configuration spécifiques à l'utilisateur
+    const configKey = `followers_goal_config_${userData.id || 'anonymous'}`;
+    const config = localStorage.getItem(configKey);
     if (config) {
       const configParams = JSON.parse(config);
       Object.entries(configParams).forEach(([key, value]) => {

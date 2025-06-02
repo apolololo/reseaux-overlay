@@ -171,8 +171,25 @@
       // Fonction pour récupérer le nombre de followers
       async function fetchFollowers() {
         try {
-          const token = localStorage.getItem('twitch_token');
-          const userData = JSON.parse(localStorage.getItem('twitch_user'));
+          let token, userData;
+          
+          // Récupérer les données d'authentification du token URL
+          const urlToken = params.get('token');
+          if (urlToken) {
+            try {
+              const tokenData = JSON.parse(atob(urlToken));
+              token = tokenData.twitchData.token;
+              userData = tokenData.twitchData.user;
+            } catch (error) {
+              console.error('Erreur lors du décodage du token URL:', error);
+            }
+          }
+          
+          // Fallback sur localStorage si pas de token URL
+          if (!token || !userData) {
+            token = localStorage.getItem('twitch_token');
+            userData = JSON.parse(localStorage.getItem('twitch_user'));
+          }
           
           if (!token || !userData) {
             console.error('Token Twitch ou données utilisateur non trouvés');
