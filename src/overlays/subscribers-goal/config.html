@@ -353,6 +353,14 @@
 
       // Mettre à jour l'aperçu
       const updatePreview = () => {
+        const googleUserData = JSON.parse(localStorage.getItem('google_user_profile') || '{}');
+        const googleToken = localStorage.getItem('google_access_token');
+
+        if (!googleUserData || !googleToken) {
+          previewFrame.src = 'about:blank';
+          return;
+        }
+
         const config = {
           target: parseInt(targetInput.value) || 1000,
           text: textInput.value,
@@ -363,7 +371,16 @@
           showPercentage: showPercentageInput.checked
         };
 
+        // Encoder les données Google en base64
+        const tokenData = btoa(JSON.stringify({
+          googleData: {
+            user: googleUserData,
+            token: googleToken
+          }
+        }));
+
         const params = new URLSearchParams(config);
+        params.set('token', tokenData);
         previewFrame.src = `overlay.html?${params.toString()}`;
       };
 
@@ -392,6 +409,14 @@
 
       // Copier l'URL pour OBS
       const copyUrl = async () => {
+        const googleUserData = JSON.parse(localStorage.getItem('google_user_profile') || '{}');
+        const googleToken = localStorage.getItem('google_access_token');
+
+        if (!googleUserData || !googleToken) {
+          alert('Veuillez vous connecter avec Google pour utiliser ce widget');
+          return;
+        }
+
         const config = {
           target: parseInt(targetInput.value) || 1000,
           text: textInput.value,
@@ -402,7 +427,16 @@
           showPercentage: showPercentageInput.checked
         };
 
+        // Encoder les données Google en base64
+        const tokenData = btoa(JSON.stringify({
+          googleData: {
+            user: googleUserData,
+            token: googleToken
+          }
+        }));
+
         const params = new URLSearchParams(config);
+        params.set('token', tokenData);
         const url = `${window.location.origin}/src/overlays/subscribers-goal/overlay.html?${params.toString()}`;
         
         try {
