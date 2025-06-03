@@ -44,6 +44,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // Vérifier l'authentification au chargement
   if (!checkAuth()) return;
 
+  // Gérer l'affichage des widgets en fonction du type d'authentification
+  const authProvider = localStorage.getItem('auth_provider');
+  document.querySelectorAll('.overlay-item').forEach(item => {
+    const url = item.dataset.url;
+    if (url.includes('subscribers-goal')) {
+      item.style.display = authProvider === 'google' ? 'block' : 'none';
+    } else if (url.includes('followers-goal')) {
+      item.style.display = authProvider === 'twitch' ? 'block' : 'none';
+    }
+  });
+
   // L'URL de production sera automatiquement détectée
   const PRODUCTION_URL = window.location.origin;
   const previewContainer = document.querySelector('.preview-background');
