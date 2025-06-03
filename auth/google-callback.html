@@ -173,9 +173,8 @@
         loadingText.textContent = "Connexion réussie !";
         statusMessage.textContent = "Vous êtes connecté ! Redirection...";
         
-        setTimeout(() => {
-          window.location.replace('/index.html');
-        }, 1500);
+        // Rediriger immédiatement sans délai
+        window.location.replace('/index.html');
 
       } catch (error) {
         console.error('Erreur lors de l\'authentification:', error);
