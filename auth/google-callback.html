@@ -169,11 +169,7 @@
         localStorage.removeItem('google_client_id');
         localStorage.removeItem('google_client_secret');
 
-        // Afficher le succès et rediriger
-        loadingText.textContent = "Connexion réussie !";
-        statusMessage.textContent = "Vous êtes connecté ! Redirection...";
-        
-        // Rediriger immédiatement sans délai
+        // Rediriger immédiatement sans affichage de message
         window.location.replace('/index.html');
 
       } catch (error) {
