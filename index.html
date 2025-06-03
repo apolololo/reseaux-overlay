@@ -199,36 +199,39 @@
       const loadingScreen = document.querySelector('.loading-screen');
 
       window.checkAuth = () => {
-        console.log('=== VÉRIFICATION AUTHENTIFICATION ===');
-        
-        const twitchToken = localStorage.getItem('twitch_token');
-        const twitchExpiresAt = localStorage.getItem('twitch_expires_at');
-        const twitchUserData = localStorage.getItem('twitch_user');
-        
-        const googleAuth = new GoogleAuth();
-        const googleUserData = localStorage.getItem('google_user_profile');
-        const youtubeChannelData = localStorage.getItem('youtube_channel_info');
         const authProvider = localStorage.getItem('auth_provider');
+        const currentPath = window.location.pathname;
         
-        const isTwitchAuth = twitchToken && twitchExpiresAt && new Date().getTime() < parseInt(twitchExpiresAt);
-        const isGoogleAuth = googleAuth.isAuthenticated();
+        // Si on est sur la page d'authentification
+        if (currentPath.includes('/auth.html')) {
+          // Si déjà authentifié, rediriger vers l'index
+          if (authProvider === 'twitch' || authProvider === 'google') {
+            window.location.replace('/index.html');
+            return false;
+          }
+          return true;
+        }
         
-        console.log('Auth Status:', {
-          twitch: isTwitchAuth,
-          google: isGoogleAuth,
-          provider: authProvider,
-          twitchData: !!twitchUserData,
-          googleData: !!googleUserData
-        });
-        
-        // Si on est sur la page auth et qu'on est déjà authentifié, rediriger vers index
-        if (window.location.pathname.includes('/auth.html') && (isTwitchAuth || isGoogleAuth)) {
-          window.location.replace('/index.html');
+        // Si on est sur une autre page
+        if (!authProvider) {
+          window.location.replace('/src/auth.html');
           return false;
         }
         
-        // Si on est sur index et qu'on n'est pas authentifié, rediriger vers auth
-        if (!window.location.pathname.includes('/auth.html') && !isTwitchAuth && !isGoogleAuth) {
+        // Vérifier l'authentification selon le provider
+        let isAuthenticated = false;
+        
+        if (authProvider === 'twitch') {
+          const twitchToken = localStorage.getItem('twitch_token');
+          const twitchExpiresAt = localStorage.getItem('twitch_expires_at');
+          isAuthenticated = twitchToken && twitchExpiresAt && new Date().getTime() < parseInt(twitchExpiresAt);
+        } else if (authProvider === 'google') {
+          const googleAuth = new GoogleAuth();
+          isAuthenticated = googleAuth.isAuthenticated();
+        }
+        
+        if (!isAuthenticated) {
+          localStorage.clear();
           window.location.replace('/src/auth.html');
           return false;
         }
@@ -236,15 +239,17 @@
         loadingScreen.style.display = 'none';
         app.style.display = 'flex';
         
+        // Afficher les informations utilisateur appropriées
         const twitchInfo = document.getElementById('twitch-info');
         const googleInfo = document.getElementById('google-info');
         if (twitchInfo) twitchInfo.style.display = 'none';
         if (googleInfo) googleInfo.style.display = 'none';
         
-        if (authProvider === 'twitch' && twitchUserData) {
-          try {
-            const user = JSON.parse(twitchUserData);
-            if (twitchInfo && user) {
+        if (authProvider === 'twitch') {
+          const twitchUserData = localStorage.getItem('twitch_user');
+          if (twitchUserData && twitchInfo) {
+            try {
+              const user = JSON.parse(twitchUserData);
               twitchInfo.style.display = 'block';
               twitchInfo.innerHTML = `
                 <div class="user-profile">
@@ -252,16 +257,19 @@
                   <span class="username">${user.display_name || 'Utilisateur Twitch'}</span>
                 </div>
               `;
+            } catch (e) {
+              console.error("Erreur lors de l'affichage des infos utilisateur Twitch", e);
             }
-          } catch (e) {
-            console.error("Erreur lors de l'affichage des infos utilisateur Twitch", e);
           }
-        } else if (authProvider === 'google' && googleUserData) {
-          try {
-            const googleUser = JSON.parse(googleUserData);
-            const youtubeChannel = youtubeChannelData ? JSON.parse(youtubeChannelData) : null;
-            
-            if (googleInfo && googleUser) {
+        } else if (authProvider === 'google') {
+          const googleUserData = localStorage.getItem('google_user_profile');
+          const youtubeChannelData = localStorage.getItem('youtube_channel_info');
+          
+          if (googleUserData && googleInfo) {
+            try {
+              const googleUser = JSON.parse(googleUserData);
+              const youtubeChannel = youtubeChannelData ? JSON.parse(youtubeChannelData) : null;
+              
               googleInfo.style.display = 'block';
               let profileHtml = `
                 <div class="user-profile google-profile">
@@ -285,9 +293,9 @@
               `;
               
               googleInfo.innerHTML = profileHtml;
+            } catch (e) {
+              console.error("Erreur lors de l'affichage des infos utilisateur Google", e);
             }
-          } catch (e) {
-            console.error("Erreur lors de l'affichage des infos utilisateur Google", e);
           }
         }
         
@@ -307,13 +315,12 @@
             localStorage.removeItem('twitch_user');
             localStorage.removeItem('twitch_subscriber_count');
             localStorage.removeItem('twitch_subscriber_points');
+            localStorage.removeItem('auth_provider');
+            window.location.replace('/src/auth.html');
           } else if (authProvider === 'google') {
             const googleAuth = new GoogleAuth();
             googleAuth.logout();
           }
-          
-          localStorage.removeItem('auth_provider');
-          window.location.replace('/src/auth.html');
         });
       }
     });
