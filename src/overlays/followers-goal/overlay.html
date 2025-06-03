@@ -6,89 +6,44 @@
   <title>Subscribers Goal - APO</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary: #ff0000;
-      --text: #ffffff;
-      --bg: rgba(0, 0, 0, 0.5);
-      --progress-bg: rgba(255, 255, 255, 0.1);
-    }
-
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Montserrat', sans-serif;
-      background: transparent;
-      overflow: hidden;
-    }
-
-    .subscribers-goal-container {
-      width: 100%;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    .goal-container {
-      text-align: center;
-      padding: 2rem;
-      border-radius: 1rem;
-      background: rgba(0, 0, 0, 0.7);
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      width: 80%;
-      max-width: 400px;
-    }
-
-    .goal-text {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-    }
-
-    .progress-container {
-      width: 100%;
-      height: 20px;
-      background: var(--progress-bg);
-      border-radius: 10px;
-      overflow: hidden;
-      margin-bottom: 0.5rem;
-    }
-
-    .progress-bar {
-      height: 100%;
-      background: var(--primary);
-      width: 0%;
-      transition: width 0.5s ease;
-    }
-
-    .subscriber-count {
-      font-size: 1.2rem;
-      font-weight: 500;
-    }
-
-    .percentage {
-      font-size: 1rem;
-      color: rgba(255, 255, 255, 0.7);
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="overlay.css">
 </head>
 <body>
-  <div class="subscribers-goal-container">
-    <div class="goal-container">
-      <div class="goal-text">Objectif Abonnés</div>
-      <div class="progress-container">
-        <div class="progress-bar"></div>
+  <div class="followers-goal-container">
+    <div class="goal-header">
+      <h2 class="goal-title">Objectif Abonnés</h2>
+    </div>
+    
+    <div class="followers-info">
+      <div class="current-followers">
+        <div class="followers-count">0</div>
+        <div class="followers-label">Abonnés</div>
       </div>
-      <div class="subscriber-count">0 abonnés</div>
-      <div class="percentage">0%</div>
+      
+      <div class="goal-separator">/</div>
+      
+      <div class="goal-followers">
+        <div class="goal-count">0</div>
+        <div class="goal-label">Objectif</div>
+      </div>
+    </div>
+    
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
+      </div>
+      <div class="progress-percentage">0%</div>
+    </div>
+    
+    <div class="remaining-info">
+      <div class="remaining-text">Plus que <span id="remaining-count">0</span> abonnés pour atteindre l'objectif !</div>
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { GoogleAuth } from '../../js/googleAuth.js';
+
     // Récupérer les paramètres de l'URL
     const urlParams = new URLSearchParams(window.location.search);
     const target = parseInt(urlParams.get('target')) || 1000;
@@ -100,24 +55,47 @@
     const showPercentage = urlParams.get('showPercentage') !== 'false';
 
     // Appliquer les styles personnalisés
-    document.documentElement.style.setProperty('--primary', barColor);
-    document.documentElement.style.setProperty('--text', textColor);
-    document.querySelector('.subscribers-goal-container').style.background = showBackground ? 'var(--bg)' : 'transparent';
+    document.documentElement.style.setProperty('--primary-color', barColor);
+    document.documentElement.style.setProperty('--text-primary', textColor);
+    document.querySelector('.followers-goal-container').style.background = showBackground ? 'var(--background-dark)' : 'transparent';
     document.querySelector('.progress-container').style.display = showProgressBar ? 'block' : 'none';
-    document.querySelector('.percentage').style.display = showPercentage ? 'block' : 'none';
-    document.querySelector('.goal-text').textContent = text;
+    document.querySelector('.progress-percentage').style.display = showPercentage ? 'block' : 'none';
+    document.querySelector('.goal-title').textContent = text;
 
     // Fonction pour mettre à jour l'affichage
     function updateDisplay(subscriberCount) {
-      const progressBar = document.querySelector('.progress-bar');
-      const countDisplay = document.querySelector('.subscriber-count');
-      const percentageDisplay = document.querySelector('.percentage');
+      const progressFill = document.querySelector('.progress-fill');
+      const countDisplay = document.querySelector('.followers-count');
+      const goalDisplay = document.querySelector('.goal-count');
+      const percentageDisplay = document.querySelector('.progress-percentage');
+      const remainingCount = document.getElementById('remaining-count');
       
       const percentage = Math.min((subscriberCount / target) * 100, 100);
+      const remaining = Math.max(target - subscriberCount, 0);
       
-      progressBar.style.width = `${percentage}%`;
-      countDisplay.textContent = `${subscriberCount.toLocaleString()} abonnés`;
+      progressFill.style.width = `${percentage}%`;
+      countDisplay.textContent = subscriberCount.toLocaleString();
+      goalDisplay.textContent = target.toLocaleString();
       percentageDisplay.textContent = `${Math.round(percentage)}%`;
+      remainingCount.textContent = remaining.toLocaleString();
+
+      // Ajouter l'animation de mise à jour
+      countDisplay.classList.add('updated');
+      goalDisplay.classList.add('updated');
+      remainingCount.classList.add('updated');
+      
+      setTimeout(() => {
+        countDisplay.classList.remove('updated');
+        goalDisplay.classList.remove('updated');
+        remainingCount.classList.remove('updated');
+      }, 600);
+
+      // Vérifier si l'objectif est atteint
+      if (subscriberCount >= target) {
+        document.querySelector('.followers-goal-container').classList.add('goal-reached');
+      } else {
+        document.querySelector('.followers-goal-container').classList.remove('goal-reached');
+      }
     }
 
     // Fonction pour récupérer le nombre d'abonnés YouTube
@@ -202,6 +180,5 @@
       }
     };
   </script>
-  <script type="module" src="../../js/googleAuth.js"></script>
 </body>
 </html>
