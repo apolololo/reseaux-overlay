@@ -41,9 +41,7 @@
     </div>
   </div>
 
-  <script type="module">
-    import { GoogleAuth } from '../../js/googleAuth.js';
-
+  <script>
     // Récupérer les paramètres de l'URL
     const urlParams = new URLSearchParams(window.location.search);
     const target = parseInt(urlParams.get('target')) || 1000;
@@ -101,7 +99,7 @@
     // Fonction pour récupérer le nombre d'abonnés YouTube
     async function fetchYouTubeSubscribers() {
       try {
-        const token = await refreshGoogleToken();
+        const token = localStorage.getItem('google_access_token');
         if (!token) {
           console.error('Pas de token Google disponible');
           return;
@@ -151,20 +149,6 @@
         }
       } catch (error) {
         console.error('Erreur lors de la récupération des abonnés:', error);
-      }
-    }
-
-    // Fonction pour rafraîchir le token Google si nécessaire
-    async function refreshGoogleToken() {
-      try {
-        const googleAuth = new GoogleAuth();
-        if (googleAuth.isTokenExpired()) {
-          await googleAuth.refreshToken();
-        }
-        return localStorage.getItem('google_access_token');
-      } catch (error) {
-        console.error('Erreur lors du rafraîchissement du token:', error);
-        return null;
       }
     }
 
