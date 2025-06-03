@@ -290,7 +290,8 @@
           params.set('token', tokenData);
         }
         
-        iframe.src = `overlay.html?${params.toString()}`;
+        // Utiliser le chemin relatif pour l'aperçu
+        iframe.src = `./overlay.html?${params.toString()}`;
       }
 
       // Générer le lien pour OBS
