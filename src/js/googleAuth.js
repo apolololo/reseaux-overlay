@@ -33,7 +33,7 @@ class GoogleAuth {
       authUrl.searchParams.set('prompt', 'consent');
 
       // Rediriger vers la page d'authentification Google
-      window.location.href = authUrl.toString();
+      window.location.replace(authUrl.toString());
     } catch (error) {
       console.error('Erreur lors de l\'initialisation de l\'authentification:', error);
       throw error;
@@ -74,6 +74,7 @@ class GoogleAuth {
       }
       const expiresAt = Date.now() + (data.expires_in * 1000);
       localStorage.setItem('google_expires_at', expiresAt.toString());
+      localStorage.setItem('auth_provider', 'google');
       
       return data;
     } catch (error) {
@@ -192,14 +193,6 @@ class GoogleAuth {
   }
 
   logout() {
-    localStorage.removeItem('google_access_token');
-    localStorage.removeItem('google_refresh_token');
-    localStorage.removeItem('google_expires_at');
-    localStorage.removeItem('google_user_profile');
-    localStorage.removeItem('youtube_channel_info');
-    localStorage.removeItem('google_auth_state');
-    localStorage.removeItem('auth_provider');
-
     const token = localStorage.getItem('google_access_token');
     if (token) {
       fetch(`https://oauth2.googleapis.com/revoke?token=${token}`, {
@@ -209,6 +202,16 @@ class GoogleAuth {
         }
       }).catch(console.error);
     }
+
+    localStorage.removeItem('google_access_token');
+    localStorage.removeItem('google_refresh_token');
+    localStorage.removeItem('google_expires_at');
+    localStorage.removeItem('google_user_profile');
+    localStorage.removeItem('youtube_channel_info');
+    localStorage.removeItem('google_auth_state');
+    localStorage.removeItem('auth_provider');
+    
+    window.location.replace('/src/auth.html');
   }
 }
 
