@@ -67,28 +67,55 @@ document.addEventListener('DOMContentLoaded', () => {
   const sizeInfo = document.querySelector('.size-info');
   const previewContainerWrapper = document.querySelector('.preview-container');
 
-  // Génération d'un jeton enrichi pour les overlays avec données Twitch
+  // Génération d'un jeton enrichi pour les overlays avec données Twitch et Google
   function generateOverlayToken(overlayPath) {
-    // Récupérer l'ID utilisateur Twitch et le token
-    const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
-    const twitchToken = localStorage.getItem('twitch_token');
-    const userId = userData?.id || 'anonymous';
+    const authProvider = localStorage.getItem('auth_provider');
     
-    // Créer un jeton qui contient toutes les données nécessaires
-    const tokenData = {
-      userId: userId,
-      overlayPath: overlayPath,
-      twitchData: {
-        token: twitchToken,
-        user: userData
-      },
-      timestamp: Date.now()
-    };
+    if (authProvider === 'twitch') {
+      // Récupérer l'ID utilisateur Twitch et le token
+      const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
+      const twitchToken = localStorage.getItem('twitch_token');
+      const userId = userData?.id || 'anonymous';
+      
+      // Créer un jeton qui contient toutes les données nécessaires
+      const tokenData = {
+        userId: userId,
+        overlayPath: overlayPath,
+        twitchData: {
+          token: twitchToken,
+          user: userData
+        },
+        timestamp: Date.now()
+      };
+      
+      // Encoder en base64 pour plus de sécurité et lisibilité
+      const token = btoa(JSON.stringify(tokenData));
+      
+      return token;
+    } else if (authProvider === 'google') {
+      // Récupérer l'ID utilisateur Google et le token
+      const userData = JSON.parse(localStorage.getItem('google_user_profile') || '{}');
+      const googleToken = localStorage.getItem('google_access_token');
+      const userId = userData?.id || 'anonymous';
+      
+      // Créer un jeton qui contient toutes les données nécessaires
+      const tokenData = {
+        userId: userId,
+        overlayPath: overlayPath,
+        googleData: {
+          token: googleToken,
+          user: userData
+        },
+        timestamp: Date.now()
+      };
+      
+      // Encoder en base64 pour plus de sécurité et lisibilité
+      const token = btoa(JSON.stringify(tokenData));
+      
+      return token;
+    }
     
-    // Encoder en base64 pour plus de sécurité et lisibilité
-    const token = btoa(JSON.stringify(tokenData));
-    
-    return token;
+    return null;
   }
 
   // Gestion des overlays avec support des tailles et jetons

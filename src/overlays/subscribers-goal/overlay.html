@@ -6,355 +6,91 @@
   <title>Subscribers Goal - APO</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --primary-color: #9146FF;
-      --secondary-color: #00D4AA;
-      --accent-color: #F77737;
-      --background-dark: #0E0E10;
-      --background-light: #18181B;
-      --text-primary: #EFEFF1;
-      --text-secondary: #ADADB8;
-      --success-color: #00F5A0;
-      --gradient-primary: linear-gradient(135deg, #9146FF 0%, #00D4AA 100%);
-      --gradient-progress: linear-gradient(90deg, #9146FF 0%, #00D4AA 50%, #F77737 100%);
-      --shadow-glow: 0 0 20px rgba(145, 70, 255, 0.3);
-    }
-
-    * {
+    body {
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       font-family: 'Montserrat', sans-serif;
       background: transparent;
-      color: var(--text-primary);
       overflow: hidden;
     }
 
-    .subscribers-goal-container {
-      background: linear-gradient(145deg, rgba(24, 24, 27, 0.95) 0%, rgba(14, 14, 16, 0.95) 100%);
-      border: 2px solid transparent;
-      background-clip: padding-box;
-      border-radius: 20px;
-      padding: 25px 30px;
-      min-width: 400px;
+    .container {
+      width: 100%;
       max-width: 500px;
-      backdrop-filter: blur(10px);
-      box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-      position: relative;
-      overflow: hidden;
+      padding: 20px;
+    }
+
+    .goal-container {
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       transition: all 0.3s ease;
     }
 
-    .subscribers-goal-container::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: var(--gradient-primary);
-      border-radius: 20px;
-      padding: 2px;
-      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      mask-composite: exclude;
-      -webkit-mask-composite: xor;
-      z-index: -1;
+    .goal-container.no-bg {
+      background: transparent !important;
+      box-shadow: none !important;
     }
 
-    .subscribers-goal-container.goal-reached {
-      animation: goalReached 2s ease-in-out infinite alternate;
-    }
-
-    @keyframes goalReached {
-      0% {
-        box-shadow: 
-          0 8px 32px rgba(0, 0, 0, 0.3),
-          0 0 30px rgba(0, 245, 160, 0.4),
-          inset 0 1px 0 rgba(255, 255, 255, 0.1);
-      }
-      100% {
-        box-shadow: 
-          0 8px 32px rgba(0, 0, 0, 0.3),
-          0 0 50px rgba(0, 245, 160, 0.6),
-          inset 0 1px 0 rgba(255, 255, 255, 0.1);
-      }
-    }
-
-    .goal-header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .goal-title {
+    .goal-text {
+      color: var(--text-color, #FFFFFF);
       font-size: 24px;
-      font-weight: 800;
-      background: var(--gradient-primary);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin: 0;
-    }
-
-    .subscribers-info {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 15px;
-      margin-bottom: 25px;
-    }
-
-    .current-subscribers,
-    .goal-subscribers {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      font-weight: 700;
       text-align: center;
-    }
-
-    .subscribers-count,
-    .goal-count {
-      font-size: 36px;
-      font-weight: 900;
-      line-height: 1;
-      margin-bottom: 5px;
-    }
-
-    .subscribers-count {
-      color: var(--secondary-color);
-      text-shadow: 0 0 10px rgba(0, 212, 170, 0.5);
-    }
-
-    .goal-count {
-      color: var(--primary-color);
-      text-shadow: 0 0 10px rgba(145, 70, 255, 0.5);
-    }
-
-    .subscribers-label,
-    .goal-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .goal-separator {
-      font-size: 32px;
-      font-weight: 300;
-      color: var(--text-secondary);
-      opacity: 0.6;
+      margin-bottom: 15px;
     }
 
     .progress-container {
-      margin-bottom: 20px;
-    }
-
-    .progress-bar {
       width: 100%;
-      height: 12px;
+      height: 20px;
       background: rgba(255, 255, 255, 0.1);
-      border-radius: 6px;
+      border-radius: 10px;
       overflow: hidden;
-      position: relative;
       margin-bottom: 10px;
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: var(--gradient-progress);
-      border-radius: 6px;
-      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .progress-fill::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-      animation: shimmer 2s infinite;
-    }
-
-    @keyframes shimmer {
-      0% {
-        left: -100%;
-      }
-      100% {
-        left: 100%;
-      }
-    }
-
-    .progress-percentage {
-      text-align: center;
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text-primary);
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-    }
-
-    .remaining-info {
-      text-align: center;
-    }
-
-    .remaining-text {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
-
-    #remaining-count {
-      color: var(--accent-color);
-      font-weight: 700;
-      text-shadow: 0 0 8px rgba(247, 119, 55, 0.4);
-    }
-
-    /* Animation d'entrée */
-    .subscribers-goal-container {
-      animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    @keyframes slideIn {
-      0% {
-        opacity: 0;
-        transform: translateY(-20px) scale(0.95);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
-
-    /* Animation pour les nombres qui changent */
-    .subscribers-count,
-    .goal-count,
-    #remaining-count {
-      transition: all 0.3s ease;
-    }
-
-    .subscribers-count.updated,
-    .goal-count.updated,
-    #remaining-count.updated {
-      transform: scale(1.1);
-      animation: pulse 0.6s ease;
-    }
-
-    @keyframes pulse {
-      0%, 100% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.05);
-      }
-    }
-
-    /* Responsive design */
-    @media (max-width: 480px) {
-      .subscribers-goal-container {
-        min-width: 300px;
-        padding: 20px 25px;
-      }
-      
-      .goal-title {
-        font-size: 20px;
-      }
-      
-      .subscribers-count,
-      .goal-count {
-        font-size: 28px;
-      }
-      
-      .goal-separator {
-        font-size: 24px;
-      }
-    }
-
-    /* État de succès quand l'objectif est atteint */
-    .subscribers-goal-container.goal-reached .goal-title {
-      background: linear-gradient(135deg, var(--success-color) 0%, var(--secondary-color) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .subscribers-goal-container.goal-reached .progress-fill {
-      background: linear-gradient(90deg, var(--success-color) 0%, var(--secondary-color) 100%);
-      box-shadow: 0 0 15px rgba(0, 245, 160, 0.5);
-    }
-
-    .subscribers-goal-container.goal-reached .remaining-info {
       display: none;
     }
 
-    .subscribers-goal-container.goal-reached::after {
-      content: '🎉 OBJECTIF ATTEINT ! 🎉';
-      position: absolute;
-      bottom: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--success-color);
-      text-shadow: 0 0 10px rgba(0, 245, 160, 0.5);
-      animation: celebration 1s ease-in-out infinite alternate;
+    .progress-container.show {
+      display: block !important;
     }
 
-    @keyframes celebration {
-      0% {
-        opacity: 0.8;
-        transform: translateX(-50%) scale(1);
-      }
-      100% {
-        opacity: 1;
-        transform: translateX(-50%) scale(1.05);
-      }
+    .progress-bar {
+      height: 100%;
+      background: var(--progress-color, #FF0000);
+      border-radius: 10px;
+      transition: width 0.5s ease;
+    }
+
+    .percentage {
+      color: var(--text-color, #FFFFFF);
+      font-size: 18px;
+      font-weight: 500;
+      text-align: center;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .percentage.show {
+      display: block !important;
     }
   </style>
 </head>
 <body>
-  <div class="subscribers-goal-container" id="goal-container">
-    <div class="goal-header">
-      <h2 class="goal-title">Objectif Abonnés</h2>
-    </div>
-    
-    <div class="subscribers-info">
-      <div class="current-subscribers">
-        <div class="subscribers-count" id="current-count">0</div>
-        <div class="subscribers-label">Abonnés</div>
+  <div class="container">
+    <div class="goal-container" id="goal-container">
+      <div class="goal-text" id="goal-text">Objectif : 0/1000 abonnés</div>
+      <div class="progress-container" id="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
       </div>
-      
-      <div class="goal-separator">/</div>
-      
-      <div class="goal-subscribers">
-        <div class="goal-count" id="goal-count">1000</div>
-        <div class="goal-label">Objectif</div>
-      </div>
-    </div>
-    
-    <div class="progress-container">
-      <div class="progress-bar">
-        <div class="progress-fill" id="progress-fill"></div>
-      </div>
-      <div class="progress-percentage" id="progress-percentage">0%</div>
-    </div>
-    
-    <div class="remaining-info">
-      <div class="remaining-text">
-        Il reste <span id="remaining-count">1000</span> abonnés à atteindre !
-      </div>
+      <div class="percentage" id="percentage">0%</div>
     </div>
   </div>
 
@@ -392,12 +128,12 @@
       };
 
       const goalContainer = document.getElementById('goal-container');
-      const progressContainer = document.querySelector('.progress-container');
-      const percentageElement = document.getElementById('progress-percentage');
+      const progressContainer = document.getElementById('progress-container');
+      const percentageElement = document.getElementById('percentage');
 
       function updateVisibility() {
-        goalContainer.style.background = config.showBackground ? 'linear-gradient(145deg, rgba(24, 24, 27, 0.95) 0%, rgba(14, 14, 16, 0.95) 100%)' : 'transparent';
-        goalContainer.style.boxShadow = config.showBackground ? '0 8px 32px rgba(0, 0, 0, 0.3)' : 'none';
+        goalContainer.style.background = config.showBackground ? 'rgba(0, 0, 0, 0.8)' : 'transparent';
+        goalContainer.style.boxShadow = config.showBackground ? '0 4px 6px rgba(0, 0, 0, 0.1)' : 'none';
         progressContainer.style.display = config.showProgressBar ? 'block' : 'none';
         percentageElement.style.display = config.showPercentage ? 'block' : 'none';
       }
@@ -416,20 +152,13 @@
         currentSubscribers = subscribers;
         const percentage = Math.min(100, Math.round((currentSubscribers / config.target) * 100));
         
-        // Mettre à jour les compteurs
-        document.getElementById('current-count').textContent = currentSubscribers.toLocaleString();
-        document.getElementById('goal-count').textContent = config.target.toLocaleString();
+        const text = config.text
+          .replace('{current}', currentSubscribers)
+          .replace('{target}', config.target);
+        document.getElementById('goal-text').textContent = text;
         
-        // Mettre à jour la barre de progression
-        document.getElementById('progress-fill').style.width = `${percentage}%`;
-        document.getElementById('progress-percentage').textContent = `${percentage}%`;
-        
-        // Mettre à jour le compteur restant
-        const remaining = Math.max(0, config.target - currentSubscribers);
-        document.getElementById('remaining-count').textContent = remaining.toLocaleString();
-        
-        // Ajouter la classe goal-reached si l'objectif est atteint
-        goalContainer.classList.toggle('goal-reached', currentSubscribers >= config.target);
+        document.getElementById('progress-bar').style.width = `${percentage}%`;
+        document.getElementById('percentage').textContent = `${percentage}%`;
 
         // Envoyer la mise à jour à tous les widgets ouverts
         const broadcastChannel = new BroadcastChannel('subscribers_goal_update');
@@ -473,7 +202,7 @@
         }
       }
 
-      // Fonction pour récupérer le nombre d'abonnés
+      // Fonction pour récupérer le nombre d'abonnés YouTube
       async function fetchSubscribers() {
         try {
           const now = Date.now();
@@ -504,7 +233,7 @@
           }
 
           const data = await response.json();
-          if (data.items?.[0]?.statistics?.subscriberCount) {
+          if (data.items && data.items.length > 0 && data.items[0].statistics && data.items[0].statistics.subscriberCount) {
             updateDisplay(parseInt(data.items[0].statistics.subscriberCount));
           }
         } catch (error) {
