@@ -13,22 +13,32 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Vérification de l'authentification Twitch
+  // Vérification de l'authentification
   const checkAuth = () => {
     const authProvider = localStorage.getItem('auth_provider');
-    if (authProvider !== 'twitch') {
-      window.location.replace('./src/auth.html');
-      return false;
-    }
-
-    const token = localStorage.getItem('twitch_token');
-    const expiresAt = localStorage.getItem('twitch_expires_at');
     
-    if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
-      window.location.replace('./src/auth.html');
-      return false;
+    if (authProvider === 'twitch') {
+      const token = localStorage.getItem('twitch_token');
+      const expiresAt = localStorage.getItem('twitch_expires_at');
+      
+      if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
+        window.location.href = './src/auth.html';
+        return false;
+      }
+      return true;
+    } else if (authProvider === 'google') {
+      const token = localStorage.getItem('google_access_token');
+      const expiresAt = localStorage.getItem('google_expires_at');
+      
+      if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
+        window.location.href = './src/auth.html';
+        return false;
+      }
+      return true;
     }
-    return true;
+    
+    window.location.href = './src/auth.html';
+    return false;
   };
   
   // Vérifier l'authentification au chargement
