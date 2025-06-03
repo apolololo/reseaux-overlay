@@ -1,4 +1,10 @@
-/* CSS pour le widget Subscribers Goal - identique au widget Followers Goal */
+/* Variables */
+:root {
+  --progress-color: #FF0000;
+  --text-color: #FFFFFF;
+}
+
+/* Base */
 body {
   margin: 0;
   padding: 0;
@@ -32,7 +38,7 @@ body {
 }
 
 .goal-text {
-  color: var(--text-color, #FFFFFF);
+  color: var(--text-color);
   font-size: 24px;
   font-weight: 700;
   text-align: center;
@@ -46,29 +52,19 @@ body {
   border-radius: 10px;
   overflow: hidden;
   margin-bottom: 10px;
-  display: none;
-}
-
-.progress-container.show {
-  display: block !important;
 }
 
 .progress-bar {
   height: 100%;
-  background: var(--progress-color, #FF0000);
+  background: var(--progress-color);
   border-radius: 10px;
   transition: width 0.5s ease;
 }
 
 .percentage {
-  color: var(--text-color, #FFFFFF);
+  color: var(--text-color);
   font-size: 18px;
   font-weight: 500;
   text-align: center;
   margin-top: 10px;
-  display: none;
-}
-
-.percentage.show {
-  display: block !important;
 }
