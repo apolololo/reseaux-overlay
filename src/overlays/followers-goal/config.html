@@ -225,10 +225,10 @@
       // Fonction pour mettre à jour l'aperçu
       function updatePreview() {
         const config = {
-          target: document.getElementById('target').value,
-          text: document.getElementById('text').value,
-          barColor: document.getElementById('barColor').value,
-          textColor: document.getElementById('textColor').value,
+          target: parseInt(document.getElementById('target').value) || 1000,
+          text: document.getElementById('text').value || 'Objectif Abonnés',
+          barColor: document.getElementById('barColor').value || '#ff0000',
+          textColor: document.getElementById('textColor').value || '#ffffff',
           showBackground: document.getElementById('showBackground').checked,
           showProgressBar: document.getElementById('showProgressBar').checked,
           showPercentage: document.getElementById('showPercentage').checked
@@ -240,29 +240,37 @@
 
         if (!googleUserData || !googleToken) {
           previewFrame.src = 'about:blank';
+          obsUrl.value = 'Veuillez vous connecter avec Google/YouTube';
           return;
         }
 
-        // Créer l'URL avec les paramètres
-        const params = new URLSearchParams({
-          target: config.target,
-          text: config.text,
-          barColor: config.barColor,
-          textColor: config.textColor,
-          showBackground: config.showBackground,
-          showProgressBar: config.showProgressBar,
-          showPercentage: config.showPercentage
-        });
+        try {
+          // Créer l'URL avec les paramètres
+          const params = new URLSearchParams({
+            target: config.target,
+            text: config.text,
+            barColor: config.barColor,
+            textColor: config.textColor,
+            showBackground: config.showBackground,
+            showProgressBar: config.showProgressBar,
+            showPercentage: config.showPercentage
+          });
 
-        // Ajouter les données d'authentification Google
-        const authData = {
-          googleUser: JSON.parse(googleUserData),
-          token: googleToken
-        };
-        params.append('auth', btoa(JSON.stringify(authData)));
+          // Ajouter les données d'authentification Google
+          const authData = {
+            googleUser: JSON.parse(googleUserData),
+            token: googleToken
+          };
+          params.append('auth', btoa(JSON.stringify(authData)));
 
-        previewFrame.src = `overlay.html?${params.toString()}`;
-        obsUrl.value = `${window.location.origin}${window.location.pathname.replace('config.html', 'overlay.html')}?${params.toString()}`;
+          const previewUrl = `overlay.html?${params.toString()}`;
+          previewFrame.src = previewUrl;
+          obsUrl.value = `${window.location.origin}${window.location.pathname.replace('config.html', 'overlay.html')}?${params.toString()}`;
+        } catch (error) {
+          console.error('Erreur lors de la mise à jour de l\'aperçu:', error);
+          previewFrame.src = 'about:blank';
+          obsUrl.value = 'Erreur lors de la génération du lien';
+        }
       }
 
       // Mettre à jour l'aperçu lors des changements
@@ -272,21 +280,36 @@
       // Gérer la soumission du formulaire
       form.addEventListener('submit', (e) => {
         e.preventDefault();
-        const config = {
-          target: document.getElementById('target').value,
-          text: document.getElementById('text').value,
-          barColor: document.getElementById('barColor').value,
-          textColor: document.getElementById('textColor').value,
-          showBackground: document.getElementById('showBackground').checked,
-          showProgressBar: document.getElementById('showProgressBar').checked,
-          showPercentage: document.getElementById('showPercentage').checked
-        };
+        try {
+          const config = {
+            target: parseInt(document.getElementById('target').value) || 1000,
+            text: document.getElementById('text').value || 'Objectif Abonnés',
+            barColor: document.getElementById('barColor').value || '#ff0000',
+            textColor: document.getElementById('textColor').value || '#ffffff',
+            showBackground: document.getElementById('showBackground').checked,
+            showProgressBar: document.getElementById('showProgressBar').checked,
+            showPercentage: document.getElementById('showPercentage').checked
+          };
 
-        localStorage.setItem('subscribers_goal_config', JSON.stringify(config));
-        successMessage.style.display = 'block';
-        setTimeout(() => {
-          successMessage.style.display = 'none';
-        }, 3000);
+          localStorage.setItem('subscribers_goal_config', JSON.stringify(config));
+          successMessage.style.display = 'block';
+          setTimeout(() => {
+            successMessage.style.display = 'none';
+          }, 3000);
+
+          // Mettre à jour l'aperçu après la sauvegarde
+          updatePreview();
+        } catch (error) {
+          console.error('Erreur lors de la sauvegarde de la configuration:', error);
+          successMessage.textContent = 'Erreur lors de la sauvegarde';
+          successMessage.style.color = '#ff5252';
+          successMessage.style.display = 'block';
+          setTimeout(() => {
+            successMessage.style.display = 'none';
+            successMessage.style.color = '#4CAF50';
+            successMessage.textContent = 'Configuration enregistrée !';
+          }, 3000);
+        }
       });
 
       // Gérer la copie du lien
