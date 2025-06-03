@@ -1,37 +1,43 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Configuration Followers Goal - APO</title>
-  <link rel="stylesheet" href="/src/styles/main.css">
-  <link rel="stylesheet" href="/src/styles/app.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configuration - Objectif Abonnés</title>
+  <link rel="stylesheet" href="../../styles/main.css" />
+  <link rel="stylesheet" href="../../styles/app.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary: #ff0000;
+      --text: #ffffff;
+      --bg: rgba(0, 0, 0, 0.5);
+      --progress-bg: rgba(255, 255, 255, 0.1);
+    }
+
     .config-container {
-      max-width: 800px;
-      margin: 2rem auto;
+      max-width: 1200px;
+      margin: 0 auto;
       padding: 2rem;
-      background: var(--bg-dark);
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
     }
 
     .config-section {
-      margin-bottom: 2rem;
-      background: var(--bg-darker);
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 1rem;
       padding: 1.5rem;
-      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
-    .config-section h2 {
-      color: var(--primary);
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+    .preview-section {
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .form-group {
@@ -41,7 +47,7 @@
     .form-group label {
       display: block;
       margin-bottom: 0.5rem;
-      color: var(--text-light);
+      color: var(--text);
       font-weight: 500;
     }
 
@@ -50,333 +56,251 @@
     .form-group input[type="color"] {
       width: 100%;
       padding: 0.75rem;
-      border: 2px solid var(--border-color);
-      border-radius: 6px;
-      background: var(--bg-dark);
-      color: var(--text-light);
-      font-family: 'Montserrat', sans-serif;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    .form-group input[type="color"] {
+      height: 40px;
+      padding: 0.25rem;
     }
 
     .checkbox-group {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      margin-bottom: 1rem;
+      margin-top: 0.5rem;
     }
 
-    .preview-section {
-      margin-top: 2rem;
-      padding: 1.5rem;
-      background: var(--bg-darker);
-      border-radius: 8px;
+    .checkbox-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
     }
 
     .preview-container {
       width: 100%;
-      height: 200px;
-      border: 2px solid var(--border-color);
-      border-radius: 8px;
+      height: 300px;
+      background: var(--bg);
+      border-radius: 0.5rem;
       overflow: hidden;
-      background: var(--bg-dark);
-    }
-
-    .save-button {
-      background: linear-gradient(135deg, #9146FF 0%, #00D4AA 100%);
-      color: white;
-      border: none;
-      padding: 1rem 2rem;
-      border-radius: 6px;
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
       margin-top: 1rem;
     }
 
-    .save-success {
-      position: fixed;
-      bottom: 2rem;
-      right: 2rem;
-      background: #00D4AA;
-      color: white;
-      padding: 1rem 2rem;
-      border-radius: 6px;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
-      z-index: 1000;
+    .preview-container iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
     }
 
-    @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
+    .copy-section {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 0.5rem;
     }
 
-    @keyframes fadeOut {
-      from { opacity: 1; }
-      to { opacity: 0; }
-    }
-
-    .copy-link-container {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .copy-link-container input {
-      flex: 1;
-      padding: 10px;
-      border: 2px solid var(--border-color);
-      border-radius: 6px;
-      background: var(--bg-dark);
-      color: var(--text-light);
-      font-family: 'Montserrat', sans-serif;
+    .copy-section input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      margin-bottom: 0.5rem;
     }
 
     .copy-button {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      padding: 10px 20px;
+      width: 100%;
+      padding: 0.75rem;
       background: var(--primary);
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 0.5rem;
       cursor: pointer;
+      font-weight: 500;
       transition: all 0.3s ease;
     }
 
     .copy-button:hover {
-      background: var(--primary-dark);
+      opacity: 0.9;
+      transform: translateY(-2px);
     }
 
-    .link-help {
-      font-size: 14px;
-      color: var(--text-secondary);
-      margin-top: 5px;
+    .success-message {
+      display: none;
+      color: #4CAF50;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
   <div class="config-container">
-    <h1>Configuration Followers Goal</h1>
-    
     <div class="config-section">
-      <h2>Objectif</h2>
-      <div class="form-group">
-        <label for="goal-target">Nombre de followers cible</label>
-        <input type="number" id="goal-target" min="1" value="1000">
-      </div>
-    </div>
+      <h2>Configuration de l'objectif</h2>
+      <form id="config-form">
+        <div class="form-group">
+          <label for="target">Objectif d'abonnés</label>
+          <input type="number" id="target" min="1" value="1000" required>
+        </div>
 
-    <div class="config-section">
-      <h2>Personnalisation</h2>
-      <div class="form-group">
-        <label for="goal-text">Texte de l'objectif</label>
-        <input type="text" id="goal-text" value="Objectif : {current}/{target} followers">
-      </div>
-      <div class="form-group">
-        <label for="progress-color">Couleur de la barre de progression</label>
-        <input type="color" id="progress-color" value="#FF0000">
-      </div>
-      <div class="form-group">
-        <label for="text-color">Couleur du texte</label>
-        <input type="color" id="text-color" value="#FFFFFF">
-      </div>
-    </div>
+        <div class="form-group">
+          <label for="text">Texte de l'objectif</label>
+          <input type="text" id="text" value="Objectif Abonnés">
+        </div>
 
-    <div class="config-section">
-      <h2>Visibilité</h2>
-      <div class="checkbox-group">
-        <input type="checkbox" id="show-background" checked>
-        <label for="show-background">Afficher le fond</label>
-      </div>
-      <div class="checkbox-group">
-        <input type="checkbox" id="show-progress-bar" checked>
-        <label for="show-progress-bar">Afficher la barre de progression</label>
-      </div>
-      <div class="checkbox-group">
-        <input type="checkbox" id="show-percentage" checked>
-        <label for="show-percentage">Afficher le pourcentage</label>
-      </div>
+        <div class="form-group">
+          <label for="barColor">Couleur de la barre</label>
+          <input type="color" id="barColor" value="#ff0000">
+        </div>
+
+        <div class="form-group">
+          <label for="textColor">Couleur du texte</label>
+          <input type="color" id="textColor" value="#ffffff">
+        </div>
+
+        <div class="form-group">
+          <label>Options d'affichage</label>
+          <div class="checkbox-group">
+            <input type="checkbox" id="showBackground" checked>
+            <label for="showBackground">Afficher le fond</label>
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="showProgressBar" checked>
+            <label for="showProgressBar">Afficher la barre de progression</label>
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="showPercentage" checked>
+            <label for="showPercentage">Afficher le pourcentage</label>
+          </div>
+        </div>
+
+        <button type="submit" class="copy-button">Enregistrer la configuration</button>
+        <div id="success-message" class="success-message">Configuration enregistrée !</div>
+      </form>
     </div>
 
     <div class="preview-section">
-      <h3>Aperçu en direct</h3>
+      <h2>Aperçu</h2>
       <div class="preview-container">
-        <iframe id="preview-frame" src="overlay.html"></iframe>
+        <iframe id="preview-frame" src="about:blank"></iframe>
+      </div>
+
+      <div class="copy-section">
+        <h3>Lien pour OBS</h3>
+        <input type="text" id="obs-url" readonly>
+        <button id="copy-button" class="copy-button">Copier le lien</button>
+        <div id="copy-success" class="success-message">Lien copié !</div>
       </div>
     </div>
-
-    <div class="config-section">
-      <h2>Lien pour OBS</h2>
-      <div class="form-group">
-        <div class="copy-link-container">
-          <input type="text" id="obs-link" readonly>
-          <button id="copy-link" class="copy-button">
-            <svg viewBox="0 0 24 24" width="18" height="18">
-              <path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-            </svg>
-            Copier
-          </button>
-        </div>
-        <p class="link-help">Copiez ce lien et ajoutez-le comme source navigateur dans OBS</p>
-      </div>
-    </div>
-
-    <button class="save-button" id="save-config">
-      Enregistrer la configuration
-    </button>
   </div>
 
-  <script>
+  <script type="module">
+    import { GoogleAuth } from '../../js/googleAuth.js';
+
     document.addEventListener('DOMContentLoaded', () => {
-      const config = {
-        target: 1000,
-        text: "Objectif : {current}/{target} followers",
-        progressColor: "#FF0000",
-        textColor: "#FFFFFF",
-        showBackground: true,
-        showProgressBar: true,
-        showPercentage: true
-      };
+      const form = document.getElementById('config-form');
+      const previewFrame = document.getElementById('preview-frame');
+      const obsUrl = document.getElementById('obs-url');
+      const copyButton = document.getElementById('copy-button');
+      const successMessage = document.getElementById('success-message');
+      const copySuccess = document.getElementById('copy-success');
 
       // Charger la configuration existante
-      const savedConfig = localStorage.getItem('followers_goal_config');
+      const savedConfig = localStorage.getItem('subscribers_goal_config');
       if (savedConfig) {
-        Object.assign(config, JSON.parse(savedConfig));
-        updateFormValues();
+        const config = JSON.parse(savedConfig);
+        document.getElementById('target').value = config.target;
+        document.getElementById('text').value = config.text;
+        document.getElementById('barColor').value = config.barColor;
+        document.getElementById('textColor').value = config.textColor;
+        document.getElementById('showBackground').checked = config.showBackground;
+        document.getElementById('showProgressBar').checked = config.showProgressBar;
+        document.getElementById('showPercentage').checked = config.showPercentage;
       }
 
-      // Mettre à jour les valeurs du formulaire
-      function updateFormValues() {
-        document.getElementById('goal-target').value = config.target;
-        document.getElementById('goal-text').value = config.text;
-        document.getElementById('progress-color').value = config.progressColor;
-        document.getElementById('text-color').value = config.textColor;
-        document.getElementById('show-background').checked = config.showBackground;
-        document.getElementById('show-progress-bar').checked = config.showProgressBar;
-        document.getElementById('show-percentage').checked = config.showPercentage;
-        updatePreview();
-        updateObsLink();
-      }
-
-      // Mettre à jour l'aperçu
+      // Fonction pour mettre à jour l'aperçu
       function updatePreview() {
-        const iframe = document.getElementById('preview-frame');
-        const params = new URLSearchParams();
-        
-        Object.entries(config).forEach(([key, value]) => {
-          params.set(key, value);
-        });
-        
-        iframe.src = `overlay.html?${params.toString()}`;
-      }
-
-      // Générer le lien pour OBS
-      function updateObsLink() {
-        const twitchData = {
-          user: JSON.parse(localStorage.getItem('twitch_user')),
-          token: localStorage.getItem('twitch_token')
+        const config = {
+          target: document.getElementById('target').value,
+          text: document.getElementById('text').value,
+          barColor: document.getElementById('barColor').value,
+          textColor: document.getElementById('textColor').value,
+          showBackground: document.getElementById('showBackground').checked,
+          showProgressBar: document.getElementById('showProgressBar').checked,
+          showPercentage: document.getElementById('showPercentage').checked
         };
 
-        if (!twitchData.user || !twitchData.token) {
-          document.getElementById('obs-link').value = 'Veuillez vous connecter avec Twitch';
+        // Récupérer les données Google
+        const googleUserData = localStorage.getItem('google_user_profile');
+        const googleToken = localStorage.getItem('google_access_token');
+
+        if (!googleUserData || !googleToken) {
+          previewFrame.src = 'about:blank';
           return;
         }
 
-        const params = new URLSearchParams();
-        Object.entries(config).forEach(([key, value]) => {
-          params.set(key, value);
+        // Créer l'URL avec les paramètres
+        const params = new URLSearchParams({
+          target: config.target,
+          text: config.text,
+          barColor: config.barColor,
+          textColor: config.textColor,
+          showBackground: config.showBackground,
+          showProgressBar: config.showProgressBar,
+          showPercentage: config.showPercentage
         });
 
-        // Encoder les données Twitch en base64
-        const tokenData = btoa(JSON.stringify({ twitchData }));
-        params.set('token', tokenData);
+        // Ajouter les données d'authentification Google
+        const authData = {
+          googleUser: JSON.parse(googleUserData),
+          token: googleToken
+        };
+        params.append('auth', btoa(JSON.stringify(authData)));
 
-        const baseUrl = window.location.origin;
-        const obsLink = `${baseUrl}/src/overlays/followers-goal/overlay.html?${params.toString()}`;
-        document.getElementById('obs-link').value = obsLink;
+        previewFrame.src = `overlay.html?${params.toString()}`;
+        obsUrl.value = `${window.location.origin}${window.location.pathname.replace('config.html', 'overlay.html')}?${params.toString()}`;
       }
 
-      // Copier le lien dans le presse-papier
-      document.getElementById('copy-link').addEventListener('click', () => {
-        const linkInput = document.getElementById('obs-link');
-        linkInput.select();
-        document.execCommand('copy');
-        
-        const copyButton = document.getElementById('copy-link');
-        const originalText = copyButton.innerHTML;
-        copyButton.innerHTML = '✓ Copié !';
+      // Mettre à jour l'aperçu lors des changements
+      form.addEventListener('input', updatePreview);
+      form.addEventListener('change', updatePreview);
+
+      // Gérer la soumission du formulaire
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const config = {
+          target: document.getElementById('target').value,
+          text: document.getElementById('text').value,
+          barColor: document.getElementById('barColor').value,
+          textColor: document.getElementById('textColor').value,
+          showBackground: document.getElementById('showBackground').checked,
+          showProgressBar: document.getElementById('showProgressBar').checked,
+          showPercentage: document.getElementById('showPercentage').checked
+        };
+
+        localStorage.setItem('subscribers_goal_config', JSON.stringify(config));
+        successMessage.style.display = 'block';
         setTimeout(() => {
-          copyButton.innerHTML = originalText;
-        }, 2000);
-      });
-
-      // Écouter les changements
-      document.getElementById('goal-target').addEventListener('input', (e) => {
-        config.target = parseInt(e.target.value);
-        updatePreview();
-        updateObsLink();
-      });
-
-      document.getElementById('goal-text').addEventListener('input', (e) => {
-        config.text = e.target.value;
-        updatePreview();
-        updateObsLink();
-      });
-
-      document.getElementById('progress-color').addEventListener('input', (e) => {
-        config.progressColor = e.target.value;
-        updatePreview();
-        updateObsLink();
-      });
-
-      document.getElementById('text-color').addEventListener('input', (e) => {
-        config.textColor = e.target.value;
-        updatePreview();
-        updateObsLink();
-      });
-
-      document.getElementById('show-background').addEventListener('change', (e) => {
-        config.showBackground = e.target.checked;
-        updatePreview();
-        updateObsLink();
-      });
-
-      document.getElementById('show-progress-bar').addEventListener('change', (e) => {
-        config.showProgressBar = e.target.checked;
-        updatePreview();
-        updateObsLink();
-      });
-
-      document.getElementById('show-percentage').addEventListener('change', (e) => {
-        config.showPercentage = e.target.checked;
-        updatePreview();
-        updateObsLink();
-      });
-
-      // Sauvegarder la configuration
-      document.getElementById('save-config').addEventListener('click', () => {
-        localStorage.setItem('followers_goal_config', JSON.stringify(config));
-        
-        const successMessage = document.createElement('div');
-        successMessage.className = 'save-success';
-        successMessage.textContent = 'Configuration sauvegardée !';
-        document.body.appendChild(successMessage);
-        
-        setTimeout(() => {
-          successMessage.remove();
+          successMessage.style.display = 'none';
         }, 3000);
       });
 
-      // Initialiser l'aperçu et le lien
+      // Gérer la copie du lien
+      copyButton.addEventListener('click', () => {
+        obsUrl.select();
+        document.execCommand('copy');
+        copySuccess.style.display = 'block';
+        setTimeout(() => {
+          copySuccess.style.display = 'none';
+        }, 3000);
+      });
+
+      // Initialiser l'aperçu
       updatePreview();
-      updateObsLink();
     });
   </script>
 </body>
