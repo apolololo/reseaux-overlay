@@ -44,17 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Vérifier l'authentification au chargement
   if (!checkAuth()) return;
 
-  // Gérer l'affichage des widgets en fonction du type d'authentification
-  const authProvider = localStorage.getItem('auth_provider');
-  document.querySelectorAll('.overlay-item').forEach(item => {
-    const url = item.dataset.url;
-    if (url.includes('subscribers-goal')) {
-      item.style.display = authProvider === 'google' ? 'block' : 'none';
-    } else if (url.includes('followers-goal')) {
-      item.style.display = authProvider === 'twitch' ? 'block' : 'none';
-    }
-  });
-
   // L'URL de production sera automatiquement détectée
   const PRODUCTION_URL = window.location.origin;
   const previewContainer = document.querySelector('.preview-background');
@@ -67,55 +56,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const sizeInfo = document.querySelector('.size-info');
   const previewContainerWrapper = document.querySelector('.preview-container');
 
-  // Génération d'un jeton enrichi pour les overlays avec données Twitch et Google
+  // Génération d'un jeton enrichi pour les overlays avec données Twitch
   function generateOverlayToken(overlayPath) {
-    const authProvider = localStorage.getItem('auth_provider');
+    // Récupérer l'ID utilisateur Twitch et le token
+    const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
+    const twitchToken = localStorage.getItem('twitch_token');
+    const userId = userData?.id || 'anonymous';
     
-    if (authProvider === 'twitch') {
-      // Récupérer l'ID utilisateur Twitch et le token
-      const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
-      const twitchToken = localStorage.getItem('twitch_token');
-      const userId = userData?.id || 'anonymous';
-      
-      // Créer un jeton qui contient toutes les données nécessaires
-      const tokenData = {
-        userId: userId,
-        overlayPath: overlayPath,
-        twitchData: {
-          token: twitchToken,
-          user: userData
-        },
-        timestamp: Date.now()
-      };
-      
-      // Encoder en base64 pour plus de sécurité et lisibilité
-      const token = btoa(JSON.stringify(tokenData));
-      
-      return token;
-    } else if (authProvider === 'google') {
-      // Récupérer l'ID utilisateur Google et le token
-      const userData = JSON.parse(localStorage.getItem('google_user_profile') || '{}');
-      const googleToken = localStorage.getItem('google_access_token');
-      const userId = userData?.id || 'anonymous';
-      
-      // Créer un jeton qui contient toutes les données nécessaires
-      const tokenData = {
-        userId: userId,
-        overlayPath: overlayPath,
-        googleData: {
-          token: googleToken,
-          user: userData
-        },
-        timestamp: Date.now()
-      };
-      
-      // Encoder en base64 pour plus de sécurité et lisibilité
-      const token = btoa(JSON.stringify(tokenData));
-      
-      return token;
-    }
+    // Créer un jeton qui contient toutes les données nécessaires
+    const tokenData = {
+      userId: userId,
+      overlayPath: overlayPath,
+      twitchData: {
+        token: twitchToken,
+        user: userData
+      },
+      timestamp: Date.now()
+    };
     
-    return null;
+    // Encoder en base64 pour plus de sécurité et lisibilité
+    const token = btoa(JSON.stringify(tokenData));
+    
+    return token;
   }
 
   // Gestion des overlays avec support des tailles et jetons
@@ -139,19 +101,14 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Ajouter les paramètres de configuration spécifiques à l'utilisateur
       const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
-      const googleUserData = JSON.parse(localStorage.getItem('google_user_profile') || '{}');
-      const configKey = item.dataset.url.includes('subscribers-goal') 
-        ? `subscribers_goal_config_${googleUserData.id || 'anonymous'}`
-        : `followers_goal_config_${userData.id || 'anonymous'}`;
+      const configKey = `followers_goal_config_${userData.id || 'anonymous'}`;
       const config = localStorage.getItem(configKey);
       if (config) {
         const configParams = JSON.parse(config);
         // S'assurer que tous les paramètres nécessaires sont inclus
         const requiredParams = {
           target: configParams.target || 1000,
-          text: configParams.text || (item.dataset.url.includes('subscribers-goal') 
-            ? "Objectif : {current}/{target} abonnés"
-            : "Objectif : {current}/{target} followers"),
+          text: configParams.text || "Objectif : {current}/{target} followers",
           progressColor: configParams.progressColor || "#FF0000",
           textColor: configParams.textColor || "#FFFFFF",
           showBackground: configParams.showBackground !== false,
@@ -234,19 +191,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Ajouter les paramètres de configuration spécifiques à l'utilisateur
     const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
-    const googleUserData = JSON.parse(localStorage.getItem('google_user_profile') || '{}');
-    const configKey = localPath.includes('subscribers-goal') 
-      ? `subscribers_goal_config_${googleUserData.id || 'anonymous'}`
-      : `followers_goal_config_${userData.id || 'anonymous'}`;
+    const configKey = `followers_goal_config_${userData.id || 'anonymous'}`;
     const config = localStorage.getItem(configKey);
     if (config) {
       const configParams = JSON.parse(config);
       // S'assurer que tous les paramètres nécessaires sont inclus
       const requiredParams = {
         target: configParams.target || 1000,
-        text: configParams.text || (localPath.includes('subscribers-goal') 
-          ? "Objectif : {current}/{target} abonnés"
-          : "Objectif : {current}/{target} followers"),
+        text: configParams.text || "Objectif : {current}/{target} followers",
         progressColor: configParams.progressColor || "#FF0000",
         textColor: configParams.textColor || "#FFFFFF",
         showBackground: configParams.showBackground !== false,
