@@ -101,14 +101,19 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Ajouter les paramètres de configuration spécifiques à l'utilisateur
       const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
-      const configKey = `followers_goal_config_${userData.id || 'anonymous'}`;
+      const googleUserData = JSON.parse(localStorage.getItem('google_user_profile') || '{}');
+      const configKey = item.dataset.url.includes('subscribers-goal') 
+        ? `subscribers_goal_config_${googleUserData.id || 'anonymous'}`
+        : `followers_goal_config_${userData.id || 'anonymous'}`;
       const config = localStorage.getItem(configKey);
       if (config) {
         const configParams = JSON.parse(config);
         // S'assurer que tous les paramètres nécessaires sont inclus
         const requiredParams = {
           target: configParams.target || 1000,
-          text: configParams.text || "Objectif : {current}/{target} followers",
+          text: configParams.text || (item.dataset.url.includes('subscribers-goal') 
+            ? "Objectif : {current}/{target} abonnés"
+            : "Objectif : {current}/{target} followers"),
           progressColor: configParams.progressColor || "#FF0000",
           textColor: configParams.textColor || "#FFFFFF",
           showBackground: configParams.showBackground !== false,
@@ -191,14 +196,19 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Ajouter les paramètres de configuration spécifiques à l'utilisateur
     const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
-    const configKey = `followers_goal_config_${userData.id || 'anonymous'}`;
+    const googleUserData = JSON.parse(localStorage.getItem('google_user_profile') || '{}');
+    const configKey = localPath.includes('subscribers-goal') 
+      ? `subscribers_goal_config_${googleUserData.id || 'anonymous'}`
+      : `followers_goal_config_${userData.id || 'anonymous'}`;
     const config = localStorage.getItem(configKey);
     if (config) {
       const configParams = JSON.parse(config);
       // S'assurer que tous les paramètres nécessaires sont inclus
       const requiredParams = {
         target: configParams.target || 1000,
-        text: configParams.text || "Objectif : {current}/{target} followers",
+        text: configParams.text || (localPath.includes('subscribers-goal') 
+          ? "Objectif : {current}/{target} abonnés"
+          : "Objectif : {current}/{target} followers"),
         progressColor: configParams.progressColor || "#FF0000",
         textColor: configParams.textColor || "#FFFFFF",
         showBackground: configParams.showBackground !== false,
