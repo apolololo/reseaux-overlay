@@ -233,7 +233,7 @@
           }
 
           const data = await response.json();
-          if (data.items && data.items.length > 0 && data.items[0].statistics && data.items[0].statistics.subscriberCount) {
+          if (data.items && data.items.length > 0 && data.items[0].statistics) {
             updateDisplay(parseInt(data.items[0].statistics.subscriberCount));
           }
         } catch (error) {
@@ -272,4 +272,4 @@
     });
   </script>
 </body>
-</html> 
+</html>
