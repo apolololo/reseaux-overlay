@@ -1,0 +1,316 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --primary-color: #ff0000;
+  --secondary-color: #00D4AA;
+  --accent-color: #F77737;
+  --background-dark: #0E0E10;
+  --background-light: #18181B;
+  --text-primary: #EFEFF1;
+  --text-secondary: #ADADB8;
+  --success-color: #00F5A0;
+  --gradient-primary: linear-gradient(135deg, #ff0000 0%, #ff4444 100%);
+  --gradient-progress: linear-gradient(90deg, #ff0000 0%, #ff4444 50%, #ff6666 100%);
+  --shadow-glow: 0 0 20px rgba(255, 0, 0, 0.3);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  background: transparent;
+  color: var(--text-primary);
+  overflow: hidden;
+}
+
+.followers-goal-container {
+  background: linear-gradient(145deg, rgba(24, 24, 27, 0.95) 0%, rgba(14, 14, 16, 0.95) 100%);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 20px;
+  padding: 25px 30px;
+  min-width: 400px;
+  max-width: 500px;
+  backdrop-filter: blur(10px);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.followers-goal-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--gradient-primary);
+  border-radius: 20px;
+  padding: 2px;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  z-index: -1;
+}
+
+.followers-goal-container.goal-reached {
+  animation: goalReached 2s ease-in-out infinite alternate;
+}
+
+@keyframes goalReached {
+  0% {
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      0 0 30px rgba(0, 245, 160, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  100% {
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      0 0 50px rgba(0, 245, 160, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+}
+
+.goal-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.goal-title {
+  font-size: 24px;
+  font-weight: 800;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.followers-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.current-followers,
+.goal-followers {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.followers-count,
+.goal-count {
+  font-size: 36px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 5px;
+}
+
+.followers-count {
+  color: var(--secondary-color);
+  text-shadow: 0 0 10px rgba(0, 212, 170, 0.5);
+}
+
+.goal-count {
+  color: var(--primary-color);
+  text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+.followers-label,
+.goal-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.goal-separator {
+  font-size: 32px;
+  font-weight: 300;
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+
+.progress-container {
+  margin-bottom: 20px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 10px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--gradient-progress);
+  border-radius: 6px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.progress-percentage {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.remaining-info {
+  text-align: center;
+}
+
+.remaining-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+#remaining-count {
+  color: var(--accent-color);
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(247, 119, 55, 0.4);
+}
+
+/* Animation d'entrée */
+.followers-goal-container {
+  animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Animation pour les nombres qui changent */
+.followers-count,
+.goal-count,
+#remaining-count {
+  transition: all 0.3s ease;
+}
+
+.followers-count.updated,
+.goal-count.updated,
+#remaining-count.updated {
+  transform: scale(1.1);
+  animation: pulse 0.6s ease;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .followers-goal-container {
+    min-width: 300px;
+    padding: 20px 25px;
+  }
+  
+  .goal-title {
+    font-size: 20px;
+  }
+  
+  .followers-count,
+  .goal-count {
+    font-size: 28px;
+  }
+  
+  .goal-separator {
+    font-size: 24px;
+  }
+}
+
+/* État de succès quand l'objectif est atteint */
+.followers-goal-container.goal-reached .goal-title {
+  background: linear-gradient(135deg, var(--success-color) 0%, var(--secondary-color) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.followers-goal-container.goal-reached .progress-fill {
+  background: linear-gradient(90deg, var(--success-color) 0%, var(--secondary-color) 100%);
+  box-shadow: 0 0 15px rgba(0, 245, 160, 0.5);
+}
+
+.followers-goal-container.goal-reached .remaining-info {
+  display: none;
+}
+
+.followers-goal-container.goal-reached::after {
+  content: '🎉 OBJECTIF ATTEINT ! 🎉';
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--success-color);
+  text-shadow: 0 0 10px rgba(0, 245, 160, 0.5);
+  animation: celebration 1s ease-in-out infinite alternate;
+}
+
+@keyframes celebration {
+  0% {
+    opacity: 0.8;
+    transform: translateX(-50%) scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.05);
+  }
+} 
