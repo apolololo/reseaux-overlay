@@ -15,96 +15,11 @@
       color: #ffffff;
       margin: 0;
       min-height: 100vh;
-      display: flex;
     }
 
-    /* Styles pour la mise en page avec barre latérale */
-     body.youtube-dashboard {
-      /* Ajoutez des styles spécifiques au corps de YouTube ici si nécessaire */
-     }
-
-    .overlay-list {
-      width: 250px;
-      background: #1e1e1e;
-      padding: 1rem;
-      overflow-y: auto;
-      flex-shrink: 0;
-    }
-
-    .overlay-list h2 {
-      color: #ffffff;
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-      text-align: center;
-    }
-
-    .overlay-list ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .overlay-list li {
-      margin-bottom: 0.5rem;
-    }
-
-    .overlay-list .overlay-item,
-    .overlay-list .folder-header {
-      display: flex;
-      align-items: center;
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      color: #ffffff;
-      text-decoration: none;
-      transition: background 0.2s;
-      cursor: pointer;
-    }
-
-    .overlay-list .overlay-item:hover,
-    .overlay-list .folder-header:hover {
-      background: #333333;
-    }
-
-    .youtube-dashboard .overlay-list .overlay-item.active {
-      background: #FF0000; /* Couleur YouTube */
-      font-weight: 600;
-    }
-
-    .overlay-list .folder-header {
-      justify-content: space-between;
-    }
-
-    .overlay-list .folder-icon {
-      transition: transform 0.2s;
-    }
-
-    .overlay-list .folder-item.open .folder-icon {
-      transform: rotate(180deg);
-    }
-
-    .overlay-list .folder-content {
-      list-style: none;
-      padding: 0;
-      margin: 0.5rem 0 0 1rem;
-      border-left: 2px solid #555555;
-      display: none;
-    }
-
-    .overlay-list .folder-item.open .folder-content {
-      display: block;
-    }
-
-    .overlay-list .folder-content li {
-      margin-bottom: 0.25rem;
-    }
-
-    .overlay-list .folder-content .overlay-item {
-      padding: 0.5rem 1rem;
-      font-size: 0.9rem;
-    }
-
-    .main-content {
-      flex-grow: 1;
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
       padding: 2rem;
     }
 
@@ -162,7 +77,7 @@
     }
 
     .widget-button {
-      background: #FF0000; /* Couleur YouTube */
+      background: #FF0000;
       color: white;
       border: none;
       padding: 0.75rem 1.5rem;
@@ -190,118 +105,29 @@
       background: #333;
       color: white;
     }
-
-    /* Styles spécifiques pour youtube-dashboard */
-    .google-info {
-      padding: 0.75rem 1rem;
-      background: rgba(66, 133, 244, 0.15);
-      border-radius: 10px;
-      transition: var(--transition);
-    }
-    .google-info:hover {
-      background: rgba(66, 133, 244, 0.2);
-      transform: translateY(-2px);
-    }
-    .google-info .user-profile {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-     .google-info img {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-    }
-     .google-info .username {
-        font-weight: 600;
-    }
-    .channel-stats {
-      display: flex;
-      gap: 1rem;
-      margin-top: 0.5rem;
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-    }
   </style>
 </head>
-<body class="youtube-dashboard">
+<body>
   <div class="container">
-    <div class="overlay-list">
-      <div class="header-container">
-        <h2>Overlays</h2>
-        <div class="user-info-container">
-          <div class="auth-providers">
-            <div id="google-user-info" class="google-info">
-              <!-- Les informations utilisateur Google/YouTube seront insérées ici -->
-            </div>
-          </div>
-          <button id="youtube-logout-button" class="logout-button">
-            <svg viewBox="0 0 24 24" width="18" height="18">
-              <path fill="currentColor" d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-            </svg>
-            <span>Déconnexion</span>
-          </button>
-        </div>
+    <div class="header">
+      <h1 class="title">APO Overlays</h1>
+      <div class="user-info">
+        <div id="youtube-user-info"></div>
+        <button id="logout-button" class="logout-button">Déconnexion</button>
       </div>
-      <ul>
-        <li class="overlay-item" data-url="../overlays/common/apo/overlay.html" data-size="800x200">
-          Réseaux & Code
-        </li>
-        <li class="overlay-item" data-url="../overlays/common/starting/overlay.html" data-size="1920x1080">
-          Starting Soon
-        </li>
-        <li class="folder-item">
-          <div class="folder-header">
-            <span>Pause</span>
-            <svg class="folder-icon" viewBox="0 0 24 24" width="24" height="24">
-              <path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-            </svg>
-          </div>
-          <ul class="folder-content">
-            <li class="overlay-item" data-url="../overlays/common/brb/overlay.html" data-size="1920x1080">
-              Pause Standard
-            </li>
-            <li class="overlay-item" data-url="../overlays/common/brb/overlay-video.html" data-size="1920x1080">
-              Pause avec Zone Vidéo
-            </li>
-          </ul>
-        </li>
-        <li class="overlay-item" data-url="../overlays/common/end/overlay.html" data-size="1920x1080">
-          Fin du Stream
-        </li>
-        <li class="overlay-item" data-url="../overlays/common/game-status/overlay.html" data-size="1920x1080">
-          Status de Jeu
-        </li>
-         <li class="folder-item">
-          <div class="folder-header">
-            <span>Maps</span>
-            <svg class="folder-icon" viewBox="0 0 24 24" width="24" height="24">
-              <path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-            </svg>
-          </div>
-          <ul class="folder-content">
-            <li class="overlay-item" data-url="../overlays/common/maps/overlay.html" data-size="1920x1080">
-              Box Fights & Zone Wars
-            </li>
-          </ul>
-        </li>
-      </ul>
     </div>
 
-    <div class="main-content">
-      <div class="header">
-        <h1 class="title">APO Overlays - YouTube Dashboard</h1>
-        <div class="user-info">
-           <div id="youtube-user-info-header"></div>
-        </div>
+    <div class="widgets-grid">
+      <div class="widget">
+        <h2 class="widget-title">Compteur d'Abonnés</h2>
+        <p class="widget-description">Affichez le nombre d'abonnés de votre chaîne YouTube en temps réel.</p>
+        <button class="widget-button" onclick="window.location.href='./overlays/subscribers-goal/overlay.html'">Créer un widget</button>
       </div>
 
-      <div class="widgets-grid">
-        <div class="widget">
-          <h2 class="widget-title">Compteur d'Abonnés</h2>
-          <p class="widget-description">Affichez le nombre d'abonnés de votre chaîne YouTube en temps réel.</p>
-          <button class="widget-button" onclick="window.location.href='./overlays/subscribers-goal/overlay.html'">Créer un widget</button>
-        </div>
+      <div class="widget">
+        <h2 class="widget-title">Objectifs d'Abonnés</h2>
+        <p class="widget-description">Définissez et affichez vos objectifs d'abonnés avec une barre de progression.</p>
+        <button class="widget-button" onclick="window.location.href='./overlays/subscribers-goal/overlay.html'">Créer un widget</button>
       </div>
     </div>
   </div>
@@ -312,7 +138,7 @@
       const checkAuth = () => {
         const token = localStorage.getItem('google_access_token');
         const expiresAt = localStorage.getItem('google_expires_at');
-
+        
         if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
           window.location.href = './auth.html';
           return false;
@@ -327,54 +153,22 @@
       if (youtubeChannelData) {
         try {
           const channel = JSON.parse(youtubeChannelData);
-          const userInfoDiv = document.getElementById('google-user-info'); // Utiliser google-user-info pour cohérence
+          const userInfoDiv = document.getElementById('youtube-user-info');
           userInfoDiv.innerHTML = `
-            <div class="user-profile google-profile">
-               ${channel.snippet.thumbnails.default.url ? `<img src="${channel.snippet.thumbnails.default.url}" alt="${channel.snippet.title}">` : ''}
-                <div>
-                   <span class="username">${channel.snippet.title}</span>
-                   ${channel.statistics ? `<div class="channel-stats"><span>👥 ${parseInt(channel.statistics.subscriberCount).toLocaleString()} abonnés</span></div>` : ''}
-                </div>
-            </div>
+            <img src="${channel.snippet.thumbnails.default.url}" alt="${channel.snippet.title}">
+            <span>${channel.snippet.title}</span>
           `;
-           // Afficher également dans le header principal si besoin
-          const userInfoHeaderDiv = document.getElementById('youtube-user-info-header');
-           if(userInfoHeaderDiv) {
-               userInfoHeaderDiv.innerHTML = `
-                 <div class="user-profile google-profile">
-                    ${channel.snippet.thumbnails.default.url ? `<img src="${channel.snippet.thumbnails.default.url}" alt="${channel.snippet.title}">` : ''}
-                     <div>
-                        <span class="username">${channel.snippet.title}</span>
-                        ${channel.statistics ? `<div class="channel-stats"><span>👥 ${parseInt(channel.statistics.subscriberCount).toLocaleString()} abonnés</span></div>` : ''}
-                     </div>
-                 </div>
-               `;
-           }
-
         } catch (e) {
           console.error("Erreur lors de l'affichage des infos utilisateur", e);
         }
       }
 
       // Gérer la déconnexion
-      document.getElementById('youtube-logout-button').addEventListener('click', () => {
-        localStorage.clear(); // Clear all localStorage for full separation intent
-        // Gérer la déconnexion Google via GoogleAuth si nécessaire
-        const googleAuth = new GoogleAuth();
-        googleAuth.logout();
-      });
-
-       // Gérer les dossiers dépliables dans la barre latérale
-      const folderItems = document.querySelectorAll('.overlay-list .folder-item');
-      folderItems.forEach(item => {
-        const header = item.querySelector('.folder-header');
-        header.addEventListener('click', () => {
-          item.classList.toggle('open');
-        });
+      document.getElementById('logout-button').addEventListener('click', () => {
+        localStorage.clear();
+        window.location.href = './auth.html';
       });
     });
-
   </script>
-  <script type="module" src="./js/googleAuth.js"></script>
 </body>
 </html> 

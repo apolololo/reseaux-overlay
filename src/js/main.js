@@ -1,48 +1,48 @@
 // Gestion de la navigation
-// document.querySelectorAll('.nav-btn').forEach(btn => {
-//   btn.addEventListener('click', () => {
-//     // Mise à jour des boutons
-//     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-//     btn.classList.add('active');
-// 
-//     // Affichage de la vue correspondante
-//     const viewType = btn.dataset.view;
-//     document.getElementById('grid-view').classList.toggle('hidden', viewType !== 'grid');
-//     document.getElementById('folder-view').classList.toggle('hidden', viewType !== 'folders');
-//   });
-// });
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    // Mise à jour des boutons
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    // Affichage de la vue correspondante
+    const viewType = btn.dataset.view;
+    document.getElementById('grid-view').classList.toggle('hidden', viewType !== 'grid');
+    document.getElementById('folder-view').classList.toggle('hidden', viewType !== 'folders');
+  });
+});
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Vérification de l'authentification - Cette logique est maintenant gérée dans les fichiers du tableau de bord.
-  // const checkAuth = () => {
-  //   const authProvider = localStorage.getItem('auth_provider');
-  // 
-  //   if (authProvider === 'twitch') {
-  //     const token = localStorage.getItem('twitch_token');
-  //     const expiresAt = localStorage.getItem('twitch_expires_at');
-  // 
-  //     if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
-  //       window.location.href = './src/auth.html';
-  //       return false;
-  //     }
-  //     return true;
-  //   } else if (authProvider === 'google') {
-  //     const token = localStorage.getItem('google_access_token');
-  //     const expiresAt = localStorage.getItem('google_expires_at');
-  // 
-  //     if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
-  //       window.location.href = './src/auth.html';
-  //       return false;
-  //     }
-  //     return true;
-  //   }
-  // 
-  //   window.location.href = './src/auth.html';
-  //   return false;
-  // };
-  // 
-  // // Vérifier l'authentification au chargement
-  // if (!checkAuth()) return;
+  // Vérification de l'authentification
+  const checkAuth = () => {
+    const authProvider = localStorage.getItem('auth_provider');
+    
+    if (authProvider === 'twitch') {
+      const token = localStorage.getItem('twitch_token');
+      const expiresAt = localStorage.getItem('twitch_expires_at');
+      
+      if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
+        window.location.href = './src/auth.html';
+        return false;
+      }
+      return true;
+    } else if (authProvider === 'google') {
+      const token = localStorage.getItem('google_access_token');
+      const expiresAt = localStorage.getItem('google_expires_at');
+      
+      if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
+        window.location.href = './src/auth.html';
+        return false;
+      }
+      return true;
+    }
+    
+    window.location.href = './src/auth.html';
+    return false;
+  };
+  
+  // Vérifier l'authentification au chargement
+  if (!checkAuth()) return;
 
   // L'URL de production sera automatiquement détectée
   const PRODUCTION_URL = window.location.origin;
@@ -56,40 +56,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const sizeInfo = document.querySelector('.size-info');
   const previewContainerWrapper = document.querySelector('.preview-container');
 
-  // Génération d'un jeton enrichi pour les overlays avec données pertinentes
+  // Génération d'un jeton enrichi pour les overlays avec données Twitch
   function generateOverlayToken(overlayPath) {
-    const authProvider = localStorage.getItem('auth_provider');
-    let userId = 'anonymous';
-    let platformData = {};
-
-    if (authProvider === 'twitch') {
-      const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
-      const twitchToken = localStorage.getItem('twitch_token');
-      userId = userData?.id || 'anonymous';
-      platformData = {
-        platform: 'twitch',
-        token: twitchToken,
-        user: userData
-      };
-    } else if (authProvider === 'google') {
-      const googleAccessToken = localStorage.getItem('google_access_token');
-      const youtubeChannelData = JSON.parse(localStorage.getItem('youtube_channel_info') || '{}');
-      const googleUserProfile = JSON.parse(localStorage.getItem('google_user_profile') || '{}');
-      
-      userId = googleUserProfile?.id || 'anonymous'; // Utiliser l'ID Google
-      platformData = {
-        platform: 'youtube',
-        token: googleAccessToken,
-        channel: youtubeChannelData,
-        user: googleUserProfile
-      };
-    }
+    // Récupérer l'ID utilisateur Twitch et le token
+    const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
+    const twitchToken = localStorage.getItem('twitch_token');
+    const userId = userData?.id || 'anonymous';
     
     // Créer un jeton qui contient toutes les données nécessaires
     const tokenData = {
       userId: userId,
       overlayPath: overlayPath,
-      platformData: platformData,
+      twitchData: {
+        token: twitchToken,
+        user: userData
+      },
       timestamp: Date.now()
     };
     
@@ -118,36 +99,24 @@ document.addEventListener('DOMContentLoaded', () => {
       const previewUrl = new URL(url, PRODUCTION_URL);
       previewUrl.searchParams.set('token', token);
       
-      // Ajouter les paramètres de configuration spécifiques à l'utilisateur et à l'overlay
-      const authProvider = localStorage.getItem('auth_provider');
-      let userId = 'anonymous';
-      let configKeyPrefix = '';
-
-      if (authProvider === 'twitch') {
-          const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
-          userId = userData?.id || 'anonymous';
-          configKeyPrefix = 'twitch';
-      } else if (authProvider === 'google') {
-           const userData = JSON.parse(localStorage.getItem('google_user_profile') || '{}');
-           userId = userData?.id || 'anonymous'; // Utiliser l'ID Google
-           configKeyPrefix = 'youtube'; // Ou un autre préfixe pertinent pour YouTube
-      }
-      
-      // Construire la clé de configuration basée sur l'authProvider, l'ID utilisateur et le type d'overlay
-      // Par exemple: twitch_followers_goal_config_userId ou youtube_subscribers_goal_config_userId
-      const overlayName = url.split('/').pop().split('.')[0]; // Extrait le nom de l'overlay (ex: followers-goal)
-      const configKey = `${configKeyPrefix}_${overlayName}_config_${userId}`;
-
+      // Ajouter les paramètres de configuration spécifiques à l'utilisateur
+      const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
+      const configKey = `followers_goal_config_${userData.id || 'anonymous'}`;
       const config = localStorage.getItem(configKey);
       if (config) {
         const configParams = JSON.parse(config);
         // S'assurer que tous les paramètres nécessaires sont inclus
-         // Ceci est un exemple; les paramètres réels dépendront de chaque overlay
-        Object.entries(configParams).forEach(([key, value]) => {
-           // Éviter d'ajouter des objets complexes directement comme paramètres d'URL
-          if (typeof value !== 'object') {
-             previewUrl.searchParams.set(key, value.toString());
-          }
+        const requiredParams = {
+          target: configParams.target || 1000,
+          text: configParams.text || "Objectif : {current}/{target} followers",
+          progressColor: configParams.progressColor || "#FF0000",
+          textColor: configParams.textColor || "#FFFFFF",
+          showBackground: configParams.showBackground !== false,
+          showProgressBar: configParams.showProgressBar !== false,
+          showPercentage: configParams.showPercentage !== false
+        };
+        Object.entries(requiredParams).forEach(([key, value]) => {
+          previewUrl.searchParams.set(key, value.toString());
         });
       }
       
@@ -220,39 +189,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const token = generateOverlayToken(localPath);
     overlayUrl.searchParams.set('token', token);
     
-     // Ajouter les paramètres de configuration spécifiques à l'utilisateur et à l'overlay
-      const authProvider = localStorage.getItem('auth_provider');
-      let userId = 'anonymous';
-      let configKeyPrefix = '';
-
-      if (authProvider === 'twitch') {
-          const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
-          userId = userData?.id || 'anonymous';
-          configKeyPrefix = 'twitch';
-      } else if (authProvider === 'google') {
-           const userData = JSON.parse(localStorage.getItem('google_user_profile') || '{}');
-           userId = userData?.id || 'anonymous'; // Utiliser l'ID Google
-           configKeyPrefix = 'youtube'; // Ou un autre préfixe pertinent pour YouTube
-      }
-      
-      // Construire la clé de configuration basée sur l'authProvider, l'ID utilisateur et le type d'overlay
-      // Par exemple: twitch_followers_goal_config_userId ou youtube_subscribers_goal_config_userId
-      const overlayName = localPath.split('/').pop().split('.')[0]; // Extrait le nom de l'overlay (ex: followers-goal)
-      const configKey = `${configKeyPrefix}_${overlayName}_config_${userId}`;
-
-      const config = localStorage.getItem(configKey);
-      if (config) {
-        const configParams = JSON.parse(config);
-        // S'assurer que tous les paramètres nécessaires sont inclus
-         // Ceci est un exemple; les paramètres réels dépendront de chaque overlay
-        Object.entries(configParams).forEach(([key, value]) => {
-           // Éviter d'ajouter des objets complexes directement comme paramètres d'URL
-          if (typeof value !== 'object') {
-             overlayUrl.searchParams.set(key, value.toString());
-          }
-        });
-      }
-
+    // Ajouter les paramètres de configuration spécifiques à l'utilisateur
+    const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
+    const configKey = `followers_goal_config_${userData.id || 'anonymous'}`;
+    const config = localStorage.getItem(configKey);
+    if (config) {
+      const configParams = JSON.parse(config);
+      // S'assurer que tous les paramètres nécessaires sont inclus
+      const requiredParams = {
+        target: configParams.target || 1000,
+        text: configParams.text || "Objectif : {current}/{target} followers",
+        progressColor: configParams.progressColor || "#FF0000",
+        textColor: configParams.textColor || "#FFFFFF",
+        showBackground: configParams.showBackground !== false,
+        showProgressBar: configParams.showProgressBar !== false,
+        showPercentage: configParams.showPercentage !== false
+      };
+      Object.entries(requiredParams).forEach(([key, value]) => {
+        overlayUrl.searchParams.set(key, value.toString());
+      });
+    }
+    
     try {
       await navigator.clipboard.writeText(overlayUrl.toString());
       copyButton.style.transition = 'transform 0.2s ease';
@@ -359,7 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Fonction pour gérer le bouton de configuration
   function updateConfigButton(overlayItem) {
     const copyInfo = document.querySelector('.copy-info');
-    let configButton = document.getElementById('configure-overlay');
+    let configButton = document.getElementById('config-button');
     
     // Supprimer le bouton existant s'il y en a un
     if (configButton) {
@@ -371,7 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (configUrl) {
       // Créer le bouton de configuration
       configButton = document.createElement('button');
-      configButton.id = 'configure-overlay';
+      configButton.id = 'config-button';
       configButton.innerHTML = `
         <svg viewBox="0 0 24 24" width="18" height="18">
           <path fill="currentColor" d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11.03L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.22,8.95 2.27,9.22 2.46,9.37L4.57,11.03C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.22,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.68 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"/>

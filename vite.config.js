@@ -1,3 +1,4 @@
+
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
@@ -6,21 +7,21 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        main: 'index.html',
-        auth: 'src/auth.html',
-        callback: 'auth/callback.html',
-        googleCallback: 'auth/google-callback.html',
-        overlay: 'overlay.html',
-        privacy: 'src/privacy.html',
-        apo: 'src/overlays/common/apo/overlay.html',
-        starting: 'src/overlays/common/starting/overlay.html',
-        brb: 'src/overlays/common/brb/overlay.html',
-        brbVideo: 'src/overlays/common/brb/overlay-video.html',
-        end: 'src/overlays/common/end/overlay.html',
-        gameStatus: 'src/overlays/common/game-status/overlay.html',
-        mapInfo: 'src/overlays/common/maps/overlay.html',
-        followersGoal: 'src/overlays/twitch/followers-goal/overlay.html',
-        followersGoalConfig: 'src/overlays/twitch/followers-goal/config.html'
+        main: resolve(__dirname, 'index.html'),
+        auth: resolve(__dirname, 'src/auth.html'),
+        callback: resolve(__dirname, 'auth/callback.html'),
+        googleCallback: resolve(__dirname, 'auth/google-callback.html'),
+        overlay: resolve(__dirname, 'overlay.html'),
+        privacy: resolve(__dirname, 'src/privacy.html'),
+        apo: resolve(__dirname, 'src/overlays/apo/overlay.html'),
+        starting: resolve(__dirname, 'src/overlays/starting/overlay.html'),
+        brb: resolve(__dirname, 'src/overlays/brb/overlay.html'),
+        brbVideo: resolve(__dirname, 'src/overlays/brb/overlay-video.html'),
+        end: resolve(__dirname, 'src/overlays/end/overlay.html'),
+        gameStatus: resolve(__dirname, 'src/overlays/game-status/overlay.html'),
+        mapInfo: resolve(__dirname, 'src/overlays/maps/overlay.html'),
+        followersGoal: resolve(__dirname, 'src/overlays/followers-goal/overlay.html'),
+        followersGoalConfig: resolve(__dirname, 'src/overlays/followers-goal/config.html')
       },
     },
     assetsDir: 'assets',

@@ -15,96 +15,11 @@
       color: #ffffff;
       margin: 0;
       min-height: 100vh;
-      display: flex;
     }
 
-    /* Styles pour la mise en page avec barre latérale */
-    body.twitch-dashboard {
-      /* Ajoutez des styles spécifiques au corps de Twitch ici si nécessaire */
-    }
-
-    .overlay-list {
-      width: 250px;
-      background: #1e1e1e;
-      padding: 1rem;
-      overflow-y: auto;
-      flex-shrink: 0;
-    }
-
-    .overlay-list h2 {
-      color: #ffffff;
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-      text-align: center;
-    }
-
-    .overlay-list ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .overlay-list li {
-      margin-bottom: 0.5rem;
-    }
-
-    .overlay-list .overlay-item,
-    .overlay-list .folder-header {
-      display: flex;
-      align-items: center;
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      color: #ffffff;
-      text-decoration: none;
-      transition: background 0.2s;
-      cursor: pointer;
-    }
-
-    .overlay-list .overlay-item:hover,
-    .overlay-list .folder-header:hover {
-      background: #333333;
-    }
-
-    .twitch-dashboard .overlay-list .overlay-item.active {
-      background: #9146FF; /* Couleur Twitch */
-      font-weight: 600;
-    }
-
-    .overlay-list .folder-header {
-      justify-content: space-between;
-    }
-
-    .overlay-list .folder-icon {
-      transition: transform 0.2s;
-    }
-
-    .overlay-list .folder-item.open .folder-icon {
-      transform: rotate(180deg);
-    }
-
-    .overlay-list .folder-content {
-      list-style: none;
-      padding: 0;
-      margin: 0.5rem 0 0 1rem;
-      border-left: 2px solid #555555;
-      display: none;
-    }
-
-    .overlay-list .folder-item.open .folder-content {
-      display: block;
-    }
-
-    .overlay-list .folder-content li {
-      margin-bottom: 0.25rem;
-    }
-
-    .overlay-list .folder-content .overlay-item {
-      padding: 0.5rem 1rem;
-      font-size: 0.9rem;
-    }
-
-    .main-content {
-      flex-grow: 1;
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
       padding: 2rem;
     }
 
@@ -162,7 +77,7 @@
     }
 
     .widget-button {
-      background: #9146FF; /* Couleur Twitch */
+      background: #9146FF;
       color: white;
       border: none;
       padding: 0.75rem 1.5rem;
@@ -190,123 +105,29 @@
       background: #333;
       color: white;
     }
-
-    /* Styles spécifiques pour twitch-dashboard */
-    .twitch-info {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 0.75rem 1rem;
-        background: rgba(145, 70, 255, 0.15);
-        border-radius: 10px;
-        transition: var(--transition);
-    }
-
-    .twitch-info .user-profile {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .twitch-info img {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-    }
-
-    .twitch-info .username {
-        font-weight: 600;
-    }
   </style>
 </head>
-<body class="twitch-dashboard">
+<body>
   <div class="container">
-    <div class="overlay-list">
-      <div class="header-container">
-        <h2>Overlays</h2>
-        <div class="user-info-container">
-          <div class="auth-providers">
-            <div id="twitch-user-info" class="twitch-info">
-              <!-- Les informations utilisateur Twitch seront insérées ici -->
-            </div>
-          </div>
-          <button id="twitch-logout-button" class="logout-button">
-            <svg viewBox="0 0 24 24" width="18" height="18">
-              <path fill="currentColor" d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-            </svg>
-            <span>Déconnexion</span>
-          </button>
-        </div>
+    <div class="header">
+      <h1 class="title">APO Overlays</h1>
+      <div class="user-info">
+        <div id="twitch-user-info"></div>
+        <button id="logout-button" class="logout-button">Déconnexion</button>
       </div>
-      <ul>
-        <li class="overlay-item" data-url="../overlays/common/apo/overlay.html" data-size="800x200">
-          Réseaux & Code
-        </li>
-        <li class="overlay-item" data-url="../overlays/common/starting/overlay.html" data-size="1920x1080">
-          Starting Soon
-        </li>
-        <li class="folder-item">
-          <div class="folder-header">
-            <span>Pause</span>
-            <svg class="folder-icon" viewBox="0 0 24 24" width="24" height="24">
-              <path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-            </svg>
-          </div>
-          <ul class="folder-content">
-            <li class="overlay-item" data-url="../overlays/common/brb/overlay.html" data-size="1920x1080">
-              Pause Standard
-            </li>
-            <li class="overlay-item" data-url="../overlays/common/brb/overlay-video.html" data-size="1920x1080">
-              Pause avec Zone Vidéo
-            </li>
-          </ul>
-        </li>
-        <li class="overlay-item" data-url="../overlays/common/end/overlay.html" data-size="1920x1080">
-          Fin du Stream
-        </li>
-        <li class="overlay-item" data-url="../overlays/common/game-status/overlay.html" data-size="1920x1080">
-          Status de Jeu
-        </li>
-        <li class="overlay-item" data-url="../overlays/twitch/followers-goal/overlay.html" data-size="500x300" data-config="../overlays/twitch/followers-goal/config.html">
-          Followers Goal
-        </li>
-        <li class="folder-item">
-          <div class="folder-header">
-            <span>Maps</span>
-            <svg class="folder-icon" viewBox="0 0 24 24" width="24" height="24">
-              <path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-            </svg>
-          </div>
-          <ul class="folder-content">
-            <li class="overlay-item" data-url="../overlays/common/maps/overlay.html" data-size="1920x1080">
-              Box Fights & Zone Wars
-            </li>
-          </ul>
-        </li>
-      </ul>
     </div>
 
-    <div class="main-content">
-      <div class="header">
-        <h1 class="title">APO Overlays - Twitch Dashboard</h1>
-        <div class="user-info">
-          <div id="twitch-user-info-header"></div>
-        </div>
+    <div class="widgets-grid">
+      <div class="widget">
+        <h2 class="widget-title">Compteur de Followers</h2>
+        <p class="widget-description">Affichez le nombre de vos followers Twitch en temps réel sur votre stream.</p>
+        <button class="widget-button" onclick="window.location.href='./overlays/followers-goal/overlay.html'">Créer un widget</button>
       </div>
 
-      <div class="widgets-grid">
-        <!-- Les widgets spécifiques à Twitch iront ici -->
-        <div class="widget">
-          <h2 class="widget-title">Compteur de Followers</h2>
-          <p class="widget-description">Affichez le nombre de vos followers Twitch en temps réel sur votre stream.</p>
-          <button class="widget-button" onclick="window.location.href='../overlays/twitch/followers-goal/overlay.html'">Créer un widget</button>
-        </div>
-
-        <div class="widget">
-          <h2 class="widget-title">Objectifs de Followers</h2>
-          <p class="widget-description">Définissez et affichez vos objectifs de followers avec une barre de progression.</p>
-          <button class="widget-button" onclick="window.location.href='../overlays/twitch/followers-goal/overlay.html'">Créer un widget</button>
-        </div>
+      <div class="widget">
+        <h2 class="widget-title">Objectifs de Followers</h2>
+        <p class="widget-description">Définissez et affichez vos objectifs de followers avec une barre de progression.</p>
+        <button class="widget-button" onclick="window.location.href='./overlays/followers-goal/overlay.html'">Créer un widget</button>
       </div>
     </div>
   </div>
@@ -317,7 +138,7 @@
       const checkAuth = () => {
         const token = localStorage.getItem('twitch_token');
         const expiresAt = localStorage.getItem('twitch_expires_at');
-
+        
         if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
           window.location.href = './auth.html';
           return false;
@@ -327,50 +148,27 @@
 
       if (!checkAuth()) return;
 
-      // Afficher les informations utilisateur dans la barre latérale
+      // Afficher les informations utilisateur
       const twitchUserData = localStorage.getItem('twitch_user');
       if (twitchUserData) {
         try {
           const user = JSON.parse(twitchUserData);
           const userInfoDiv = document.getElementById('twitch-user-info');
           userInfoDiv.innerHTML = `
-            <div class="user-profile">
-              ${user.profile_image_url ? `<img src="${user.profile_image_url}" alt="${user.display_name}">` : ''}
-              <span class="username">${user.display_name}</span>
-            </div>
+            <img src="${user.profile_image_url}" alt="${user.display_name}">
+            <span>${user.display_name}</span>
           `;
-           // Afficher également dans le header principal si besoin
-          const userInfoHeaderDiv = document.getElementById('twitch-user-info-header');
-           if(userInfoHeaderDiv) {
-              userInfoHeaderDiv.innerHTML = `
-                <div class="user-profile">
-                   ${user.profile_image_url ? `<img src="${user.profile_image_url}" alt="${user.display_name}">` : ''}
-                   <span class="username">${user.display_name}</span>
-                 </div>
-              `;
-           }
-
         } catch (e) {
           console.error("Erreur lors de l'affichage des infos utilisateur", e);
         }
       }
 
       // Gérer la déconnexion
-      document.getElementById('twitch-logout-button').addEventListener('click', () => {
-        localStorage.clear(); // Clear all localStorage for full separation intent
+      document.getElementById('logout-button').addEventListener('click', () => {
+        localStorage.clear();
         window.location.href = './auth.html';
       });
-
-       // Gérer les dossiers dépliables dans la barre latérale
-      const folderItems = document.querySelectorAll('.overlay-list .folder-item');
-      folderItems.forEach(item => {
-        const header = item.querySelector('.folder-header');
-        header.addEventListener('click', () => {
-          item.classList.toggle('open');
-        });
-      });
     });
-
   </script>
 </body>
 </html> 

@@ -1,3 +1,4 @@
+
 /* Header et informations utilisateur */
 .header-container {
   background: rgba(30, 41, 59, 0.4);
@@ -11,6 +12,13 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.twitch-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .user-profile {
@@ -49,7 +57,7 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1.25rem;
-  background-color: rgba(239, 68, 68, 0.15); /* Couleur de base (peut être surchargée) */
+  background-color: rgba(239, 68, 68, 0.15);
   border: none;
   border-radius: 10px;
   color: #fff;
