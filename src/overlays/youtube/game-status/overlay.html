@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>Game Status - APO</title>
+  <link rel="stylesheet" href="/src/overlays/game-status/overlay.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <!-- Fond avec effets -->
+    <div class="background">
+      <div class="gradient-circle circle-1"></div>
+      <div class="gradient-circle circle-2"></div>
+      <div class="gradient-circle circle-3"></div>
+    </div>
+    
+    <div class="stars-container">
+      <div class="star-field"></div>
+    </div>
+
+    <div class="content">
+      <!-- Message de statut -->
+      <div class="status-message">
+        <div class="status-icon">
+          <div class="loading-circle"></div>
+        </div>
+        <h1 class="status-text">Chargement...</h1>
+        <p class="status-details">Préparation du prochain jeu</p>
+      </div>      <!-- Code créateur -->
+      <div class="creator-code">
+        <span class="label">CODE CRÉATEUR</span>
+        <span class="code">APO21</span>
+        <span class="ad-tag">#AD</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Liste des messages de statut
+    const statusMessages = [
+      { text: "Chargement...", details: "Préparation du prochain jeu" },
+      { text: "En recherche...", details: "Choix du prochain jeu" },
+      { text: "Changement de jeu", details: "Un instant..." },
+      { text: "Configuration", details: "Paramétrage du jeu" }
+    ];
+
+    let currentIndex = 0;
+    const statusText = document.querySelector('.status-text');
+    const statusDetails = document.querySelector('.status-details');
+
+    // Change le message toutes les 5 secondes
+    setInterval(() => {
+      currentIndex = (currentIndex + 1) % statusMessages.length;
+      const message = statusMessages[currentIndex];
+      
+      // Animation de fade out/in
+      statusText.style.opacity = 0;
+      statusDetails.style.opacity = 0;
+      
+      setTimeout(() => {
+        statusText.textContent = message.text;
+        statusDetails.textContent = message.details;
+        statusText.style.opacity = 1;
+        statusDetails.style.opacity = 1;
+      }, 500);
+    }, 5000);
+  </script>
+</body>
+</html>

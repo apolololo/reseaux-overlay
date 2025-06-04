@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Ajouter les paramètres de configuration spécifiques à l'utilisateur
       const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
-      const isTwitchOverlay = activeOverlay.dataset.url.includes('followers-goal');
+      const isTwitchOverlay = activeOverlay.dataset.url.includes('twitch/followers-goal');
       const authProvider = localStorage.getItem('auth_provider');
       
       if (isTwitchOverlay && authProvider !== 'twitch') {
