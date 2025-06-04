@@ -189,7 +189,7 @@
           const expiresAt = localStorage.getItem('twitch_expires_at');
           
           if (token && expiresAt && new Date().getTime() < parseInt(expiresAt)) {
-            window.location.replace('../index.html');
+            window.location.replace('../twitch-dashboard.html');
             return true;
           }
         } else if (authProvider === 'google') {
@@ -197,7 +197,7 @@
           const expiresAt = localStorage.getItem('google_expires_at');
           
           if (token && expiresAt && new Date().getTime() < parseInt(expiresAt)) {
-            window.location.replace('../index.html');
+            window.location.replace('../youtube-dashboard.html');
             return true;
           }
         }
