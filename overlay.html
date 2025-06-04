@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -74,14 +73,7 @@
           throw new Error("Chemin d'overlay non valide");
         }
         
-        // Stocker les données YouTube dans localStorage si elles sont présentes
-        if (tokenData.youtubeData && tokenData.youtubeData.token && tokenData.youtubeData.channel) {
-          localStorage.setItem('google_access_token', tokenData.youtubeData.token);
-          localStorage.setItem('youtube_channel_info', JSON.stringify(tokenData.youtubeData.channel));
-          console.log('Données YouTube restaurées depuis le token pour OBS');
-        }
-        
-        // Stocker les données Twitch dans localStorage si elles sont présentes (pour compatibilité)
+        // Stocker les données Twitch dans localStorage si elles sont présentes
         if (tokenData.twitchData && tokenData.twitchData.token && tokenData.twitchData.user) {
           localStorage.setItem('twitch_token', tokenData.twitchData.token);
           localStorage.setItem('twitch_user', JSON.stringify(tokenData.twitchData.user));
@@ -91,15 +83,13 @@
         // Construire l'URL de l'overlay
         const overlayUrl = new URL(overlayPath, window.location.origin);
         
-        // Transférer tous les paramètres nécessaires
+        // Transférer uniquement les paramètres nécessaires
+        const essentialParams = ['token', 'target', 'text', 'progressColor', 'textColor'];
         params.forEach((value, key) => {
-          if (key !== 'token') { // Éviter de dupliquer le token
+          if (essentialParams.includes(key)) {
             overlayUrl.searchParams.set(key, value);
           }
         });
-        
-        // Ajouter le token à l'URL de l'overlay pour qu'il puisse accéder aux données
-        overlayUrl.searchParams.set('token', token);
         
         // Créer un iframe pour charger l'overlay
         const iframe = document.createElement('iframe');
