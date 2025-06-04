@@ -1,254 +1,174 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard YouTube</title>
-    <link rel="stylesheet" href="styles/youtube.css">
-    <link rel="stylesheet" href="styles/overlay.css">
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/app.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>APO Overlays - Dashboard YouTube</title>
+  <link rel="stylesheet" href="./styles/overlay.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0f0f0f;
+      color: #ffffff;
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .title {
+      font-size: 2rem;
+      font-weight: 600;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-info img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+
+    .widgets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .widget {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: transform 0.2s;
+    }
+
+    .widget:hover {
+      transform: translateY(-2px);
+    }
+
+    .widget-title {
+      font-size: 1.2rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+
+    .widget-description {
+      color: #888;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .widget-button {
+      background: #FF0000;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: opacity 0.2s;
+    }
+
+    .widget-button:hover {
+      opacity: 0.9;
+    }
+
+    .logout-button {
+      background: transparent;
+      border: 1px solid #333;
+      color: #888;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .logout-button:hover {
+      background: #333;
+      color: white;
+    }
+  </style>
 </head>
-<body class="youtube-dashboard">
-    <div id="app">
-        <div class="overlay-list">
-            <div class="header-container">
-                <h2>Overlays</h2>
-                <div class="user-info-container">
-                    <div class="auth-providers">
-                        <div id="google-info" class="google-info">
-                        </div>
-                    </div>
-                    <button id="youtube-logout-button" class="logout-button">
-                        <svg viewBox="0 0 24 24" width="18" height="18">
-                            <path fill="currentColor" d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-                        </svg>
-                        <span>Déconnexion</span>
-                    </button>
-                </div>
-            </div>
-            <ul>
-                <li class="overlay-item active" data-url="src/overlays/youtube/apo/overlay.html" data-size="800x200">
-                    Réseaux & Code
-                </li>
-                <li class="overlay-item" data-url="src/overlays/youtube/starting/overlay.html" data-size="1920x1080">
-                    Starting Soon
-                </li>
-                <li class="folder-item">
-                    <div class="folder-header">
-                        <span>Pause</span>
-                        <svg class="folder-icon" viewBox="0 0 24 24" width="24" height="24">
-                            <path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-                        </svg>
-                    </div>
-                    <ul class="folder-content">
-                        <li class="overlay-item" data-url="src/overlays/youtube/brb/overlay.html" data-size="1920x1080">
-                            Pause Standard
-                        </li>
-                        <li class="overlay-item" data-url="src/overlays/youtube/brb/overlay-video.html" data-size="1920x1080">
-                            Pause avec Zone Vidéo
-                        </li>
-                    </ul>
-                </li>
-                <li class="overlay-item" data-url="src/overlays/youtube/end/overlay.html" data-size="1920x1080">
-                    Fin du Stream
-                </li>
-                <li class="overlay-item" data-url="src/overlays/youtube/game-status/overlay.html" data-size="1920x1080">
-                    Status de Jeu
-                </li>
-                <li class="folder-item">
-                    <div class="folder-header">
-                        <span>Maps</span>
-                        <svg class="folder-icon" viewBox="0 0 24 24" width="24" height="24">
-                            <path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-                        </svg>
-                    </div>
-                    <ul class="folder-content">
-                        <li class="overlay-item" data-url="src/overlays/youtube/maps/overlay.html" data-size="1920x1080">
-                            Box Fights & Zone Wars
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-
-        <div class="preview-section">
-             <div class="preview-options">
-                <div class="background-options">
-                    <label>Fond de preview :</label>
-                    <div class="background-controls">
-                        <input type="color" id="bg-color" value="#000000" title="Couleur de fond">
-                        <button id="bg-transparent" title="Fond transparent">
-                            <svg viewBox="0 0 24 24" width="24" height="24">
-                                <path fill="currentColor" d="M12 2L2 12l10 10 10-10L12 2zM4.83 12L12 19.17 19.17 12 12 4.83 4.83 12z"/>
-                            </svg>
-                        </button>
-                        <input type="file" id="bg-image" accept="image/*" hidden>
-                        <button id="bg-image-btn" title="Image de fond">
-                            <svg viewBox="0 0 24 24" width="24" height="24">
-                                <path fill="currentColor" d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="preview-container">
-                <div class="preview-background">
-                    <iframe id="overlay-preview" src="src/overlays/youtube/apo/overlay.html"></iframe>
-                </div>
-            </div>
-
-            <div class="copy-info">
-                <button id="copy-url">
-                    <svg viewBox="0 0 24 24" width="18" height="18">
-                        <path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-                    </svg>
-                    Copier l'URL pour OBS
-                </button>
-                <span class="size-info">Taille recommandée : 800x200</span>
-            </div>
-        </div>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 class="title">APO Overlays</h1>
+      <div class="user-info">
+        <div id="youtube-user-info"></div>
+        <button id="logout-button" class="logout-button">Déconnexion</button>
+      </div>
     </div>
 
-    <a href="/src/privacy.html" class="privacy-link">Politique de confidentialité</a>
+    <div class="widgets-grid">
+      <div class="widget">
+        <h2 class="widget-title">Compteur d'Abonnés</h2>
+        <p class="widget-description">Affichez le nombre d'abonnés de votre chaîne YouTube en temps réel.</p>
+        <button class="widget-button" onclick="window.location.href='./overlays/subscribers-goal/overlay.html'">Créer un widget</button>
+      </div>
 
-    <script type="module" src="./js/main.js"></script>
-    <script type="module" src="./js/googleAuth.js"></script>
-    <script type="module">
-        import { GoogleAuth } from './js/googleAuth.js';
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const app = document.getElementById('app');
-            const loadingScreen = document.querySelector('.loading-screen');
-
-            async function loadYouTubeChannelInfo() {
-                const googleToken = localStorage.getItem('google_access_token');
-                const googleExpiresAt = localStorage.getItem('google_expires_at');
-
-                if (!googleToken || !googleExpiresAt || Date.now() > parseInt(googleExpiresAt)) {
-                    localStorage.clear();
-                    window.location.href = 'auth.html';
-                    return;
-                }
-
-                try {
-                    const response = await fetch('https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&mine=true', {
-                        headers: {
-                            'Authorization': `Bearer ${googleToken}`
-                        }
-                    });
-
-                    if (!response.ok) throw new Error('Erreur API YouTube');
-
-                    const data = await response.json();
-                    const channel = data.items[0];
-
-                    const googleInfo = document.getElementById('google-info');
-                    if (googleInfo) {
-                         googleInfo.style.display = 'block';
-                         googleInfo.innerHTML = `
-                           <div class="user-profile google-profile">
-                             ${channel.snippet.thumbnails.default.url ? `<img src="${channel.snippet.thumbnails.default.url}" alt="${channel.snippet.title}">` : ''}
-                             <span class="username">${channel.snippet.title || 'Chaîne YouTube'}</span>
-                             <div class="channel-stats">
-                                 <span>👥 ${parseInt(channel.statistics.subscriberCount).toLocaleString()} abonnés</span>
-                             </div>
-                           </div>
-                         `;
-                    }
-
-                    localStorage.setItem('youtube_channel_info', JSON.stringify(channel));
-
-                    if (loadingScreen) loadingScreen.style.display = 'none';
-                    if (app) app.style.display = 'flex';
-
-                } catch (error) {
-                    console.error('Erreur lors du chargement des informations YouTube:', error);
-                    localStorage.clear();
-                    window.location.href = 'auth.html';
-                }
-            }
-
-            document.getElementById('youtube-logout-button').addEventListener('click', () => {
-                const googleAuth = new GoogleAuth();
-                googleAuth.logout();
-                localStorage.clear();
-                window.location.href = 'auth.html';
-            });
-
-            document.querySelectorAll('.overlay-item').forEach(item => {
-                item.addEventListener('click', function() {
-                    document.querySelectorAll('.overlay-item').forEach(i => i.classList.remove('active'));
-                    this.classList.add('active');
-                    const overlayUrl = this.getAttribute('data-url');
-                    const overlaySize = this.getAttribute('data-size').split('x');
-                    const iframe = document.getElementById('overlay-preview');
-                    const sizeInfo = document.querySelector('.copy-info .size-info');
-                    const copyUrlButton = document.getElementById('copy-url');
-                    const configUrl = this.getAttribute('data-config');
-
-                    iframe.src = overlayUrl;
-                    iframe.style.width = overlaySize[0] + 'px';
-                    iframe.style.height = overlaySize[1] + 'px';
-                    sizeInfo.textContent = `Taille recommandée : ${this.getAttribute('data-size')}`;
-
-                    copyUrlButton.onclick = () => {
-                         let urlToCopy = window.location.origin + '/' + overlayUrl;
-                         if (configUrl) {
-                             urlToCopy += '?config=' + window.location.origin + '/' + configUrl;
-                         }
-                         navigator.clipboard.writeText(urlToCopy).then(() => {
-                             console.log('URL copied!');
-                         }).catch(err => {
-                             console.error('Failed to copy URL: ', err);
-                         });
-                    };
-
-                    document.querySelectorAll('.folder-header').forEach(header => {
-                        header.addEventListener('click', function() {
-                            this.parentElement.classList.toggle('open');
-                        });
-                    });
-
-                });
-            });
-
-            const initialOverlay = document.querySelector('.overlay-item.active');
-             if(initialOverlay) {
-                const initialUrl = initialOverlay.getAttribute('data-url');
-                const initialSize = initialOverlay.getAttribute('data-size').split('x');
-                const iframe = document.getElementById('overlay-preview');
-                const sizeInfo = document.querySelector('.copy-info .size-info');
-                 const copyUrlButton = document.getElementById('copy-url');
-                 const configUrl = initialOverlay.getAttribute('data-config');
-
-                iframe.src = initialUrl;
-                iframe.style.width = initialSize[0] + 'px';
-                iframe.style.height = initialSize[1] + 'px';
-                sizeInfo.textContent = `Taille recommandée : ${initialOverlay.getAttribute('data-size')}`;
-
-                 copyUrlButton.onclick = () => {
-                      let urlToCopy = window.location.origin + '/' + initialUrl;
-                      if (configUrl) {
-                          urlToCopy += '?config=' + window.location.origin + '/' + configUrl;
-                      }
-                      navigator.clipboard.writeText(urlToCopy).then(() => {
-                          console.log('URL copied!');
-                      }).catch(err => {
-                          console.error('Failed to copy URL: ', err);
-                      });
-                 };
-             }
-
-            loadYouTubeChannelInfo();
-        });
-    </script>
-     <div class="loading-screen" style="display: flex;">
-        <div class="loading-spinner"></div>
+      <div class="widget">
+        <h2 class="widget-title">Objectifs d'Abonnés</h2>
+        <p class="widget-description">Définissez et affichez vos objectifs d'abonnés avec une barre de progression.</p>
+        <button class="widget-button" onclick="window.location.href='./overlays/subscribers-goal/overlay.html'">Créer un widget</button>
+      </div>
     </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Vérifier l'authentification Google
+      const checkAuth = () => {
+        const token = localStorage.getItem('google_access_token');
+        const expiresAt = localStorage.getItem('google_expires_at');
+        
+        if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
+          window.location.href = './auth.html';
+          return false;
+        }
+        return true;
+      };
+
+      if (!checkAuth()) return;
+
+      // Afficher les informations utilisateur
+      const youtubeChannelData = localStorage.getItem('youtube_channel_info');
+      if (youtubeChannelData) {
+        try {
+          const channel = JSON.parse(youtubeChannelData);
+          const userInfoDiv = document.getElementById('youtube-user-info');
+          userInfoDiv.innerHTML = `
+            <img src="${channel.snippet.thumbnails.default.url}" alt="${channel.snippet.title}">
+            <span>${channel.snippet.title}</span>
+          `;
+        } catch (e) {
+          console.error("Erreur lors de l'affichage des infos utilisateur", e);
+        }
+      }
+
+      // Gérer la déconnexion
+      document.getElementById('logout-button').addEventListener('click', () => {
+        localStorage.clear();
+        window.location.href = './auth.html';
+      });
+    });
+  </script>
 </body>
-</html>
+</html> 
