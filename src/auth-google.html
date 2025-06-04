@@ -188,9 +188,6 @@
         return false;
       };
       
-      // Si l'utilisateur est déjà authentifié, rediriger vers l'index
-      if (checkExistingAuth()) return;
-      
       // Vérifier s'il y a des erreurs dans l'URL
       const checkUrlErrors = () => {
         const urlParams = new URLSearchParams(window.location.search);

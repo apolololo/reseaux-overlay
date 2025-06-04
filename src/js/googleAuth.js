@@ -216,7 +216,7 @@ class GoogleAuth {
     localStorage.removeItem('google_auth_state');
     localStorage.removeItem('auth_provider');
     
-    window.location.replace('/src/auth.html');
+    window.location.replace('auth.html');
   }
 }
 
