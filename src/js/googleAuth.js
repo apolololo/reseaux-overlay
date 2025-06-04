@@ -198,24 +198,12 @@ class GoogleAuth {
   }
 
   logout() {
-    const token = localStorage.getItem('google_access_token');
-    if (token) {
-      fetch(`https://oauth2.googleapis.com/revoke?token=${token}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        }
-      }).catch(console.error);
-    }
-
     localStorage.removeItem('google_access_token');
     localStorage.removeItem('google_refresh_token');
     localStorage.removeItem('google_expires_at');
     localStorage.removeItem('google_user_profile');
     localStorage.removeItem('youtube_channel_info');
-    localStorage.removeItem('google_auth_state');
     localStorage.removeItem('auth_provider');
-    
     window.location.replace('auth.html');
   }
 }
