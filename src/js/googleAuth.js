@@ -198,12 +198,15 @@ class GoogleAuth {
   }
 
   logout() {
-    localStorage.removeItem('google_access_token');
-    localStorage.removeItem('google_refresh_token');
-    localStorage.removeItem('google_expires_at');
-    localStorage.removeItem('google_user_profile');
-    localStorage.removeItem('youtube_channel_info');
-    localStorage.removeItem('auth_provider');
+    const authProvider = localStorage.getItem('auth_provider');
+    if (authProvider === 'google') {
+      localStorage.removeItem('google_access_token');
+      localStorage.removeItem('google_refresh_token');
+      localStorage.removeItem('google_expires_at');
+      localStorage.removeItem('google_user_profile');
+      localStorage.removeItem('youtube_channel_info');
+      localStorage.removeItem('auth_provider');
+    }
     window.location.replace('auth.html');
   }
 }

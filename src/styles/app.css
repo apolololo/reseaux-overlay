@@ -1,4 +1,3 @@
-
 /* Variables globales */
 :root {
   --primary: #6C63FF;
@@ -105,6 +104,17 @@ body {
   background-color: var(--primary);
   color: white;
   box-shadow: 0 4px 20px rgba(108, 99, 255, 0.3);
+}
+
+/* Styles spécifiques pour les tableaux de bord */
+.twitch-dashboard .overlay-item.active {
+  background-color: #9146FF; /* Violet Twitch */
+  box-shadow: 0 4px 20px rgba(145, 70, 255, 0.3);
+}
+
+.youtube-dashboard .overlay-item.active {
+  background-color: #FF0000; /* Rouge YouTube */
+  box-shadow: 0 4px 20px rgba(255, 0, 0, 0.3);
 }
 
 /* Dossiers */
