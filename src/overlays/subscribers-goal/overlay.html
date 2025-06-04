@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Followers Goal - APO</title>
+  <title>Subscribers Goal - APO</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -12,13 +12,13 @@
 <body>
   <div class="followers-goal-container">
     <div class="goal-header">
-      <h2 class="goal-title">Objectif Followers</h2>
+      <h2 class="goal-title">Objectif Abonnés</h2>
     </div>
     
     <div class="followers-info">
       <div class="current-followers">
         <div class="followers-count">0</div>
-        <div class="followers-label">Followers</div>
+        <div class="followers-label">Abonnés</div>
       </div>
       
       <div class="goal-separator">/</div>
@@ -37,7 +37,7 @@
     </div>
     
     <div class="remaining-info">
-      <div class="remaining-text">Plus que <span id="remaining-count">0</span> followers pour atteindre l'objectif !</div>
+      <div class="remaining-text">Plus que <span id="remaining-count">0</span> abonnés pour atteindre l'objectif !</div>
     </div>
   </div>
 
@@ -45,8 +45,8 @@
     // Récupérer les paramètres de l'URL
     const urlParams = new URLSearchParams(window.location.search);
     const target = parseInt(urlParams.get('target')) || 1000;
-    const text = urlParams.get('text') || 'Objectif Followers';
-    const barColor = urlParams.get('barColor') || '#9146FF';
+    const text = urlParams.get('text') || 'Objectif Abonnés';
+    const barColor = urlParams.get('barColor') || '#ff0000';
     const textColor = urlParams.get('textColor') || '#ffffff';
     const showBackground = urlParams.get('showBackground') !== 'false';
     const showProgressBar = urlParams.get('showProgressBar') !== 'false';
@@ -61,18 +61,18 @@
     document.querySelector('.goal-title').textContent = text;
 
     // Fonction pour mettre à jour l'affichage
-    function updateDisplay(followerCount) {
+    function updateDisplay(subscriberCount) {
       const progressFill = document.querySelector('.progress-fill');
       const countDisplay = document.querySelector('.followers-count');
       const goalDisplay = document.querySelector('.goal-count');
       const percentageDisplay = document.querySelector('.progress-percentage');
       const remainingCount = document.getElementById('remaining-count');
       
-      const percentage = Math.min((followerCount / target) * 100, 100);
-      const remaining = Math.max(target - followerCount, 0);
+      const percentage = Math.min((subscriberCount / target) * 100, 100);
+      const remaining = Math.max(target - subscriberCount, 0);
       
       progressFill.style.width = `${percentage}%`;
-      countDisplay.textContent = followerCount.toLocaleString();
+      countDisplay.textContent = subscriberCount.toLocaleString();
       goalDisplay.textContent = target.toLocaleString();
       percentageDisplay.textContent = `${Math.round(percentage)}%`;
       remainingCount.textContent = remaining.toLocaleString();
@@ -89,55 +89,75 @@
       }, 600);
 
       // Vérifier si l'objectif est atteint
-      if (followerCount >= target) {
+      if (subscriberCount >= target) {
         document.querySelector('.followers-goal-container').classList.add('goal-reached');
       } else {
         document.querySelector('.followers-goal-container').classList.remove('goal-reached');
       }
     }
 
-    // Fonction pour récupérer le nombre de followers Twitch
-    async function fetchTwitchFollowers() {
+    // Fonction pour récupérer le nombre d'abonnés YouTube
+    async function fetchYouTubeSubscribers() {
       try {
-        const token = localStorage.getItem('twitch_token');
+        const token = localStorage.getItem('google_access_token');
         if (!token) {
-          console.error('Pas de token Twitch disponible');
+          console.error('Pas de token Google disponible');
           return;
         }
 
-        const response = await fetch('https://api.twitch.tv/helix/users/follows?to_id=' + localStorage.getItem('twitch_user_id'), {
+        // Récupérer d'abord l'ID de la chaîne
+        const channelResponse = await fetch('https://www.googleapis.com/youtube/v3/channels?part=id&mine=true', {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Client-Id': 'z8q1w4g12yrql6cyb5zzwmhe1pnxyn'
+            'Authorization': `Bearer ${token}`
           }
         });
 
-        if (!response.ok) {
-          throw new Error('Erreur lors de la récupération des followers');
+        if (!channelResponse.ok) {
+          throw new Error('Erreur lors de la récupération de l\'ID de la chaîne');
         }
 
-        const data = await response.json();
-        const followerCount = data.total;
-        console.log('Nombre de followers récupéré:', followerCount);
-        updateDisplay(followerCount);
+        const channelData = await channelResponse.json();
+        if (!channelData.items || !channelData.items[0]) {
+          throw new Error('Aucune chaîne YouTube trouvée');
+        }
 
-        // Envoyer la mise à jour via BroadcastChannel
-        const channel = new BroadcastChannel('followers-goal');
-        channel.postMessage({
-          type: 'update',
-          count: followerCount
+        const channelId = channelData.items[0].id;
+
+        // Récupérer les statistiques de la chaîne
+        const statsResponse = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
         });
+
+        if (!statsResponse.ok) {
+          throw new Error('Erreur lors de la récupération des statistiques');
+        }
+
+        const statsData = await statsResponse.json();
+        if (statsData.items && statsData.items[0] && statsData.items[0].statistics) {
+          const subscriberCount = parseInt(statsData.items[0].statistics.subscriberCount);
+          console.log('Nombre d\'abonnés récupéré:', subscriberCount);
+          updateDisplay(subscriberCount);
+
+          // Envoyer la mise à jour via BroadcastChannel
+          const channel = new BroadcastChannel('subscribers-goal');
+          channel.postMessage({
+            type: 'update',
+            count: subscriberCount
+          });
+        }
       } catch (error) {
-        console.error('Erreur lors de la récupération des followers:', error);
+        console.error('Erreur lors de la récupération des abonnés:', error);
       }
     }
 
     // Mettre à jour toutes les 30 secondes
-    fetchTwitchFollowers();
-    setInterval(fetchTwitchFollowers, 30000);
+    fetchYouTubeSubscribers();
+    setInterval(fetchYouTubeSubscribers, 30000);
 
     // Utiliser BroadcastChannel pour synchroniser les mises à jour
-    const channel = new BroadcastChannel('followers-goal');
+    const channel = new BroadcastChannel('subscribers-goal');
     channel.onmessage = (event) => {
       if (event.data.type === 'update') {
         updateDisplay(event.data.count);
@@ -145,4 +165,4 @@
     };
   </script>
 </body>
-</html>
+</html> 
