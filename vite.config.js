@@ -13,15 +13,24 @@ export default defineConfig({
         googleCallback: resolve(__dirname, 'auth/google-callback.html'),
         overlay: resolve(__dirname, 'overlay.html'),
         privacy: resolve(__dirname, 'src/privacy.html'),
-        apo: resolve(__dirname, 'src/overlays/apo/overlay.html'),
-        starting: resolve(__dirname, 'src/overlays/starting/overlay.html'),
-        brb: resolve(__dirname, 'src/overlays/brb/overlay.html'),
-        brbVideo: resolve(__dirname, 'src/overlays/brb/overlay-video.html'),
-        end: resolve(__dirname, 'src/overlays/end/overlay.html'),
-        gameStatus: resolve(__dirname, 'src/overlays/game-status/overlay.html'),
-        mapInfo: resolve(__dirname, 'src/overlays/maps/overlay.html'),
-        followersGoal: resolve(__dirname, 'src/overlays/followers-goal/overlay.html'),
-        followersGoalConfig: resolve(__dirname, 'src/overlays/followers-goal/config.html')
+        // Twitch overlays
+        twitchApo: resolve(__dirname, 'src/overlays/twitch/apo/overlay.html'),
+        twitchStarting: resolve(__dirname, 'src/overlays/twitch/starting/overlay.html'),
+        twitchBrb: resolve(__dirname, 'src/overlays/twitch/brb/overlay.html'),
+        twitchBrbVideo: resolve(__dirname, 'src/overlays/twitch/brb/overlay-video.html'),
+        twitchEnd: resolve(__dirname, 'src/overlays/twitch/end/overlay.html'),
+        twitchGameStatus: resolve(__dirname, 'src/overlays/twitch/game-status/overlay.html'),
+        twitchMapInfo: resolve(__dirname, 'src/overlays/twitch/maps/overlay.html'),
+        twitchFollowersGoal: resolve(__dirname, 'src/overlays/twitch/followers-goal/overlay.html'),
+        twitchFollowersGoalConfig: resolve(__dirname, 'src/overlays/twitch/followers-goal/config.html'),
+        
+        // YouTube overlays
+        youtubeApo: resolve(__dirname, 'src/overlays/youtube/apo/overlay.html'),
+        youtubeStarting: resolve(__dirname, 'src/overlays/youtube/starting/overlay.html'),
+        youtubeBrb: resolve(__dirname, 'src/overlays/youtube/brb/overlay.html'),
+        youtubeEnd: resolve(__dirname, 'src/overlays/youtube/end/overlay.html'),
+        youtubeGameStatus: resolve(__dirname, 'src/overlays/youtube/game-status/overlay.html'),
+        youtubeMapInfo: resolve(__dirname, 'src/overlays/youtube/maps/overlay.html')
       },
     },
     assetsDir: 'assets',
