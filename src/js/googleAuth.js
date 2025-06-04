@@ -1,11 +1,15 @@
-import { config } from './config.js';
-
 class GoogleAuth {
   constructor() {
-    this.clientId = config.google.clientId;
-    this.clientSecret = config.google.clientSecret;
-    this.redirectUri = config.google.redirectUri;
-    this.scopes = config.google.scopes;
+    this.clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    this.clientSecret = import.meta.env.VITE_GOOGLE_CLIENT_SECRET;
+    this.redirectUri = 'https://apo-overlay.netlify.app/auth/google-callback.html';
+    this.scopes = [
+      'https://www.googleapis.com/auth/userinfo.profile',
+      'openid',
+      'https://www.googleapis.com/auth/youtube.readonly',
+      'https://www.googleapis.com/auth/youtube',
+      'https://www.googleapis.com/auth/youtube.channel-memberships.creator'
+    ].join(' ');
   }
 
   async initiateAuth() {
