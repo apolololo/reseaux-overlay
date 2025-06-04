@@ -58,6 +58,8 @@
   </style>
 
   <script type="module">
+    import './js/twitchAuth.js';
+
     document.addEventListener('DOMContentLoaded', () => {
       const loginButton = document.getElementById('login-button');
       const loading = document.getElementById('loading');
@@ -66,10 +68,8 @@
 
       // Vérifier si l'utilisateur est déjà authentifié
       const checkExistingAuth = () => {
-        const token = localStorage.getItem('twitch_token');
-        const expiresAt = localStorage.getItem('twitch_expires_at');
-        
-        if (token && expiresAt && new Date().getTime() < parseInt(expiresAt)) {
+        const twitchAuth = new TwitchAuth();
+        if (twitchAuth.isAuthenticated()) {
           window.location.replace('../index.html');
           return true;
         }
@@ -93,15 +93,8 @@
           loading.classList.add('active');
           errorContainer.style.display = 'none';
           
-          const clientId = "z8q1w4g12yrql6cyb5zzwmhe1pnxyn";
-          const redirectUri = "https://apo-overlay.netlify.app/auth/callback.html";
-          const state = Math.random().toString(36).substring(2, 15);
-          localStorage.setItem('twitch_auth_state', state);
-          
-          const scope = 'user:read:email channel:read:subscriptions moderator:read:followers';
-          const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}&force_verify=true`;
-          
-          window.location.href = authUrl;
+          const twitchAuth = new TwitchAuth();
+          twitchAuth.initiateAuth();
         } catch (error) {
           console.error("Erreur lors de la redirection:", error);
           loading.classList.remove('active');
