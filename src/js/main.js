@@ -58,21 +58,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Génération d'un jeton enrichi pour les overlays avec données Twitch
   function generateOverlayToken(overlayPath) {
-    // Récupérer l'ID utilisateur Twitch et le token
-    const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
-    const twitchToken = localStorage.getItem('twitch_token');
-    const userId = userData?.id || 'anonymous';
-    
-    // Créer un jeton qui contient toutes les données nécessaires
-    const tokenData = {
-      userId: userId,
+    // Récupérer l'ID utilisateur et le token selon la plateforme
+    const authProvider = localStorage.getItem('auth_provider');
+    let tokenData = {
       overlayPath: overlayPath,
-      twitchData: {
-        token: twitchToken,
-        user: userData
-      },
+      platform: authProvider,
       timestamp: Date.now()
     };
+
+    if (authProvider === 'twitch') {
+      const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
+      const twitchToken = localStorage.getItem('twitch_token');
+      tokenData = {
+        ...tokenData,
+        userId: userData?.id || 'anonymous',
+        twitchData: {
+          token: twitchToken,
+          user: userData
+        }
+      };
+    } else if (authProvider === 'google') {
+      const youtubeToken = localStorage.getItem('google_access_token');
+      const userData = JSON.parse(localStorage.getItem('google_user') || '{}');
+      tokenData = {
+        ...tokenData,
+        userId: userData?.id || 'anonymous',
+        youtubeData: {
+          token: youtubeToken,
+          user: userData
+        }
+      };
+    }
     
     // Encoder en base64 pour plus de sécurité et lisibilité
     const token = btoa(JSON.stringify(tokenData));
@@ -101,6 +117,14 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Ajouter les paramètres de configuration spécifiques à l'utilisateur
       const userData = JSON.parse(localStorage.getItem('twitch_user') || '{}');
+      const isTwitchOverlay = activeOverlay.dataset.url.includes('followers-goal');
+      const authProvider = localStorage.getItem('auth_provider');
+      
+      if (isTwitchOverlay && authProvider !== 'twitch') {
+        // Skip adding Followers Goal config if it's not a Twitch user
+        return;
+      }
+      
       const configKey = `followers_goal_config_${userData.id || 'anonymous'}`;
       const config = localStorage.getItem(configKey);
       if (config) {
@@ -325,6 +349,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Vérifier si l'overlay a une page de configuration
     const configUrl = overlayItem.dataset.config;
+    const authProvider = localStorage.getItem('auth_provider');
+    const isTwitchOverlay = overlayItem.dataset.url.includes('followers-goal');
+    
+    // Skip adding config button if it's a Followers Goal overlay and not a Twitch user
+    if (isTwitchOverlay && authProvider !== 'twitch') {
+      return;
+    }
+    
     if (configUrl) {
       // Créer le bouton de configuration
       configButton = document.createElement('button');
