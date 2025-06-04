@@ -1,429 +1,317 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Configuration Objectif Abonnés YouTube - APO</title>
-  <link rel="stylesheet" href="/src/styles/main.css">
-  <link rel="stylesheet" href="/src/styles/app.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configuration - Objectif d'Abonnés YouTube</title>
+  <link rel="stylesheet" href="../../styles/overlay.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    .config-container {
-      max-width: 800px;
-      margin: 2rem auto;
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0f0f0f;
+      color: #ffffff;
+      margin: 0;
+      min-height: 100vh;
       padding: 2rem;
-      background: var(--bg-dark);
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
-    .config-section {
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .header {
       margin-bottom: 2rem;
-      background: var(--bg-darker);
-      padding: 1.5rem;
-      border-radius: 8px;
     }
 
-    .config-section h2 {
-      color: var(--primary);
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+    .title {
+      font-size: 1.8rem;
+      font-weight: 600;
     }
 
     .form-group {
       margin-bottom: 1.5rem;
     }
 
-    .form-group label {
+    label {
       display: block;
       margin-bottom: 0.5rem;
-      color: var(--text-light);
       font-weight: 500;
     }
 
-    .form-group input[type="number"],
-    .form-group input[type="text"],
-    .form-group input[type="color"] {
+    input, select {
       width: 100%;
       padding: 0.75rem;
-      border: 2px solid var(--border-color);
-      border-radius: 6px;
-      background: var(--bg-dark);
-      color: var(--text-light);
-      font-family: 'Montserrat', sans-serif;
-    }
-
-    .checkbox-group {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-    }
-
-    .preview-section {
-      margin-top: 2rem;
-      padding: 1.5rem;
-      background: var(--bg-darker);
       border-radius: 8px;
+      border: 1px solid #333;
+      background: #1a1a1a;
+      color: white;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .color-picker {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .color-preview {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 1px solid #333;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .button {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      border: none;
+    }
+
+    .primary-button {
+      background: #FF0000;
+      color: white;
+    }
+
+    .secondary-button {
+      background: transparent;
+      border: 1px solid #333;
+      color: #888;
+    }
+
+    .button:hover {
+      opacity: 0.9;
     }
 
     .preview-container {
-      width: 100%;
-      height: 200px;
-      border: 2px solid var(--border-color);
-      border-radius: 8px;
-      overflow: hidden;
-      background: var(--bg-dark);
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: #1a1a1a;
+      border-radius: 12px;
     }
 
-    .save-button {
-      background: linear-gradient(135deg, #FF0000 0%, #00D4AA 100%);
-      color: white;
-      border: none;
-      padding: 1rem 2rem;
-      border-radius: 6px;
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-top: 1rem;
-    }
-
-    .save-success {
-      position: fixed;
-      bottom: 2rem;
-      right: 2rem;
-      background: #00D4AA;
-      color: white;
-      padding: 1rem 2rem;
-      border-radius: 6px;
+    .preview-title {
+      font-size: 1.2rem;
       font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
-      z-index: 1000;
+      margin-bottom: 1rem;
     }
 
-    @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-
-    @keyframes fadeOut {
-      from { opacity: 1; }
-      to { opacity: 0; }
-    }
-
-    .copy-link-container {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .copy-link-container input {
-      flex: 1;
-      padding: 10px;
-      border: 2px solid var(--border-color);
-      border-radius: 6px;
-      background: var(--bg-dark);
-      color: var(--text-light);
-      font-family: 'Montserrat', sans-serif;
+    .overlay-url {
+      padding: 0.75rem;
+      background: #0f0f0f;
+      border-radius: 8px;
+      font-family: monospace;
+      word-break: break-all;
+      margin-bottom: 1rem;
     }
 
     .copy-button {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      padding: 10px 20px;
-      background: var(--primary);
+      background: #333;
       color: white;
       border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .copy-button:hover {
-      background: var(--primary-dark);
-    }
-
-    .link-help {
-      font-size: 14px;
-      color: var(--text-secondary);
-      margin-top: 5px;
-    }
-
-    .back-button {
-      position: absolute;
-      top: 2rem;
-      left: 2rem;
-      background: transparent;
-      border: 1px solid var(--border-color);
-      color: var(--text-light);
       padding: 0.5rem 1rem;
       border-radius: 6px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: all 0.2s;
-      text-decoration: none;
+      font-size: 0.9rem;
     }
 
-    .back-button:hover {
-      background: var(--bg-darker);
+    .copy-button:hover {
+      background: #444;
+    }
+
+    .preview-frame {
+      width: 100%;
+      height: 150px;
+      border: none;
+      border-radius: 8px;
+      background: #0f0f0f;
     }
   </style>
 </head>
 <body>
-  <a href="/src/youtube-dashboard.html" class="back-button">
-    <svg viewBox="0 0 24 24" width="18" height="18">
-      <path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-    </svg>
-    Retour au Dashboard
-  </a>
-
-  <div class="config-container">
-    <h1>Configuration Objectif Abonnés YouTube</h1>
-    
-    <div class="config-section">
-      <h2>Objectif</h2>
-      <div class="form-group">
-        <label for="goal-target">Nombre d'abonnés cible</label>
-        <input type="number" id="goal-target" min="1" value="1000">
-      </div>
+  <div class="container">
+    <div class="header">
+      <h1 class="title">Configuration - Objectif d'Abonnés YouTube</h1>
+      <p>Personnalisez votre widget d'objectif d'abonnés pour votre chaîne YouTube.</p>
     </div>
 
-    <div class="config-section">
-      <h2>Personnalisation</h2>
+    <form id="config-form">
       <div class="form-group">
-        <label for="goal-text">Texte de l'objectif</label>
-        <input type="text" id="goal-text" value="Objectif : {current}/{target} abonnés">
+        <label for="current-subscribers">Abonnés actuels</label>
+        <input type="number" id="current-subscribers" readonly placeholder="Chargement..." />
       </div>
+
       <div class="form-group">
-        <label for="progress-color">Couleur de la barre de progression</label>
-        <input type="color" id="progress-color" value="#FF0000">
+        <label for="goal">Objectif d'abonnés</label>
+        <input type="number" id="goal" min="1" required />
       </div>
+
+      <div class="form-group">
+        <label for="title">Titre (optionnel)</label>
+        <input type="text" id="title" placeholder="Objectif d'abonnés" />
+      </div>
+
+      <div class="form-group">
+        <label for="bar-color">Couleur de la barre</label>
+        <div class="color-picker">
+          <input type="color" id="bar-color" value="#FF0000" />
+          <div class="color-preview" id="bar-color-preview" style="background-color: #FF0000;"></div>
+        </div>
+      </div>
+
       <div class="form-group">
         <label for="text-color">Couleur du texte</label>
-        <input type="color" id="text-color" value="#FFFFFF">
-      </div>
-    </div>
-
-    <div class="config-section">
-      <h2>Visibilité</h2>
-      <div class="checkbox-group">
-        <input type="checkbox" id="show-background" checked>
-        <label for="show-background">Afficher le fond</label>
-      </div>
-      <div class="checkbox-group">
-        <input type="checkbox" id="show-progress-bar" checked>
-        <label for="show-progress-bar">Afficher la barre de progression</label>
-      </div>
-      <div class="checkbox-group">
-        <input type="checkbox" id="show-percentage" checked>
-        <label for="show-percentage">Afficher le pourcentage</label>
-      </div>
-    </div>
-
-    <div class="preview-section">
-      <h3>Aperçu en direct</h3>
-      <div class="preview-container">
-        <iframe id="preview-frame" src="overlay.html"></iframe>
-      </div>
-    </div>
-
-    <div class="config-section">
-      <h2>Lien pour OBS</h2>
-      <div class="form-group">
-        <div class="copy-link-container">
-          <input type="text" id="obs-link" readonly>
-          <button id="copy-link" class="copy-button">
-            <svg viewBox="0 0 24 24" width="18" height="18">
-              <path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-            </svg>
-            Copier
-          </button>
+        <div class="color-picker">
+          <input type="color" id="text-color" value="#FFFFFF" />
+          <div class="color-preview" id="text-color-preview" style="background-color: #FFFFFF;"></div>
         </div>
-        <p class="link-help">Copiez ce lien et ajoutez-le comme source navigateur dans OBS</p>
       </div>
-    </div>
 
-    <button class="save-button" id="save-config">
-      Enregistrer la configuration
-    </button>
+      <div class="form-group">
+        <label for="background-color">Couleur de fond</label>
+        <div class="color-picker">
+          <input type="color" id="background-color" value="#1A1A1A" />
+          <div class="color-preview" id="background-color-preview" style="background-color: #1A1A1A;"></div>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button type="submit" class="button primary-button">Générer le widget</button>
+        <button type="button" class="button secondary-button" onclick="window.location.href='../../youtube-dashboard.html'">Retour au dashboard</button>
+      </div>
+    </form>
+
+    <div class="preview-container" id="preview-section" style="display: none;">
+      <h2 class="preview-title">Votre widget est prêt !</h2>
+      <p>Copiez cette URL et ajoutez-la comme source navigateur dans votre logiciel de streaming :</p>
+      <div class="overlay-url" id="overlay-url"></div>
+      <button class="copy-button" id="copy-url">Copier l'URL</button>
+      
+      <p>Aperçu :</p>
+      <iframe id="preview-frame" class="preview-frame"></iframe>
+    </div>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Vérifier l'authentification Google YouTube
-      const checkYouTubeAuth = () => {
+      // Vérifier l'authentification Google
+      const checkAuth = () => {
         const token = localStorage.getItem('google_access_token');
         const expiresAt = localStorage.getItem('google_expires_at');
         
         if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
-          window.location.href = '/src/auth.html';
+          window.location.href = '../../auth.html';
           return false;
         }
         return true;
       };
 
-      if (!checkYouTubeAuth()) return;
+      if (!checkAuth()) return;
 
-      const config = {
-        target: 1000,
-        text: "Objectif : {current}/{target} abonnés",
-        progressColor: "#FF0000",
-        textColor: "#FFFFFF",
-        showBackground: true,
-        showProgressBar: true,
-        showPercentage: true
+      // Récupérer le nombre d'abonnés actuel
+      const fetchSubscriberCount = async () => {
+        try {
+          const token = localStorage.getItem('google_access_token');
+          const channelInfo = JSON.parse(localStorage.getItem('youtube_channel_info'));
+          const channelId = channelInfo.id;
+          
+          const response = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (!response.ok) throw new Error('Erreur lors de la récupération des statistiques');
+          
+          const data = await response.json();
+          const subscriberCount = data.items[0].statistics.subscriberCount;
+          
+          document.getElementById('current-subscribers').value = subscriberCount;
+          
+          // Suggérer un objectif légèrement supérieur au nombre actuel d'abonnés
+          const suggestedGoal = Math.ceil(parseInt(subscriberCount) * 1.1 / 100) * 100;
+          document.getElementById('goal').value = suggestedGoal;
+        } catch (error) {
+          console.error('Erreur:', error);
+          document.getElementById('current-subscribers').value = 'Erreur de chargement';
+        }
       };
 
-      // Charger la configuration existante pour YouTube
-      const savedConfig = localStorage.getItem('youtube_subscribers_goal_config');
-      if (savedConfig) {
-        Object.assign(config, JSON.parse(savedConfig));
-        updateFormValues();
-      }
+      fetchSubscriberCount();
 
-      // Mettre à jour les valeurs du formulaire
-      function updateFormValues() {
-        document.getElementById('goal-target').value = config.target;
-        document.getElementById('goal-text').value = config.text;
-        document.getElementById('progress-color').value = config.progressColor;
-        document.getElementById('text-color').value = config.textColor;
-        document.getElementById('show-background').checked = config.showBackground;
-        document.getElementById('show-progress-bar').checked = config.showProgressBar;
-        document.getElementById('show-percentage').checked = config.showPercentage;
-        updatePreview();
-        updateObsLink();
-      }
-
-      // Mettre à jour l'aperçu
-      function updatePreview() {
-        const iframe = document.getElementById('preview-frame');
-        const params = new URLSearchParams();
-        
-        Object.entries(config).forEach(([key, value]) => {
-          params.set(key, value);
-        });
-        
-        iframe.src = `overlay.html?${params.toString()}`;
-      }
-
-      // Générer le lien pour OBS avec les données YouTube
-      function updateObsLink() {
-        const youtubeData = {
-          token: localStorage.getItem('google_access_token'),
-          channel: JSON.parse(localStorage.getItem('youtube_channel_info') || '{}')
-        };
-
-        if (!youtubeData.token || !youtubeData.channel || !youtubeData.channel.id) {
-          document.getElementById('obs-link').value = 'Veuillez vous connecter avec Google/YouTube depuis le dashboard';
-          return;
-        }
-
-        const params = new URLSearchParams();
-        Object.entries(config).forEach(([key, value]) => {
-          params.set(key, value);
-        });
-
-        // Encoder les données YouTube en base64
-        const tokenData = btoa(JSON.stringify({ 
-          userId: youtubeData.channel.id,
-          overlayPath: '/src/overlays/subscribers-goal/overlay.html',
-          youtubeData: youtubeData
-        }));
-        params.set('token', tokenData);
-
-        const baseUrl = window.location.origin;
-        const obsLink = `${baseUrl}/overlay.html?${params.toString()}`;
-        document.getElementById('obs-link').value = obsLink;
-      }
-
-      // Copier le lien dans le presse-papier
-      document.getElementById('copy-link').addEventListener('click', () => {
-        const linkInput = document.getElementById('obs-link');
-        linkInput.select();
-        document.execCommand('copy');
-        
-        const copyButton = document.getElementById('copy-link');
-        const originalText = copyButton.innerHTML;
-        copyButton.innerHTML = '✓ Copié !';
-        setTimeout(() => {
-          copyButton.innerHTML = originalText;
-        }, 2000);
-      });
-
-      // Écouter les changements
-      document.getElementById('goal-target').addEventListener('input', (e) => {
-        config.target = parseInt(e.target.value);
-        updatePreview();
-        updateObsLink();
-      });
-
-      document.getElementById('goal-text').addEventListener('input', (e) => {
-        config.text = e.target.value;
-        updatePreview();
-        updateObsLink();
-      });
-
-      document.getElementById('progress-color').addEventListener('input', (e) => {
-        config.progressColor = e.target.value;
-        updatePreview();
-        updateObsLink();
+      // Mise à jour des aperçus de couleur
+      document.getElementById('bar-color').addEventListener('input', (e) => {
+        document.getElementById('bar-color-preview').style.backgroundColor = e.target.value;
       });
 
       document.getElementById('text-color').addEventListener('input', (e) => {
-        config.textColor = e.target.value;
-        updatePreview();
-        updateObsLink();
+        document.getElementById('text-color-preview').style.backgroundColor = e.target.value;
       });
 
-      document.getElementById('show-background').addEventListener('change', (e) => {
-        config.showBackground = e.target.checked;
-        updatePreview();
-        updateObsLink();
+      document.getElementById('background-color').addEventListener('input', (e) => {
+        document.getElementById('background-color-preview').style.backgroundColor = e.target.value;
       });
 
-      document.getElementById('show-progress-bar').addEventListener('change', (e) => {
-        config.showProgressBar = e.target.checked;
-        updatePreview();
-        updateObsLink();
-      });
-
-      document.getElementById('show-percentage').addEventListener('change', (e) => {
-        config.showPercentage = e.target.checked;
-        updatePreview();
-        updateObsLink();
-      });
-
-      // Sauvegarder la configuration
-      document.getElementById('save-config').addEventListener('click', () => {
-        localStorage.setItem('youtube_subscribers_goal_config', JSON.stringify(config));
+      // Gestion du formulaire
+      document.getElementById('config-form').addEventListener('submit', (e) => {
+        e.preventDefault();
         
-        const successMessage = document.createElement('div');
-        successMessage.className = 'save-success';
-        successMessage.textContent = 'Configuration sauvegardée !';
-        document.body.appendChild(successMessage);
+        const currentSubscribers = document.getElementById('current-subscribers').value;
+        const goal = document.getElementById('goal').value;
+        const title = document.getElementById('title').value || 'Objectif d\'abonnés';
+        const barColor = document.getElementById('bar-color').value;
+        const textColor = document.getElementById('text-color').value;
+        const backgroundColor = document.getElementById('background-color').value;
         
-        setTimeout(() => {
-          successMessage.remove();
-        }, 3000);
+        // Créer les paramètres d'URL
+        const params = new URLSearchParams({
+          current: currentSubscribers,
+          goal: goal,
+          title: title,
+          barColor: barColor.replace('#', ''),
+          textColor: textColor.replace('#', ''),
+          bgColor: backgroundColor.replace('#', '')
+        });
+        
+        // Générer l'URL de l'overlay
+        const overlayUrl = `${window.location.origin}/overlays/subscribers-goal/overlay.html?${params.toString()}`;
+        
+        // Afficher la section de prévisualisation
+        document.getElementById('preview-section').style.display = 'block';
+        document.getElementById('overlay-url').textContent = overlayUrl;
+        document.getElementById('preview-frame').src = overlayUrl;
+        
+        // Faire défiler jusqu'à la section de prévisualisation
+        document.getElementById('preview-section').scrollIntoView({ behavior: 'smooth' });
       });
 
-      // Initialiser l'aperçu et le lien
-      updatePreview();
-      updateObsLink();
+      // Copier l'URL dans le presse-papiers
+      document.getElementById('copy-url').addEventListener('click', () => {
+        const url = document.getElementById('overlay-url').textContent;
+        navigator.clipboard.writeText(url)
+          .then(() => {
+            const button = document.getElementById('copy-url');
+            button.textContent = 'Copié !';
+            setTimeout(() => {
+              button.textContent = 'Copier l\'URL';
+            }, 2000);
+          })
+          .catch(err => {
+            console.error('Erreur lors de la copie:', err);
+          });
+      });
     });
   </script>
 </body>
