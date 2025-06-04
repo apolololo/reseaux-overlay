@@ -1,5 +1,6 @@
 class GoogleAuth {
   constructor() {
+    // Get client ID from environment variables
     this.clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     this.clientSecret = import.meta.env.VITE_GOOGLE_CLIENT_SECRET;
     this.redirectUri = 'https://apo-overlay.netlify.app/auth/google-callback.html';
@@ -14,15 +15,19 @@ class GoogleAuth {
 
   async initiateAuth() {
     try {
-      // Stocker les identifiants pour la page de callback
+      if (!this.clientId) {
+        throw new Error('Google Client ID not configured');
+      }
+
+      // Store credentials for callback page
       localStorage.setItem('google_client_id', this.clientId);
       localStorage.setItem('google_client_secret', this.clientSecret);
       
-      // Générer et stocker l'état pour la sécurité
+      // Generate and store state for security
       const state = Math.random().toString(36).substring(2, 15);
       localStorage.setItem('google_auth_state', state);
       
-      // Construire l'URL d'authentification
+      // Build auth URL
       const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
       authUrl.searchParams.set('client_id', this.clientId);
       authUrl.searchParams.set('redirect_uri', this.redirectUri);
@@ -32,10 +37,10 @@ class GoogleAuth {
       authUrl.searchParams.set('access_type', 'offline');
       authUrl.searchParams.set('prompt', 'consent');
 
-      // Rediriger vers la page d'authentification Google
+      // Redirect to Google auth page
       window.location.replace(authUrl.toString());
     } catch (error) {
-      console.error('Erreur lors de l\'initialisation de l\'authentification:', error);
+      console.error('Error initializing Google auth:', error);
       throw error;
     }
   }
