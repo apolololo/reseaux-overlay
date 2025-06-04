@@ -1,0 +1,91 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #282828;
+    color: white;
+}
+
+.youtube-overlay {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: linear-gradient(135deg, #282828 0%, #1f1f1f 100%);
+}
+
+.container {
+    position: relative;
+    z-index: 1;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.stream-title {
+    font-size: 3rem;
+    color: #FF0000;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+    margin-bottom: 1rem;
+}
+
+.info-container {
+    background: rgba(40, 40, 40, 0.8);
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    backdrop-filter: blur(10px);
+}
+
+.channel-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.channel-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid #FF0000;
+}
+
+.channel-details {
+    text-align: left;
+}
+
+.channel-details h2 {
+    margin: 0;
+    color: #FF0000;
+    font-size: 1.8rem;
+}
+
+.countdown {
+    text-align: center;
+}
+
+#timer {
+    font-size: 4rem;
+    font-weight: bold;
+    color: #FF0000;
+    text-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
+}
+
+/* Animations */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+#timer {
+    animation: pulse 2s infinite;
+}

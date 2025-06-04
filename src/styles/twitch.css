@@ -1,0 +1,36 @@
+/* Styles spécifiques pour le dashboard Twitch */
+:root {
+    --twitch-primary: #9146FF;
+    --twitch-secondary: #772CE8;
+}
+
+.twitch-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.twitch-header {
+    background-color: var(--twitch-primary);
+    color: white;
+    padding: 1rem;
+}
+
+.twitch-user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.twitch-button {
+    background-color: var(--twitch-primary);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.twitch-button:hover {
+    background-color: var(--twitch-secondary);
+}

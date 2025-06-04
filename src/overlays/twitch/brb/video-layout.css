@@ -1,0 +1,214 @@
+/* Styles pour la mise en page avec vidéo */
+.video-zone {
+  position: absolute;
+  top: 50%;
+  right: 45px;
+  transform: translateY(-50%);
+  width: 1280px;
+  height: 720px;
+  margin-top: 30px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+  z-index: 100; /* Augmenté pour être au-dessus des autres éléments */
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background-clip: padding-box;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  pointer-events: all; /* Assure que les clics sont détectés */
+}
+
+.video-zone:hover {
+  background: rgba(0, 0, 0, 0.4);
+  transform: translateY(-50%) scale(1.01);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.video-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.5rem;
+  text-align: center;
+  padding: 2rem;
+  pointer-events: none; /* Le texte ne doit pas interférer avec les clics */
+}
+
+.video-zone:hover .video-placeholder {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.video-zone iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Effet de contour lumineux animé */
+.video-zone::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, 
+    var(--primary) 0%, 
+    var(--primary-light) 25%, 
+    var(--accent) 50%, 
+    var(--primary-light) 75%, 
+    var(--primary) 100%);
+  border-radius: 14px;
+  z-index: -1;
+  animation: borderGlow 4s linear infinite;
+  pointer-events: none; /* L'effet ne doit pas interférer avec les clics */
+}
+
+@keyframes borderGlow {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 200% 0%;
+  }
+}
+
+/* Ajustements pour le contenu avec vidéo */
+.content.with-video {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  height: 100vh;
+  padding: 4vh 2rem;
+  pointer-events: none; /* Le contenu ne doit pas bloquer les clics sur la vidéo */
+}
+
+/* Style pour le logo centré au-dessus de la zone vidéo */
+.video-logo-container {
+  position: absolute;
+  top: calc(44% - 520px);
+  right: calc(60px + 640px);
+  transform: translateX(50%);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* Styles spécifiques pour le logo et sa ligne dans l'overlay vidéo */
+.video-logo-container .logo {
+  font-size: 7rem;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: 6px;
+  text-shadow: 0 0 20px rgba(108, 99, 255, 0.5);
+  animation: logoGlow 3s ease-in-out infinite alternate;
+}
+
+.video-logo-container .logo-underline {
+  width: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, var(--primary), var(--primary-light), var(--primary), transparent);
+  border-radius: 2px;
+  animation: expandLine 2s ease-out forwards;
+  margin-top: 5px;
+}
+
+.content.with-video .main-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  height: 100%;
+  position: relative;
+  pointer-events: none;
+}
+
+.content.with-video .message-section {
+  text-align: left;
+  margin-right: 1340px;
+  position: absolute;
+  left: 10px;
+  top: 55%;
+  transform: translateY(-50%);
+  width: auto;
+  pointer-events: none;
+}
+
+.content.with-video .main-message {
+  font-size: 3.2em;
+  margin-bottom: 0.5em;
+  text-shadow: 0 0 20px rgba(108, 99, 255, 0.5);
+  line-height: 1.2;
+  max-width: 500px;
+  text-align: center;
+}
+
+.content.with-video .sub-message {
+  font-size: 1.8em;
+  opacity: 0.9;
+  max-width: 450px;
+  text-align: center;
+  margin-bottom: 1.2rem;
+}
+
+/* Style personnalisé pour l'indicateur de pause dans l'overlay vidéo */
+.content.with-video .pause-indicator {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+  justify-content: center;
+  width: 100%;
+  margin-left: -10px;
+  pointer-events: none;
+}
+
+/* Style pour le code créateur sous la zone vidéo */
+.video-creator-code {
+  position: absolute;
+  bottom: 30px;
+  right: calc(60px + 640px);
+  transform: translateX(50%);
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.8rem 2rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Styles pour les éléments à l'intérieur du code créateur */
+.video-creator-code .label {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.video-creator-code .code {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--text);
+  text-shadow: 0 0 20px rgba(108, 99, 255, 0.5);
+  white-space: nowrap;
+}
+
+.video-creator-code .ad-tag {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #FFD700;
+  white-space: nowrap;
+}

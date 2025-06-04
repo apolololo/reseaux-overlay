@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentification YouTube</title>
+    <link rel="stylesheet" href="styles/youtube.css">
+</head>
+<body class="youtube-container">
+    <div class="youtube-header">
+        <h1>Connexion à YouTube</h1>
+    </div>
+
+    <main>
+        <div id="google-login-container">
+            <button id="google-login-button" class="youtube-button">Se connecter avec Google</button>
+        </div>
+    </main>
+
+    <script>
+        // Configuration Google OAuth
+        const GOOGLE_CLIENT_ID = 'votre_client_id';
+        const GOOGLE_REDIRECT_URI = `${window.location.origin}/auth/google-callback`;
+        const GOOGLE_SCOPE = 'https://www.googleapis.com/auth/youtube.readonly';
+
+        document.getElementById('google-login-button').addEventListener('click', () => {
+            const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+                `client_id=${GOOGLE_CLIENT_ID}` +
+                `&redirect_uri=${encodeURIComponent(GOOGLE_REDIRECT_URI)}` +
+                `&response_type=token` +
+                `&scope=${encodeURIComponent(GOOGLE_SCOPE)}` +
+                `&include_granted_scopes=true` +
+                `&state=youtube`;
+            window.location.href = authUrl;
+        });
+
+        // Vérifier si déjà connecté
+        const googleToken = localStorage.getItem('google_access_token');
+        const googleExpiresAt = localStorage.getItem('google_expires_at');
+        
+        if (googleToken && googleExpiresAt && Date.now() < parseInt(googleExpiresAt)) {
+            window.location.href = 'youtube-dashboard.html';
+        }
+    </script>
+</body>
+</html>

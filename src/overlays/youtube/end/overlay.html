@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube End Screen</title>
+    <link rel="stylesheet" href="overlay.css">
+</head>
+<body class="youtube-overlay">
+    <div class="container">
+        <div class="end-message">
+            <h1>Merci d'avoir regardé !</h1>
+            <p class="subtitle">N'oubliez pas de vous abonner et d'activer les notifications</p>
+        </div>
+
+        <div class="channel-info">
+            <img id="channel-image" src="" alt="Channel Image" class="channel-image">
+            <div class="channel-details">
+                <h2 id="channel-name">Chargement...</h2>
+                <div class="social-links">
+                    <a href="#" class="social-button subscribe-button">S'abonner</a>
+                    <a href="#" class="social-button">Suivez-moi sur Twitter</a>
+                    <a href="#" class="social-button">Rejoignez le Discord</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Récupération des informations YouTube
+        const channelInfo = JSON.parse(localStorage.getItem('youtube_channel_info') || '{}');
+        if (channelInfo) {
+            document.getElementById('channel-name').textContent = channelInfo.snippet?.title || 'Chaîne YouTube';
+            document.getElementById('channel-image').src = channelInfo.snippet?.thumbnails?.default?.url || '';
+        }
+    </script>
+</body>
+</html>

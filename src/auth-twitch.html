@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentification Twitch</title>
+    <link rel="stylesheet" href="styles/twitch.css">
+</head>
+<body class="twitch-container">
+    <div class="twitch-header">
+        <h1>Authentification Twitch</h1>
+    </div>
+    <main>
+        <div id="twitch-login-container">
+            <button id="twitch-login-button" class="twitch-button">Se connecter avec Twitch</button>
+        </div>
+    </main>
+    <script>
+        // Configuration Twitch
+        const TWITCH_CLIENT_ID = 'votre_client_id';
+        const TWITCH_REDIRECT_URI = `${window.location.origin}/auth/twitch-callback`;
+        const TWITCH_SCOPE = 'user:read:email channel:read:subscriptions';
+
+        document.getElementById('twitch-login-button').addEventListener('click', () => {
+            const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${TWITCH_CLIENT_ID}&redirect_uri=${encodeURIComponent(TWITCH_REDIRECT_URI)}&response_type=token&scope=${encodeURIComponent(TWITCH_SCOPE)}`;
+            window.location.href = authUrl;
+        });
+    </script>
+</body>
+</html>
