@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-  --primary-color: #9146FF;
+  --primary-color: #ff0000;
   --secondary-color: #00D4AA;
   --accent-color: #F77737;
   --background-dark: #0E0E10;
@@ -9,9 +9,9 @@
   --text-primary: #EFEFF1;
   --text-secondary: #ADADB8;
   --success-color: #00F5A0;
-  --gradient-primary: linear-gradient(135deg, #9146FF 0%, #B366FF 100%);
-  --gradient-progress: linear-gradient(90deg, #9146FF 0%, #B366FF 50%, #D4A6FF 100%);
-  --shadow-glow: 0 0 20px rgba(145, 70, 255, 0.3);
+  --gradient-primary: linear-gradient(135deg, #ff0000 0%, #ff4444 100%);
+  --gradient-progress: linear-gradient(90deg, #ff0000 0%, #ff4444 50%, #ff6666 100%);
+  --shadow-glow: 0 0 20px rgba(255, 0, 0, 0.3);
 }
 
 * {
@@ -127,7 +127,7 @@ body {
 
 .goal-count {
   color: var(--primary-color);
-  text-shadow: 0 0 10px rgba(145, 70, 255, 0.5);
+  text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
 }
 
 .followers-label,
