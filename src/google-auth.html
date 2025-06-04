@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connexion Google - APO Overlays</title>
+  <link rel="stylesheet" href="./styles/overlay.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="login-container">
+    <div class="auth-background">
+      <div class="auth-gradient-circle auth-circle-1"></div>
+      <div class="auth-gradient-circle auth-circle-2"></div>
+      <div class="auth-gradient-circle auth-circle-3"></div>
+    </div>
+    
+    <div class="login-box">
+      <h1 class="login-title">APO Overlays</h1>
+      <p class="login-subtitle">Connectez-vous avec Google/YouTube</p>
+      
+      <button id="google-login-button" class="login-button google-button">
+        <div class="google-logo-container">
+          <img src="https://www.google.com/images/branding/googleg/1x/googleg_standard_color_128dp.png" alt="Google" class="google-logo" />
+          <img src="https://www.youtube.com/s/desktop/7c155e84/img/favicon_144x144.png" alt="YouTube" class="youtube-logo" />
+        </div>
+        Se connecter avec Google/YouTube
+      </button>
+      
+      <div id="loading" class="loading-container">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Redirection en cours...</div>
+      </div>
+
+      <div id="error-container" style="display: none; margin-top: 20px; color: #ff5252; background: rgba(255, 82, 82, 0.1); padding: 12px; border-radius: 8px; text-align: left;">
+        <div id="error-message">Une erreur s'est produite</div>
+      </div>
+
+      <div class="auth-switch">
+        <a href="twitch-auth.html">Se connecter avec Twitch à la place</a>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .google-logo-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .google-logo, .youtube-logo {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+    }
+
+    .google-button {
+      background: #ffffff !important;
+      color: #000000 !important;
+      border: 1px solid #dadce0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .google-button:hover {
+      background: #f8f9fa !important;
+      box-shadow: 0 1px 2px 0 rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%) !important;
+    }
+
+    .auth-switch {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .auth-switch a {
+      color: #9147ff;
+      text-decoration: none;
+    }
+
+    .auth-switch a:hover {
+      text-decoration: underline;
+    }
+  </style>
+
+  <script type="module">
+    import './js/googleAuth.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const googleLoginButton = document.getElementById('google-login-button');
+      const loading = document.getElementById('loading');
+      const errorContainer = document.getElementById('error-container');
+      const errorMessage = document.getElementById('error-message');
+
+      // Vérifier si l'utilisateur est déjà authentifié
+      const checkExistingAuth = () => {
+        const token = localStorage.getItem('google_access_token');
+        const expiresAt = localStorage.getItem('google_expires_at');
+        
+        if (token && expiresAt && new Date().getTime() < parseInt(expiresAt)) {
+          window.location.replace('../index.html');
+          return true;
+        }
+        return false;
+      };
+      
+      if (checkExistingAuth()) return;
+      
+      const checkUrlErrors = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('error')) {
+          errorContainer.style.display = 'block';
+          errorMessage.textContent = `Erreur: ${urlParams.get('error')} - ${urlParams.get('error_description') || 'Veuillez réessayer'}`;
+        }
+      };
+      
+      checkUrlErrors();
+      
+      googleLoginButton.addEventListener('click', () => {
+        try {
+          loading.classList.add('active');
+          errorContainer.style.display = 'none';
+          
+          const googleAuth = new GoogleAuth();
+          googleAuth.initiateAuth();
+        } catch (error) {
+          console.error("Erreur lors de la connexion Google:", error);
+          loading.classList.remove('active');
+          errorContainer.style.display = 'block';
+          errorMessage.textContent = error.message || "Une erreur s'est produite lors de la tentative de connexion avec Google. Veuillez réessayer.";
+        }
+      });
+    });
+  </script>
+</body>
+</html> 
