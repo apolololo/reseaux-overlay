@@ -198,7 +198,9 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { GoogleAuth } from '../../js/googleAuth.js';
+
     document.addEventListener('DOMContentLoaded', () => {
       const form = document.getElementById('config-form');
       const previewFrame = document.getElementById('preview-frame');
