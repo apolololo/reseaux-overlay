@@ -118,25 +118,52 @@
     </div>
 
     <div class="widgets-grid">      <div class="widget">
-        <h2 class="widget-title">Compteur d'Abonnés</h2>
-        <p class="widget-description">Affichez le nombre d'abonnés de votre chaîne YouTube en temps réel.</p>
-        <button class="widget-button" onclick="window.location.href='./overlays/youtube/subscribers-goal/overlay.html'">Créer un widget</button>
-      </div>
-
-      <div class="widget">
         <h2 class="widget-title">Objectifs d'Abonnés</h2>
-        <p class="widget-description">Définissez et affichez vos objectifs d'abonnés avec une barre de progression.</p>
-        <button class="widget-button" onclick="window.location.href='./overlays/youtube/subscribers-goal/config.html'">Configurer</button>
+        <p class="widget-description">Définissez et affichez vos objectifs d'abonnés avec une barre de progression personnalisable.</p>
+        <button class="widget-button" onclick="configureSubscriberGoal()">Configurer</button>
       </div>
     </div>
   </div>
-
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    // Fonction pour configurer le widget d'objectif d'abonnés
+    async function configureSubscriberGoal() {
+      try {
+        // Récupérer les informations d'authentification
+        const token = localStorage.getItem("google_access_token");
+        const channelInfo = JSON.parse(localStorage.getItem("youtube_channel_info"));
+        
+        if (!token || !channelInfo) {
+          console.error("Informations d'authentification manquantes");
+          window.location.href = "./auth.html";
+          return;
+        }
+
+        // Créer l'objet de données pour le widget
+        const youtubeData = {
+          user: {
+            id: channelInfo.id,
+            name: channelInfo.snippet.title,
+            avatar: channelInfo.snippet.thumbnails.default.url
+          },
+          token: token
+        };
+
+        // Encoder les données en base64
+        const encodedData = btoa(JSON.stringify({ youtubeData }));
+
+        // Rediriger vers la page de configuration avec les données
+        window.location.href = `./overlays/youtube/subscribers-goal/config.html?token=${encodedData}`;
+      } catch (error) {
+        console.error("Erreur lors de la configuration:", error);
+        alert("Une erreur est survenue lors de la configuration du widget");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
       // Vérifier l'authentification Google
       const checkAuth = () => {
-        const token = localStorage.getItem('google_access_token');
-        const expiresAt = localStorage.getItem('google_expires_at');
+        const token = localStorage.getItem("google_access_token");
+        const expiresAt = localStorage.getItem("google_expires_at");
         
         if (!token || !expiresAt || new Date().getTime() > parseInt(expiresAt)) {
           window.location.href = './auth.html';
@@ -168,6 +195,39 @@
         window.location.href = './auth.html';
       });
     });
+
+    async function configureSubscriberGoal() {
+      try {
+        // Récupérer les informations d'authentification
+        const token = localStorage.getItem('google_access_token');
+        const channelInfo = JSON.parse(localStorage.getItem('youtube_channel_info'));
+        
+        if (!token || !channelInfo) {
+          console.error('Informations d'authentification manquantes');
+          window.location.href = './auth.html';
+          return;
+        }
+
+        // Créer l'objet de données pour le widget
+        const youtubeData = {
+          user: {
+            id: channelInfo.id,
+            name: channelInfo.snippet.title,
+            avatar: channelInfo.snippet.thumbnails.default.url
+          },
+          token: token
+        };
+
+        // Encoder les données en base64
+        const encodedData = btoa(JSON.stringify({ youtubeData }));
+
+        // Rediriger vers la page de configuration avec les données
+        window.location.href = `./overlays/youtube/subscribers-goal/config.html?token=${encodedData}`;
+      } catch (error) {
+        console.error('Erreur lors de la configuration:', error);
+        alert('Une erreur est survenue lors de la configuration du widget');
+      }
+    }
   </script>
 </body>
-</html> 
+</html>

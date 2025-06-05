@@ -81,7 +81,7 @@
     }
 
     .save-button {
-      background: linear-gradient(135deg, #9146FF 0%, #00D4AA 100%);
+      background: #FF0000;
       color: white;
       border: none;
       padding: 1rem 2rem;
@@ -93,6 +93,11 @@
       align-items: center;
       gap: 0.5rem;
       margin-top: 1rem;
+      transition: opacity 0.2s;
+    }
+
+    .save-button:hover {
+      opacity: 0.9;
     }
 
     .save-success {
@@ -177,11 +182,17 @@
       <h2>Personnalisation</h2>
       <div class="form-group">
         <label for="goal-text">Texte de l'objectif</label>
-        <input type="text" id="goal-text" value="Objectif : {current}/{target} followers">
+        <input type="text" id="goal-text" value="Objectif : {current}/{target} abonnés">
+        <small style="color: #888; display: block; margin-top: 0.5rem;">
+          Utilisez {current} pour le nombre actuel d'abonnés et {target} pour l'objectif
+        </small>
       </div>
       <div class="form-group">
         <label for="progress-color">Couleur de la barre de progression</label>
         <input type="color" id="progress-color" value="#FF0000">
+        <small style="color: #888; display: block; margin-top: 0.5rem;">
+          Rouge YouTube par défaut (#FF0000)
+        </small>
       </div>
       <div class="form-group">
         <label for="text-color">Couleur du texte</label>
@@ -233,171 +244,139 @@
     </button>
   </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const config = {
-        target: 1000,
-        text: "Objectif : {current}/{target} abonnés",
-        progressColor: "#FF0000",
-        textColor: "#FFFFFF",
-        showBackground: true,
-        showProgressBar: true,
-        showPercentage: true
-      };
+  <script type="module">
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Vérifier l'authentification
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
       
-      // Mettre à jour les valeurs du formulaire
-      function updateFormValues() {
-        document.getElementById('goal-target').value = config.target;
-        document.getElementById('goal-text').value = config.text;
-        document.getElementById('progress-color').value = config.progressColor;
-        document.getElementById('text-color').value = config.textColor;
-        document.getElementById('show-background').checked = config.showBackground;
-        document.getElementById('show-progress-bar').checked = config.showProgressBar;
-        document.getElementById('show-percentage').checked = config.showPercentage;
-        updatePreview();
-        updateObsLink();
+      if (!token) {
+        window.location.href = '/src/youtube-dashboard.html';
+        return;
       }
 
-      // Canal de diffusion pour la synchronisation
-      const broadcastChannel = new BroadcastChannel('subscribers_goal_update');
+      try {
+        // Décoder les données YouTube
+        const tokenData = JSON.parse(atob(token));
+        const youtubeData = tokenData.youtubeData;
 
-      // Charger la configuration existante
-      const savedConfig = localStorage.getItem('followers_goal_config');
-      if (savedConfig) {
-        Object.assign(config, JSON.parse(savedConfig));
-        updateFormValues();
-      }
-
-      // Mettre à jour l'aperçu
-      function updatePreview() {
-        const iframe = document.getElementById('preview-frame');
-        const params = new URLSearchParams();
-        
-        Object.entries(config).forEach(([key, value]) => {
-          params.set(key, value);
-        });
-        
-        iframe.src = `overlay.html?${params.toString()}`;
-      }
-
-      // Générer le lien pour OBS
-      function updateObsLink() {
-        const youtubeData = {
-          user: JSON.parse(localStorage.getItem('google_user_profile')),
-          token: localStorage.getItem('google_access_token')
-        };
-
-        if (!youtubeData.user || !youtubeData.token) {
-          document.getElementById('obs-link').value = 'Veuillez vous connecter avec YouTube';
-          return;
+        if (!youtubeData || !youtubeData.user || !youtubeData.token) {
+          throw new Error('Données YouTube manquantes');
         }
 
-        const params = new URLSearchParams();
-        Object.entries(config).forEach(([key, value]) => {
-          params.set(key, value);
-        });
+        // Configuration par défaut
+        const config = {
+          target: 1000,
+          text: "Objectif : {current}/{target} abonnés",
+          progressColor: "#FF0000",
+          textColor: "#FFFFFF",
+          showBackground: true,
+          showProgressBar: true,
+          showPercentage: true
+        };
 
-        // Encoder les données YouTube en base64
-        const tokenData = btoa(JSON.stringify({ youtubeData }));
-        params.set('token', tokenData);
+        // Charger la configuration sauvegardée
+        const savedConfig = localStorage.getItem('subscribers_goal_config');
+        if (savedConfig) {
+          Object.assign(config, JSON.parse(savedConfig));
+        }
 
-        const baseUrl = window.location.origin;
-        const obsLink = `${baseUrl}/src/overlays/followers-goal/overlay.html?${params.toString()}`;
-        document.getElementById('obs-link').value = obsLink;
-      }
-
-      // Copier le lien dans le presse-papier
-      document.getElementById('copy-link').addEventListener('click', () => {
-        const linkInput = document.getElementById('obs-link');
-        linkInput.select();
-        document.execCommand('copy');
-        
-        const copyButton = document.getElementById('copy-link');
-        const originalText = copyButton.innerHTML;
-        copyButton.innerHTML = '✓ Copié !';
-        setTimeout(() => {
-          copyButton.innerHTML = originalText;
-        }, 2000);
-      });
-
-      // Écouter les changements
-      document.getElementById('goal-target').addEventListener('input', (e) => {
-        config.target = parseInt(e.target.value);
-        updatePreview();
-        updateObsLink();
-      });
-
-      document.getElementById('goal-text').addEventListener('input', (e) => {
-        config.text = e.target.value;
-        updatePreview();
-        updateObsLink();
-      });
-
-      document.getElementById('progress-color').addEventListener('input', (e) => {
-        config.progressColor = e.target.value;
-        updatePreview();
-        updateObsLink();
-      });
-
-      document.getElementById('text-color').addEventListener('input', (e) => {
-        config.textColor = e.target.value;
-        updatePreview();
-        updateObsLink();
-      });
-
-      document.getElementById('show-background').addEventListener('change', (e) => {
-        config.showBackground = e.target.checked;
-        updatePreview();
-        updateObsLink();
-      });
-
-      document.getElementById('show-progress-bar').addEventListener('change', (e) => {
-        config.showProgressBar = e.target.checked;
-        updatePreview();
-        updateObsLink();
-      });
-
-      document.getElementById('show-percentage').addEventListener('change', (e) => {
-        config.showPercentage = e.target.checked;
-        updatePreview();
-        updateObsLink();
-      });
-
-      // Sauvegarder la configuration
-      document.getElementById('save-config').addEventListener('click', () => {
-        config.target = parseInt(document.getElementById('goal-target').value);
-        config.text = document.getElementById('goal-text').value;
-        config.progressColor = document.getElementById('progress-color').value;
-        config.textColor = document.getElementById('text-color').value;
-        config.showBackground = document.getElementById('show-background').checked;
-        config.showProgressBar = document.getElementById('show-progress-bar').checked;
-        config.showPercentage = document.getElementById('show-percentage').checked;
-
-        // Sauvegarder localement
-        localStorage.setItem('subscribers_goal_config', JSON.stringify(config));
-
-        // Diffuser la mise à jour
-        broadcastChannel.postMessage({
-          type: 'config_update',
-          userId: JSON.parse(localStorage.getItem('google_user_profile')).id,
-          config: config
-        });
+        // Mettre à jour les valeurs du formulaire
+        function updateFormValues() {
+          document.getElementById('goal-target').value = config.target;
+          document.getElementById('goal-text').value = config.text;
+          document.getElementById('progress-color').value = config.progressColor;
+          document.getElementById('text-color').value = config.textColor;
+          document.getElementById('show-background').checked = config.showBackground;
+          document.getElementById('show-progress-bar').checked = config.showProgressBar;
+          document.getElementById('show-percentage').checked = config.showPercentage;
+          updatePreview();
+          updateObsLink();
+        }
 
         // Mettre à jour l'aperçu
-        updatePreview();
-        updateObsLink();
+        function updatePreview() {
+          const previewFrame = document.getElementById('preview-frame');
+          if (!previewFrame) return;
 
-        // Afficher un message de confirmation
-        const successMessage = document.createElement('div');
-        successMessage.className = 'save-success';
-        successMessage.textContent = 'Configuration enregistrée !';
-        document.body.appendChild(successMessage);
-        setTimeout(() => successMessage.remove(), 3000);
-      });
+          const params = new URLSearchParams();
+          Object.entries(config).forEach(([key, value]) => {
+            params.set(key, value);
+          });
+          params.set('token', token);
+          
+          previewFrame.src = `overlay.html?${params.toString()}`;
+        }
 
-      // Initialiser l'aperçu et le lien
-      updatePreview();
-      updateObsLink();
+        // Générer et mettre à jour le lien OBS
+        function updateObsLink() {
+          const params = new URLSearchParams();
+          Object.entries(config).forEach(([key, value]) => {
+            params.set(key, value);
+          });
+          params.set('token', token);
+
+          const obsUrl = `${window.location.origin}/src/overlays/youtube/subscribers-goal/overlay.html?${params.toString()}`;
+          const obsLinkInput = document.getElementById('obs-link');
+          if (obsLinkInput) {
+            obsLinkInput.value = obsUrl;
+          }
+        }
+
+        // Gestionnaire de copie du lien
+        document.getElementById('copy-link')?.addEventListener('click', () => {
+          const obsLink = document.getElementById('obs-link');
+          obsLink.select();
+          document.execCommand('copy');
+          
+          const successMessage = document.createElement('div');
+          successMessage.className = 'save-success';
+          successMessage.textContent = 'Lien copié !';
+          document.body.appendChild(successMessage);
+          setTimeout(() => successMessage.remove(), 3000);
+        });
+
+        // Gestionnaire de sauvegarde
+        document.getElementById('save-config')?.addEventListener('click', () => {
+          config.target = parseInt(document.getElementById('goal-target').value);
+          config.text = document.getElementById('goal-text').value;
+          config.progressColor = document.getElementById('progress-color').value;
+          config.textColor = document.getElementById('text-color').value;
+          config.showBackground = document.getElementById('show-background').checked;
+          config.showProgressBar = document.getElementById('show-progress-bar').checked;
+          config.showPercentage = document.getElementById('show-percentage').checked;
+
+          // Sauvegarder localement
+          localStorage.setItem('subscribers_goal_config', JSON.stringify(config));
+
+          // Mettre à jour l'aperçu et le lien
+          updatePreview();
+          updateObsLink();
+
+          // Message de confirmation
+          const successMessage = document.createElement('div');
+          successMessage.className = 'save-success';
+          successMessage.textContent = 'Configuration enregistrée !';
+          document.body.appendChild(successMessage);
+          setTimeout(() => successMessage.remove(), 3000);
+
+          // Diffuser la mise à jour
+          const broadcastChannel = new BroadcastChannel('subscribers_goal_update');
+          broadcastChannel.postMessage({
+            type: 'config_update',
+            userId: youtubeData.user.id,
+            config: config
+          });
+        });
+
+        // Initialiser les valeurs
+        updateFormValues();
+
+      } catch (error) {
+        console.error('Erreur lors de l\'initialisation:', error);
+        alert('Une erreur est survenue lors du chargement de la configuration');
+        window.location.href = '/src/youtube-dashboard.html';
+      }
     });
   </script>
 </body>
