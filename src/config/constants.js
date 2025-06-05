@@ -14,7 +14,6 @@ export const SOCIAL_LINKS = {
 
 // Configuration de l'interface
 export const UI_CONFIG = {
-  creator_code: 'APO21',
   default_timer: 120, // 2 minutes
   refresh_interval: 30000 // 30 secondes
 };
