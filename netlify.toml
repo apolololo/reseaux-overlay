@@ -9,23 +9,14 @@
     Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
     Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept"
 
-[[headers]]
-  for = "/auth/*"
-  [headers.values]
-    Cross-Origin-Opener-Policy = "unsafe-none"
-    Cross-Origin-Embedder-Policy = "unsafe-none"
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
-    Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept"
-
-[[redirects]]
-  from = "/auth/google-callback.html"
-  to = "/auth/google-callback.html"
-  status = 200
-
 [[redirects]]
   from = "/auth/*"
   to = "/auth/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/overlays/*"
+  to = "/overlays/:splat"
   status = 200
 
 [[redirects]]

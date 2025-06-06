@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APO - Objectif Followers</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .goal-container {
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 15px;
+      padding: 2rem;
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(99, 102, 241, 0.3);
+      text-align: center;
+      color: white;
+      min-width: 400px;
+    }
+
+    .goal-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #6366f1;
+    }
+
+    .goal-numbers {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .current {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #10b981;
+    }
+
+    .separator {
+      font-size: 2rem;
+      color: #94a3b8;
+    }
+
+    .target {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #6366f1;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #6366f1);
+      width: 65%;
+      transition: width 0.5s ease;
+    }
+
+    .percentage {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <div class="goal-container">
+    <div class="goal-title">OBJECTIF FOLLOWERS</div>
+    <div class="goal-numbers">
+      <div class="current" id="current">650</div>
+      <div class="separator">/</div>
+      <div class="target" id="target">1000</div>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress"></div>
+    </div>
+    <div class="percentage" id="percentage">65%</div>
+  </div>
+
+  <script>
+    // Simulation de mise à jour en temps réel
+    function updateProgress() {
+      const current = parseInt(document.getElementById('current').textContent);
+      const target = parseInt(document.getElementById('target').textContent);
+      const percentage = Math.round((current / target) * 100);
+      
+      document.getElementById('progress').style.width = `${percentage}%`;
+      document.getElementById('percentage').textContent = `${percentage}%`;
+    }
+
+    updateProgress();
+
+    // Simulation d'incrémentation
+    setInterval(() => {
+      const currentEl = document.getElementById('current');
+      const current = parseInt(currentEl.textContent);
+      const target = parseInt(document.getElementById('target').textContent);
+      
+      if (current < target && Math.random() > 0.7) {
+        currentEl.textContent = current + 1;
+        updateProgress();
+      }
+    }, 5000);
+  </script>
+</body>
+</html>

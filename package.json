@@ -1,7 +1,6 @@
 {
-  "name": "apo-overlay-generator",
-  "private": true,
-  "version": "1.0.0",
+  "name": "apo-overlays",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,8 +8,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.38.4",
-    "apo-overlay-generator": "file:",
     "vite": "^5.0.0"
   }
 }

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APO - Statut de Jeu</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+    }
+
+    .status-container {
+      text-align: center;
+    }
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(99, 102, 241, 0.3);
+      border-top: 4px solid #6366f1;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 2rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .status-title {
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      background: linear-gradient(45deg, #6366f1, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .status-message {
+      font-size: 1.5rem;
+      color: #94a3b8;
+      margin-bottom: 3rem;
+    }
+
+    .creator-code {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.6);
+      padding: 1rem 2rem;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div class="status-container">
+    <div class="spinner"></div>
+    <div class="status-title" id="status-title">Chargement...</div>
+    <div class="status-message" id="status-message">Préparation du prochain jeu</div>
+  </div>
+  <div class="creator-code">CODE CRÉATEUR: APO21</div>
+
+  <script>
+    const statuses = [
+      { title: "Chargement...", message: "Préparation du prochain jeu" },
+      { title: "En recherche...", message: "Choix du prochain jeu" },
+      { title: "Configuration", message: "Paramétrage du jeu" },
+      { title: "Changement de jeu", message: "Un instant..." }
+    ];
+
+    let currentIndex = 0;
+
+    function updateStatus() {
+      const status = statuses[currentIndex];
+      document.getElementById('status-title').textContent = status.title;
+      document.getElementById('status-message').textContent = status.message;
+      
+      currentIndex = (currentIndex + 1) % statuses.length;
+    }
+
+    setInterval(updateStatus, 3000);
+  </script>
+</body>
+</html>

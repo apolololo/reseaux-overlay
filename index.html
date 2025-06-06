@@ -1,329 +1,376 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="google-site-verification" content="wsa3hgo8nByeN7Dol9wAqijcqjokRiZgi7GTXYS9vS4" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>APO Overlays</title>
-  <link rel="stylesheet" href="./src/styles/main.css" />
-  <link rel="stylesheet" href="./src/styles/app.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APO Overlays - Générateur d'overlays pour streamers</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    #app { display: none; }
-    .loading-screen {
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --success: #10b981;
+      --error: #ef4444;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .header h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, var(--primary), #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header p {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+    }
+
+    .auth-section {
+      background: var(--bg-card);
+      border-radius: 1rem;
+      padding: 2rem;
+      margin-bottom: 3rem;
+      border: 1px solid var(--border);
+    }
+
+    .auth-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .btn-twitch {
+      background: #9146ff;
+      color: white;
+    }
+
+    .btn-twitch:hover {
+      background: #7c3aed;
+      transform: translateY(-2px);
+    }
+
+    .btn-youtube {
+      background: #ff0000;
+      color: white;
+    }
+
+    .btn-youtube:hover {
+      background: #dc2626;
+      transform: translateY(-2px);
+    }
+
+    .btn-logout {
+      background: var(--error);
+      color: white;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+
+    .overlays-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .overlay-card {
+      background: var(--bg-card);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+
+    .overlay-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .overlay-card h3 {
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+
+    .overlay-card p {
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .overlay-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-small {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--border);
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .preview-modal {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: var(--bg-dark);
+      background: rgba(0, 0, 0, 0.8);
       display: flex;
-      justify-content: center;
       align-items: center;
-      z-index: 9999;
+      justify-content: center;
+      z-index: 1000;
     }
-    .loading-spinner {
+
+    .preview-content {
+      background: var(--bg-card);
+      border-radius: 1rem;
+      padding: 2rem;
+      max-width: 90vw;
+      max-height: 90vh;
+      overflow: auto;
+    }
+
+    .preview-iframe {
+      width: 800px;
+      height: 450px;
+      border: none;
+      border-radius: 0.5rem;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: var(--error);
+      color: white;
+      border: none;
+      border-radius: 50%;
       width: 40px;
       height: 40px;
-      border: 4px solid rgba(255, 255, 255, 0.1);
-      border-left-color: var(--primary);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    .privacy-link {
-      position: fixed;
-      bottom: 1rem;
-      right: 1rem;
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-size: 0.9rem;
-      padding: 0.5rem 1rem;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 6px;
-      transition: all 0.3s ease;
-    }
-    .privacy-link:hover {
-      background: rgba(255, 255, 255, 0.2);
-      transform: translateY(-2px);
-    }
-    .auth-providers {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    .google-profile {
-      padding: 0.75rem 1rem;
-      background: rgba(66, 133, 244, 0.15);
-      border-radius: 10px;
-      transition: var(--transition);
-    }
-    .google-profile:hover {
-      background: rgba(66, 133, 244, 0.2);
-      transform: translateY(-2px);
-    }
-    .channel-stats {
-      display: flex;
-      gap: 1rem;
-      margin-top: 0.5rem;
-      font-size: 0.85rem;
-      color: var(--text-secondary);
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <div class="loading-screen">
-    <div class="loading-spinner"></div>
-  </div>
+  <div class="container">
+    <header class="header">
+      <h1>APO Overlays</h1>
+      <p>Créez des overlays professionnels pour vos streams en quelques clics</p>
+    </header>
 
-  <div id="app">
-    <div class="overlay-list">
-      <div class="header-container">
-        <h2>Overlays</h2>
-        <div class="user-info-container">
-          <div class="auth-providers">
-            <div id="twitch-info" class="twitch-info">
-              <!-- Les informations utilisateur Twitch seront insérées ici -->
-            </div>
-            <div id="google-info" class="google-info">
-              <!-- Les informations utilisateur Google/YouTube seront insérées ici -->
-            </div>
-          </div>
-          <button id="logout-button" class="logout-button">
-            <svg viewBox="0 0 24 24" width="18" height="18">
-              <path fill="currentColor" d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+    <!-- Section d'authentification -->
+    <section class="auth-section">
+      <div id="auth-login" class="hidden">
+        <h2 style="text-align: center; margin-bottom: 1.5rem;">Connectez-vous pour commencer</h2>
+        <div class="auth-buttons">
+          <button id="login-twitch" class="btn btn-twitch">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/>
             </svg>
-            <span>Déconnexion</span>
+            Twitch
+          </button>
+          <button id="login-youtube" class="btn btn-youtube">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+            </svg>
+            YouTube
           </button>
         </div>
       </div>
-      <ul>
-        <li class="overlay-item active" data-url="src/overlays/apo/overlay.html" data-size="800x200">
-          Réseaux & Code
-        </li>
-        <li class="overlay-item" data-url="src/overlays/starting/overlay.html" data-size="1920x1080">
-          Starting Soon
-        </li>
-        <li class="folder-item">
-          <div class="folder-header">
-            <span>Pause</span>
-            <svg class="folder-icon" viewBox="0 0 24 24" width="24" height="24">
-              <path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-            </svg>
+
+      <div id="auth-user" class="hidden">
+        <div class="user-info">
+          <img id="user-avatar" class="user-avatar" src="" alt="Avatar">
+          <div>
+            <div id="user-name"></div>
+            <div id="user-platform" style="color: var(--text-muted); font-size: 0.875rem;"></div>
           </div>
-          <ul class="folder-content">
-            <li class="overlay-item" data-url="src/overlays/brb/overlay.html" data-size="1920x1080">
-              Pause Standard
-            </li>
-            <li class="overlay-item" data-url="src/overlays/brb/overlay-video.html" data-size="1920x1080">
-              Pause avec Zone Vidéo
-            </li>
-          </ul>
-        </li>
-        <li class="overlay-item" data-url="src/overlays/end/overlay.html" data-size="1920x1080">
-          Fin du Stream
-        </li>
-        <li class="overlay-item" data-url="src/overlays/game-status/overlay.html" data-size="1920x1080">
-          Status de Jeu
-        </li>
-        <li class="overlay-item" data-url="src/overlays/followers-goal/overlay.html" data-size="500x300" data-config="src/overlays/followers-goal/config.html">
-          Followers Goal
-        </li>
-        <li class="folder-item">
-          <div class="folder-header">
-            <span>Maps</span>
-            <svg class="folder-icon" viewBox="0 0 24 24" width="24" height="24">
-              <path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-            </svg>
+        </div>
+        <button id="logout" class="btn btn-logout btn-small">Déconnexion</button>
+      </div>
+    </section>
+
+    <!-- Grille des overlays -->
+    <section id="overlays-section" class="hidden">
+      <h2 style="margin-bottom: 2rem;">Vos Overlays</h2>
+      <div class="overlays-grid">
+        <!-- Social Networks -->
+        <div class="overlay-card">
+          <h3>Réseaux Sociaux</h3>
+          <p>Affichez vos réseaux sociaux avec des animations fluides</p>
+          <div class="overlay-actions">
+            <button class="btn btn-primary btn-small" onclick="previewOverlay('social')">Aperçu</button>
+            <button class="btn btn-secondary btn-small" onclick="copyOverlayUrl('social')">Copier URL</button>
           </div>
-          <ul class="folder-content">
-            <li class="overlay-item" data-url="src/overlays/maps/overlay.html" data-size="1920x1080">
-              Box Fights & Zone Wars
-            </li>
-          </ul>
-        </li>
-      </ul>
-    </div>
-    
-    <div class="preview-section">
-      <div class="preview-options">
-        <div class="background-options">
-          <label>Fond de preview :</label>
-          <div class="background-controls">
-            <input type="color" id="bg-color" value="#000000" title="Couleur de fond">
-            <button id="bg-transparent" title="Fond transparent">
-              <svg viewBox="0 0 24 24" width="24" height="24">
-                <path fill="currentColor" d="M12 2L2 12l10 10 10-10L12 2zM4.83 12L12 19.17 19.17 12 12 4.83 4.83 12z"/>
-              </svg>
-            </button>
-            <input type="file" id="bg-image" accept="image/*" hidden>
-            <button id="bg-image-btn" title="Image de fond">
-              <svg viewBox="0 0 24 24" width="24" height="24">
-                <path fill="currentColor" d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-              </svg>
-            </button>
+        </div>
+
+        <!-- Starting Soon -->
+        <div class="overlay-card">
+          <h3>Starting Soon</h3>
+          <p>Écran de démarrage avec compte à rebours personnalisable</p>
+          <div class="overlay-actions">
+            <button class="btn btn-primary btn-small" onclick="previewOverlay('starting')">Aperçu</button>
+            <button class="btn btn-secondary btn-small" onclick="copyOverlayUrl('starting')">Copier URL</button>
+          </div>
+        </div>
+
+        <!-- Be Right Back -->
+        <div class="overlay-card">
+          <h3>Be Right Back</h3>
+          <p>Écran de pause élégant pour vos pauses</p>
+          <div class="overlay-actions">
+            <button class="btn btn-primary btn-small" onclick="previewOverlay('brb')">Aperçu</button>
+            <button class="btn btn-secondary btn-small" onclick="copyOverlayUrl('brb')">Copier URL</button>
+          </div>
+        </div>
+
+        <!-- End Screen -->
+        <div class="overlay-card">
+          <h3>Fin de Stream</h3>
+          <p>Écran de fin avec tous vos réseaux sociaux</p>
+          <div class="overlay-actions">
+            <button class="btn btn-primary btn-small" onclick="previewOverlay('end')">Aperçu</button>
+            <button class="btn btn-secondary btn-small" onclick="copyOverlayUrl('end')">Copier URL</button>
+          </div>
+        </div>
+
+        <!-- Followers Goal -->
+        <div class="overlay-card">
+          <h3>Objectif Followers</h3>
+          <p>Barre de progression pour vos objectifs de followers</p>
+          <div class="overlay-actions">
+            <button class="btn btn-primary btn-small" onclick="previewOverlay('followers')">Aperçu</button>
+            <button class="btn btn-secondary btn-small" onclick="copyOverlayUrl('followers')">Copier URL</button>
+          </div>
+        </div>
+
+        <!-- Game Status -->
+        <div class="overlay-card">
+          <h3>Statut de Jeu</h3>
+          <p>Indicateur de changement de jeu</p>
+          <div class="overlay-actions">
+            <button class="btn btn-primary btn-small" onclick="previewOverlay('game')">Aperçu</button>
+            <button class="btn btn-secondary btn-small" onclick="copyOverlayUrl('game')">Copier URL</button>
           </div>
         </div>
       </div>
+    </section>
 
-      <div class="preview-container">
-        <div class="preview-background">
-          <iframe id="overlay-preview" src="/src/overlays/apo/overlay.html"></iframe>
-        </div>
-      </div>
-
-      <div class="copy-info">
-        <button id="copy-url">
-          <svg viewBox="0 0 24 24" width="18" height="18">
-            <path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-          </svg>
-          Copier l'URL pour OBS
-        </button>
-        <span class="size-info">Taille recommandée : 800x200</span>
-      </div>
+    <!-- Loading -->
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p>Chargement...</p>
     </div>
   </div>
 
-  <a href="/src/privacy.html" class="privacy-link">Politique de confidentialité</a>
+  <!-- Modal de prévisualisation -->
+  <div id="preview-modal" class="preview-modal hidden">
+    <div class="preview-content">
+      <button class="close-btn" onclick="closePreview()">&times;</button>
+      <iframe id="preview-iframe" class="preview-iframe"></iframe>
+    </div>
+  </div>
 
-  <script type="module" src="./src/js/main.js"></script>
-  <script type="module">
-    import './src/js/googleAuth.js';
-    
-    document.addEventListener('DOMContentLoaded', () => {
-      const app = document.getElementById('app');
-      const loadingScreen = document.querySelector('.loading-screen');
-
-      window.checkAuth = () => {
-        const authProvider = localStorage.getItem('auth_provider');
-        const currentPath = window.location.pathname;
-        
-        // Si on est sur la page d'authentification
-        if (currentPath.includes('/auth.html')) {
-          // Si déjà authentifié, rediriger vers l'index
-          if (authProvider === 'twitch' || authProvider === 'google') {
-            window.location.replace('/index.html');
-            return false;
-          }
-          return true;
-        }
-        
-        // Si on est sur une autre page
-        if (!authProvider) {
-          window.location.replace('/src/auth.html');
-          return false;
-        }
-        
-        // Vérifier l'authentification selon le provider
-        let isAuthenticated = false;
-        
-        if (authProvider === 'twitch') {
-          const twitchToken = localStorage.getItem('twitch_token');
-          const twitchExpiresAt = localStorage.getItem('twitch_expires_at');
-          isAuthenticated = twitchToken && twitchExpiresAt && new Date().getTime() < parseInt(twitchExpiresAt);
-        } else if (authProvider === 'google') {
-          const googleAuth = new GoogleAuth();
-          isAuthenticated = googleAuth.isAuthenticated();
-        }
-        
-        if (!isAuthenticated) {
-          localStorage.clear();
-          window.location.replace('/src/auth.html');
-          return false;
-        }
-        
-        loadingScreen.style.display = 'none';
-        app.style.display = 'flex';
-        
-        // Afficher les informations utilisateur appropriées
-        const twitchInfo = document.getElementById('twitch-info');
-        const googleInfo = document.getElementById('google-info');
-        if (twitchInfo) twitchInfo.style.display = 'none';
-        if (googleInfo) googleInfo.style.display = 'none';
-        
-        if (authProvider === 'twitch') {
-          const twitchUserData = localStorage.getItem('twitch_user');
-          if (twitchUserData && twitchInfo) {
-            try {
-              const user = JSON.parse(twitchUserData);
-              twitchInfo.style.display = 'block';
-              twitchInfo.innerHTML = `
-                <div class="user-profile">
-                  ${user.profile_image_url ? `<img src="${user.profile_image_url}" alt="${user.display_name}">` : ''}
-                  <span class="username">${user.display_name || 'Utilisateur Twitch'}</span>
-                </div>
-              `;
-            } catch (e) {
-              console.error("Erreur lors de l'affichage des infos utilisateur Twitch", e);
-            }
-          }
-        } else if (authProvider === 'google') {
-          const googleUserData = localStorage.getItem('google_user_profile');
-          const youtubeChannelData = localStorage.getItem('youtube_channel_info');
-          
-          if (googleUserData && googleInfo) {
-            try {
-              const googleUser = JSON.parse(googleUserData);
-              const youtubeChannel = youtubeChannelData ? JSON.parse(youtubeChannelData) : null;
-              
-              googleInfo.style.display = 'block';
-              let profileHtml = `
-                <div class="user-profile google-profile">
-                  ${googleUser.picture ? `<img src="${googleUser.picture}" alt="${googleUser.name}">` : ''}
-                  <div>
-                    <span class="username">${googleUser.name || 'Utilisateur Google'}</span>
-              `;
-              
-              if (youtubeChannel && youtubeChannel.snippet) {
-                profileHtml += `
-                    <div class="channel-stats">
-                      <span>📺 ${youtubeChannel.snippet.title}</span>
-                      ${youtubeChannel.statistics ? `<span>👥 ${parseInt(youtubeChannel.statistics.subscriberCount).toLocaleString()} abonnés</span>` : ''}
-                    </div>
-                `;
-              }
-              
-              profileHtml += `
-                  </div>
-                </div>
-              `;
-              
-              googleInfo.innerHTML = profileHtml;
-            } catch (e) {
-              console.error("Erreur lors de l'affichage des infos utilisateur Google", e);
-            }
-          }
-        }
-        
-        return true;
-      };
-      
-      window.checkAuth();
-      
-      const logoutButton = document.getElementById('logout-button');
-      if (logoutButton) {
-        logoutButton.addEventListener('click', () => {
-          const authProvider = localStorage.getItem('auth_provider');
-          
-          if (authProvider === 'twitch') {
-            localStorage.removeItem('twitch_token');
-            localStorage.removeItem('twitch_expires_at');
-            localStorage.removeItem('twitch_user');
-            localStorage.removeItem('twitch_subscriber_count');
-            localStorage.removeItem('twitch_subscriber_points');
-            localStorage.removeItem('auth_provider');
-            window.location.replace('/src/auth.html');
-          } else if (authProvider === 'google') {
-            const googleAuth = new GoogleAuth();
-            googleAuth.logout();
-          }
-        });
-      }
-    });
-  </script>
+  <script type="module" src="/main.js"></script>
 </body>
 </html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APO - Réseaux Sociaux</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+    }
+
+    .social-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 15px;
+      padding: 20px 30px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .creator-code {
+      font-size: 24px;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(255, 0, 255, 0.8);
+    }
+
+    .social-icons {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .social-icon {
+      width: 32px;
+      height: 32px;
+      filter: brightness(0) invert(1);
+      transition: all 0.3s ease;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .social-icon:nth-child(1) { animation-delay: 0s; }
+    .social-icon:nth-child(2) { animation-delay: 0.5s; }
+    .social-icon:nth-child(3) { animation-delay: 1s; }
+    .social-icon:nth-child(4) { animation-delay: 1.5s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .username {
+      font-size: 28px;
+      font-weight: 700;
+      color: #00f0ff;
+      text-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
+    }
+  </style>
+</head>
+<body>
+  <div class="social-container">
+    <div class="creator-code">APO21</div>
+    <div class="username">@tryh_apo</div>
+    <div class="social-icons">
+      <img class="social-icon" src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/twitch.svg" alt="Twitch">
+      <img class="social-icon" src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/youtube.svg" alt="YouTube">
+      <img class="social-icon" src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/twitter.svg" alt="Twitter">
+      <img class="social-icon" src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/instagram.svg" alt="Instagram">
+    </div>
+  </div>
+</body>
+</html>
