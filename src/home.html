@@ -333,6 +333,12 @@
       };
 
       checkUrlErrors();
+      
+      // Nettoyer l'URL des paramètres d'erreur après affichage
+      if (window.location.search) {
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
 
       // Connexion Twitch
       twitchLoginBtn.addEventListener('click', () => {
