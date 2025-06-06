@@ -27,7 +27,8 @@ const CONFIG = {
       icon: '🌐',
       size: '800x200',
       path: '/overlays/social.html',
-      category: 'social'
+      category: 'social',
+      platforms: ['twitch', 'youtube']
     },
     {
       id: 'starting-soon',
@@ -36,7 +37,8 @@ const CONFIG = {
       icon: '⏰',
       size: '1920x1080',
       path: '/overlays/starting.html',
-      category: 'stream'
+      category: 'stream',
+      platforms: ['twitch', 'youtube']
     },
     {
       id: 'be-right-back',
@@ -45,7 +47,8 @@ const CONFIG = {
       icon: '⏸️',
       size: '1920x1080',
       path: '/overlays/brb.html',
-      category: 'stream'
+      category: 'stream',
+      platforms: ['twitch', 'youtube']
     },
     {
       id: 'end-screen',
@@ -54,7 +57,8 @@ const CONFIG = {
       icon: '🎬',
       size: '1920x1080',
       path: '/overlays/end.html',
-      category: 'stream'
+      category: 'stream',
+      platforms: ['twitch', 'youtube']
     },
     {
       id: 'followers-goal',
@@ -63,7 +67,8 @@ const CONFIG = {
       icon: '📈',
       size: '500x300',
       path: '/overlays/followers.html',
-      category: 'goals'
+      category: 'goals',
+      platforms: ['twitch'] // Disponible uniquement pour Twitch
     },
     {
       id: 'game-status',
@@ -72,7 +77,8 @@ const CONFIG = {
       icon: '🎮',
       size: '1920x1080',
       path: '/overlays/game.html',
-      category: 'gaming'
+      category: 'gaming',
+      platforms: ['twitch', 'youtube']
     }
   ]
 };
@@ -284,7 +290,14 @@ class OverlayManager {
   }
 
   getOverlays() {
-    return this.overlays;
+    // Filtrer les overlays selon la plateforme connectée
+    if (!this.appState.isAuthenticated || !this.appState.platform) {
+      return this.overlays;
+    }
+
+    return this.overlays.filter(overlay => {
+      return overlay.platforms.includes(this.appState.platform);
+    });
   }
 
   getOverlayById(id) {
@@ -371,6 +384,7 @@ class UIManager {
     // Écouter les changements d'état utilisateur
     this.appState.on('userChanged', () => {
       this.updateAuthSection();
+      this.renderOverlays(); // Re-render les overlays pour appliquer le filtrage
     });
   }
 
