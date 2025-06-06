@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>APO Overlays</title>
+  <link rel="stylesheet" href="./styles/overlay.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0f0f0f;
+      color: #ffffff;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      max-width: 400px;
+      width: 90%;
+      padding: 2rem;
+    }
+
+    .title {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    .subtitle {
+      color: #888;
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .button:hover {
+      opacity: 0.9;
+    }
+
+    .button img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+    }
+
+    .twitch {
+      background: #9146FF;
+      color: white;
+    }
+
+    .google {
+      background: white;
+      color: black;
+    }
+
+    .divider {
+      text-align: center;
+      color: #888;
+      font-size: 0.8rem;
+      margin: 1rem 0;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    .feature {
+      background: #1a1a1a;
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .feature-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-title {
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin: 0;
+    }
+
+    @media (max-width: 400px) {
+      .features {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="title">APO Overlays</h1>
+    <p class="subtitle">La solution complète pour vos overlays de stream</p>
+
+    <div class="buttons">
+      <button id="login-button" class="button twitch">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Twitch_Glitch_Logo_Purple.svg/878px-Twitch_Glitch_Logo_Purple.svg.png" alt="Twitch" />
+        Connexion avec Twitch
+      </button>
+
+      <div class="divider">ou</div>
+
+      <button id="google-login-button" class="button google">
+        <div class="google-logo-container">
+          <img src="https://www.google.com/images/branding/googleg/1x/googleg_standard_color_128dp.png" alt="Google" class="google-logo" />
+          <img src="https://www.youtube.com/s/desktop/7c155e84/img/favicon_144x144.png" alt="YouTube" class="youtube-logo" />
+        </div>
+        Se connecter avec YouTube
+      </button>
+    </div>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">👥</div>
+        <h3 class="feature-title">Compteur de followers Twitch</h3>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🎯</div>
+        <h3 class="feature-title">Objectifs de followers</h3>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📈</div>
+        <h3 class="feature-title">Compteur d'abonnés YouTube</h3>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🎯</div>
+        <h3 class="feature-title">Objectifs d'abonnés</h3>
+      </div>
+    </div>
+  </div>
+
+  <div id="loading" class="loading-container" style="display: none;">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Redirection en cours...</div>
+  </div>
+
+  <div id="error-container" style="display: none; margin-top: 20px; color: #ff5252; background: rgba(255, 82, 82, 0.1); padding: 12px; border-radius: 8px; text-align: left;">
+    <div id="error-message">Une erreur s'est produite</div>
+  </div>
+
+  <script type="module">
+    import './js/googleAuth.js';
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      const loginButton = document.getElementById('login-button');
+      const googleLoginButton = document.getElementById('google-login-button');
+      const loading = document.getElementById('loading');
+      const errorContainer = document.getElementById('error-container');
+      const errorMessage = document.getElementById('error-message');
+
+      // Vérifier si l'utilisateur est déjà authentifié
+      const checkExistingAuth = () => {
+        const authProvider = localStorage.getItem('auth_provider');
+        
+        if (authProvider === 'twitch') {
+          const token = localStorage.getItem('twitch_token');
+          const expiresAt = localStorage.getItem('twitch_expires_at');
+          
+          if (token && expiresAt && new Date().getTime() < parseInt(expiresAt)) {
+            window.location.replace('../twitch-dashboard.html');
+            return true;
+          }
+        } else if (authProvider === 'google') {
+          const token = localStorage.getItem('google_access_token');
+          const expiresAt = localStorage.getItem('google_expires_at');
+          
+          if (token && expiresAt && new Date().getTime() < parseInt(expiresAt)) {
+            window.location.replace('../youtube-dashboard.html');
+            return true;
+          }
+        }
+        return false;
+      };
+      
+      // Si l'utilisateur est déjà authentifié, rediriger vers l'index
+      if (checkExistingAuth()) return;
+      
+      // Vérifier s'il y a des erreurs dans l'URL
+      const checkUrlErrors = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('error')) {
+          errorContainer.style.display = 'block';
+          errorMessage.textContent = `Erreur: ${urlParams.get('error')} - ${urlParams.get('error_description') || 'Veuillez réessayer'}`;
+        }
+      };
+      
+      // Vérifier les erreurs au chargement
+      checkUrlErrors();
+      
+      // Gérer le clic sur le bouton de connexion Twitch
+      loginButton.addEventListener('click', () => {
+        try {
+          loading.style.display = 'flex';
+          errorContainer.style.display = 'none';
+          
+          const clientId = "z8q1w4g12yrql6cyb5zzwmhe1pnxyn";
+          const redirectUri = "https://apo-overlay.netlify.app/auth/callback.html";
+          const state = Math.random().toString(36).substring(2, 15);
+          localStorage.setItem('twitch_auth_state', state);
+          
+          const scope = 'user:read:email channel:read:subscriptions moderator:read:followers';
+          const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}&force_verify=true`;
+          
+          window.location.href = authUrl;
+        } catch (error) {
+          console.error("Erreur lors de la redirection:", error);
+          loading.style.display = 'none';
+          errorContainer.style.display = 'block';
+          errorMessage.textContent = "Une erreur s'est produite lors de la tentative de connexion. Veuillez réessayer.";
+        }
+      });
+
+      // Gérer le clic sur le bouton de connexion Google
+      googleLoginButton.addEventListener('click', () => {
+        try {
+          loading.style.display = 'flex';
+          errorContainer.style.display = 'none';
+          
+          const googleAuth = new GoogleAuth();
+          googleAuth.initiateAuth();
+        } catch (error) {
+          console.error("Erreur lors de la connexion Google:", error);
+          loading.style.display = 'none';
+          errorContainer.style.display = 'block';
+          errorMessage.textContent = error.message || "Une erreur s'est produite lors de la tentative de connexion avec Google. Veuillez réessayer.";
+        }
+      });
+    });
+  </script>
+</body>
+</html>
