@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>APO Overlays - Dashboard</title>
+  <link rel="stylesheet" href="./styles/overlay.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0f0f0f;
+      color: #ffffff;
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .title {
+      font-size: 2rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, #9146FF, #FF0000);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .user-section {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .user-info img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+    }
+
+    .user-info span {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .platform-badge {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .twitch-badge {
+      background: #9146FF;
+      color: white;
+    }
+
+    .youtube-badge {
+      background: #FF0000;
+      color: white;
+    }
+
+    .auth-buttons {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .auth-btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .connect-btn {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ccc;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .connect-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+
+    .disconnect-btn {
+      background: rgba(255, 82, 82, 0.2);
+      color: #ff5252;
+      border: 1px solid rgba(255, 82, 82, 0.3);
+    }
+
+    .disconnect-btn:hover {
+      background: rgba(255, 82, 82, 0.3);
+    }
+
+    .logout-all-btn {
+      background: transparent;
+      border: 1px solid #333;
+      color: #888;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .logout-all-btn:hover {
+      background: #333;
+      color: white;
+    }
+
+    .content {
+      display: grid;
+      gap: 2rem;
+    }
+
+    .section {
+      background: rgba(26, 26, 26, 0.8);
+      border-radius: 12px;
+      padding: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-icon {
+      font-size: 1.2rem;
+    }
+
+    .widgets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .widget {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .widget::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+      transition: left 0.5s;
+    }
+
+    .widget:hover::before {
+      left: 100%;
+    }
+
+    .widget:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .widget-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .widget-title {
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin: 0;
+    }
+
+    .widget-platform {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .widget-description {
+      color: #888;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+      line-height: 1.4;
+    }
+
+    .widget-button {
+      width: 100%;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .widget-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .widget-button:hover::before {
+      left: 100%;
+    }
+
+    .twitch-widget .widget-button {
+      background: linear-gradient(135deg, #9146FF, #772ce8);
+      color: white;
+    }
+
+    .twitch-widget .widget-button:hover {
+      background: linear-gradient(135deg, #772ce8, #9146FF);
+      transform: translateY(-2px);
+    }
+
+    .youtube-widget .widget-button {
+      background: linear-gradient(135deg, #FF0000, #cc0000);
+      color: white;
+    }
+
+    .youtube-widget .widget-button:hover {
+      background: linear-gradient(135deg, #cc0000, #FF0000);
+      transform: translateY(-2px);
+    }
+
+    .overlay-widget .widget-button {
+      background: linear-gradient(135deg, #333, #555);
+      color: white;
+    }
+
+    .overlay-widget .widget-button:hover {
+      background: linear-gradient(135deg, #555, #333);
+      transform: translateY(-2px);
+    }
+
+    .disabled-widget {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .disabled-message {
+      background: rgba(255, 193, 7, 0.1);
+      border: 1px solid rgba(255, 193, 7, 0.3);
+      color: #ffc107;
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .loading-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid #9146FF;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+      
+      .header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .user-section {
+        justify-content: center;
+      }
+      
+      .widgets-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 class="title">APO Overlays</h1>
+      <div class="user-section">
+        <div id="twitch-user-info" class="user-info" style="display: none;">
+          <span class="platform-badge twitch-badge">TWITCH</span>
+        </div>
+        <div id="youtube-user-info" class="user-info" style="display: none;">
+          <span class="platform-badge youtube-badge">YOUTUBE</span>
+        </div>
+        <div class="auth-buttons">
+          <button id="connect-twitch" class="auth-btn connect-btn" style="display: none;">+ Twitch</button>
+          <button id="connect-youtube" class="auth-btn connect-btn" style="display: none;">+ YouTube</button>
+          <button id="disconnect-twitch" class="auth-btn disconnect-btn" style="display: none;">- Twitch</button>
+          <button id="disconnect-youtube" class="auth-btn disconnect-btn" style="display: none;">- YouTube</button>
+          <button id="logout-all" class="logout-all-btn">Tout déconnecter</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Section Overlays Universels -->
+      <div class="section">
+        <h2 class="section-title">
+          <span class="section-icon">🎮</span>
+          Overlays Universels
+        </h2>
+        <div class="widgets-grid">
+          <div class="widget overlay-widget">
+            <div class="widget-header">
+              <h3 class="widget-title">Écran de Démarrage</h3>
+            </div>
+            <p class="widget-description">Overlay animé pour le début de votre stream avec effets visuels.</p>
+            <button class="widget-button" onclick="window.open('./overlays/starting/overlay.html', '_blank')">Ouvrir l'overlay</button>
+          </div>
+
+          <div class="widget overlay-widget">
+            <div class="widget-header">
+              <h3 class="widget-title">Be Right Back</h3>
+            </div>
+            <p class="widget-description">Écran d'attente pour vos pauses avec animation.</p>
+            <button class="widget-button" onclick="window.open('./overlays/brb/overlay.html', '_blank')">Ouvrir l'overlay</button>
+          </div>
+
+          <div class="widget overlay-widget">
+            <div class="widget-header">
+              <h3 class="widget-title">Écran de Fin</h3>
+            </div>
+            <p class="widget-description">Overlay de fin de stream avec remerciements.</p>
+            <button class="widget-button" onclick="window.open('./overlays/end/overlay.html', '_blank')">Ouvrir l'overlay</button>
+          </div>
+
+          <div class="widget overlay-widget">
+            <div class="widget-header">
+              <h3 class="widget-title">Statut de Jeu</h3>
+            </div>
+            <p class="widget-description">Affichage du jeu en cours et informations associées.</p>
+            <button class="widget-button" onclick="window.open('./overlays/game-status/overlay.html', '_blank')">Ouvrir l'overlay</button>
+          </div>
+
+          <div class="widget overlay-widget">
+            <div class="widget-header">
+              <h3 class="widget-title">Cartes</h3>
+            </div>
+            <p class="widget-description">Overlay pour afficher des cartes ou mini-maps.</p>
+            <button class="widget-button" onclick="window.open('./overlays/maps/overlay.html', '_blank')">Ouvrir l'overlay</button>
+          </div>
+
+          <div class="widget overlay-widget">
+            <div class="widget-header">
+              <h3 class="widget-title">APO Overlay</h3>
+            </div>
+            <p class="widget-description">Overlay personnalisé APO avec branding.</p>
+            <button class="widget-button" onclick="window.open('./overlays/apo/overlay.html', '_blank')">Ouvrir l'overlay</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section Widgets Twitch -->
+      <div class="section">
+        <h2 class="section-title">
+          <span class="section-icon">📊</span>
+          Widgets Twitch
+        </h2>
+        <div class="widgets-grid" id="twitch-widgets">
+          <div class="widget twitch-widget" id="twitch-followers-widget">
+            <div class="widget-header">
+              <h3 class="widget-title">Compteur de Followers</h3>
+              <span class="widget-platform twitch-badge">TWITCH</span>
+            </div>
+            <p class="widget-description">Affichez le nombre de vos followers Twitch en temps réel sur votre stream.</p>
+            <button class="widget-button" onclick="window.open('./overlays/followers-goal/overlay.html', '_blank')">Créer le widget</button>
+          </div>
+
+          <div class="widget twitch-widget" id="twitch-goals-widget">
+            <div class="widget-header">
+              <h3 class="widget-title">Objectifs de Followers</h3>
+              <span class="widget-platform twitch-badge">TWITCH</span>
+            </div>
+            <p class="widget-description">Définissez et affichez vos objectifs de followers avec une barre de progression.</p>
+            <button class="widget-button" onclick="window.open('./overlays/followers-goal/config.html', '_blank')">Configurer l'objectif</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section Widgets YouTube -->
+      <div class="section">
+        <h2 class="section-title">
+          <span class="section-icon">📈</span>
+          Widgets YouTube
+        </h2>
+        <div class="widgets-grid" id="youtube-widgets">
+          <div class="widget youtube-widget" id="youtube-subscribers-widget">
+            <div class="widget-header">
+              <h3 class="widget-title">Compteur d'Abonnés</h3>
+              <span class="widget-platform youtube-badge">YOUTUBE</span>
+            </div>
+            <p class="widget-description">Affichez le nombre d'abonnés de votre chaîne YouTube en temps réel.</p>
+            <button class="widget-button" onclick="window.open('./overlays/youtube/subscribers-goal/overlay.html', '_blank')">Créer le widget</button>
+          </div>
+
+          <div class="widget youtube-widget" id="youtube-goals-widget">
+            <div class="widget-header">
+              <h3 class="widget-title">Objectifs d'Abonnés</h3>
+              <span class="widget-platform youtube-badge">YOUTUBE</span>
+            </div>
+            <p class="widget-description">Définissez et affichez vos objectifs d'abonnés avec une barre de progression.</p>
+            <button class="widget-button" onclick="window.open('./overlays/youtube/subscribers-goal/config.html', '_blank')">Configurer l'objectif</button>
+          </div>
+
+          <div class="widget youtube-widget" id="youtube-starting-widget">
+            <div class="widget-header">
+              <h3 class="widget-title">Écran de Démarrage YouTube</h3>
+              <span class="widget-platform youtube-badge">YOUTUBE</span>
+            </div>
+            <p class="widget-description">Overlay de démarrage spécialement conçu pour YouTube.</p>
+            <button class="widget-button" onclick="window.open('./overlays/youtube/starting/overlay.html', '_blank')">Ouvrir l'overlay</button>
+          </div>
+
+          <div class="widget youtube-widget" id="youtube-brb-widget">
+            <div class="widget-header">
+              <h3 class="widget-title">Be Right Back YouTube</h3>
+              <span class="widget-platform youtube-badge">YOUTUBE</span>
+            </div>
+            <p class="widget-description">Écran d'attente personnalisé pour YouTube.</p>
+            <button class="widget-button" onclick="window.open('./overlays/youtube/brb/overlay.html', '_blank')">Ouvrir l'overlay</button>
+          </div>
+
+          <div class="widget youtube-widget" id="youtube-end-widget">
+            <div class="widget-header">
+              <h3 class="widget-title">Écran de Fin YouTube</h3>
+              <span class="widget-platform youtube-badge">YOUTUBE</span>
+            </div>
+            <p class="widget-description">Overlay de fin de stream pour YouTube.</p>
+            <button class="widget-button" onclick="window.open('./overlays/youtube/end/overlay.html', '_blank')">Ouvrir l'overlay</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="loading" class="loading-container" style="display: none;">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Connexion en cours...</div>
+  </div>
+
+  <script type="module">
+    import './js/googleAuth.js';
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      // Éléments du DOM
+      const twitchUserInfo = document.getElementById('twitch-user-info');
+      const youtubeUserInfo = document.getElementById('youtube-user-info');
+      const connectTwitchBtn = document.getElementById('connect-twitch');
+      const connectYoutubeBtn = document.getElementById('connect-youtube');
+      const disconnectTwitchBtn = document.getElementById('disconnect-twitch');
+      const disconnectYoutubeBtn = document.getElementById('disconnect-youtube');
+      const logoutAllBtn = document.getElementById('logout-all');
+      const loading = document.getElementById('loading');
+      const twitchWidgets = document.getElementById('twitch-widgets');
+      const youtubeWidgets = document.getElementById('youtube-widgets');
+
+      // Vérifier l'authentification
+      const checkAuth = () => {
+        const twitchToken = localStorage.getItem('twitch_token');
+        const twitchExpires = localStorage.getItem('twitch_expires_at');
+        const googleToken = localStorage.getItem('google_access_token');
+        const googleExpires = localStorage.getItem('google_expires_at');
+        
+        const twitchValid = twitchToken && twitchExpires && new Date().getTime() < parseInt(twitchExpires);
+        const googleValid = googleToken && googleExpires && new Date().getTime() < parseInt(googleExpires);
+        
+        console.log('Dashboard - Vérification auth:', { 
+          twitchToken: !!twitchToken, 
+          twitchExpires, 
+          twitchValid,
+          googleToken: !!googleToken, 
+          googleExpires, 
+          googleValid 
+        });
+        
+        if (!twitchValid && !googleValid) {
+          console.log('Aucune authentification valide, redirection vers home');
+          window.location.href = './home.html';
+          return false;
+        }
+        
+        return { twitch: twitchValid, youtube: googleValid };
+      };
+
+      const authStatus = checkAuth();
+      if (!authStatus) return;
+
+      // Mettre à jour l'interface utilisateur
+      const updateUI = () => {
+        // Twitch
+        if (authStatus.twitch) {
+          const twitchUserData = localStorage.getItem('twitch_user');
+          if (twitchUserData) {
+            try {
+              const user = JSON.parse(twitchUserData);
+              twitchUserInfo.innerHTML = `
+                <span class="platform-badge twitch-badge">TWITCH</span>
+                <img src="${user.profile_image_url}" alt="${user.display_name}">
+                <span>${user.display_name}</span>
+              `;
+              twitchUserInfo.style.display = 'flex';
+              disconnectTwitchBtn.style.display = 'block';
+            } catch (e) {
+              console.error("Erreur lors de l'affichage des infos Twitch", e);
+            }
+          }
+        } else {
+          connectTwitchBtn.style.display = 'block';
+          // Désactiver les widgets Twitch
+          const twitchWidgetElements = twitchWidgets.querySelectorAll('.widget');
+          twitchWidgetElements.forEach(widget => {
+            widget.classList.add('disabled-widget');
+            widget.innerHTML += '<div class="disabled-message">Connectez-vous à Twitch pour utiliser ce widget</div>';
+          });
+        }
+
+        // YouTube
+        if (authStatus.youtube) {
+          const youtubeChannelData = localStorage.getItem('youtube_channel_info');
+          if (youtubeChannelData) {
+            try {
+              const channel = JSON.parse(youtubeChannelData);
+              youtubeUserInfo.innerHTML = `
+                <span class="platform-badge youtube-badge">YOUTUBE</span>
+                <img src="${channel.snippet.thumbnails.default.url}" alt="${channel.snippet.title}">
+                <span>${channel.snippet.title}</span>
+              `;
+              youtubeUserInfo.style.display = 'flex';
+              disconnectYoutubeBtn.style.display = 'block';
+            } catch (e) {
+              console.error("Erreur lors de l'affichage des infos YouTube", e);
+            }
+          }
+        } else {
+          connectYoutubeBtn.style.display = 'block';
+          // Désactiver les widgets YouTube
+          const youtubeWidgetElements = youtubeWidgets.querySelectorAll('.widget');
+          youtubeWidgetElements.forEach(widget => {
+            widget.classList.add('disabled-widget');
+            widget.innerHTML += '<div class="disabled-message">Connectez-vous à YouTube pour utiliser ce widget</div>';
+          });
+        }
+      };
+
+      updateUI();
+
+      // Gestionnaires d'événements
+      connectTwitchBtn.addEventListener('click', () => {
+        loading.style.display = 'flex';
+        const clientId = "z8q1w4g12yrql6cyb5zzwmhe1pnxyn";
+        const redirectUri = "https://apo-overlay.netlify.app/auth/callback.html";
+        const state = Math.random().toString(36).substring(2, 15);
+        localStorage.setItem('twitch_auth_state', state);
+        
+        const scope = 'user:read:email channel:read:subscriptions moderator:read:followers';
+        const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}&force_verify=true`;
+        
+        window.location.href = authUrl;
+      });
+
+      connectYoutubeBtn.addEventListener('click', () => {
+        loading.style.display = 'flex';
+        const googleAuth = new GoogleAuth();
+        googleAuth.initiateAuth();
+      });
+
+      disconnectTwitchBtn.addEventListener('click', () => {
+        console.log('Déconnexion Twitch');
+        // Supprimer uniquement les données Twitch
+        localStorage.removeItem('twitch_token');
+        localStorage.removeItem('twitch_expires_at');
+        localStorage.removeItem('twitch_user');
+        localStorage.removeItem('twitch_auth_state');
+        localStorage.removeItem('twitch_subscriber_count');
+        localStorage.removeItem('twitch_subscriber_points');
+        
+        // Vérifier s'il reste une connexion YouTube
+        const googleToken = localStorage.getItem('google_access_token');
+        const googleExpires = localStorage.getItem('google_expires_at');
+        const googleValid = googleToken && googleExpires && new Date().getTime() < parseInt(googleExpires);
+        
+        console.log('Après déconnexion Twitch, YouTube valide:', googleValid);
+        
+        if (googleValid) {
+          window.location.reload();
+        } else {
+          window.location.href = './home.html';
+        }
+      });
+
+      disconnectYoutubeBtn.addEventListener('click', () => {
+        console.log('Déconnexion YouTube');
+        // Supprimer uniquement les données YouTube
+        localStorage.removeItem('google_access_token');
+        localStorage.removeItem('google_refresh_token');
+        localStorage.removeItem('google_expires_at');
+        localStorage.removeItem('youtube_channel_info');
+        localStorage.removeItem('google_user_profile');
+        localStorage.removeItem('google_auth_state');
+        localStorage.removeItem('google_client_id');
+        localStorage.removeItem('google_client_secret');
+        
+        // Vérifier s'il reste une connexion Twitch
+        const twitchToken = localStorage.getItem('twitch_token');
+        const twitchExpires = localStorage.getItem('twitch_expires_at');
+        const twitchValid = twitchToken && twitchExpires && new Date().getTime() < parseInt(twitchExpires);
+        
+        console.log('Après déconnexion YouTube, Twitch valide:', twitchValid);
+        
+        if (twitchValid) {
+          window.location.reload();
+        } else {
+          window.location.href = './home.html';
+        }
+      });
+
+      logoutAllBtn.addEventListener('click', () => {
+        console.log('Déconnexion complète');
+        // Supprimer toutes les données d'authentification
+        localStorage.removeItem('twitch_token');
+        localStorage.removeItem('twitch_expires_at');
+        localStorage.removeItem('twitch_user');
+        localStorage.removeItem('twitch_auth_state');
+        localStorage.removeItem('twitch_subscriber_count');
+        localStorage.removeItem('twitch_subscriber_points');
+        localStorage.removeItem('google_access_token');
+        localStorage.removeItem('google_refresh_token');
+        localStorage.removeItem('google_expires_at');
+        localStorage.removeItem('youtube_channel_info');
+        localStorage.removeItem('google_user_profile');
+        localStorage.removeItem('google_auth_state');
+        localStorage.removeItem('google_client_id');
+        localStorage.removeItem('google_client_secret');
+        localStorage.removeItem('auth_provider'); // Supprimer l'ancienne variable
+        
+        window.location.href = './home.html';
+      });
+    });
+  </script>
+</body>
+</html>

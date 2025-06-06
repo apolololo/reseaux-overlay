@@ -75,7 +75,7 @@
 
       // Gestionnaire du bouton de réessai
       retryButton.addEventListener('click', () => {
-        window.location.href = '/src/auth.html';
+        window.location.href = '/src/home.html';
       });
 
       try {
@@ -136,7 +136,11 @@
           localStorage.setItem('google_refresh_token', tokens.refresh_token);
         }
         localStorage.setItem('google_expires_at', (Date.now() + (tokens.expires_in * 1000)).toString());
-        localStorage.setItem('auth_provider', 'google');
+        
+        console.log('Google auth - Données stockées:', {
+          token: tokens.access_token,
+          expiresAt: Date.now() + (tokens.expires_in * 1000)
+        });
 
         // Récupérer le profil utilisateur
         loadingText.textContent = "Récupération du profil...";
@@ -169,8 +173,8 @@
         localStorage.removeItem('google_client_id');
         localStorage.removeItem('google_client_secret');
 
-        // Rediriger immédiatement sans affichage de message
-        window.location.replace('/src/youtube-dashboard.html');
+        // Rediriger vers le dashboard unifié
+        window.location.replace('/src/dashboard.html');
 
       } catch (error) {
         console.error('Erreur lors de l\'authentification:', error);

@@ -57,7 +57,7 @@
 
       // Gérer le bouton de nouvelle tentative
       retryButton.addEventListener('click', () => {
-        window.location.href = '/src/auth.html';
+        window.location.href = '/src/home.html';
       });
       
       // Fonction pour échanger le code contre un token
@@ -105,7 +105,12 @@
           localStorage.setItem('twitch_token', data.access_token);
           const expiresAt = new Date().getTime() + (data.expires_in * 1000);
           localStorage.setItem('twitch_expires_at', expiresAt.toString());
-          localStorage.setItem('auth_provider', 'twitch');
+          
+          console.log('Twitch auth - Données stockées:', {
+            token: data.access_token,
+            expiresAt: expiresAt,
+            user: data.user
+          });
           
           // Stocker également les infos utilisateur si retournées
           if (data.user) {
@@ -128,9 +133,9 @@
           loadingText.textContent = "Connexion réussie !";
           statusMessage.textContent = "Vous êtes connecté ! Redirection...";
           
-          // Rediriger vers la page principale
+          // Rediriger vers le dashboard unifié
           setTimeout(() => {
-            window.location.href = '/src/twitch-dashboard.html';
+            window.location.href = '/src/dashboard.html';
           }, 1500);
           
         } catch (error) {

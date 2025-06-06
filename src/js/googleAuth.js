@@ -149,9 +149,8 @@ class GoogleAuth {
     const token = localStorage.getItem('google_access_token');
     const expiresAt = localStorage.getItem('google_expires_at');
     const refreshToken = localStorage.getItem('google_refresh_token');
-    const authProvider = localStorage.getItem('auth_provider');
     
-    if (!token || !expiresAt || authProvider !== 'google') return false;
+    if (!token || !expiresAt) return false;
 
     const isExpired = new Date().getTime() >= parseInt(expiresAt);
     
@@ -198,13 +197,26 @@ class GoogleAuth {
   }
 
   logout() {
+    console.log('GoogleAuth logout');
     localStorage.removeItem('google_access_token');
     localStorage.removeItem('google_refresh_token');
     localStorage.removeItem('google_expires_at');
     localStorage.removeItem('google_user_profile');
     localStorage.removeItem('youtube_channel_info');
-    localStorage.removeItem('auth_provider');
-    window.location.replace('auth.html');
+    localStorage.removeItem('google_auth_state');
+    localStorage.removeItem('google_client_id');
+    localStorage.removeItem('google_client_secret');
+    
+    // Vérifier s'il reste une connexion Twitch
+    const twitchToken = localStorage.getItem('twitch_token');
+    const twitchExpires = localStorage.getItem('twitch_expires_at');
+    const twitchValid = twitchToken && twitchExpires && new Date().getTime() < parseInt(twitchExpires);
+    
+    if (twitchValid) {
+      window.location.replace('dashboard.html');
+    } else {
+      window.location.replace('home.html');
+    }
   }
 }
 

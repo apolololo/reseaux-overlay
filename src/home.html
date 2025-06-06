@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>APO Overlays - Accueil</title>
+  <link rel="stylesheet" href="./styles/overlay.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+      color: #ffffff;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      max-width: 500px;
+      width: 90%;
+      padding: 3rem;
+      background: rgba(26, 26, 26, 0.8);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .title {
+      font-size: 2.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      text-align: center;
+      background: linear-gradient(135deg, #9146FF, #FF0000);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: #888;
+      font-size: 1rem;
+      margin-bottom: 3rem;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .auth-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .auth-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .auth-button:hover::before {
+      left: 100%;
+    }
+
+    .auth-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .auth-button img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+    }
+
+    .twitch-button {
+      background: linear-gradient(135deg, #9146FF, #772ce8);
+      color: white;
+    }
+
+    .twitch-button:hover {
+      background: linear-gradient(135deg, #772ce8, #9146FF);
+    }
+
+    .google-button {
+      background: linear-gradient(135deg, #FF0000, #cc0000);
+      color: white;
+    }
+
+    .google-button:hover {
+      background: linear-gradient(135deg, #cc0000, #FF0000);
+    }
+
+    .divider {
+      text-align: center;
+      color: #666;
+      font-size: 0.9rem;
+      margin: 1rem 0;
+      position: relative;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, #333, transparent);
+    }
+
+    .divider::before {
+      left: 0;
+    }
+
+    .divider::after {
+      right: 0;
+    }
+
+    .features-preview {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1rem;
+      border-radius: 10px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .feature-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-title {
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin: 0;
+      color: #ccc;
+    }
+
+    .loading-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid #9146FF;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    .loading-text {
+      color: white;
+      font-size: 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .error-container {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(255, 82, 82, 0.1);
+      border: 1px solid rgba(255, 82, 82, 0.3);
+      border-radius: 8px;
+      color: #ff5252;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 2rem;
+      }
+      
+      .title {
+        font-size: 2rem;
+      }
+      
+      .features-preview {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <h1 class="title">APO Overlays</h1>
+      <p class="subtitle">Choisissez votre plateforme pour accéder au dashboard unifié</p>
+    </div>
+
+    <div class="auth-buttons">
+      <button id="twitch-login" class="auth-button twitch-button">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Twitch_Glitch_Logo_Purple.svg/878px-Twitch_Glitch_Logo_Purple.svg.png" alt="Twitch" />
+        Se connecter avec Twitch
+      </button>
+
+      <div class="divider">ou</div>
+
+      <button id="google-login" class="auth-button google-button">
+        <img src="https://www.youtube.com/s/desktop/7c155e84/img/favicon_144x144.png" alt="YouTube" />
+        Se connecter avec YouTube
+      </button>
+    </div>
+
+    <div class="features-preview">
+      <div class="feature-card">
+        <div class="feature-icon">🎮</div>
+        <h3 class="feature-title">Overlays Universels</h3>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3 class="feature-title">Widgets Twitch</h3>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📈</div>
+        <h3 class="feature-title">Widgets YouTube</h3>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3 class="feature-title">Interface Unifiée</h3>
+      </div>
+    </div>
+
+    <div id="error-container" class="error-container" style="display: none;">
+      <div id="error-message">Une erreur s'est produite</div>
+    </div>
+  </div>
+
+  <div id="loading" class="loading-container" style="display: none;">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Connexion en cours...</div>
+  </div>
+
+  <script type="module">
+    import './js/googleAuth.js';
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      const twitchLoginBtn = document.getElementById('twitch-login');
+      const googleLoginBtn = document.getElementById('google-login');
+      const loading = document.getElementById('loading');
+      const errorContainer = document.getElementById('error-container');
+      const errorMessage = document.getElementById('error-message');
+
+      // Vérifier si l'utilisateur est déjà connecté
+      const checkExistingAuth = () => {
+        const twitchToken = localStorage.getItem('twitch_token');
+        const twitchExpires = localStorage.getItem('twitch_expires_at');
+        const googleToken = localStorage.getItem('google_access_token');
+        const googleExpires = localStorage.getItem('google_expires_at');
+        
+        const twitchValid = twitchToken && twitchExpires && new Date().getTime() < parseInt(twitchExpires);
+        const googleValid = googleToken && googleExpires && new Date().getTime() < parseInt(googleExpires);
+        
+        console.log('Vérification auth:', { twitchValid, googleValid });
+        
+        if (twitchValid || googleValid) {
+          console.log('Redirection vers dashboard');
+          window.location.replace('./dashboard.html');
+          return true;
+        }
+        return false;
+      };
+
+      // Si déjà connecté, rediriger vers le dashboard
+      if (checkExistingAuth()) return;
+
+      // Vérifier les erreurs dans l'URL
+      const checkUrlErrors = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('error')) {
+          errorContainer.style.display = 'block';
+          errorMessage.textContent = `Erreur: ${urlParams.get('error')} - ${urlParams.get('error_description') || 'Veuillez réessayer'}`;
+        }
+      };
+
+      checkUrlErrors();
+
+      // Connexion Twitch
+      twitchLoginBtn.addEventListener('click', () => {
+        try {
+          loading.style.display = 'flex';
+          errorContainer.style.display = 'none';
+          
+          const clientId = "z8q1w4g12yrql6cyb5zzwmhe1pnxyn";
+          const redirectUri = "https://apo-overlay.netlify.app/auth/callback.html";
+          const state = Math.random().toString(36).substring(2, 15);
+          localStorage.setItem('twitch_auth_state', state);
+          
+          const scope = 'user:read:email channel:read:subscriptions moderator:read:followers';
+          const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}&force_verify=true`;
+          
+          window.location.href = authUrl;
+        } catch (error) {
+          console.error("Erreur lors de la connexion Twitch:", error);
+          loading.style.display = 'none';
+          errorContainer.style.display = 'block';
+          errorMessage.textContent = "Erreur lors de la connexion Twitch. Veuillez réessayer.";
+        }
+      });
+
+      // Connexion Google/YouTube
+      googleLoginBtn.addEventListener('click', () => {
+        try {
+          loading.style.display = 'flex';
+          errorContainer.style.display = 'none';
+          
+          const googleAuth = new GoogleAuth();
+          googleAuth.initiateAuth();
+        } catch (error) {
+          console.error("Erreur lors de la connexion Google:", error);
+          loading.style.display = 'none';
+          errorContainer.style.display = 'block';
+          errorMessage.textContent = error.message || "Erreur lors de la connexion YouTube. Veuillez réessayer.";
+        }
+      });
+    });
+  </script>
+</body>
+</html>
