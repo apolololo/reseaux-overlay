@@ -5,11 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>APO - Be Right Back</title>
   <style>
-    body {
+    * {
       margin: 0;
       padding: 0;
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      font-family: 'Arial', sans-serif;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1e293b 100%);
+      font-family: 'Inter', sans-serif;
       overflow: hidden;
       height: 100vh;
       display: flex;
@@ -17,73 +21,276 @@
       justify-content: center;
       align-items: center;
       color: white;
+      position: relative;
+    }
+
+    .wave-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .wave {
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+      animation: wave 8s ease-in-out infinite;
+    }
+
+    .wave:nth-child(1) {
+      animation-delay: 0s;
+      top: -50%;
+      left: -50%;
+    }
+
+    .wave:nth-child(2) {
+      animation-delay: 2s;
+      top: -30%;
+      left: -30%;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+    }
+
+    .wave:nth-child(3) {
+      animation-delay: 4s;
+      top: -70%;
+      left: -70%;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, transparent 70%);
+    }
+
+    @keyframes wave {
+      0%, 100% {
+        transform: rotate(0deg) scale(1);
+      }
+      50% {
+        transform: rotate(180deg) scale(1.1);
+      }
     }
 
     .logo {
-      font-size: 6rem;
+      font-size: clamp(5rem, 10vw, 8rem);
       font-weight: 900;
       margin-bottom: 2rem;
       background: linear-gradient(45deg, #6366f1, #8b5cf6);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: logoFloat 4s ease-in-out infinite;
+      letter-spacing: 3px;
     }
 
-    .message {
-      font-size: 3rem;
+    @keyframes logoFloat {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .main-message {
+      font-size: clamp(2.5rem, 6vw, 4rem);
       font-weight: 700;
       margin-bottom: 1rem;
       text-align: center;
+      animation: fadeInUp 1s ease-out;
     }
 
-    .submessage {
-      font-size: 1.5rem;
+    .sub-message {
+      font-size: clamp(1.25rem, 3vw, 1.8rem);
       color: #94a3b8;
       margin-bottom: 3rem;
+      text-align: center;
+      animation: fadeInUp 1s ease-out 0.3s both;
     }
 
-    .dots {
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .loading-dots {
       display: flex;
-      gap: 10px;
+      gap: 12px;
+      margin-bottom: 3rem;
+      animation: fadeInUp 1s ease-out 0.6s both;
     }
 
     .dot {
-      width: 12px;
-      height: 12px;
+      width: 16px;
+      height: 16px;
       background: #6366f1;
       border-radius: 50%;
-      animation: pulse 1.5s ease-in-out infinite;
+      animation: bounce 1.5s ease-in-out infinite;
     }
 
-    .dot:nth-child(2) { animation-delay: 0.5s; }
-    .dot:nth-child(3) { animation-delay: 1s; }
+    .dot:nth-child(1) { animation-delay: 0s; }
+    .dot:nth-child(2) { animation-delay: 0.3s; }
+    .dot:nth-child(3) { animation-delay: 0.6s; }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 0.3; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.2); }
+    @keyframes bounce {
+      0%, 100% {
+        opacity: 0.3;
+        transform: scale(1) translateY(0);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.2) translateY(-8px);
+      }
     }
 
     .creator-code {
       position: fixed;
-      bottom: 2rem;
+      bottom: 3rem;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.7);
+      padding: 1.5rem 3rem;
+      border-radius: 15px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      border: 2px solid rgba(99, 102, 241, 0.3);
+      backdrop-filter: blur(10px);
+      animation: fadeInUp 1s ease-out 0.9s both;
+      letter-spacing: 2px;
+    }
+
+    .social-reminder {
+      position: fixed;
+      top: 3rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.1);
       padding: 1rem 2rem;
       border-radius: 10px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      animation: fadeInUp 1s ease-out 1.2s both;
+    }
+
+    .time-indicator {
+      position: fixed;
+      top: 3rem;
+      right: 3rem;
+      background: rgba(99, 102, 241, 0.2);
+      padding: 1rem;
+      border-radius: 10px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      animation: fadeInUp 1s ease-out 1.5s both;
+    }
+
+    .clock {
       font-size: 1.2rem;
-      font-weight: 700;
+      font-weight: 600;
+      font-family: 'Courier New', monospace;
+    }
+
+    @media (max-width: 768px) {
+      .social-reminder,
+      .time-indicator {
+        position: relative;
+        top: auto;
+        left: auto;
+        right: auto;
+        transform: none;
+        margin: 1rem;
+      }
+      
+      .creator-code {
+        bottom: 2rem;
+        padding: 1rem 2rem;
+        font-size: 1.2rem;
+      }
     }
   </style>
 </head>
 <body>
+  <div class="wave-background">
+    <div class="wave"></div>
+    <div class="wave"></div>
+    <div class="wave"></div>
+  </div>
+  
+  <div class="social-reminder">
+    <span>💬 Continuez à discuter dans le chat !</span>
+  </div>
+  
+  <div class="time-indicator">
+    <div class="clock" id="clock">00:00</div>
+  </div>
+
   <div class="logo">APO</div>
-  <div class="message">Je reviens dans un instant</div>
-  <div class="submessage">Petite pause en cours...</div>
-  <div class="dots">
+  <div class="main-message">Je reviens dans un instant</div>
+  <div class="sub-message">Petite pause en cours...</div>
+  
+  <div class="loading-dots">
     <div class="dot"></div>
     <div class="dot"></div>
     <div class="dot"></div>
   </div>
+  
   <div class="creator-code">CODE CRÉATEUR: APO21</div>
+
+  <script>
+    // Horloge en temps réel
+    function updateClock() {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      document.getElementById('clock').textContent = `${hours}:${minutes}`;
+    }
+
+    // Messages rotatifs
+    const messages = [
+      "Je reviens dans un instant",
+      "Petite pause technique",
+      "De retour très bientôt",
+      "Un moment s'il vous plaît"
+    ];
+
+    const subMessages = [
+      "Petite pause en cours...",
+      "Préparation en cours...",
+      "Restez connectés...",
+      "Merci de votre patience..."
+    ];
+
+    let messageIndex = 0;
+
+    function rotateMessages() {
+      const mainMessage = document.querySelector('.main-message');
+      const subMessage = document.querySelector('.sub-message');
+      
+      mainMessage.style.opacity = '0';
+      subMessage.style.opacity = '0';
+      
+      setTimeout(() => {
+        mainMessage.textContent = messages[messageIndex];
+        subMessage.textContent = subMessages[messageIndex];
+        mainMessage.style.opacity = '1';
+        subMessage.style.opacity = '1';
+        
+        messageIndex = (messageIndex + 1) % messages.length;
+      }, 500);
+    }
+
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', () => {
+      updateClock();
+      setInterval(updateClock, 1000);
+      setInterval(rotateMessages, 5000);
+    });
+  </script>
 </body>
 </html>

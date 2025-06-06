@@ -6,371 +6,180 @@
   <title>APO Overlays - Générateur d'overlays pour streamers</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    :root {
-      --primary: #6366f1;
-      --primary-dark: #4f46e5;
-      --bg: #0f172a;
-      --bg-card: #1e293b;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --border: #334155;
-      --success: #10b981;
-      --error: #ef4444;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem;
-    }
-
-    .header {
-      text-align: center;
-      margin-bottom: 3rem;
-    }
-
-    .header h1 {
-      font-size: 3rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      background: linear-gradient(135deg, var(--primary), #8b5cf6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .header p {
-      font-size: 1.2rem;
-      color: var(--text-muted);
-    }
-
-    .auth-section {
-      background: var(--bg-card);
-      border-radius: 1rem;
-      padding: 2rem;
-      margin-bottom: 3rem;
-      border: 1px solid var(--border);
-    }
-
-    .auth-buttons {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      padding: 0.75rem 1.5rem;
-      border-radius: 0.5rem;
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      text-decoration: none;
-    }
-
-    .btn-twitch {
-      background: #9146ff;
-      color: white;
-    }
-
-    .btn-twitch:hover {
-      background: #7c3aed;
-      transform: translateY(-2px);
-    }
-
-    .btn-youtube {
-      background: #ff0000;
-      color: white;
-    }
-
-    .btn-youtube:hover {
-      background: #dc2626;
-      transform: translateY(-2px);
-    }
-
-    .btn-logout {
-      background: var(--error);
-      color: white;
-    }
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .user-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-    }
-
-    .overlays-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 3rem;
-    }
-
-    .overlay-card {
-      background: var(--bg-card);
-      border-radius: 1rem;
-      padding: 1.5rem;
-      border: 1px solid var(--border);
-      transition: all 0.2s;
-    }
-
-    .overlay-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-    }
-
-    .overlay-card h3 {
-      margin-bottom: 0.5rem;
-      color: var(--primary);
-    }
-
-    .overlay-card p {
-      color: var(--text-muted);
-      margin-bottom: 1rem;
-    }
-
-    .overlay-actions {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .btn-small {
-      padding: 0.5rem 1rem;
-      font-size: 0.875rem;
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-    }
-
-    .btn-primary:hover {
-      background: var(--primary-dark);
-    }
-
-    .btn-secondary {
-      background: transparent;
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-    }
-
-    .btn-secondary:hover {
-      background: var(--border);
-      color: var(--text);
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 2rem;
-    }
-
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid var(--border);
-      border-top: 4px solid var(--primary);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 1rem;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .preview-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-
-    .preview-content {
-      background: var(--bg-card);
-      border-radius: 1rem;
-      padding: 2rem;
-      max-width: 90vw;
-      max-height: 90vh;
-      overflow: auto;
-    }
-
-    .preview-iframe {
-      width: 800px;
-      height: 450px;
-      border: none;
-      border-radius: 0.5rem;
-    }
-
-    .close-btn {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      background: var(--error);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      cursor: pointer;
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles/main.css">
 </head>
 <body>
-  <div class="container">
-    <header class="header">
-      <h1>APO Overlays</h1>
-      <p>Créez des overlays professionnels pour vos streams en quelques clics</p>
-    </header>
+  <div id="app">
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-brand">
+          <h1 class="brand-logo">APO</h1>
+          <span class="brand-text">Overlays</span>
+        </div>
+        
+        <div class="nav-actions">
+          <div id="auth-section" class="auth-section">
+            <!-- Contenu dynamique géré par JS -->
+          </div>
+        </div>
+      </div>
+    </nav>
 
-    <!-- Section d'authentification -->
-    <section class="auth-section">
-      <div id="auth-login" class="hidden">
-        <h2 style="text-align: center; margin-bottom: 1.5rem;">Connectez-vous pour commencer</h2>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-background">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+      </div>
+      
+      <div class="hero-content">
+        <h1 class="hero-title">
+          Créez des overlays
+          <span class="gradient-text">professionnels</span>
+          pour vos streams
+        </h1>
+        <p class="hero-subtitle">
+          Des overlays animés et personnalisables pour Twitch et YouTube.
+          Prêts à l'emploi en quelques clics.
+        </p>
+        
+        <div class="hero-cta">
+          <button id="get-started-btn" class="btn btn-primary btn-large">
+            Commencer maintenant
+          </button>
+          <button id="preview-btn" class="btn btn-secondary btn-large">
+            Voir les exemples
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+      <div class="container">
+        <h2 class="section-title">Fonctionnalités</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🎨</div>
+            <h3>Design moderne</h3>
+            <p>Overlays avec des animations fluides et un design professionnel</p>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Prêt à l'emploi</h3>
+            <p>Copiez l'URL et ajoutez directement dans OBS Studio</p>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">🔧</div>
+            <h3>Personnalisable</h3>
+            <p>Adaptez les couleurs, textes et animations selon vos besoins</p>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">📱</div>
+            <h3>Responsive</h3>
+            <p>Optimisé pour toutes les résolutions d'écran</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Overlays Gallery -->
+    <section id="overlays-gallery" class="overlays-gallery">
+      <div class="container">
+        <h2 class="section-title">Galerie d'overlays</h2>
+        <div class="overlays-grid" id="overlays-grid">
+          <!-- Contenu dynamique géré par JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-brand">
+            <h3>APO Overlays</h3>
+            <p>Créé avec ❤️ pour la communauté streaming</p>
+          </div>
+          
+          <div class="footer-links">
+            <h4>Liens utiles</h4>
+            <ul>
+              <li><a href="#features">Fonctionnalités</a></li>
+              <li><a href="#overlays">Overlays</a></li>
+              <li><a href="#support">Support</a></li>
+            </ul>
+          </div>
+          
+          <div class="footer-social">
+            <h4>Suivez APO</h4>
+            <div class="social-links">
+              <a href="#" class="social-link">Twitch</a>
+              <a href="#" class="social-link">YouTube</a>
+              <a href="#" class="social-link">Twitter</a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="footer-bottom">
+          <p>&copy; 2024 APO Overlays. Tous droits réservés.</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Modals -->
+  <div id="auth-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Connexion</h2>
+        <button class="modal-close" id="close-auth-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Connectez-vous pour accéder à vos overlays personnalisés</p>
         <div class="auth-buttons">
           <button id="login-twitch" class="btn btn-twitch">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/>
             </svg>
-            Twitch
+            Connexion avec Twitch
           </button>
+          
           <button id="login-youtube" class="btn btn-youtube">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
             </svg>
-            YouTube
+            Connexion avec YouTube
           </button>
         </div>
       </div>
-
-      <div id="auth-user" class="hidden">
-        <div class="user-info">
-          <img id="user-avatar" class="user-avatar" src="" alt="Avatar">
-          <div>
-            <div id="user-name"></div>
-            <div id="user-platform" style="color: var(--text-muted); font-size: 0.875rem;"></div>
-          </div>
-        </div>
-        <button id="logout" class="btn btn-logout btn-small">Déconnexion</button>
-      </div>
-    </section>
-
-    <!-- Grille des overlays -->
-    <section id="overlays-section" class="hidden">
-      <h2 style="margin-bottom: 2rem;">Vos Overlays</h2>
-      <div class="overlays-grid">
-        <!-- Social Networks -->
-        <div class="overlay-card">
-          <h3>Réseaux Sociaux</h3>
-          <p>Affichez vos réseaux sociaux avec des animations fluides</p>
-          <div class="overlay-actions">
-            <button class="btn btn-primary btn-small" onclick="previewOverlay('social')">Aperçu</button>
-            <button class="btn btn-secondary btn-small" onclick="copyOverlayUrl('social')">Copier URL</button>
-          </div>
-        </div>
-
-        <!-- Starting Soon -->
-        <div class="overlay-card">
-          <h3>Starting Soon</h3>
-          <p>Écran de démarrage avec compte à rebours personnalisable</p>
-          <div class="overlay-actions">
-            <button class="btn btn-primary btn-small" onclick="previewOverlay('starting')">Aperçu</button>
-            <button class="btn btn-secondary btn-small" onclick="copyOverlayUrl('starting')">Copier URL</button>
-          </div>
-        </div>
-
-        <!-- Be Right Back -->
-        <div class="overlay-card">
-          <h3>Be Right Back</h3>
-          <p>Écran de pause élégant pour vos pauses</p>
-          <div class="overlay-actions">
-            <button class="btn btn-primary btn-small" onclick="previewOverlay('brb')">Aperçu</button>
-            <button class="btn btn-secondary btn-small" onclick="copyOverlayUrl('brb')">Copier URL</button>
-          </div>
-        </div>
-
-        <!-- End Screen -->
-        <div class="overlay-card">
-          <h3>Fin de Stream</h3>
-          <p>Écran de fin avec tous vos réseaux sociaux</p>
-          <div class="overlay-actions">
-            <button class="btn btn-primary btn-small" onclick="previewOverlay('end')">Aperçu</button>
-            <button class="btn btn-secondary btn-small" onclick="copyOverlayUrl('end')">Copier URL</button>
-          </div>
-        </div>
-
-        <!-- Followers Goal -->
-        <div class="overlay-card">
-          <h3>Objectif Followers</h3>
-          <p>Barre de progression pour vos objectifs de followers</p>
-          <div class="overlay-actions">
-            <button class="btn btn-primary btn-small" onclick="previewOverlay('followers')">Aperçu</button>
-            <button class="btn btn-secondary btn-small" onclick="copyOverlayUrl('followers')">Copier URL</button>
-          </div>
-        </div>
-
-        <!-- Game Status -->
-        <div class="overlay-card">
-          <h3>Statut de Jeu</h3>
-          <p>Indicateur de changement de jeu</p>
-          <div class="overlay-actions">
-            <button class="btn btn-primary btn-small" onclick="previewOverlay('game')">Aperçu</button>
-            <button class="btn btn-secondary btn-small" onclick="copyOverlayUrl('game')">Copier URL</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Loading -->
-    <div id="loading" class="loading hidden">
-      <div class="spinner"></div>
-      <p>Chargement...</p>
     </div>
   </div>
 
-  <!-- Modal de prévisualisation -->
-  <div id="preview-modal" class="preview-modal hidden">
-    <div class="preview-content">
-      <button class="close-btn" onclick="closePreview()">&times;</button>
-      <iframe id="preview-iframe" class="preview-iframe"></iframe>
+  <div id="preview-modal" class="modal">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h2 id="preview-title">Aperçu de l'overlay</h2>
+        <button class="modal-close" id="close-preview-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="preview-container">
+          <iframe id="preview-iframe" class="preview-iframe"></iframe>
+        </div>
+        <div class="preview-actions">
+          <button id="copy-url-btn" class="btn btn-primary">Copier l'URL</button>
+          <button id="customize-btn" class="btn btn-secondary">Personnaliser</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <script type="module" src="/main.js"></script>
+  <script type="module" src="/src/js/main.js"></script>
 </body>
 </html>

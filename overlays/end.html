@@ -5,11 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>APO - Fin de Stream</title>
   <style>
-    body {
+    * {
       margin: 0;
       padding: 0;
-      background: linear-gradient(135deg, #0f172a, #1e293b);
-      font-family: 'Arial', sans-serif;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      font-family: 'Inter', sans-serif;
       overflow: hidden;
       height: 100vh;
       display: flex;
@@ -18,28 +22,74 @@
       align-items: center;
       color: white;
       text-align: center;
+      position: relative;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #6366f1;
+      animation: confetti-fall 3s linear infinite;
+    }
+
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
     }
 
     .title {
-      font-size: 4rem;
+      font-size: clamp(3rem, 8vw, 5rem);
       font-weight: 900;
       margin-bottom: 1rem;
-      background: linear-gradient(45deg, #6366f1, #8b5cf6);
+      background: linear-gradient(45deg, #6366f1, #8b5cf6, #06b6d4);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: titleGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes titleGlow {
+      0%, 100% {
+        filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.5));
+      }
+      50% {
+        filter: drop-shadow(0 0 40px rgba(99, 102, 241, 0.8));
+      }
     }
 
     .subtitle {
-      font-size: 2rem;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
       color: #94a3b8;
       margin-bottom: 3rem;
+      animation: fadeInUp 1s ease-out 0.5s both;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .social-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 2rem;
       margin-bottom: 3rem;
+      max-width: 800px;
+      width: 100%;
+      padding: 0 2rem;
     }
 
     .social-item {
@@ -47,38 +97,166 @@
       align-items: center;
       gap: 1rem;
       background: rgba(255, 255, 255, 0.1);
-      padding: 1rem 1.5rem;
-      border-radius: 10px;
+      padding: 1.5rem;
+      border-radius: 15px;
       backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+      animation: slideInScale 0.8s ease-out;
+    }
+
+    .social-item:nth-child(1) { animation-delay: 0.2s; }
+    .social-item:nth-child(2) { animation-delay: 0.4s; }
+    .social-item:nth-child(3) { animation-delay: 0.6s; }
+    .social-item:nth-child(4) { animation-delay: 0.8s; }
+    .social-item:nth-child(5) { animation-delay: 1.0s; }
+    .social-item:nth-child(6) { animation-delay: 1.2s; }
+
+    @keyframes slideInScale {
+      from {
+        opacity: 0;
+        transform: translateY(50px) scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .social-item:hover {
+      transform: translateY(-8px) scale(1.05);
+      background: rgba(99, 102, 241, 0.2);
+      border-color: rgba(99, 102, 241, 0.5);
+      box-shadow: 0 20px 40px rgba(99, 102, 241, 0.3);
     }
 
     .social-icon {
-      width: 32px;
-      height: 32px;
+      width: 40px;
+      height: 40px;
       filter: brightness(0) invert(1);
+      transition: all 0.3s ease;
+    }
+
+    .social-item:hover .social-icon {
+      filter: brightness(0) invert(1) drop-shadow(0 0 10px #6366f1);
+      transform: scale(1.1);
     }
 
     .social-text {
       font-size: 1.2rem;
       font-weight: 600;
+      flex: 1;
     }
 
     .creator-code {
-      background: rgba(0, 0, 0, 0.6);
-      padding: 1.5rem 3rem;
-      border-radius: 15px;
-      font-size: 1.5rem;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 2rem 4rem;
+      border-radius: 20px;
+      font-size: 2rem;
       font-weight: 700;
       margin-bottom: 2rem;
+      border: 2px solid rgba(99, 102, 241, 0.3);
+      backdrop-filter: blur(10px);
+      animation: fadeInUp 1s ease-out 1.5s both;
+      letter-spacing: 3px;
     }
 
     .goodbye {
-      font-size: 1.5rem;
+      font-size: clamp(1.25rem, 3vw, 1.8rem);
       color: #94a3b8;
+      animation: fadeInUp 1s ease-out 1.8s both;
+      max-width: 600px;
+      line-height: 1.4;
+    }
+
+    .stats-container {
+      position: fixed;
+      top: 3rem;
+      left: 3rem;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 1.5rem;
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      animation: fadeInUp 1s ease-out 2.1s both;
+    }
+
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .stat-label {
+      color: #94a3b8;
+    }
+
+    .stat-value {
+      font-weight: 700;
+      color: #6366f1;
+    }
+
+    .thank-you-animation {
+      position: fixed;
+      top: 3rem;
+      right: 3rem;
+      font-size: 3rem;
+      animation: heartbeat 2s ease-in-out infinite;
+    }
+
+    @keyframes heartbeat {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .social-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 0 1rem;
+      }
+      
+      .creator-code {
+        padding: 1.5rem 2rem;
+        font-size: 1.5rem;
+      }
+      
+      .stats-container,
+      .thank-you-animation {
+        position: relative;
+        top: auto;
+        left: auto;
+        right: auto;
+        margin: 1rem auto;
+      }
     }
   </style>
 </head>
 <body>
+  <div id="confetti-container"></div>
+  
+  <div class="stats-container">
+    <div class="stat-item">
+      <span class="stat-label">Durée du stream:</span>
+      <span class="stat-value">3h 42m</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Viewers max:</span>
+      <span class="stat-value">1,247</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Messages chat:</span>
+      <span class="stat-value">2,856</span>
+    </div>
+  </div>
+  
+  <div class="thank-you-animation">❤️</div>
+
   <div class="title">Fin du Stream</div>
   <div class="subtitle">Merci d'avoir suivi le live !</div>
   
@@ -111,5 +289,64 @@
 
   <div class="creator-code">CODE CRÉATEUR: APO21</div>
   <div class="goodbye">À bientôt pour de nouvelles aventures ! 🎮</div>
+
+  <script>
+    // Création des confettis
+    function createConfetti() {
+      const container = document.getElementById('confetti-container');
+      const colors = ['#6366f1', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'];
+      
+      for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = Math.random() * 3 + 's';
+        confetti.style.animationDuration = (2 + Math.random() * 3) + 's';
+        container.appendChild(confetti);
+        
+        // Supprimer le confetti après l'animation
+        setTimeout(() => {
+          if (confetti.parentNode) {
+            confetti.parentNode.removeChild(confetti);
+          }
+        }, 5000);
+      }
+    }
+
+    // Animation des statistiques
+    function animateStats() {
+      const statValues = document.querySelectorAll('.stat-value');
+      statValues.forEach((stat, index) => {
+        const finalValue = stat.textContent;
+        stat.textContent = '0';
+        
+        setTimeout(() => {
+          let current = 0;
+          const target = parseInt(finalValue.replace(/[^\d]/g, ''));
+          const increment = target / 50;
+          
+          const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+              stat.textContent = finalValue;
+              clearInterval(timer);
+            } else {
+              stat.textContent = Math.floor(current).toLocaleString();
+            }
+          }, 50);
+        }, index * 200);
+      });
+    }
+
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', () => {
+      createConfetti();
+      setTimeout(animateStats, 2000);
+      
+      // Créer des confettis périodiquement
+      setInterval(createConfetti, 5000);
+    });
+  </script>
 </body>
 </html>
