@@ -271,7 +271,7 @@ body {
 }
 
 /* --- Qualité maximale pour overlay agrandi (OBS, Retina, 4K) --- */
-.apo-container, .creator-box {
+.apo-container {
   /* Pour le texte : antialiasing optimal */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
